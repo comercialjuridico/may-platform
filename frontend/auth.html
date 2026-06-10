@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1917" />
+  <title>May — Entrar</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body class="auth-page">
+
+<div class="auth-container">
+
+  <!-- Logo -->
+  <div class="auth-logo">
+    <div class="auth-logo-mark">M</div>
+    <span class="auth-logo-name">May</span>
+  </div>
+
+  <!-- Tabs -->
+  <div style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; box-shadow:var(--shadow-lg);">
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="mostrarTab('login')">Entrar</button>
+      <button class="auth-tab" id="tab-register" onclick="mostrarTab('register')">Criar conta</button>
+    </div>
+
+    <!-- Alerta de erros -->
+    <div class="auth-error" id="auth-error"></div>
+
+    <!-- Sucesso/avisos via query param -->
+    <div id="auth-aviso" style="display:none; background:rgba(90,158,111,0.1); border:1px solid rgba(90,158,111,0.3); border-radius:var(--radius-sm); padding:10px 14px; font-size:0.85rem; color:#7dcf97; margin-bottom:16px;"></div>
+
+    <!-- ── PAINEL LOGIN ── -->
+    <div class="auth-panel active" id="panel-login">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="password-toggle">
+          <input type="password" id="login-senha" placeholder="Sua senha" autocomplete="current-password" />
+          <button class="btn-toggle-pw" onclick="toggleSenha('login-senha')">👁</button>
+        </div>
+      </div>
+      <div style="text-align:right; margin-bottom:20px;">
+        <a href="#" onclick="mostrarTab('forgot')" class="text-sm" style="color:var(--text-muted)">Esqueci minha senha</a>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" id="btn-login" onclick="fazerLogin()">
+        Entrar
+      </button>
+    </div>
+
+    <!-- ── PAINEL CADASTRO ── -->
+    <div class="auth-panel" id="panel-register">
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input type="text" id="reg-nome" placeholder="Seu nome" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="password-toggle">
+          <input type="password" id="reg-senha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+          <button class="btn-toggle-pw" onclick="toggleSenha('reg-senha')">👁</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" id="btn-register" onclick="criarConta()">
+        Criar conta grátis
+      </button>
+      <p class="text-xs text-muted" style="text-align:center; margin-top:12px;">
+        Ao criar conta, você concorda com os nossos termos de uso.
+      </p>
+    </div>
+
+    <!-- ── PAINEL ESQUECI SENHA ── -->
+    <div class="auth-panel" id="panel-forgot">
+      <p class="text-secondary text-sm mb-16">
+        Informe seu e-mail e enviaremos um link para redefinir sua senha.
+      </p>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" id="forgot-email" placeholder="seu@email.com" />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="enviarReset()">Enviar link</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" onclick="mostrarTab('login')" class="text-sm text-muted">Voltar ao login</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  // ─── Verificar se já está logado ──────────────────────────────────────────
+  if (getAccessToken() && getUser()) {
+    window.location.href = '/';
+  }
+
+  // ─── Verificar query params ───────────────────────────────────────────────
+  const params = new URLSearchParams(window.location.search);
+  const aviso  = document.getElementById('auth-aviso');
+
+  if (params.get('verificado')) {
+    aviso.style.display = 'block';
+    aviso.textContent = 'E-mail verificado com sucesso! Faça login.';
+  }
+  if (params.get('erro') === 'token_invalido') {
+    mostrarErro('Link inválido ou expirado.');
+  }
+
+  // ─── Tabs ─────────────────────────────────────────────────────────────────
+  function mostrarTab(tab) {
+    ['login','register','forgot'].forEach(t => {
+      document.getElementById(`panel-${t}`)?.classList.toggle('active', t === tab);
+      document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
+    });
+    limparErro();
+  }
+
+  // ─── Login ────────────────────────────────────────────────────────────────
+  async function fazerLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    if (!email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      mostrarErro(data.erro || 'Erro ao fazer login.');
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+      return;
+    }
+
+    salvarTokens(data.accessToken, data.refreshToken);
+    salvarUser(data.user);
+    window.location.href = '/';
+  }
+
+  // ─── Cadastro ─────────────────────────────────────────────────────────────
+  async function criarConta() {
+    const nome  = document.getElementById('reg-nome').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const senha = document.getElementById('reg-senha').value;
+
+    if (!nome || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+    if (senha.length < 8) { mostrarErro('Senha deve ter no mínimo 8 caracteres.'); return; }
+
+    const btn = document.getElementById('btn-register');
+    btn.disabled = true;
+    btn.textContent = 'Criando conta...';
+
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: nome, email, password: senha }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      mostrarErro(data.erro || 'Erro ao criar conta.');
+      btn.disabled = false;
+      btn.textContent = 'Criar conta grátis';
+      return;
+    }
+
+    salvarTokens(data.accessToken, data.refreshToken);
+    salvarUser(data.user);
+    window.location.href = '/';
+  }
+
+  // ─── Esqueci a senha ──────────────────────────────────────────────────────
+  async function enviarReset() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) { mostrarErro('Informe seu e-mail.'); return; }
+
+    const res = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    aviso.style.display = 'block';
+    aviso.textContent = data.mensagem || 'Se o e-mail existir, você receberá as instruções.';
+    limparErro();
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  function mostrarErro(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+  function limparErro() {
+    const el = document.getElementById('auth-error');
+    el.textContent = '';
+    el.classList.remove('visible');
+  }
+  function toggleSenha(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  // Enter para enviar
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const ativo = document.querySelector('.auth-panel.active')?.id;
+    if (ativo === 'panel-login')    fazerLogin();
+    if (ativo === 'panel-register') criarConta();
+    if (ativo === 'panel-forgot')   enviarReset();
+  });
+
+  function mostrarToast(msg, tipo = 'info') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${tipo}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+</script>
+</body>
+</html>

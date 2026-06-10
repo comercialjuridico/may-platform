@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1917" />
+  <title>May — Assistente de Vendas</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body>
+
+<!-- ══════════════ APP LAYOUT ══════════════ -->
+<div id="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <span class="logo-name">May</span>
+      </div>
+      <button class="btn-new-chat" onclick="novaConversa()" title="Nova conversa">
+        ✏️ Nova
+      </button>
+    </div>
+
+    <!-- Ferramentas -->
+    <div class="sidebar-section-title">Ferramentas</div>
+    <div class="tool-list" id="tool-list"></div>
+
+    <!-- Histórico de conversas -->
+    <div class="sidebar-section-title" style="margin-top:8px">Histórico</div>
+    <div class="conv-list" id="conv-list"></div>
+
+    <!-- Footer com usuário -->
+    <div class="sidebar-footer">
+      <div class="user-info" onclick="abrirModalPerfil()">
+        <div class="user-avatar" id="user-avatar-text">U</div>
+        <div class="user-details">
+          <div class="user-name" id="user-name-text"></div>
+          <div class="user-plan-badge" id="user-plan-badge"></div>
+        </div>
+      </div>
+      <button class="btn-ghost btn-full" onclick="logout()" style="font-size:0.8rem">
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main id="main">
+
+    <!-- Header do chat -->
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <button id="btn-menu" onclick="toggleMenuMobile()" title="Menu">☰</button>
+        <div>
+          <div class="chat-title" id="chat-title">Chat livre</div>
+          <div class="chat-tool-label text-xs text-muted" id="chat-tool-label">May — Assistente de vendas</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-ghost btn-sm" onclick="abrirModalPlanos()" title="Planos">
+          ⭐ Planos
+        </button>
+        <button class="btn-ghost btn-sm" onclick="abrirModalDiagnostico()" title="Editar diagnóstico">
+          ⚙️
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensagens -->
+    <div id="messages-container"></div>
+
+    <!-- Input -->
+    <div style="max-width:900px; width:100%; margin:0 auto; padding:0 24px; box-sizing:border-box;">
+      <div id="input-area" style="padding:16px 0 20px">
+        <div class="input-wrapper">
+          <textarea
+            id="message-input"
+            placeholder="Pergunte à May..."
+            rows="1"
+          ></textarea>
+          <div class="input-actions">
+            <button class="input-btn" onclick="uploadArquivo()" title="Enviar arquivo">📎</button>
+            <button class="input-btn" id="btn-audio" onclick="toggleGravacao()" title="Gravar áudio">🎙️</button>
+            <button id="btn-send" onclick="enviarMensagem()" title="Enviar (Enter)">➤</button>
+          </div>
+        </div>
+        <div class="input-footer">
+          <span class="input-hint text-xs text-muted">Enter para enviar · Shift+Enter para quebrar linha</span>
+          <span class="usage-counter" id="usage-counter"></span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ══════════════ MODAL: DIAGNÓSTICO ══════════════ -->
+<div class="modal-overlay" id="modal-diagnostico">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title">Diagnóstico inicial</span>
+    </div>
+    <p class="text-secondary text-sm mb-16">
+      Em 2 minutos, a May fica personalizada para o seu contexto de vendas.
+    </p>
+
+    <div class="form-group">
+      <label class="form-label">Qual é o seu nicho de atuação?</label>
+      <select id="diag-nicho">
+        <option value="">Selecione...</option>
+        <option value="juridico">Jurídico</option>
+        <option value="seguros">Seguros</option>
+        <option value="imoveis">Imóveis</option>
+        <option value="saude">Saúde</option>
+        <option value="financeiro">Financeiro</option>
+        <option value="tecnologia">Tecnologia / SaaS</option>
+        <option value="educacao">Educação</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">O que você vende especificamente?</label>
+      <input id="diag-produto" type="text" placeholder="Ex: Ações de BPC/LOAS para crianças com deficiência" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Para quem você vende (público-alvo)?</label>
+      <input id="diag-publico" type="text" placeholder="Ex: Famílias de baixa renda com membros com deficiência" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Seu nível em vendas</label>
+      <select id="diag-nivel">
+        <option value="iniciante">Iniciante — estou aprendendo</option>
+        <option value="intermediario">Intermediário — já vendo, quero melhorar</option>
+        <option value="avancado">Avançado — tenho equipe, quero escalar</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Qual sua maior dificuldade hoje?</label>
+      <select id="diag-dificuldade">
+        <option value="">Selecione...</option>
+        <option value="objecoes">Responder objeções do lead</option>
+        <option value="abordagem">Abordagem inicial (WhatsApp, ligação)</option>
+        <option value="qualificacao">Qualificar leads corretamente</option>
+        <option value="proposta">Montar e passar proposta</option>
+        <option value="negociacao">Negociar sem ceder no preço</option>
+        <option value="follow_up">Fazer follow-up sem parecer chato</option>
+        <option value="fechamento">Fechar no momento certo</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="salvarDiagnostico()">
+      Salvar e personalizar May ✓
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL: PERFIL ══════════════ -->
+<div class="modal-overlay" id="modal-perfil">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Perfil</span>
+      <button class="modal-close" onclick="document.getElementById('modal-perfil').classList.remove('active')">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nome</label>
+      <input id="perfil-nome" type="text" />
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:16px;">
+      <button class="btn btn-primary" style="flex:1" onclick="salvarPerfil()">Salvar</button>
+      <button class="btn btn-secondary" onclick="abrirModalDiagnostico()">Editar diagnóstico</button>
+    </div>
+
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+      <button class="btn btn-secondary btn-full mb-8" onclick="abrirPortalStripe()">
+        Gerenciar assinatura
+      </button>
+      <button class="btn btn-danger btn-full" onclick="logout()">Sair</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL: PLANOS ══════════════ -->
+<div class="modal-overlay" id="modal-planos">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <span class="modal-title">Planos</span>
+      <button class="modal-close" onclick="document.getElementById('modal-planos').classList.remove('active')">✕</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
+
+      <!-- Mensal -->
+      <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:20px;">
+        <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Mensal</div>
+        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;" id="preco-mensal">R$ —</div>
+        <div class="text-xs text-muted mb-16">por mês · cancele quando quiser</div>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:20px;">
+          <li>✓ 500 mensagens/mês</li>
+          <li>✓ Todas as ferramentas</li>
+          <li>✓ Upload de documentos</li>
+          <li>✓ Gravação de áudio</li>
+          <li>✓ Exportação Word</li>
+        </ul>
+        <button class="btn btn-secondary btn-full" onclick="iniciarCheckout('mensal')">Assinar mensal</button>
+      </div>
+
+      <!-- Anual -->
+      <div style="background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:var(--radius); padding:20px; position:relative;">
+        <div style="position:absolute; top:-10px; right:12px; background:var(--accent); color:var(--text-inverse); font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:99px;">MELHOR VALOR</div>
+        <div style="font-size:0.75rem; font-weight:600; color:var(--accent-light); text-transform:uppercase; margin-bottom:8px;">Anual</div>
+        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;" id="preco-anual">R$ —</div>
+        <div class="text-xs text-muted mb-16">por ano · equivale a X meses grátis</div>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:20px;">
+          <li>✓ Mensagens ilimitadas</li>
+          <li>✓ Todas as ferramentas</li>
+          <li>✓ Upload de documentos</li>
+          <li>✓ Gravação de áudio</li>
+          <li>✓ Exportação Word</li>
+          <li>✓ Suporte prioritário</li>
+        </ul>
+        <button class="btn btn-primary btn-full" onclick="iniciarCheckout('anual')">Assinar anual</button>
+      </div>
+    </div>
+
+    <p class="text-xs text-muted" style="text-align:center; margin-top:16px;">
+      Pagamento seguro via Stripe · Cancele a qualquer momento
+    </p>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/markdown.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  // Abre modal de planos
+  function abrirModalPlanos() {
+    document.getElementById('modal-planos').classList.add('active');
+  }
+
+  // Fecha modal ao clicar fora
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        // Não fecha o diagnóstico se não estiver completo
+        if (overlay.id === 'modal-diagnostico' && !window.estado?.user?.diagnostico_completo) return;
+        overlay.classList.remove('active');
+      }
+    });
+  });
+
+  // PWA service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
