@@ -171,6 +171,47 @@
     }
     .g-modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
 
+    /* ── Ranking de Vendas ── */
+    .g-rank-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    .g-rank-table th {
+      text-align: left; font-size: 11px; font-weight: 500;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0 12px 10px; border-bottom: 1px solid var(--border);
+    }
+    .g-rank-table td {
+      padding: 14px 12px; font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .g-rank-table tr:last-child td { border-bottom: none; }
+    .g-rank-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .g-pos { font-size: 18px; font-weight: 700; color: var(--text-muted); min-width: 28px; }
+    .g-pos.gold   { color: #f5c842; }
+    .g-pos.silver { color: #adb5bd; }
+    .g-pos.bronze { color: #cd7f32; }
+
+    .g-valor-grande { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .g-valor-zero   { font-size: 13px; color: var(--text-muted); }
+
+    .g-treino-bar { display: flex; align-items: center; gap: 6px; }
+    .g-treino-fill {
+      height: 6px; border-radius: 3px;
+      background: var(--accent); min-width: 2px;
+      transition: width 0.3s;
+    }
+    .g-treino-num { font-size: 11px; color: var(--text-muted); }
+
+    .g-corr-tag {
+      font-size: 10px; font-weight: 600; padding: 2px 6px;
+      border-radius: 99px; letter-spacing: 0.03em;
+    }
+    .g-corr-ok   { background: rgba(125,207,151,0.15); color: #7dcf97; }
+    .g-corr-risk { background: rgba(224,112,112,0.15); color: #e07070; }
+    .g-corr-gap  { background: rgba(255,200,80,0.15);  color: #f5c842; }
+
+    .g-section { margin-top: 40px; }
+
     /* ── Empty state ── */
     .g-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
     .g-empty h3 { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
@@ -271,6 +312,53 @@
       <p>Convide membros para começar a acompanhar a evolução deles.</p>
     </div>
   </div>
+
+  <!-- ═══ RANKING DE VENDAS ═══ -->
+  <div class="g-section">
+    <div class="g-section-header">
+      <span class="g-section-title">🏆 Ranking de Vendas — <span id="mes-ranking"></span></span>
+      <span style="font-size:12px; color:var(--text-muted)">treino × resultado</span>
+    </div>
+
+    <!-- Stats de vendas -->
+    <div class="g-stats" id="stats-vendas" style="margin-bottom:20px">
+      <div class="g-stat success">
+        <div class="g-stat-label">Total vendido no mês</div>
+        <div class="g-stat-value" id="venda-total">R$ —</div>
+        <div class="g-stat-sub" id="venda-count">— vendas</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-label">Ticket médio</div>
+        <div class="g-stat-value" id="venda-ticket">R$ —</div>
+        <div class="g-stat-sub">por venda</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-label">Top vendedor</div>
+        <div class="g-stat-value" id="venda-top" style="font-size:16px">—</div>
+        <div class="g-stat-sub">este mês</div>
+      </div>
+    </div>
+
+    <!-- Tabela do ranking -->
+    <table class="g-rank-table" id="tabela-ranking">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Vendedor</th>
+          <th>R$ no mês</th>
+          <th>Vendas</th>
+          <th>Treinos/mês</th>
+          <th>Correlação</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-ranking"></tbody>
+    </table>
+
+    <p style="font-size:11px; color:var(--text-muted); margin-top:12px; text-align:right">
+      Vendas registradas pelos próprios membros · atualizado em tempo real
+    </p>
+  </div>
+
 </div>
 
 <!-- Modal convite -->
@@ -308,7 +396,7 @@ async function init() {
   } else {
     document.getElementById('nome-empresa').textContent = data.empresa.nome;
     document.getElementById('tela-dashboard').style.display = 'block';
-    await carregarEquipe();
+    await Promise.all([ carregarEquipe(), carregarRanking() ]);
   }
 }
 
@@ -386,6 +474,83 @@ async function carregarEquipe() {
         <td><div class="g-skills">${dots}</div></td>
         <td><strong>${m.media_geral || '—'}</strong></td>
         <td><span class="g-inativo-badge ${statusClass}">${statusText}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ─── Ranking de Vendas ────────────────────────────────────────────────────────
+async function carregarRanking() {
+  const res = await apiFetch('/vendas/ranking');
+  if (!res.ok) return;
+  const data = await res.json();
+
+  // Mês
+  const mes = new Date(data.mes_referencia);
+  const nomeMes = mes.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  document.getElementById('mes-ranking').textContent = nomeMes;
+
+  // Stats
+  const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('venda-total').textContent  = fmt(data.stats.total_vendido);
+  document.getElementById('venda-count').textContent  = `${data.stats.total_vendas} venda${data.stats.total_vendas !== 1 ? 's' : ''}`;
+  document.getElementById('venda-ticket').textContent = fmt(data.stats.ticket_medio);
+  document.getElementById('venda-top').textContent    = data.stats.top_vendedor || '—';
+
+  // Tabela de ranking
+  const tbody = document.getElementById('tbody-ranking');
+  if (!data.ranking || data.ranking.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">
+      Nenhuma venda registrada ainda.<br>
+      <span style="font-size:12px">Os membros registram vendas pelo app principal.</span>
+    </td></tr>`;
+    return;
+  }
+
+  const maxTreinos = Math.max(...data.ranking.map(r => r.treinos_mes), 1);
+
+  tbody.innerHTML = data.ranking.map(r => {
+    // Ícone de posição
+    const posClass = r.posicao === 1 ? 'gold' : r.posicao === 2 ? 'silver' : r.posicao === 3 ? 'bronze' : '';
+    const posIcon  = r.posicao === 1 ? '🥇' : r.posicao === 2 ? '🥈' : r.posicao === 3 ? '🥉' : r.posicao;
+
+    // Valor formatado
+    const valorHtml = r.total_mes > 0
+      ? `<span class="g-valor-grande">${fmt(r.total_mes)}</span>`
+      : `<span class="g-valor-zero">R$ 0,00</span>`;
+
+    // Barra de treinos
+    const pct   = Math.round((r.treinos_mes / maxTreinos) * 100);
+    const width  = Math.max(pct, 4);
+    const treinoHtml = `
+      <div class="g-treino-bar">
+        <div class="g-treino-fill" style="width:${width}px; max-width:80px"></div>
+        <span class="g-treino-num">${r.treinos_mes}</span>
+      </div>`;
+
+    // Correlação treino × resultado
+    let corrTag = '';
+    if (r.total_mes > 0 && r.ativo) {
+      corrTag = `<span class="g-corr-tag g-corr-ok">Treina e vende ✓</span>`;
+    } else if (r.total_mes > 0 && !r.ativo) {
+      corrTag = `<span class="g-corr-tag g-corr-gap">Vende, pouco treino</span>`;
+    } else if (r.total_mes === 0 && r.ativo) {
+      corrTag = `<span class="g-corr-tag g-corr-gap">Treina, ainda sem venda</span>`;
+    } else {
+      corrTag = `<span class="g-corr-tag g-corr-risk">Sem treino e sem venda ⚠</span>`;
+    }
+
+    return `
+      <tr>
+        <td><span class="g-pos ${posClass}">${posIcon}</span></td>
+        <td>
+          <div class="g-membro-nome">${r.name}</div>
+          <div class="g-membro-email">${r.email}</div>
+        </td>
+        <td>${valorHtml}<br><span style="font-size:11px;color:var(--text-muted)">${r.count_mes} venda${r.count_mes !== 1 ? 's' : ''}</span></td>
+        <td>${r.count_mes}</td>
+        <td>${treinoHtml}</td>
+        <td>${corrTag}</td>
       </tr>
     `;
   }).join('');

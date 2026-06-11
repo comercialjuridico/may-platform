@@ -50,6 +50,9 @@
       <a id="link-gestor" href="/gestor.html" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px">
         👥 Painel da equipe
       </a>
+      <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;margin-bottom:4px;color:#7dcf97;border-color:rgba(125,207,151,0.3)">
+        💰 Registrar venda
+      </button>
       <button class="btn-ghost btn-full" onclick="logout()" style="font-size:0.8rem">
         Sair
       </button>
@@ -249,6 +252,48 @@
   </div>
 </div>
 
+
+<!-- ══════════════ MODAL: REGISTRAR VENDA ══════════════ -->
+<div class="modal-overlay" id="modal-venda">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">💰 Registrar venda</span>
+      <button class="modal-close" onclick="fecharModalVenda()">✕</button>
+    </div>
+    <p class="text-secondary text-sm" style="margin-bottom:20px">
+      Registre uma venda fechada. Ela vai aparecer no ranking da equipe e te dará XP.
+    </p>
+
+    <div class="form-group">
+      <label class="form-label">Valor da venda *</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="color:var(--text-muted);font-size:14px">R$</span>
+        <input id="venda-valor" type="number" min="1" step="0.01" placeholder="0,00"
+          style="flex:1" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Descrição <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
+      <input id="venda-descricao" type="text" placeholder="Ex: Contrato de honorários, Seguro de vida..." />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Cliente <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
+      <input id="venda-cliente" type="text" placeholder="Nome do cliente" />
+    </div>
+
+    <div id="venda-resultado" style="display:none;background:rgba(125,207,151,0.08);border:1px solid rgba(125,207,151,0.25);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="color:#7dcf97;font-weight:600;font-size:14px;margin-bottom:4px">✓ Venda registrada!</div>
+      <div id="venda-resultado-texto" style="font-size:13px;color:var(--text-secondary)"></div>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="registrarVenda()" id="btn-confirmar-venda">
+      Registrar venda
+    </button>
+  </div>
+</div>
+
 <script src="/js/api.js"></script>
 <script src="/js/markdown.js"></script>
 <script src="/js/app.js"></script>
@@ -267,6 +312,11 @@
         overlay.classList.remove('active');
       }
     });
+  });
+
+  // Fecha modal de venda ao clicar fora
+  document.getElementById('modal-venda')?.addEventListener('click', function(e) {
+    if (e.target === this) fecharModalVenda();
   });
 
   // PWA service worker

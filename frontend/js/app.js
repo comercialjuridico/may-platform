@@ -59,6 +59,11 @@ async function carregarDadosIniciais() {
         const linkGestor = document.getElementById('link-gestor');
         if (linkGestor) linkGestor.style.display = 'block';
       }
+      // Mostra botão de registrar venda se pertencer a uma equipe
+      if (data.user?.empresa_id) {
+        const btnVenda = document.getElementById('btn-registrar-venda');
+        if (btnVenda) btnVenda.style.display = 'block';
+      }
     }
 
     if (resConversas?.ok) {
@@ -612,7 +617,69 @@ async function abrirPortalStripe() {
   window.open(data.url, '_blank');
 }
 
-// ─── Logout ──────────────────────────────────────────────────────────────────
+// ─── Modal: Registrar Venda ───────────────────────────────────────────────────
+function abrirModalVenda() {
+  document.getElementById('modal-venda').classList.add('active');
+  document.getElementById('venda-valor').value = '';
+  document.getElementById('venda-descricao').value = '';
+  document.getElementById('venda-cliente').value = '';
+  document.getElementById('venda-resultado').style.display = 'none';
+  document.getElementById('btn-confirmar-venda').style.display = 'block';
+  document.getElementById('btn-confirmar-venda').disabled = false;
+}
+
+function fecharModalVenda() {
+  document.getElementById('modal-venda').classList.remove('active');
+}
+
+async function registrarVenda() {
+  const valor     = parseFloat(document.getElementById('venda-valor').value);
+  const descricao = document.getElementById('venda-descricao').value.trim();
+  const cliente   = document.getElementById('venda-cliente').value.trim();
+
+  if (!valor || valor <= 0) {
+    mostrarToast('Informe o valor da venda.', 'erro');
+    return;
+  }
+
+  const btn = document.getElementById('btn-confirmar-venda');
+  btn.disabled = true;
+  btn.textContent = 'Registrando...';
+
+  try {
+    const res = await api.post('/vendas', { valor, descricao, cliente });
+    const data = await res.json();
+
+    if (!res.ok) {
+      mostrarToast(data.erro || 'Erro ao registrar venda.', 'erro');
+      btn.disabled = false;
+      btn.textContent = 'Registrar venda';
+      return;
+    }
+
+    // Mostra resultado com XP e posição
+    const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    const textoResultado = [
+      `Venda de ${fmt(valor)} registrada.`,
+      `+${data.xp_ganho} XP`,
+      data.posicao_ranking
+        ? `Você está em ${data.posicao_ranking}° no ranking da equipe.`
+        : '',
+    ].filter(Boolean).join(' · ');
+
+    document.getElementById('venda-resultado-texto').textContent = textoResultado;
+    document.getElementById('venda-resultado').style.display = 'block';
+    btn.style.display = 'none';
+
+    mostrarToast(`💰 +${data.xp_ganho} XP · ${data.posicao_ranking}° no ranking!`, 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão.', 'erro');
+    btn.disabled = false;
+    btn.textContent = 'Registrar venda';
+  }
+}
+
+// ─── Logout ───────────────────────────────────────────────────────────────────
 function logout() {
   if (!confirm('Sair da plataforma?')) return;
   limparTokens();
@@ -661,4 +728,5 @@ Object.assign(window, {
   iniciarCheckout, abrirPortalStripe, logout,
   toggleMenuMobile, mostrarToast,
   copiarMensagem, exportarDocx, salvarTemplate,
+  abrirModalVenda, fecharModalVenda, registrarVenda,
 });
