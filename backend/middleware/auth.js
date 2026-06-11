@@ -28,7 +28,7 @@ async function authMiddleware(req, res, next) {
     // Busca dados atualizados do usuário (plano pode ter mudado)
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, name, plano, plano_status, plano_fim, mensagens_mes, mes_referencia, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade')
+      .select('id, email, name, plano, plano_status, plano_fim, mensagens_mes, mes_referencia, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, role, empresa_id')
       .eq('id', payload.id)
       .single();
 
