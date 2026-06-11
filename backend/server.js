@@ -54,6 +54,7 @@ app.use('/api/user',   require('./routes/user'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/export', require('./routes/export'));
+app.use('/api/gestor', require('./routes/gestor'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

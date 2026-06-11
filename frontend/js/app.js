@@ -53,6 +53,12 @@ async function carregarDadosIniciais() {
       estado.user   = data.user;
       estado.streak = data.streak;
       salvarUser(data.user);
+
+      // Mostra link do painel se for gestor
+      if (data.user?.role === 'gestor') {
+        const linkGestor = document.getElementById('link-gestor');
+        if (linkGestor) linkGestor.style.display = 'block';
+      }
     }
 
     if (resConversas?.ok) {

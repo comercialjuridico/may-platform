@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1917" />
+  <title>May — Painel da Equipe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .g-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .g-header-left { display: flex; align-items: center; gap: 12px; }
+    .g-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .g-logo-mark {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--accent); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .g-logo-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .g-badge {
+      font-size: 11px; font-weight: 500; padding: 2px 8px;
+      background: rgba(201,125,78,0.15); color: var(--accent);
+      border-radius: 99px; border: 1px solid rgba(201,125,78,0.3);
+    }
+    .g-header-right { display: flex; align-items: center; gap: 8px; }
+    #nome-empresa { font-size: 13px; color: var(--text-muted); }
+
+    /* ── Layout ── */
+    .g-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── Setup (sem equipe) ── */
+    .g-setup {
+      max-width: 480px; margin: 80px auto; text-align: center;
+    }
+    .g-setup h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+    .g-setup p { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+    .g-setup-input {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .g-setup-input input {
+      flex: 1; background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 14px; color: var(--text-primary); font-family: inherit;
+    }
+    .g-setup-input input:focus { outline: none; border-color: var(--accent); }
+
+    /* ── Stats cards ── */
+    .g-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .g-stat {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 20px;
+    }
+    .g-stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .g-stat-value { font-size: 28px; font-weight: 600; color: var(--text-primary); }
+    .g-stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .g-stat.alert .g-stat-value { color: #e07070; }
+    .g-stat.success .g-stat-value { color: #7dcf97; }
+
+    /* ── Alertas ── */
+    .g-alertas { margin-bottom: 24px; }
+    .g-alerta-item {
+      background: rgba(224,112,112,0.08); border: 1px solid rgba(224,112,112,0.2);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 13px; color: #e07070; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .g-alerta-item::before { content: '⚠'; }
+
+    /* ── Section header ── */
+    .g-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .g-section-title { font-size: 15px; font-weight: 600; }
+
+    /* ── Tabela de membros ── */
+    .g-table { width: 100%; border-collapse: collapse; }
+    .g-table th {
+      text-align: left; font-size: 11px; font-weight: 500;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0 12px 10px; border-bottom: 1px solid var(--border);
+    }
+    .g-table td {
+      padding: 14px 12px; font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .g-table tr:last-child td { border-bottom: none; }
+    .g-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .g-membro-nome { font-weight: 500; }
+    .g-membro-email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Habilidades (bolinhas coloridas) ── */
+    .g-skills { display: flex; gap: 4px; align-items: center; }
+    .g-skill-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      title: attr(data-label);
+    }
+    .skill-1 { background: #555; }
+    .skill-2, .skill-3 { background: #c97d4e; }
+    .skill-4, .skill-5 { background: #d4a04a; }
+    .skill-6, .skill-7 { background: #7dcf97; }
+    .skill-8, .skill-9, .skill-10 { background: #4ecf9a; }
+
+    /* ── Streak badge ── */
+    .g-streak {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 500;
+    }
+    .g-streak.ativo { color: var(--accent); }
+    .g-streak.inativo { color: var(--text-muted); }
+
+    /* ── Inativo badge ── */
+    .g-inativo-badge {
+      font-size: 11px; padding: 2px 7px; border-radius: 99px;
+      font-weight: 500;
+    }
+    .g-inativo-badge.sim { background: rgba(224,112,112,0.15); color: #e07070; }
+    .g-inativo-badge.nao { background: rgba(125,207,151,0.15); color: #7dcf97; }
+
+    /* ── Modal de convite ── */
+    .g-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .g-modal-overlay.open { display: flex; }
+    .g-modal {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px; width: 440px; max-width: 90vw;
+    }
+    .g-modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .g-modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .g-modal-input { display: flex; gap: 8px; margin-bottom: 16px; }
+    .g-modal-input input {
+      flex: 1; background: var(--bg-primary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 14px; color: var(--text-primary); font-family: inherit;
+    }
+    .g-modal-input input:focus { outline: none; border-color: var(--accent); }
+    .g-link-box {
+      background: var(--bg-primary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 12px; color: var(--text-muted); word-break: break-all;
+      margin-bottom: 12px; display: none;
+    }
+    .g-modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* ── Empty state ── */
+    .g-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+    .g-empty h3 { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+
+    /* ── Toast ── */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 16px;
+      font-size: 13px; animation: slideUp 0.2s ease;
+    }
+    .toast.success { border-color: rgba(125,207,151,0.4); color: #7dcf97; }
+    .toast.error { border-color: rgba(224,112,112,0.4); color: #e07070; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="g-header">
+  <div class="g-header-left">
+    <a href="/" class="g-logo">
+      <div class="g-logo-mark">M</div>
+      <span class="g-logo-name">May</span>
+    </a>
+    <span class="g-badge">Painel do Gestor</span>
+  </div>
+  <div class="g-header-right">
+    <span id="nome-empresa"></span>
+    <a href="/" class="btn btn-ghost btn-sm">← Voltar ao app</a>
+  </div>
+</header>
+
+<!-- Setup: criar equipe -->
+<div class="g-container" id="tela-setup" style="display:none">
+  <div class="g-setup">
+    <h1>Crie sua equipe</h1>
+    <p>Configure o painel de gestão para acompanhar a evolução dos seus vendedores. Você poderá convidar até 5 membros no plano atual.</p>
+    <div class="g-setup-input">
+      <input type="text" id="input-empresa" placeholder="Nome do escritório ou equipe" />
+      <button class="btn btn-primary" onclick="criarEmpresa()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard principal -->
+<div class="g-container" id="tela-dashboard" style="display:none">
+
+  <!-- Stats -->
+  <div class="g-stats" id="stats-cards">
+    <div class="g-stat">
+      <div class="g-stat-label">Total de membros</div>
+      <div class="g-stat-value" id="stat-total">—</div>
+      <div class="g-stat-sub">na sua equipe</div>
+    </div>
+    <div class="g-stat success">
+      <div class="g-stat-label">Ativos esta semana</div>
+      <div class="g-stat-value" id="stat-ativos">—</div>
+      <div class="g-stat-sub">treinaram nos últimos 5 dias</div>
+    </div>
+    <div class="g-stat alert">
+      <div class="g-stat-label">Inativos</div>
+      <div class="g-stat-value" id="stat-inativos">—</div>
+      <div class="g-stat-sub">precisam de atenção</div>
+    </div>
+    <div class="g-stat">
+      <div class="g-stat-label">Média da equipe</div>
+      <div class="g-stat-value" id="stat-media">—</div>
+      <div class="g-stat-sub">nível médio geral</div>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  <div class="g-alertas" id="alertas-container"></div>
+
+  <!-- Tabela de membros -->
+  <div class="g-section-header">
+    <span class="g-section-title">Membros da equipe</span>
+    <button class="btn btn-primary btn-sm" onclick="abrirModalConvite()">+ Convidar membro</button>
+  </div>
+
+  <div id="tabela-container">
+    <table class="g-table" id="tabela-membros">
+      <thead>
+        <tr>
+          <th>Membro</th>
+          <th>Streak</th>
+          <th>XP</th>
+          <th>Habilidades</th>
+          <th>Média</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-membros"></tbody>
+    </table>
+    <div class="g-empty" id="empty-state" style="display:none">
+      <h3>Nenhum membro ainda</h3>
+      <p>Convide membros para começar a acompanhar a evolução deles.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal convite -->
+<div class="g-modal-overlay" id="modal-convite">
+  <div class="g-modal">
+    <h2>Convidar membro</h2>
+    <p>Digite o e-mail do vendedor que você quer adicionar à equipe. Um link de acesso será gerado.</p>
+    <div class="g-modal-input">
+      <input type="email" id="input-email-convite" placeholder="email@exemplo.com" />
+      <button class="btn btn-primary" onclick="gerarConvite()">Gerar link</button>
+    </div>
+    <div class="g-link-box" id="link-convite-box"></div>
+    <div class="g-modal-footer">
+      <button class="btn btn-ghost" onclick="fecharModalConvite()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="/js/api.js"></script>
+<script>
+// ─── Auth guard ───────────────────────────────────────────────────────────────
+const user = getUser();
+if (!user || !getAccessToken()) window.location.href = '/auth.html';
+
+// ─── Inicialização ────────────────────────────────────────────────────────────
+async function init() {
+  const res = await apiFetch('/api/gestor/info');
+  if (!res.ok) { mostrarToast('Erro ao carregar.', 'error'); return; }
+  const data = await res.json();
+
+  if (!data.tem_empresa || data.role !== 'gestor') {
+    document.getElementById('tela-setup').style.display = 'block';
+  } else {
+    document.getElementById('nome-empresa').textContent = data.empresa.nome;
+    document.getElementById('tela-dashboard').style.display = 'block';
+    await carregarEquipe();
+  }
+}
+
+// ─── Criar empresa ────────────────────────────────────────────────────────────
+async function criarEmpresa() {
+  const nome = document.getElementById('input-empresa').value.trim();
+  if (!nome) return;
+
+  const res = await apiFetch('/api/gestor/empresa', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome }),
+  });
+
+  if (res.ok) {
+    mostrarToast('Equipe criada!', 'success');
+    setTimeout(() => location.reload(), 800);
+  } else {
+    const d = await res.json();
+    mostrarToast(d.erro || 'Erro ao criar equipe.', 'error');
+  }
+}
+
+// ─── Carregar equipe ──────────────────────────────────────────────────────────
+async function carregarEquipe() {
+  const res = await apiFetch('/api/gestor/equipe');
+  if (!res.ok) { mostrarToast('Erro ao carregar equipe.', 'error'); return; }
+  const data = await res.json();
+
+  // Stats
+  document.getElementById('stat-total').textContent    = data.stats.total_membros;
+  document.getElementById('stat-ativos').textContent   = data.stats.ativos_semana;
+  document.getElementById('stat-inativos').textContent = data.stats.inativos;
+  document.getElementById('stat-media').textContent    = data.stats.media_equipe || '—';
+
+  // Alertas
+  const alertasEl = document.getElementById('alertas-container');
+  alertasEl.innerHTML = data.alertas.map(a =>
+    `<div class="g-alerta-item">${a.mensagem}</div>`
+  ).join('');
+
+  // Tabela
+  const tbody = document.getElementById('tbody-membros');
+  if (data.membros.length === 0) {
+    document.getElementById('tabela-membros').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'block';
+    return;
+  }
+
+  const HABILIDADES = ['conexao','objecao','proposta','negociacao','fechamento','follow_up'];
+  const LABELS = ['Conexão','Objeção','Proposta','Negociação','Fechamento','Follow-up'];
+
+  tbody.innerHTML = data.membros.map(m => {
+    const dots = HABILIDADES.map((h, i) => {
+      const nv = m.habilidades[h];
+      return `<span class="g-skill-dot skill-${nv}" title="${LABELS[i]}: nível ${nv}"></span>`;
+    }).join('');
+
+    const streakClass = m.streak > 0 ? 'ativo' : 'inativo';
+    const streakText = m.streak > 0 ? `🔥 ${m.streak} dias` : '— sem streak';
+
+    const statusClass = m.inativo ? 'sim' : 'nao';
+    const statusText = m.inativo
+      ? (m.dias_sem_treinar === null ? 'Nunca treinou' : `${m.dias_sem_treinar}d sem treinar`)
+      : 'Ativo';
+
+    return `
+      <tr>
+        <td>
+          <div class="g-membro-nome">${m.name}</div>
+          <div class="g-membro-email">${m.email}</div>
+        </td>
+        <td><span class="g-streak ${streakClass}">${streakText}</span></td>
+        <td>${m.xp_total} XP</td>
+        <td><div class="g-skills">${dots}</div></td>
+        <td><strong>${m.media_geral || '—'}</strong></td>
+        <td><span class="g-inativo-badge ${statusClass}">${statusText}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ─── Modal convite ────────────────────────────────────────────────────────────
+function abrirModalConvite() {
+  document.getElementById('modal-convite').classList.add('open');
+  document.getElementById('link-convite-box').style.display = 'none';
+  document.getElementById('input-email-convite').value = '';
+}
+
+function fecharModalConvite() {
+  document.getElementById('modal-convite').classList.remove('open');
+}
+
+async function gerarConvite() {
+  const email = document.getElementById('input-email-convite').value.trim();
+  if (!email) return;
+
+  const res = await apiFetch('/api/gestor/convidar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    const box = document.getElementById('link-convite-box');
+    box.style.display = 'block';
+    box.innerHTML = `Link gerado para <strong>${email}</strong>:<br><br>${data.link}<br><br>
+      <button class="btn btn-ghost btn-sm" onclick="copiar('${data.link}')">Copiar link</button>`;
+    mostrarToast('Link gerado!', 'success');
+  } else {
+    mostrarToast(data.erro || 'Erro ao gerar convite.', 'error');
+  }
+}
+
+function copiar(texto) {
+  navigator.clipboard.writeText(texto);
+  mostrarToast('Link copiado!', 'success');
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function mostrarToast(msg, tipo = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${tipo}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Fechar modal clicando fora
+document.getElementById('modal-convite').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalConvite();
+});
+
+init();
+</script>
+</body>
+</html>
