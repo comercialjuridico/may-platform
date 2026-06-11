@@ -299,7 +299,7 @@ if (!user || !getAccessToken()) window.location.href = '/auth.html';
 
 // ─── Inicialização ────────────────────────────────────────────────────────────
 async function init() {
-  const res = await apiFetch('/api/gestor/info');
+  const res = await apiFetch('/gestor/info');
   if (!res.ok) { mostrarToast('Erro ao carregar.', 'error'); return; }
   const data = await res.json();
 
@@ -317,7 +317,7 @@ async function criarEmpresa() {
   const nome = document.getElementById('input-empresa').value.trim();
   if (!nome) return;
 
-  const res = await apiFetch('/api/gestor/empresa', {
+  const res = await apiFetch('/gestor/empresa', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nome }),
@@ -334,7 +334,7 @@ async function criarEmpresa() {
 
 // ─── Carregar equipe ──────────────────────────────────────────────────────────
 async function carregarEquipe() {
-  const res = await apiFetch('/api/gestor/equipe');
+  const res = await apiFetch('/gestor/equipe');
   if (!res.ok) { mostrarToast('Erro ao carregar equipe.', 'error'); return; }
   const data = await res.json();
 
@@ -406,7 +406,7 @@ async function gerarConvite() {
   const email = document.getElementById('input-email-convite').value.trim();
   if (!email) return;
 
-  const res = await apiFetch('/api/gestor/convidar', {
+  const res = await apiFetch('/gestor/convidar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
