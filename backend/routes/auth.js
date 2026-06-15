@@ -112,7 +112,7 @@ router.post('/login', async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, name, password_hash, plano, plano_status, plano_fim, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade')
+      .select('id, email, name, password_hash, plano, plano_status, plano_fim, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, totp_enabled')
       .eq('email', email.toLowerCase())
       .single();
 
@@ -125,12 +125,22 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ erro: 'E-mail ou senha incorretos.' });
     }
 
+    // Se 2FA está ativo, retorna token temporário (5 min) para segunda etapa
+    if (user.totp_enabled) {
+      const tempToken = jwt.sign(
+        { id: user.id, tipo: '2fa_pendente' },
+        process.env.JWT_SECRET,
+        { expiresIn: '5m' }
+      );
+      return res.json({ requires_2fa: true, temp_token: tempToken });
+    }
+
     const accessToken  = gerarAccessToken(user);
     const refreshToken = gerarRefreshToken(user);
 
     await supabase.from('users').update({ refresh_token: refreshToken }).eq('id', user.id);
 
-    const { password_hash, ...userPublic } = user;
+    const { password_hash, totp_enabled, ...userPublic } = user;
 
     await registrarAuditoria({ userId: user.id, acao: 'login', req });
 

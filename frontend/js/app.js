@@ -903,7 +903,65 @@ function abrirModalPerfil() {
     inicial.textContent = (user?.name || 'U').charAt(0).toUpperCase();
   }
 
+  // Atualiza status 2FA
+  atualizar2FAStatus();
+
   document.getElementById('modal-perfil').classList.add('active');
+}
+
+// ── 2FA ──────────────────────────────────────────────────────────────────────
+function atualizar2FAStatus() {
+  const user = estado.user;
+  const ativo = user?.totp_enabled;
+  document.getElementById('2fa-status-texto').textContent = ativo ? '✓ Ativado' : 'Desativado';
+  document.getElementById('2fa-status-texto').style.color = ativo ? '#6EE7B7' : 'var(--text-muted)';
+  document.getElementById('btn-toggle-2fa').textContent = ativo ? 'Desativar' : 'Ativar';
+  document.getElementById('2fa-setup-area').style.display = 'none';
+  document.getElementById('2fa-desativar-area').style.display = 'none';
+}
+
+async function toggle2FA() {
+  const ativo = estado.user?.totp_enabled;
+  if (ativo) {
+    document.getElementById('2fa-desativar-area').style.display = 'block';
+    document.getElementById('2fa-setup-area').style.display = 'none';
+    document.getElementById('2fa-codigo-desativar').value = '';
+    document.getElementById('2fa-codigo-desativar').focus();
+  } else {
+    // Inicia setup — busca QR code
+    const res  = await apiFetch('/api/2fa/setup', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) { mostrarToast(data.erro || 'Erro ao iniciar 2FA', 'error'); return; }
+    document.getElementById('2fa-qr-img').src = data.qrDataUrl;
+    document.getElementById('2fa-setup-area').style.display = 'block';
+    document.getElementById('2fa-desativar-area').style.display = 'none';
+    document.getElementById('2fa-codigo-ativar').value = '';
+    document.getElementById('2fa-codigo-ativar').focus();
+  }
+}
+
+async function confirmar2FAAtivacao() {
+  const codigo = document.getElementById('2fa-codigo-ativar').value.trim();
+  if (codigo.length !== 6) { mostrarToast('Informe os 6 dígitos', 'error'); return; }
+  const res  = await apiFetch('/api/2fa/ativar', { method: 'POST', body: JSON.stringify({ codigo }) });
+  const data = await res.json();
+  if (!res.ok) { mostrarToast(data.erro || 'Código inválido', 'error'); return; }
+  estado.user.totp_enabled = true;
+  localStorage.setItem('may_user', JSON.stringify(estado.user));
+  atualizar2FAStatus();
+  mostrarToast('2FA ativado!', 'success');
+}
+
+async function confirmar2FADesativacao() {
+  const codigo = document.getElementById('2fa-codigo-desativar').value.trim();
+  if (codigo.length !== 6) { mostrarToast('Informe os 6 dígitos', 'error'); return; }
+  const res  = await apiFetch('/api/2fa/desativar', { method: 'POST', body: JSON.stringify({ codigo }) });
+  const data = await res.json();
+  if (!res.ok) { mostrarToast(data.erro || 'Código inválido', 'error'); return; }
+  estado.user.totp_enabled = false;
+  localStorage.setItem('may_user', JSON.stringify(estado.user));
+  atualizar2FAStatus();
+  mostrarToast('2FA desativado.', 'info');
 }
 
 async function uploadFotoPerfil(input) {
@@ -1175,4 +1233,5 @@ Object.assign(window, {
   copiarMensagem, exportarDocx, salvarTemplate,
   abrirArquivosArea, copiarArquivo, excluirArquivo,
   abrirModalVenda, fecharModalVenda, registrarVenda,
+  toggle2FA, confirmar2FAAtivacao, confirmar2FADesativacao,
 });

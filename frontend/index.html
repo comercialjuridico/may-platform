@@ -323,6 +323,38 @@
       <button class="btn btn-secondary" onclick="abrirModalDiagnostico()">Editar diagnóstico</button>
     </div>
 
+    <!-- 2FA -->
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <div>
+          <div style="font-size:.88rem; font-weight:600; color:var(--text-primary);">Autenticação em dois fatores</div>
+          <div id="2fa-status-texto" style="font-size:.78rem; color:var(--text-muted); margin-top:2px;">Carregando...</div>
+        </div>
+        <button id="btn-toggle-2fa" class="btn btn-secondary" style="font-size:.8rem; padding:6px 14px;" onclick="toggle2FA()">...</button>
+      </div>
+      <!-- Área de setup do QR code (oculta por padrão) -->
+      <div id="2fa-setup-area" style="display:none; background:var(--bg-tertiary); border-radius:var(--radius-sm); padding:14px; margin-top:8px;">
+        <p style="font-size:.82rem; color:var(--text-muted); margin-bottom:12px;">Escaneie o QR code no Google Authenticator ou Authy, depois informe o código para ativar.</p>
+        <div style="display:flex; justify-content:center; margin-bottom:12px;">
+          <img id="2fa-qr-img" src="" alt="QR Code 2FA" style="width:160px;height:160px;border-radius:8px;" />
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Código de 6 dígitos</label>
+          <input type="text" id="2fa-codigo-ativar" placeholder="000000" maxlength="6" inputmode="numeric" style="letter-spacing:.25em; text-align:center;" />
+        </div>
+        <button class="btn btn-primary btn-full" onclick="confirmar2FAAtivacao()">Ativar 2FA</button>
+      </div>
+      <!-- Área de desativação (oculta por padrão) -->
+      <div id="2fa-desativar-area" style="display:none; background:var(--bg-tertiary); border-radius:var(--radius-sm); padding:14px; margin-top:8px;">
+        <p style="font-size:.82rem; color:var(--text-muted); margin-bottom:12px;">Informe o código do app para desativar o 2FA.</p>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Código de 6 dígitos</label>
+          <input type="text" id="2fa-codigo-desativar" placeholder="000000" maxlength="6" inputmode="numeric" style="letter-spacing:.25em; text-align:center;" />
+        </div>
+        <button class="btn btn-danger btn-full" onclick="confirmar2FADesativacao()">Desativar 2FA</button>
+      </div>
+    </div>
+
     <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
       <button class="btn btn-secondary btn-full mb-8" onclick="abrirPortalStripe()">
         Gerenciar assinatura

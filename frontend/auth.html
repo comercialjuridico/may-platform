@@ -78,6 +78,21 @@
       </p>
     </div>
 
+    <!-- 2FA -->
+    <div class="auth-panel" id="panel-2fa">
+      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
+        Abra seu app autenticador (Google Authenticator, Authy) e informe o código de 6 dígitos.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Código de verificação</label>
+        <input type="text" id="totp-codigo" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:.3em; font-size:1.3rem; text-align:center;" />
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" id="btn-2fa" onclick="validar2FA()">Verificar</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" onclick="mostrarTab('login')" style="font-size:0.82rem; color:var(--text-muted)">Voltar ao login</a>
+      </div>
+    </div>
+
     <!-- ESQUECI SENHA -->
     <div class="auth-panel" id="panel-forgot">
       <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
@@ -140,8 +155,10 @@ const aviso  = document.getElementById('auth-aviso');
 if (params.get('verificado')) { aviso.style.display='block'; aviso.textContent='E-mail verificado com sucesso! Faça login.'; }
 if (params.get('erro')==='token_invalido') mostrarErro('Link inválido ou expirado.');
 
+let _tempToken = null;
+
 function mostrarTab(tab) {
-  ['login','register','forgot'].forEach(t => {
+  ['login','register','forgot','2fa'].forEach(t => {
     document.getElementById(`panel-${t}`)?.classList.toggle('active', t===tab);
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t===tab);
   });
@@ -157,6 +174,29 @@ async function fazerLogin() {
   const res  = await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
   const data = await res.json();
   if (!res.ok) { mostrarErro(data.erro||'Erro ao fazer login.'); btn.disabled=false; btn.textContent='Entrar'; return; }
+
+  // 2FA obrigatório
+  if (data.requires_2fa) {
+    _tempToken = data.temp_token;
+    btn.disabled=false; btn.textContent='Entrar';
+    mostrarTab('2fa');
+    setTimeout(() => document.getElementById('totp-codigo')?.focus(), 100);
+    return;
+  }
+
+  salvarTokens(data.accessToken, data.refreshToken);
+  salvarUser(data.user);
+  window.location.href = '/app';
+}
+
+async function validar2FA() {
+  const codigo = document.getElementById('totp-codigo').value.trim();
+  if (!codigo || codigo.length !== 6) { mostrarErro('Informe o código de 6 dígitos.'); return; }
+  const btn = document.getElementById('btn-2fa');
+  btn.disabled=true; btn.textContent='Verificando...';
+  const res  = await fetch('/api/2fa/validar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({temp_token:_tempToken,codigo})});
+  const data = await res.json();
+  if (!res.ok) { mostrarErro(data.erro||'Código inválido.'); btn.disabled=false; btn.textContent='Verificar'; return; }
   salvarTokens(data.accessToken, data.refreshToken);
   salvarUser(data.user);
   window.location.href = '/app';
@@ -206,6 +246,7 @@ document.addEventListener('keydown', e => {
   if (ativo==='panel-login')    fazerLogin();
   if (ativo==='panel-register') criarConta();
   if (ativo==='panel-forgot')   enviarReset();
+  if (ativo==='panel-2fa')      validar2FA();
 });
 </script>
 </body>

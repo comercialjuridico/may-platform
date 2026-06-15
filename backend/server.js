@@ -84,6 +84,7 @@ app.use('/api/vendas',   require('./routes/vendas'));
 app.use('/api/areas',   require('./routes/areas'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/metas',  require('./routes/metas'));
+app.use('/api/2fa',   require('./routes/twofa'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
