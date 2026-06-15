@@ -44,6 +44,14 @@ app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ─── Rotas do frontend (ANTES do static para não ser interceptado) ─────────
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/landing.html'));
+});
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -63,17 +71,6 @@ app.use('/api/metas',  require('./routes/metas'));
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// ─── Rotas do frontend ─────────────────────────────────────────────────────
-// Raiz → landing page pública
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/landing.html'));
-});
-
-// /app → aplicação (requer auth no lado do cliente)
-app.get('/app', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // ─── Fallback SPA ──────────────────────────────────────────────────────────
