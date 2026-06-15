@@ -838,13 +838,20 @@ async function abrirPortalStripe() {
 
 // ─── Modal: Registrar Venda ───────────────────────────────────────────────────
 function abrirModalVenda() {
-  document.getElementById('modal-venda').classList.add('active');
-  document.getElementById('venda-valor').value = '';
-  document.getElementById('venda-descricao').value = '';
-  document.getElementById('venda-cliente').value = '';
+  ['venda-cliente','venda-telefone','venda-produto','venda-valor','venda-data-contato','venda-data-fechamento'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const origem = document.getElementById('venda-origem');
+  if (origem) origem.value = '';
   document.getElementById('venda-resultado').style.display = 'none';
   document.getElementById('btn-confirmar-venda').style.display = 'block';
   document.getElementById('btn-confirmar-venda').disabled = false;
+  document.getElementById('modal-venda').classList.add('active');
+
+  // Preenche data de fechamento com hoje por padrão
+  const hoje = new Date().toISOString().slice(0, 10);
+  document.getElementById('venda-data-fechamento').value = hoje;
 }
 
 function fecharModalVenda() {
@@ -852,21 +859,33 @@ function fecharModalVenda() {
 }
 
 async function registrarVenda() {
-  const valor     = parseFloat(document.getElementById('venda-valor').value);
-  const descricao = document.getElementById('venda-descricao').value.trim();
-  const cliente   = document.getElementById('venda-cliente').value.trim();
+  const cliente       = document.getElementById('venda-cliente').value.trim();
+  const origem        = document.getElementById('venda-origem').value;
+  const produto       = document.getElementById('venda-produto').value.trim();
+  const telefone      = document.getElementById('venda-telefone').value.trim();
+  const valorRaw      = document.getElementById('venda-valor').value;
+  const valor         = valorRaw ? parseFloat(valorRaw) : null;
+  const dataContato   = document.getElementById('venda-data-contato').value || null;
+  const dataFechamento= document.getElementById('venda-data-fechamento').value || null;
 
-  if (!valor || valor <= 0) {
-    mostrarToast('Informe o valor da venda.', 'erro');
-    return;
-  }
+  if (!cliente) { mostrarToast('Informe o nome do cliente.', 'erro'); return; }
+  if (!origem)  { mostrarToast('Selecione a origem do cliente.', 'erro'); return; }
+  if (!produto) { mostrarToast('Informe o produto ou serviço.', 'erro'); return; }
 
   const btn = document.getElementById('btn-confirmar-venda');
   btn.disabled = true;
   btn.textContent = 'Registrando...';
 
   try {
-    const res = await api.post('/vendas', { valor, descricao, cliente });
+    const res = await api.post('/vendas', {
+      cliente,
+      telefone:        telefone  || null,
+      origem,
+      descricao:       produto,
+      valor:           valor && valor > 0 ? valor : null,
+      data_contato:    dataContato,
+      data_fechamento: dataFechamento,
+    });
     const data = await res.json();
 
     if (!res.ok) {
@@ -876,21 +895,19 @@ async function registrarVenda() {
       return;
     }
 
-    // Mostra resultado com XP e posição
-    const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    const fmt = v => v ? 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : null;
     const textoResultado = [
-      `Venda de ${fmt(valor)} registrada.`,
+      `${produto} — ${cliente} registrado.`,
       `+${data.xp_ganho} XP`,
-      data.posicao_ranking
-        ? `Você está em ${data.posicao_ranking}° no ranking da equipe.`
-        : '',
+      valor ? fmt(valor) : 'Êxito (sem valor definido)',
+      data.posicao_ranking ? `${data.posicao_ranking}° no ranking` : '',
     ].filter(Boolean).join(' · ');
 
     document.getElementById('venda-resultado-texto').textContent = textoResultado;
     document.getElementById('venda-resultado').style.display = 'block';
     btn.style.display = 'none';
 
-    mostrarToast(`💰 +${data.xp_ganho} XP · ${data.posicao_ranking}° no ranking!`, 'sucesso');
+    mostrarToast(`💰 Venda registrada! +${data.xp_ganho} XP`, 'sucesso');
   } catch (err) {
     mostrarToast('Erro de conexão.', 'erro');
     btn.disabled = false;

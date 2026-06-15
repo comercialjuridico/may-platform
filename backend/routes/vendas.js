@@ -4,8 +4,9 @@ const router  = express.Router();
 const { supabase }       = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 
-// Calcula XP por valor da venda
+// Calcula XP: vendas com valor ganham por faixa; sem valor (êxito) ganham XP fixo por unidade
 function calcularXP(valor) {
+  if (!valor || valor <= 0) return 100; // êxito — conta como unidade, XP fixo
   if (valor < 1000)  return 50;
   if (valor < 5000)  return 150;
   if (valor < 20000) return 300;
@@ -13,35 +14,47 @@ function calcularXP(valor) {
 }
 
 // ─── POST /api/vendas ──────────────────────────────────────────────────────────
-// Vendedor registra uma venda realizada
 router.post('/', authMiddleware, async (req, res) => {
-  const { valor, descricao, cliente } = req.body;
-  const valorNum = parseFloat(valor);
+  const {
+    cliente,
+    telefone,
+    origem,
+    descricao,        // produto/serviço
+    valor,            // opcional — null para êxito
+    data_contato,
+    data_fechamento,
+  } = req.body;
 
-  if (!valor || isNaN(valorNum) || valorNum <= 0) {
-    return res.status(400).json({ erro: 'Valor inválido.' });
-  }
+  if (!cliente) return res.status(400).json({ erro: 'Nome do cliente é obrigatório.' });
+  if (!origem)  return res.status(400).json({ erro: 'Origem do cliente é obrigatória.' });
+  if (!descricao) return res.status(400).json({ erro: 'Produto/serviço é obrigatório.' });
   if (!req.user.empresa_id) {
     return res.status(400).json({ erro: 'Você precisa pertencer a uma equipe para registrar vendas.' });
   }
+
+  const valorNum = valor ? parseFloat(valor) : null;
 
   try {
     // 1. Registra a venda
     const { data: venda, error } = await supabase
       .from('vendas')
       .insert({
-        user_id:    req.user.id,
-        empresa_id: req.user.empresa_id,
-        valor:      valorNum,
-        descricao:  descricao || null,
-        cliente:    cliente   || null,
+        user_id:         req.user.id,
+        empresa_id:      req.user.empresa_id,
+        cliente,
+        telefone:        telefone        || null,
+        origem:          origem          || null,
+        descricao,
+        valor:           valorNum        || null,
+        data_contato:    data_contato    || null,
+        data_fechamento: data_fechamento || null,
       })
       .select('id, valor, created_at')
       .single();
 
     if (error) throw error;
 
-    // 2. Adiciona XP ao streak (best-effort — não falha a request se der erro)
+    // 2. Adiciona XP ao streak (best-effort)
     const xp = calcularXP(valorNum);
     try {
       const { data: streakAtual } = await supabase
@@ -73,7 +86,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const totais = {};
     (vendasMes || []).forEach(v => {
-      totais[v.user_id] = (totais[v.user_id] || 0) + parseFloat(v.valor);
+      totais[v.user_id] = (totais[v.user_id] || 0) + (parseFloat(v.valor) || 0);
     });
     const sorted   = Object.entries(totais).sort((a, b) => b[1] - a[1]);
     const posicao  = sorted.findIndex(([uid]) => uid === req.user.id) + 1;

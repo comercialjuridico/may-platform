@@ -400,7 +400,7 @@
 
 <!-- ══════════════ MODAL: REGISTRAR VENDA ══════════════ -->
 <div class="modal-overlay" id="modal-venda">
-  <div class="modal" style="max-width:420px">
+  <div class="modal" style="max-width:480px">
     <div class="modal-header">
       <span class="modal-title">💰 Registrar venda</span>
       <button class="modal-close" onclick="fecharModalVenda()">✕</button>
@@ -409,31 +409,67 @@
       Registre uma venda fechada. Ela vai aparecer no ranking da equipe e te dará XP.
     </p>
 
+    <!-- Nome do cliente -->
     <div class="form-group">
-      <label class="form-label">Valor da venda *</label>
+      <label class="form-label">Nome do cliente *</label>
+      <input id="venda-cliente" type="text" placeholder="Ex: João Silva" />
+    </div>
+
+    <!-- Telefone -->
+    <div class="form-group">
+      <label class="form-label">Telefone do cliente <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
+      <input id="venda-telefone" type="tel" placeholder="(11) 99999-9999" />
+    </div>
+
+    <!-- Origem -->
+    <div class="form-group">
+      <label class="form-label">Origem do cliente *</label>
+      <select id="venda-origem">
+        <option value="">Selecione a origem</option>
+        <option value="indicacao">Indicação</option>
+        <option value="instagram">Instagram</option>
+        <option value="trafego_meta">Tráfego pago — Meta (Facebook/Instagram Ads)</option>
+        <option value="trafego_google">Tráfego pago — Google</option>
+        <option value="grupo_whatsapp">Grupo de WhatsApp</option>
+        <option value="parceria">Parceria</option>
+        <option value="tiktok">TikTok</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+
+    <!-- Produto / Serviço -->
+    <div class="form-group">
+      <label class="form-label">Produto / Serviço *</label>
+      <input id="venda-produto" type="text" placeholder="Ex: Contrato trabalhista, Revisional de financiamento..." />
+    </div>
+
+    <!-- Valor -->
+    <div class="form-group">
+      <label class="form-label">Valor do contrato <span style="color:var(--text-muted);font-size:11px">(opcional — deixe vazio se for êxito)</span></label>
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="color:var(--text-muted);font-size:14px">R$</span>
-        <input id="venda-valor" type="number" min="1" step="0.01" placeholder="0,00"
-          style="flex:1" />
+        <span style="color:var(--text-muted);font-size:14px;white-space:nowrap">R$</span>
+        <input id="venda-valor" type="number" min="0" step="0.01" placeholder="0,00" style="flex:1" />
       </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Descrição <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
-      <input id="venda-descricao" type="text" placeholder="Ex: Contrato de honorários, Seguro de vida..." />
+    <!-- Datas lado a lado -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">1º Contato <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
+        <input id="venda-data-contato" type="date" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Fechamento *</label>
+        <input id="venda-data-fechamento" type="date" />
+      </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Cliente <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
-      <input id="venda-cliente" type="text" placeholder="Nome do cliente" />
-    </div>
-
-    <div id="venda-resultado" style="display:none;background:rgba(125,207,151,0.08);border:1px solid rgba(125,207,151,0.25);border-radius:8px;padding:14px;margin-bottom:16px">
+    <div id="venda-resultado" style="display:none;background:rgba(125,207,151,0.08);border:1px solid rgba(125,207,151,0.25);border-radius:8px;padding:14px;margin:16px 0">
       <div style="color:#7dcf97;font-weight:600;font-size:14px;margin-bottom:4px">✓ Venda registrada!</div>
       <div id="venda-resultado-texto" style="font-size:13px;color:var(--text-secondary)"></div>
     </div>
 
-    <button class="btn btn-primary btn-full" onclick="registrarVenda()" id="btn-confirmar-venda">
+    <button class="btn btn-primary btn-full" onclick="registrarVenda()" id="btn-confirmar-venda" style="margin-top:20px">
       Registrar venda
     </button>
   </div>
