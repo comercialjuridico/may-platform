@@ -31,6 +31,8 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
       dificuldades,        // string: ex "objecoes,follow_up,fechamento"
       quero_melhorar,
       leads_semana,
+      modelo_cobranca,     // exito | inicial | misto
+      faturamento_mensal,  // fat_10k | fat_11_20k | fat_21_35k | fat_36_55k | fat_10_20k | fat_20_35k | fat_35_50k | fat_60k_mais
     } = req.body;
 
     if (!tempo_experiencia || !contratos_mes || !dificuldades || !quero_melhorar || !leads_semana) {
@@ -38,9 +40,9 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
     }
 
     // ── Cálculo de maturidade comercial (0-5) ──────────────────────────────
-    // Pontuação máxima: 10 → divide por 2 → 0-5
+    // Score máximo: 4+4+3+4 = 15 → normalizado para 0-5
 
-    // Pontos por tempo de experiência (0-3)
+    // Pontos por tempo de experiência (0-4)
     const ptExp = {
       'nunca':  0,
       'menos6': 1,
@@ -66,8 +68,20 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
       '21mais':3,
     }[leads_semana] ?? 0;
 
-    const scoreBruto = ptExp + ptContr + ptLeads; // 0-11
-    const maturidade = Math.min(5, Math.round(scoreBruto / 11 * 5));
+    // Pontos por faturamento mensal (0-4)
+    const ptFat = {
+      'fat_10k':     0,
+      'fat_11_20k':  1,
+      'fat_10_20k':  1,
+      'fat_21_35k':  2,
+      'fat_20_35k':  2,
+      'fat_36_55k':  3,
+      'fat_35_50k':  3,
+      'fat_60k_mais':4,
+    }[faturamento_mensal] ?? 0;
+
+    const scoreBruto = ptExp + ptContr + ptLeads + ptFat; // 0-15
+    const maturidade = Math.min(5, Math.round(scoreBruto / 15 * 5));
 
     // ── Trilha baseada na dificuldade principal ────────────────────────────
     const dificArr   = dificuldades.split(',').filter(Boolean);
@@ -101,6 +115,8 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
         dificuldades,
         quero_melhorar,
         leads_semana,
+        modelo_cobranca:    modelo_cobranca    || null,
+        faturamento_mensal: faturamento_mensal || null,
         maturidade,
         meta_semanal,
         trilha_ativa:       trilhaPrincipal,

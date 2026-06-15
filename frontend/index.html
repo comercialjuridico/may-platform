@@ -218,6 +218,34 @@
       </div>
       <div style="display:flex;gap:8px;margin-top:20px">
         <button class="btn btn-ghost" onclick="diagAnterior(4)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(6)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- ── PASSO 6: Modelo de cobrança ── -->
+    <div id="diag-step-6" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Como você costuma cobrar seus clientes?</p>
+      <p class="text-secondary text-sm mb-16">Isso personaliza sua trilha de faturamento.</p>
+      <div class="diag-options" id="diag-modelo">
+        <button class="diag-opt" data-val="exito"   onclick="selecionarOpcao('diag-modelo',this)">Só êxito — recebo quando ganho a causa</button>
+        <button class="diag-opt" data-val="inicial" onclick="selecionarOpcao('diag-modelo',this)">Honorários iniciais — cobro antes de começar</button>
+        <button class="diag-opt" data-val="misto"   onclick="selecionarOpcao('diag-modelo',this)">Misto — inicial + êxito</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(5)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(7)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- ── PASSO 7: Faturamento ── -->
+    <div id="diag-step-7" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Qual seu faturamento médio mensal?</p>
+      <p class="text-secondary text-sm mb-16">Considere os últimos 3 meses.</p>
+      <div class="diag-options" id="diag-fat">
+        <!-- preenchido dinamicamente via JS com base no modelo de cobrança -->
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(6)">← Voltar</button>
         <button class="btn btn-primary" style="flex:1" id="btn-finalizar-diag" onclick="salvarDiagnostico()">
           Calcular minha maturidade →
         </button>

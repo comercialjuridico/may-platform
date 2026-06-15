@@ -623,12 +623,11 @@ const NIVEIS_MATURIDADE = [
 ];
 
 function abrirModalDiagnostico() {
-  // Reset ao abrir
-  diagIrPara(1);
-  // Limpa seleções
+  // Limpa seleções e reseta
   document.querySelectorAll('.diag-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('diag-fat').innerHTML = '';
   document.getElementById('diag-resultado').style.display = 'none';
-  document.getElementById('diag-step-1').style.display    = 'block';
+  diagIrPara(1);
   document.getElementById('modal-diagnostico').classList.add('active');
 }
 
@@ -636,28 +635,66 @@ function fecharDiagnostico() {
   document.getElementById('modal-diagnostico').classList.remove('active');
 }
 
+const TOTAL_PASSOS_DIAG = 7;
+
 function diagIrPara(passo) {
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= TOTAL_PASSOS_DIAG; i++) {
     const el = document.getElementById(`diag-step-${i}`);
     if (el) el.style.display = i === passo ? 'block' : 'none';
   }
-  document.getElementById('diag-passo-label').textContent = `Passo ${passo} de 5`;
-  document.getElementById('diag-progress').style.width    = `${passo * 20}%`;
+  document.getElementById('diag-passo-label').textContent = `Passo ${passo} de ${TOTAL_PASSOS_DIAG}`;
+  document.getElementById('diag-progress').style.width    = `${Math.round(passo / TOTAL_PASSOS_DIAG * 100)}%`;
+
+  // Ao chegar no passo 7, preenche as opções de faturamento dinamicamente
+  if (passo === 7) mostrarOpcoesFaturamento();
 }
 
 function diagProximo(passo) {
-  // Valida passo anterior
   const validacoes = {
     2: () => !!document.querySelector('#diag-exp .selected'),
     3: () => !!document.querySelector('#diag-contr .selected'),
     4: () => !!document.querySelector('#diag-leads .selected'),
     5: () => document.querySelectorAll('#diag-dific .selected').length > 0,
+    6: () => !!document.querySelector('#diag-melhora .selected'),
+    7: () => !!document.querySelector('#diag-modelo .selected'),
   };
   if (validacoes[passo] && !validacoes[passo]()) {
     mostrarToast('Selecione uma opção para continuar.', 'aviso');
     return;
   }
   diagIrPara(passo);
+}
+
+function mostrarOpcoesFaturamento() {
+  const modelo = document.querySelector('#diag-modelo .selected')?.dataset.val;
+  const container = document.getElementById('diag-fat');
+  if (!container) return;
+
+  // Mantém seleção atual se já havia
+  const selecionado = container.querySelector('.selected')?.dataset.val;
+
+  let opcoes;
+  if (modelo === 'exito') {
+    opcoes = [
+      { val: 'fat_10k',      label: 'Até R$ 10 mil' },
+      { val: 'fat_11_20k',   label: 'R$ 11 mil a R$ 20 mil' },
+      { val: 'fat_21_35k',   label: 'R$ 21 mil a R$ 35 mil' },
+      { val: 'fat_36_55k',   label: 'R$ 36 mil a R$ 55 mil' },
+      { val: 'fat_60k_mais', label: 'Acima de R$ 60 mil' },
+    ];
+  } else {
+    opcoes = [
+      { val: 'fat_10k',      label: 'Até R$ 10 mil' },
+      { val: 'fat_10_20k',   label: 'R$ 10.001 a R$ 20 mil' },
+      { val: 'fat_20_35k',   label: 'R$ 20.001 a R$ 35 mil' },
+      { val: 'fat_35_50k',   label: 'R$ 35.001 a R$ 50 mil' },
+      { val: 'fat_60k_mais', label: 'Acima de R$ 60 mil' },
+    ];
+  }
+
+  container.innerHTML = opcoes.map(o =>
+    `<button class="diag-opt${o.val === selecionado ? ' selected' : ''}" data-val="${o.val}" onclick="selecionarOpcao('diag-fat',this)">${o.label}</button>`
+  ).join('');
 }
 
 function diagAnterior(passo) { diagIrPara(passo); }
@@ -677,13 +714,15 @@ function toggleMulti(btn) {
 }
 
 async function salvarDiagnostico() {
-  const exp     = document.querySelector('#diag-exp .selected')?.dataset.val;
-  const contr   = document.querySelector('#diag-contr .selected')?.dataset.val;
-  const leads   = document.querySelector('#diag-leads .selected')?.dataset.val;
-  const dificEls= document.querySelectorAll('#diag-dific .selected');
-  const melhora = document.querySelector('#diag-melhora .selected')?.dataset.val;
+  const exp          = document.querySelector('#diag-exp .selected')?.dataset.val;
+  const contr        = document.querySelector('#diag-contr .selected')?.dataset.val;
+  const leads        = document.querySelector('#diag-leads .selected')?.dataset.val;
+  const dificEls     = document.querySelectorAll('#diag-dific .selected');
+  const melhora      = document.querySelector('#diag-melhora .selected')?.dataset.val;
+  const modeloCobr   = document.querySelector('#diag-modelo .selected')?.dataset.val;
+  const faturamento  = document.querySelector('#diag-fat .selected')?.dataset.val;
 
-  if (!exp || !contr || !leads || !dificEls.length || !melhora) {
+  if (!exp || !contr || !leads || !dificEls.length || !melhora || !modeloCobr || !faturamento) {
     mostrarToast('Complete todas as etapas antes de finalizar.', 'erro');
     return;
   }
@@ -695,11 +734,13 @@ async function salvarDiagnostico() {
   btn.textContent = 'Calculando...';
 
   const res = await api.put('/user/diagnostico', {
-    tempo_experiencia: exp,
-    contratos_mes:     contr,
-    leads_semana:      leads,
+    tempo_experiencia:  exp,
+    contratos_mes:      contr,
+    leads_semana:       leads,
     dificuldades,
-    quero_melhorar:    melhora,
+    quero_melhorar:     melhora,
+    modelo_cobranca:    modeloCobr,
+    faturamento_mensal: faturamento,
   });
 
   btn.disabled = false;
@@ -715,7 +756,7 @@ async function salvarDiagnostico() {
   // Mostra resultado
   const nivel    = data.maturidade ?? 0;
   const nivelInfo= NIVEIS_MATURIDADE[nivel];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= TOTAL_PASSOS_DIAG; i++) {
     const el = document.getElementById(`diag-step-${i}`);
     if (el) el.style.display = 'none';
   }
