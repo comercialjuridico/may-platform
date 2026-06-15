@@ -143,6 +143,10 @@ function renderizarSidebar() {
   if (btnVenda) {
     btnVenda.style.display = user?.empresa_id ? 'block' : 'none';
   }
+  const linkRanking = document.getElementById('link-ranking');
+  if (linkRanking) {
+    linkRanking.style.display = user?.empresa_id ? 'block' : 'none';
+  }
 }
 
 // ─── Seletor de Área Ativa ───────────────────────────────────────────────────

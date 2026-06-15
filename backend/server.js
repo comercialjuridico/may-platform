@@ -55,8 +55,9 @@ app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/gestor', require('./routes/gestor'));
-app.use('/api/vendas', require('./routes/vendas'));
-app.use('/api/areas',  require('./routes/areas'));
+app.use('/api/vendas',   require('./routes/vendas'));
+app.use('/api/areas',   require('./routes/areas'));
+app.use('/api/ranking', require('./routes/ranking'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

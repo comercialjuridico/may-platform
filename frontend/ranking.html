@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arena de Vendas — May</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Tokens ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:        #7C3AED;
+      --brand-light:  #EDE9FE;
+      --brand-dark:   #5B21B6;
+      --gold:         #F59E0B;
+      --silver:       #94A3B8;
+      --bronze:       #B45309;
+      --bg:           #F8F7FF;
+      --surface:      #FFFFFF;
+      --surface2:     #F3F0FF;
+      --border:       #E5E4F0;
+      --text:         #1E1B2E;
+      --text-sub:     #6B7280;
+      --green:        #10B981;
+      --red:          #EF4444;
+      --radius:       14px;
+      --shadow:       0 2px 16px rgba(124,58,237,.08);
+    }
+    [data-theme="dark"] {
+      --bg:       #0F0D1A;
+      --surface:  #1A1726;
+      --surface2: #221E33;
+      --border:   #2D2845;
+      --text:     #F0EEFF;
+      --text-sub: #9CA3AF;
+      --brand-light: #2D1A5E;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    h1,h2,h3 { font-family: 'Syne', sans-serif; }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .page { max-width: 960px; margin: 0 auto; padding: 24px 16px 80px; }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    .header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+    .header-back { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--brand);
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .header-back:hover { background: var(--brand-light); }
+    .header-title { flex: 1; }
+    .header-title h1 { font-size: 26px; font-weight: 800; }
+    .header-title p  { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
+    .periodo-tabs { display: flex; gap: 6px; background: var(--surface2);
+      border-radius: 10px; padding: 4px; }
+    .periodo-tab { padding: 6px 16px; border-radius: 8px; border: none;
+      background: none; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-sub); }
+    .periodo-tab.active { background: var(--brand); color: #fff; }
+
+    /* ── Trial Banner ───────────────────────────────────────────── */
+    .trial-banner { background: linear-gradient(135deg, var(--brand), #A78BFA);
+      border-radius: var(--radius); padding: 16px 20px; color: #fff;
+      display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+    .trial-banner .trial-icon { font-size: 28px; }
+    .trial-banner h3 { font-size: 15px; font-weight: 700; }
+    .trial-banner p  { font-size: 12px; opacity: .85; margin-top: 2px; }
+    .trial-banner .trial-cta { margin-left: auto; background: #fff; color: var(--brand);
+      border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700;
+      font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .trial-banner .trial-cta:hover { opacity: .9; }
+
+    /* ── Stats Bar ──────────────────────────────────────────────── */
+    .stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+    @media(max-width:600px){ .stats-bar { grid-template-columns: 1fr 1fr; } }
+    .stat-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; text-align: center; }
+    .stat-card .stat-val { font-family: 'Syne',sans-serif; font-size: 22px; font-weight: 800; color: var(--brand); }
+    .stat-card .stat-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* ── Podium ─────────────────────────────────────────────────── */
+    .podium-wrap { display: flex; justify-content: center; align-items: flex-end;
+      gap: 12px; margin-bottom: 32px; padding: 0 8px; }
+    .podium-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 200px; }
+    .podium-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+      background: var(--brand-light); display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: var(--brand); border: 3px solid var(--border); }
+    .podium-avatar.gold   { border-color: var(--gold); }
+    .podium-avatar.silver { border-color: var(--silver); }
+    .podium-avatar.bronze { border-color: var(--bronze); }
+    .podium-name  { font-size: 13px; font-weight: 700; text-align: center; }
+    .podium-count { font-size: 12px; color: var(--text-sub); }
+    .podium-block { width: 100%; border-radius: 10px 10px 0 0; display: flex;
+      align-items: center; justify-content: center; font-family: 'Syne',sans-serif;
+      font-size: 26px; font-weight: 800; }
+    .podium-block.gold   { height: 90px; background: linear-gradient(135deg,#FEF3C7,#FDE68A); color: var(--gold); }
+    .podium-block.silver { height: 65px; background: linear-gradient(135deg,#F1F5F9,#E2E8F0); color: var(--silver); }
+    .podium-block.bronze { height: 50px; background: linear-gradient(135deg,#FEF0E8,#FCD9BD); color: var(--bronze); }
+
+    /* ── Leaderboard Table ──────────────────────────────────────── */
+    .section-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .leaderboard { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 28px; }
+    .lb-row { display: grid; grid-template-columns: 40px 1fr 80px 80px 80px 70px;
+      gap: 0; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row.header-row { background: var(--surface2); font-size: 11px; font-weight: 600;
+      color: var(--text-sub); text-transform: uppercase; letter-spacing: .04em; padding: 10px 16px; }
+    @media(max-width:600px){
+      .lb-row { grid-template-columns: 32px 1fr 60px 60px; }
+      .lb-row .col-tempo, .lb-row .col-xp { display: none; }
+    }
+    .lb-pos { font-family: 'Syne',sans-serif; font-weight: 800; font-size: 16px; color: var(--text-sub); }
+    .lb-pos.p1 { color: var(--gold); }
+    .lb-pos.p2 { color: var(--silver); }
+    .lb-pos.p3 { color: var(--bronze); }
+    .lb-user { display: flex; align-items: center; gap: 10px; }
+    .lb-av { width: 34px; height: 34px; border-radius: 50%; background: var(--brand-light);
+      display: flex; align-items: center; justify-content: center; font-weight: 700;
+      font-size: 13px; color: var(--brand); flex-shrink: 0; }
+    .lb-name { font-size: 14px; font-weight: 600; }
+    .lb-sub  { font-size: 11px; color: var(--text-sub); }
+    .lb-val  { font-size: 14px; font-weight: 700; text-align: right; }
+    .lb-val.green { color: var(--green); }
+    .badge-streak { display: inline-flex; align-items: center; gap: 3px; background: var(--brand-light);
+      color: var(--brand); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-top: 2px; }
+
+    /* ── Tabs (gestor / membro) ─────────────────────────────────── */
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 0; }
+    .tab-btn { background: none; border: none; font-size: 14px; font-weight: 600;
+      color: var(--text-sub); padding: 8px 16px 10px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab-btn.active { color: var(--brand); border-bottom-color: var(--brand); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Gestor Dashboard ───────────────────────────────────────── */
+    .alert-box { border-radius: 10px; padding: 12px 16px; font-size: 13px;
+      margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; }
+    .alert-box.atencao  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .alert-box.aviso    { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .alert-box.destaque { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: -1px; }
+    .colab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+    @media(max-width:620px){ .colab-grid { grid-template-columns: 1fr; } }
+    .colab-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; }
+    .colab-card.status-queda    { border-left: 4px solid var(--red); }
+    .colab-card.status-destaque { border-left: 4px solid var(--green); }
+    .colab-card.status-atencao  { border-left: 4px solid var(--gold); }
+    .colab-card.status-ok       { border-left: 4px solid var(--border); }
+    .colab-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .colab-av { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-light);
+      display: flex; align-items: center; justify-content: center; font-weight: 700;
+      font-size: 13px; color: var(--brand); flex-shrink: 0; }
+    .colab-name { font-size: 14px; font-weight: 700; }
+    .colab-stats { font-size: 12px; color: var(--text-sub); }
+    .colab-insights { font-size: 12px; color: var(--text-sub); margin-top: 8px; }
+    .colab-insights li { list-style: disc; margin-left: 16px; margin-top: 3px; }
+    .treinar-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .treinar-tag { background: var(--brand-light); color: var(--brand); font-size: 11px;
+      font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+    /* ── Minha Semana ───────────────────────────────────────────── */
+    .semana-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+    @media(max-width:500px){ .semana-grid { grid-template-columns: 1fr 1fr; } }
+    .semana-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; text-align: center; }
+    .semana-val { font-family: 'Syne',sans-serif; font-size: 24px; font-weight: 800; color: var(--brand); }
+    .semana-var { font-size: 12px; font-weight: 600; margin-top: 2px; }
+    .semana-var.up   { color: var(--green); }
+    .semana-var.down { color: var(--red); }
+    .semana-lbl { font-size: 11px; color: var(--text-sub); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+    .insight-box { background: var(--brand-light); border-radius: var(--radius); padding: 16px 20px;
+      margin-bottom: 20px; font-size: 14px; color: var(--brand-dark); font-weight: 500; line-height: 1.5; }
+    .insight-box .insight-emoji { font-size: 20px; margin-right: 8px; }
+    .posicao-destaque { display: flex; align-items: center; gap: 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 20px; }
+    .posicao-num { font-family: 'Syne',sans-serif; font-size: 36px; font-weight: 800; color: var(--brand); }
+    .posicao-txt { font-size: 13px; color: var(--text-sub); }
+    .ultimas-vendas { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .uv-row { display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .uv-row:last-child { border-bottom: none; }
+    .uv-desc { font-weight: 600; }
+    .uv-meta { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
+    .uv-val  { font-weight: 700; color: var(--green); }
+    .uv-val.exito { color: var(--text-sub); font-style: italic; }
+
+    /* ── Misc ────────────────────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 48px 16px; color: var(--text-sub); font-size: 14px; }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
+    .loading { text-align: center; padding: 40px; color: var(--text-sub); }
+    .skeleton { background: var(--border); border-radius: 6px; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .acesso-bloqueado { text-align: center; padding: 60px 24px; }
+    .acesso-bloqueado .lock-icon { font-size: 56px; margin-bottom: 16px; }
+    .acesso-bloqueado h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .acesso-bloqueado p  { font-size: 14px; color: var(--text-sub); max-width: 360px; margin: 0 auto 20px; }
+    .btn-activar { background: var(--brand); color: #fff; border: none; border-radius: 10px;
+      padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .btn-activar:hover { background: var(--brand-dark); }
+  </style>
+</head>
+<body>
+<div class="page" id="page">
+
+  <!-- Header -->
+  <div class="header">
+    <a class="header-back" href="index.html">&#8592; Voltar</a>
+    <div class="header-title">
+      <h1>🏆 Arena de Vendas</h1>
+      <p id="header-sub">Carregando...</p>
+    </div>
+    <div class="periodo-tabs">
+      <button class="periodo-tab active" onclick="setPeriodo('mes')">Mês</button>
+      <button class="periodo-tab"        onclick="setPeriodo('semana')">Semana</button>
+    </div>
+  </div>
+
+  <!-- Trial Banner -->
+  <div class="trial-banner" id="trial-banner" style="display:none">
+    <span class="trial-icon">⚡</span>
+    <div>
+      <h3>Ranking ativo — Trial gratuito</h3>
+      <p id="trial-dias-txt">Restam 7 dias para explorar o ranking completo</p>
+    </div>
+    <button class="trial-cta" onclick="alert('Fale com a May para ativar o plano completo!')">Ativar agora</button>
+  </div>
+
+  <div id="main-content">
+    <div class="loading">Carregando ranking...</div>
+  </div>
+
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+let periodoAtual = 'mes';
+let dadosRanking = null;
+let dadosDash    = null;
+let dadosSemana  = null;
+let userRole     = null;
+let userId       = null;
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function getToken() { return localStorage.getItem('may_token'); }
+async function apiFetch(path, opts = {}) {
+  const token = getToken();
+  return fetch(API + path, {
+    ...opts,
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...(opts.headers||{}) },
+  });
+}
+
+// ── Formatação ───────────────────────────────────────────────────────────────
+function fmtBRL(v) {
+  if (!v && v !== 0) return '—';
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function inicial(name) { return (name || '?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const token = getToken();
+  if (!token) { window.location.href = 'login.html'; return; }
+
+  try {
+    const r = await apiFetch('/api/user/me');
+    if (!r.ok) throw new Error('not auth');
+    const me = await r.json();
+    userRole = me.role;
+    userId   = me.id;
+  } catch { window.location.href = 'login.html'; return; }
+
+  await carregarDados();
+});
+
+async function setPeriodo(p) {
+  periodoAtual = p;
+  document.querySelectorAll('.periodo-tab').forEach((b,i) => b.classList.toggle('active', (i===0&&p==='mes')||(i===1&&p==='semana')));
+  await carregarDados();
+}
+
+async function carregarDados() {
+  document.getElementById('main-content').innerHTML = '<div class="loading">Carregando...</div>';
+  try {
+    const r = await apiFetch(`/api/ranking/leaderboard?periodo=${periodoAtual}`);
+    const data = await r.json();
+
+    if (!data.acesso || !data.acesso.acesso) {
+      mostrarBloqueado(data.acesso);
+      return;
+    }
+
+    dadosRanking = data;
+    handleTrialBanner(data.acesso);
+    document.getElementById('header-sub').textContent = periodoAtual === 'mes'
+      ? `Ranking do mês — ${data.ranking?.length || 0} participantes`
+      : `Ranking da semana — ${data.ranking?.length || 0} participantes`;
+
+    // Paralelamente busca dados gestor / minha-semana
+    const promises = [apiFetch('/api/ranking/minha-semana')];
+    if (userRole === 'gestor') promises.push(apiFetch('/api/ranking/dashboard'));
+    const results = await Promise.all(promises);
+    const semData = await results[0].json();
+    dadosSemana  = semData;
+    if (userRole === 'gestor' && results[1]) dadosDash = await results[1].json();
+
+    renderizarPagina();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('main-content').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Erro ao carregar ranking. Verifique sua conexão.</p></div>';
+  }
+}
+
+function handleTrialBanner(acesso) {
+  const banner = document.getElementById('trial-banner');
+  if (acesso.trial) {
+    banner.style.display = 'flex';
+    document.getElementById('trial-dias-txt').textContent =
+      `Restam ${acesso.dias_restantes} dia${acesso.dias_restantes !== 1 ? 's' : ''} de acesso gratuito`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function mostrarBloqueado(acesso) {
+  document.getElementById('trial-banner').style.display = 'none';
+  document.getElementById('main-content').innerHTML = `
+    <div class="acesso-bloqueado">
+      <div class="lock-icon">🔒</div>
+      <h2>Arena de Vendas</h2>
+      <p>${acesso?.motivo === 'trial_expirado'
+        ? 'Seu período de teste encerrou. Ative o plano para continuar acompanhando o ranking da sua equipe.'
+        : 'Ative o ranking para transformar suas vendas em uma competição saudável e motivadora.'
+      }</p>
+      <button class="btn-activar" onclick="alert('Entre em contato com a May para ativar!')">
+        ${acesso?.motivo === 'trial_expirado' ? '🚀 Ativar Plano Completo' : '⚡ Começar Trial Gratuito (7 dias)'}
+      </button>
+    </div>`;
+}
+
+// ── Render Principal ──────────────────────────────────────────────────────────
+function renderizarPagina() {
+  const ranking = dadosRanking?.ranking || [];
+  const stats   = dadosRanking?.stats_time || {};
+
+  const temGestor = userRole === 'gestor' && dadosDash;
+  const tabs = temGestor
+    ? `<div class="tabs">
+        <button class="tab-btn active" onclick="trocarTab('ranking',this)">🏆 Ranking</button>
+        <button class="tab-btn"        onclick="trocarTab('gestor',this)">📊 Painel Gestor</button>
+        <button class="tab-btn"        onclick="trocarTab('semana',this)">📅 Minha Semana</button>
+       </div>`
+    : `<div class="tabs">
+        <button class="tab-btn active" onclick="trocarTab('ranking',this)">🏆 Ranking</button>
+        <button class="tab-btn"        onclick="trocarTab('semana',this)">📅 Minha Semana</button>
+       </div>`;
+
+  document.getElementById('main-content').innerHTML = `
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-val">${stats.total_contratos || 0}</div>
+        <div class="stat-lbl">Contratos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${fmtBRL(stats.total_faturado)}</div>
+        <div class="stat-lbl">Faturamento</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${stats.tempo_medio_fechamento != null ? stats.tempo_medio_fechamento + 'd' : '—'}</div>
+        <div class="stat-lbl">Tempo Médio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${stats.melhor_origem || '—'}</div>
+        <div class="stat-lbl">Melhor Origem</div>
+      </div>
+    </div>
+
+    ${tabs}
+
+    <!-- Aba Ranking -->
+    <div class="tab-panel active" id="tab-ranking">
+      ${renderPodium(ranking)}
+      <p class="section-title">Todos os participantes</p>
+      ${renderLeaderboard(ranking)}
+    </div>
+
+    <!-- Aba Gestor -->
+    ${temGestor ? `<div class="tab-panel" id="tab-gestor">${renderGestor()}</div>` : ''}
+
+    <!-- Aba Minha Semana -->
+    <div class="tab-panel" id="tab-semana">${renderSemana()}</div>
+  `;
+}
+
+function trocarTab(nome, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const panel = document.getElementById('tab-' + nome);
+  if (panel) panel.classList.add('active');
+}
+
+// ── Pódio ────────────────────────────────────────────────────────────────────
+function renderPodium(ranking) {
+  if (ranking.length === 0) return '<div class="empty-state"><div class="empty-icon">🏆</div><p>Nenhuma venda registrada ainda.</p></div>';
+  const [p1, p2, p3] = ranking;
+  const makeItem = (p, cls, label) => p ? `
+    <div class="podium-item">
+      <div class="podium-avatar ${cls}">${inicial(p.name)}</div>
+      <div class="podium-name">${p.name.split(' ')[0]}</div>
+      <div class="podium-count">${p.count_mes} contrato${p.count_mes !== 1?'s':''}</div>
+      <div class="podium-block ${cls}">${label}</div>
+    </div>` : '';
+
+  return `<div class="podium-wrap">
+    ${makeItem(p2, 'silver', '2')}
+    ${makeItem(p1, 'gold',   '1')}
+    ${makeItem(p3, 'bronze', '3')}
+  </div>`;
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+function renderLeaderboard(ranking) {
+  if (ranking.length === 0) return '';
+  const posClass = i => i===1?'p1':i===2?'p2':i===3?'p3':'';
+  const rows = ranking.map(r => `
+    <div class="lb-row${r.user_id === userId ? ' style="background:var(--brand-light)"' : ''}">
+      <div class="lb-pos ${posClass(r.posicao)}">${r.posicao}</div>
+      <div class="lb-user">
+        <div class="lb-av">${inicial(r.name)}</div>
+        <div>
+          <div class="lb-name">${r.name}</div>
+          ${r.streak > 0 ? `<span class="badge-streak">🔥 ${r.streak}</span>` : ''}
+        </div>
+      </div>
+      <div class="lb-val">${r.count_mes}</div>
+      <div class="lb-val green">${fmtBRL(r.total_mes) === 'R$ 0' ? '—' : fmtBRL(r.total_mes)}</div>
+      <div class="lb-val col-tempo">${r.tempo_medio_fechamento != null ? r.tempo_medio_fechamento + ' d' : '—'}</div>
+      <div class="lb-val col-xp">${r.xp_total} XP</div>
+    </div>`).join('');
+
+  return `
+    <div class="leaderboard">
+      <div class="lb-row header-row">
+        <div>#</div><div>Vendedor</div>
+        <div style="text-align:right">Contratos</div>
+        <div style="text-align:right">Faturado</div>
+        <div style="text-align:right" class="col-tempo">T. Médio</div>
+        <div style="text-align:right" class="col-xp">XP</div>
+      </div>
+      ${rows}
+    </div>`;
+}
+
+// ── Painel Gestor ─────────────────────────────────────────────────────────────
+function renderGestor() {
+  if (!dadosDash) return '<div class="empty-state"><div class="empty-icon">📊</div><p>Sem dados do painel.</p></div>';
+  const { colaboradores, alertas, origens_time } = dadosDash;
+
+  const alertHtml = (alertas||[]).map(a => `
+    <div class="alert-box ${a.tipo}">
+      <span class="alert-icon">${a.tipo==='atencao'?'🚨':a.tipo==='aviso'?'⚠️':'🚀'}</span>
+      <span>${a.msg}</span>
+    </div>`).join('');
+
+  const colabHtml = (colaboradores||[]).map(c => `
+    <div class="colab-card status-${c.status}">
+      <div class="colab-head">
+        <div class="colab-av">${inicial(c.name)}</div>
+        <div>
+          <div class="colab-name">${c.name}</div>
+          <div class="colab-stats">${c.contratos_mes} contrato${c.contratos_mes!==1?'s':''} · ${fmtBRL(c.faturamento_mes) === 'R$ 0' ? '—' : fmtBRL(c.faturamento_mes)}
+            ${c.variacao_contratos != null ? `<span style="color:${c.variacao_contratos>=0?'var(--green)':'var(--red)'}">(${c.variacao_contratos>0?'+':''}${c.variacao_contratos}%)</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <ul class="colab-insights">${c.insights.map(i=>`<li>${i}</li>`).join('')}</ul>
+      ${c.o_que_treinar?.length ? `
+        <div class="treinar-tags">
+          ${c.o_que_treinar.map(t=>`<span class="treinar-tag">📚 ${t}</span>`).join('')}
+        </div>` : ''}
+    </div>`).join('');
+
+  return `
+    ${alertHtml ? alertHtml : ''}
+    <p class="section-title" style="margin-top:16px">Colaboradores</p>
+    <div class="colab-grid">${colabHtml || '<p style="color:var(--text-sub);font-size:13px">Sem colaboradores cadastrados.</p>'}</div>
+    ${origens_time?.length ? `
+      <p class="section-title" style="margin-top:24px">Origem dos clientes</p>
+      <div class="stats-bar" style="grid-template-columns:repeat(${Math.min(origens_time.length,4)},1fr)">
+        ${origens_time.slice(0,4).map(o=>`
+          <div class="stat-card"><div class="stat-val">${o.count}</div><div class="stat-lbl">${o.origem}</div></div>
+        `).join('')}
+      </div>` : ''}`;
+}
+
+// ── Minha Semana ──────────────────────────────────────────────────────────────
+function renderSemana() {
+  if (!dadosSemana) return '<div class="empty-state"><div class="empty-icon">📅</div><p>Sem dados da semana.</p></div>';
+  const { semana, variacao, posicao_semana, o_que_treinar, insight, ultimas_vendas } = dadosSemana;
+
+  const varC = variacao?.contratos;
+  const varF = variacao?.faturamento;
+
+  return `
+    <div class="semana-grid">
+      <div class="semana-card">
+        <div class="semana-val">${semana.contratos}</div>
+        ${varC != null ? `<div class="semana-var ${varC>=0?'up':'down'}">${varC>0?'+':''}${varC}% vs ant.</div>` : ''}
+        <div class="semana-lbl">Contratos</div>
+      </div>
+      <div class="semana-card">
+        <div class="semana-val">${semana.faturamento > 0 ? fmtBRL(semana.faturamento) : '—'}</div>
+        ${varF != null ? `<div class="semana-var ${varF>=0?'up':'down'}">${varF>0?'+':''}${varF}%</div>` : ''}
+        <div class="semana-lbl">Faturamento</div>
+      </div>
+      <div class="semana-card">
+        <div class="semana-val">${semana.tempo_medio_fechamento != null ? semana.tempo_medio_fechamento + 'd' : '—'}</div>
+        <div class="semana-lbl">Tempo médio</div>
+      </div>
+    </div>
+
+    ${posicao_semana ? `
+      <div class="posicao-destaque">
+        <div class="posicao-num">#${posicao_semana}</div>
+        <div>
+          <div style="font-weight:700;font-size:14px">Sua posição esta semana</div>
+          <div class="posicao-txt">no ranking da equipe</div>
+        </div>
+      </div>` : ''}
+
+    <div class="insight-box"><span class="insight-emoji">💡</span>${insight || ''}</div>
+
+    ${o_que_treinar?.length ? `
+      <p class="section-title">O que treinar esta semana</p>
+      <div class="treinar-tags" style="margin-bottom:20px">
+        ${o_que_treinar.map(t=>`<span class="treinar-tag" style="font-size:13px;padding:6px 14px">📚 ${t}</span>`).join('')}
+      </div>` : ''}
+
+    ${ultimas_vendas?.length ? `
+      <p class="section-title">Últimas vendas</p>
+      <div class="ultimas-vendas">
+        ${ultimas_vendas.map(v => `
+          <div class="uv-row">
+            <div>
+              <div class="uv-desc">${v.descricao || 'Venda'}</div>
+              <div class="uv-meta">${v.origem || ''} ${v.data ? '· ' + v.data : ''}</div>
+            </div>
+            <div class="uv-val ${!v.valor ? 'exito' : ''}">${v.valor ? fmtBRL(v.valor) : 'Êxito'}</div>
+          </div>`).join('')}
+      </div>` : ''}`;
+}
+</script>
+</body>
+</html>
