@@ -30,12 +30,11 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
       contratos_mes,
       dificuldades,        // string: ex "objecoes,follow_up,fechamento"
       quero_melhorar,
-      leads_semana,
       modelo_cobranca,     // exito | inicial | misto
       faturamento_mensal,  // fat_10k | fat_11_20k | fat_21_35k | fat_36_55k | fat_10_20k | fat_20_35k | fat_35_50k | fat_60k_mais
     } = req.body;
 
-    if (!tempo_experiencia || !contratos_mes || !dificuldades || !quero_melhorar || !leads_semana) {
+    if (!tempo_experiencia || !contratos_mes || !dificuldades || !quero_melhorar) {
       return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
     }
 
