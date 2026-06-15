@@ -466,9 +466,18 @@ async function enviarMensagem() {
         if (msgEl) {
           msgEl.insertAdjacentHTML('beforeend', `
             <div class="msg-actions">
-              <button class="msg-action-btn" onclick="copiarMensagem('${msgId}')">Copiar</button>
-              <button class="msg-action-btn" onclick="salvarTemplate('${msgId}')">Salvar</button>
-              <button class="msg-action-btn" onclick="exportarDocx('${msgId}')">↓ Word</button>
+              <button class="msg-action-btn" onclick="copiarMensagem('${msgId}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copiar
+              </button>
+              <button class="msg-action-btn" onclick="salvarTemplate('${msgId}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Salvar
+              </button>
+              <button class="msg-action-btn" onclick="exportarDocx('${msgId}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Word
+              </button>
             </div>
           `);
         }

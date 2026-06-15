@@ -191,6 +191,28 @@
 .message.assistant .msg-content { border-radius: 4px 14px 14px 14px; }
 .message.user      .msg-content { border-radius: 14px 4px 14px 14px; }
 
+/* Botões de ação da mensagem */
+.msg-actions {
+  display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+}
+.msg-action-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px; padding: 5px 11px;
+  font-size: 0.75rem; font-weight: 500; letter-spacing: .01em;
+  color: rgba(200,190,255,.55); cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .18s; white-space: nowrap;
+}
+.msg-action-btn:hover {
+  background: rgba(124,58,237,.18);
+  border-color: rgba(124,58,237,.45);
+  color: #C4B5FD;
+  transform: translateY(-1px);
+}
+.msg-action-btn:active { transform: translateY(0); }
+
 /* Markdown dentro das mensagens */
 .msg-content h1,.msg-content h2,.msg-content h3 { color:#fff; margin:12px 0 6px; }
 .msg-content p  { margin-bottom: 10px; }
