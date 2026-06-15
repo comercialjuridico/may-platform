@@ -23,6 +23,7 @@ const FERRAMENTAS = [
   { id: 'diagnostico',        nome: 'Diagnóstico de atendimento',  icon: '🔍' },
   { id: 'spin',               nome: 'Treino SPIN Selling',         icon: '🧠' },
   { id: 'simulador_vendas',   nome: 'Simulador de vendas',         icon: '🏋️' },
+  { id: 'criador_prompt',     nome: 'Criador de prompt de IA',     icon: '🤖' },
 ];
 
 // ─── Inicialização ───────────────────────────────────────────────────────────
@@ -54,16 +55,7 @@ async function carregarDadosIniciais() {
       estado.streak = data.streak;
       salvarUser(data.user);
 
-      // Mostra link do painel se for gestor
-      if (data.user?.role === 'gestor') {
-        const linkGestor = document.getElementById('link-gestor');
-        if (linkGestor) linkGestor.style.display = 'block';
-      }
-      // Mostra botão de registrar venda se pertencer a uma equipe
-      if (data.user?.empresa_id) {
-        const btnVenda = document.getElementById('btn-registrar-venda');
-        if (btnVenda) btnVenda.style.display = 'block';
-      }
+      // Visibilidade dos botões contextuais é gerenciada em renderizarSidebar()
     }
 
     if (resConversas?.ok) {
@@ -126,6 +118,16 @@ function renderizarSidebar() {
 
   // Contador de uso
   atualizarContadorUso();
+
+  // Botões contextuais — sempre re-avaliados com base no estado atual do usuário
+  const linkGestor = document.getElementById('link-gestor');
+  if (linkGestor) {
+    linkGestor.style.display = user?.role === 'gestor' ? 'block' : 'none';
+  }
+  const btnVenda = document.getElementById('btn-registrar-venda');
+  if (btnVenda) {
+    btnVenda.style.display = user?.empresa_id ? 'block' : 'none';
+  }
 }
 
 function renderizarListaConversas() {
