@@ -171,14 +171,21 @@ function renderizarSeletorArea() {
     <div style="padding:0 10px;margin-bottom:4px">
       <div style="font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--text-muted);margin-bottom:6px">ÁREA ATIVA</div>
       ${estado.areas.map(a => `
-        <div onclick="selecionarArea('${a.id}')"
-             style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;margin-bottom:3px;font-size:13px;transition:background .15s;
-                    background:${ativa?.id === a.id ? 'rgba(249,115,22,0.15)' : 'transparent'};
-                    border:1px solid ${ativa?.id === a.id ? 'rgba(249,115,22,0.35)' : 'transparent'};
-                    color:${ativa?.id === a.id ? 'var(--accent)' : 'var(--text-secondary)'}">
-          <span>${a.icone || '⚖️'}</span>
-          <span style="font-weight:${ativa?.id === a.id ? '600' : '400'}">${escapeHtml(a.nome)}</span>
-          ${ativa?.id === a.id ? '<span style="margin-left:auto;font-size:10px;opacity:.7">●</span>' : ''}
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <div onclick="selecionarArea('${a.id}')"
+               style="flex:1;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;transition:background .15s;
+                      background:${ativa?.id === a.id ? 'rgba(249,115,22,0.15)' : 'transparent'};
+                      border:1px solid ${ativa?.id === a.id ? 'rgba(249,115,22,0.35)' : 'transparent'};
+                      color:${ativa?.id === a.id ? 'var(--accent)' : 'var(--text-secondary)'}">
+            <span>${a.icone || '⚖️'}</span>
+            <span style="font-weight:${ativa?.id === a.id ? '600' : '400'}">${escapeHtml(a.nome)}</span>
+            ${ativa?.id === a.id ? '<span style="margin-left:auto;font-size:10px;opacity:.7">●</span>' : ''}
+          </div>
+          <button onclick="abrirArquivosArea('${a.id}','${escapeHtml(a.nome)}')"
+                  title="Arquivos salvos em ${escapeHtml(a.nome)}"
+                  style="flex-shrink:0;background:transparent;border:none;cursor:pointer;padding:5px 6px;border-radius:6px;font-size:13px;color:var(--text-muted);transition:all .15s;"
+                  onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.color='#A78BFA'"
+                  onmouseout="this.style.background='transparent';this.style.color='var(--text-muted)'">📂</button>
         </div>
       `).join('')}
     </div>
@@ -572,17 +579,27 @@ async function salvarTemplate(msgId) {
   const bolha = document.querySelector(`#${msgId} .msg-bubble`);
   if (!bolha) return;
   const conteudo = bolha.innerText || bolha.textContent;
-  const titulo = prompt('Nome para salvar este conteúdo:');
-  if (!titulo) return;
 
-  const res = await api.post('/export/template', {
-    tipo: estado.ferramentaAtiva,
+  // Gera título automático baseado na ferramenta + data
+  const ferrNome = FERRAMENTAS.find(f => f.id === estado.ferramentaAtiva)?.nome || 'Conteúdo';
+  const data     = new Date().toLocaleDateString('pt-BR');
+  const titulo   = `${ferrNome} — ${data}`;
+
+  const body = {
+    tipo:    estado.ferramentaAtiva,
     titulo,
     conteudo,
-  });
+    area_id: estado.areaAtiva?.id || null,
+  };
 
-  if (res?.ok) mostrarToast('Salvo nos seus templates!', 'sucesso');
-  else mostrarToast('Erro ao salvar', 'erro');
+  const res = await api.post('/export/template', body);
+
+  if (res?.ok) {
+    const areaNome = estado.areaAtiva?.nome;
+    mostrarToast(areaNome ? `Salvo em "${areaNome}"` : 'Salvo nos seus arquivos!', 'sucesso');
+  } else {
+    mostrarToast('Erro ao salvar', 'erro');
+  }
 }
 
 // ─── Input auto-resize ───────────────────────────────────────────────────────
@@ -1062,6 +1079,72 @@ function novaConversa() {
   selecionarFerramenta(estado.ferramentaAtiva);
 }
 
+// ─── Arquivos da Área ────────────────────────────────────────────────────────
+async function abrirArquivosArea(areaId, areaNome) {
+  // Cria modal se não existir
+  let modal = document.getElementById('modal-arquivos-area');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-arquivos-area';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+      <div style="background:#0F0C24;border:1px solid rgba(124,58,237,.3);border-radius:16px;padding:28px;width:min(600px,94vw);max-height:80vh;display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h3 id="arquivos-titulo" style="font-family:Syne,sans-serif;font-size:1.1rem;color:#E8E4FF;margin:0;">📂 Arquivos</h3>
+          <button onclick="document.getElementById('modal-arquivos-area').remove()" style="background:transparent;border:none;color:rgba(200,190,255,.4);font-size:20px;cursor:pointer;padding:4px;">✕</button>
+        </div>
+        <div id="arquivos-lista" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;"></div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  }
+
+  document.getElementById('arquivos-titulo').textContent = `📂 ${areaNome}`;
+  document.getElementById('arquivos-lista').innerHTML = '<div style="color:rgba(200,190,255,.4);text-align:center;padding:24px;">Carregando...</div>';
+
+  const res = await api.get(`/export/templates?area_id=${areaId}`);
+  const lista = document.getElementById('arquivos-lista');
+
+  if (!res?.ok) { lista.innerHTML = '<div style="color:#F87171;text-align:center;padding:24px;">Erro ao carregar arquivos.</div>'; return; }
+
+  const { templates } = await res.json();
+
+  if (!templates.length) {
+    lista.innerHTML = `<div style="text-align:center;padding:32px;">
+      <div style="font-size:2rem;margin-bottom:10px;">📄</div>
+      <p style="color:rgba(200,190,255,.4);font-size:0.88rem;">Nenhum arquivo salvo nesta área ainda.<br>Use o botão <strong style="color:#A78BFA">Salvar</strong> em qualquer resposta da May.</p>
+    </div>`;
+    return;
+  }
+
+  lista.innerHTML = templates.map(t => `
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 16px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.88rem;font-weight:600;color:#E8E4FF;margin-bottom:4px;">${escapeHtml(t.titulo)}</div>
+          <div style="font-size:0.75rem;color:rgba(200,190,255,.4);">${new Date(t.created_at).toLocaleDateString('pt-BR')} · ${escapeHtml(t.tipo||'')}</div>
+          <div style="margin-top:8px;font-size:0.82rem;color:rgba(200,190,255,.6);line-height:1.5;max-height:60px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml((t.conteudo||'').slice(0,180))}${t.conteudo?.length>180?'…':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button onclick="copiarArquivo('${t.id}',${JSON.stringify(t.conteudo).replace(/'/g,"\\'")})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#C4B5FD;border-radius:7px;padding:5px 12px;font-size:0.75rem;cursor:pointer;">Copiar</button>
+          <button onclick="excluirArquivo('${t.id}','${areaId}','${escapeHtml(areaNome)}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;border-radius:7px;padding:5px 12px;font-size:0.75rem;cursor:pointer;">Excluir</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copiarArquivo(id, conteudo) {
+  navigator.clipboard.writeText(conteudo).then(() => mostrarToast('Copiado!', 'sucesso'));
+}
+
+async function excluirArquivo(templateId, areaId, areaNome) {
+  if (!confirm('Excluir este arquivo?')) return;
+  const res = await api.delete(`/export/template/${templateId}`);
+  if (res?.ok) { mostrarToast('Arquivo excluído.', 'sucesso'); abrirArquivosArea(areaId, areaNome); }
+  else mostrarToast('Erro ao excluir.', 'erro');
+}
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function mostrarToast(msg, tipo = 'info') {
   const container = document.getElementById('toast-container');
@@ -1090,5 +1173,6 @@ Object.assign(window, {
   iniciarCheckout, abrirPortalStripe, logout,
   toggleMenuMobile, mostrarToast,
   copiarMensagem, exportarDocx, salvarTemplate,
+  abrirArquivosArea, copiarArquivo, excluirArquivo,
   abrirModalVenda, fecharModalVenda, registrarVenda,
 });

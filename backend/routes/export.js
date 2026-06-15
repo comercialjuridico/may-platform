@@ -132,10 +132,9 @@ router.post('/docx', authMiddleware, async (req, res) => {
 });
 
 // ─── POST /api/export/template ──────────────────────────────────────────────
-// Salva um conteúdo gerado como template reutilizável
 router.post('/template', authMiddleware, async (req, res) => {
   try {
-    const { tipo, titulo, conteudo, nicho } = req.body;
+    const { tipo, titulo, conteudo, nicho, area_id } = req.body;
     if (!tipo || !titulo || !conteudo) {
       return res.status(400).json({ erro: 'Tipo, título e conteúdo são obrigatórios.' });
     }
@@ -148,6 +147,7 @@ router.post('/template', authMiddleware, async (req, res) => {
         titulo,
         conteudo,
         nicho: nicho || req.user.nicho,
+        area_id: area_id || null,
       })
       .select('id, titulo')
       .single();
@@ -163,16 +163,35 @@ router.post('/template', authMiddleware, async (req, res) => {
 // ─── GET /api/export/templates ──────────────────────────────────────────────
 router.get('/templates', authMiddleware, async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { area_id } = req.query;
+    let query = supabase
       .from('templates')
-      .select('id, tipo, titulo, created_at')
+      .select('id, tipo, titulo, conteudo, area_id, created_at')
       .eq('user_id', req.user.id)
       .order('created_at', { ascending: false });
 
+    if (area_id) query = query.eq('area_id', area_id);
+
+    const { data, error } = await query;
     if (error) throw error;
     res.json({ templates: data });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao buscar templates.' });
+  }
+});
+
+// ─── DELETE /api/export/template/:id ─────────────────────────────────────────
+router.delete('/template/:id', authMiddleware, async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('templates')
+      .delete()
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao excluir template.' });
   }
 });
 
