@@ -245,7 +245,7 @@ let userRole     = null;
 let userId       = null;
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
-function getToken() { return localStorage.getItem('may_token'); }
+function getToken() { return localStorage.getItem('may_access'); }
 async function apiFetch(path, opts = {}) {
   const token = getToken();
   return fetch(API + path, {
@@ -264,7 +264,7 @@ function inicial(name) { return (name || '?').split(' ').map(w=>w[0]).join('').s
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   const token = getToken();
-  if (!token) { window.location.href = 'login.html'; return; }
+  if (!token) { window.location.href = 'index.html'; return; }
 
   try {
     const r = await apiFetch('/api/user/me');
@@ -272,7 +272,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const me = await r.json();
     userRole = me.role;
     userId   = me.id;
-  } catch { window.location.href = 'login.html'; return; }
+  } catch { window.location.href = 'index.html'; return; }
 
   await carregarDados();
 });
