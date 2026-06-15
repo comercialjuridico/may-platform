@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { supabase } = require('../services/supabase');
 const { Resend } = require('resend');
+const { registrarAuditoria } = require('../middleware/auditLog');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -130,6 +131,9 @@ router.post('/login', async (req, res) => {
     await supabase.from('users').update({ refresh_token: refreshToken }).eq('id', user.id);
 
     const { password_hash, ...userPublic } = user;
+
+    await registrarAuditoria({ userId: user.id, acao: 'login', req });
+
     res.json({ accessToken, refreshToken, user: userPublic });
   } catch (err) {
     console.error('Erro no login:', err.message);
@@ -265,6 +269,28 @@ router.get('/verify/:token', async (req, res) => {
     res.redirect(`${process.env.APP_URL}/auth.html?verificado=1`);
   } catch (err) {
     res.redirect(`${process.env.APP_URL}/auth.html?erro=erro_verificacao`);
+  }
+});
+
+// ─── POST /api/auth/logout ──────────────────────────────────────────────────
+router.post('/logout', async (req, res) => {
+  try {
+    const header = req.headers.authorization;
+    if (header && header.startsWith('Bearer ')) {
+      const token = header.split(' ')[1];
+      try {
+        const payload = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+        // Invalida o refresh token no banco (revogação)
+        await supabase.from('users').update({ refresh_token: null }).eq('id', payload.id);
+        await registrarAuditoria({ userId: payload.id, acao: 'logout', req });
+      } catch {
+        // Token já inválido — tudo bem, continua logout
+      }
+    }
+    res.json({ mensagem: 'Logout realizado.' });
+  } catch (err) {
+    console.error('Erro no logout:', err.message);
+    res.status(500).json({ erro: 'Erro ao fazer logout.' });
   }
 });
 

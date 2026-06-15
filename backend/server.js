@@ -3,13 +3,17 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 require('dotenv').config();
 
-const express    = require('express');
-const cors       = require('cors');
-const helmet     = require('helmet');
-const rateLimit  = require('express-rate-limit');
-const path       = require('path');
+const express      = require('express');
+const cors         = require('cors');
+const helmet       = require('helmet');
+const rateLimit    = require('express-rate-limit');
+const compression  = require('compression');
+const path         = require('path');
 
 const app = express();
+
+// ─── Compressão gzip ───────────────────────────────────────────────────────
+app.use(compression());
 
 // ─── Segurança ──────────────────────────────────────────────────────────────
 app.use(helmet({
@@ -53,7 +57,20 @@ app.get('/app', (req, res) => {
 });
 
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Cache longo para assets imutáveis (js/css/imgs com hash no nome)
+app.use('/assets', express.static(path.join(__dirname, '../frontend/assets'), {
+  maxAge: '30d',
+  immutable: true,
+}));
+app.use('/css', express.static(path.join(__dirname, '../frontend/css'), {
+  maxAge: '1d',
+}));
+app.use('/js', express.static(path.join(__dirname, '../frontend/js'), {
+  maxAge: '1d',
+}));
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  maxAge: '1h',
+}));
 
 // ─── Rotas da API ──────────────────────────────────────────────────────────
 app.use('/api/auth',   require('./routes/auth'));
