@@ -29,7 +29,7 @@ function getModelo(ferramenta) {
 // ─── POST /api/chat/stream ──────────────────────────────────────────────────
 // Envia uma mensagem e recebe resposta via Server-Sent Events (streaming)
 router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
-  const { mensagem, conversa_id, ferramenta = 'chat' } = req.body;
+  const { mensagem, conversa_id, ferramenta = 'chat', area_ativa = null } = req.body;
 
   if (!mensagem || mensagem.trim() === '') {
     return res.status(400).json({ erro: 'Mensagem não pode estar vazia.' });
@@ -99,7 +99,7 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     }).eq('id', req.user.id);
 
     // System prompt personalizado
-    const systemPrompt = buildSystemPrompt(req.user, ferramenta);
+    const systemPrompt = buildSystemPrompt(req.user, ferramenta, area_ativa);
     const modelo = getModelo(ferramenta);
 
     // Inicia streaming com OpenAI

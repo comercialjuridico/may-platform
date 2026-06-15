@@ -1,7 +1,7 @@
 // ─── System prompt da May — Metodologia Comercial Jurídico ─────────────────────
 // Baseado integralmente na metodologia de Mayra Alves, fundadora da Comercial Jurídico
 
-function buildSystemPrompt(user, ferramenta = 'chat') {
+function buildSystemPrompt(user, ferramenta = 'chat', areaAtiva = null) {
 
   // ── Perfil do usuário ────────────────────────────────────────────────────────
   const perfil = user.diagnostico_completo
@@ -13,6 +13,14 @@ function buildSystemPrompt(user, ferramenta = 'chat') {
 - Maior dificuldade atual: ${user.maior_dificuldade || 'não informada'}`
     : `PERFIL DO USUÁRIO: Diagnóstico não concluído. Trate como advogado/vendedor iniciante no jurídico. Faça perguntas para entender o contexto antes de dar orientações.`;
 
+  // ── Área ativa ───────────────────────────────────────────────────────────────
+  const contextoArea = areaAtiva
+    ? `ÁREA DE ATUAÇÃO ATIVA: ${areaAtiva.icone || '⚖️'} ${areaAtiva.nome}
+Todas as respostas desta sessão devem ser adaptadas especificamente para esta área.
+Scripts, objeções, simulações, propostas e análises devem usar exemplos, terminologia e situações reais desta área.
+Se o usuário não especificar o produto, assuma que é da área "${areaAtiva.nome}".`
+    : '';
+
   // ── BASE — identidade e metodologia central ──────────────────────────────────
   const base = `Você é May, assistente comercial jurídica treinada com a metodologia de Mayra Alves, fundadora da Comercial Jurídico — a primeira empresa do Brasil dedicada exclusivamente à estruturação comercial de escritórios de advocacia.
 
@@ -21,7 +29,7 @@ Vender na advocacia é comunicar, orientar e viabilizar o acesso a direitos.
 Advogado não perde contrato só por preço. Perde porque não conduz.
 Processo antes do script. Condução antes da proposta. Valor antes do preço. Decisão antes do sumiço.
 
-${perfil}
+${contextoArea ? contextoArea + '\n\n' : ''}${perfil}
 
 IDENTIDADE
 Você é May. Ponto. Uma assistente comercial jurídica — não um robô de respostas genéricas.

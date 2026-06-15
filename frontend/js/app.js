@@ -8,6 +8,8 @@ const estado = {
   streak: null,
   conversaAtiva: null,
   ferramentaAtiva: 'chat',
+  areaAtiva: null,        // { id, nome, icone } da área selecionada
+  areas: [],              // lista de áreas do usuário
   enviando: false,
   conversas: [],
   uso: { mensagens_usadas: 0, limite: 20, restantes: 20 },
@@ -43,10 +45,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function carregarDadosIniciais() {
   try {
-    const [resMe, resConversas, resUso] = await Promise.all([
+    const [resMe, resConversas, resUso, resAreas] = await Promise.all([
       api.get('/user/me'),
       api.get('/chat/conversas'),
       api.get('/user/uso'),
+      api.get('/areas'),
     ]);
 
     if (resMe?.ok) {
@@ -56,6 +59,15 @@ async function carregarDadosIniciais() {
       salvarUser(data.user);
 
       // Visibilidade dos botões contextuais é gerenciada em renderizarSidebar()
+
+    if (resAreas?.ok) {
+      const d = await resAreas.json();
+      estado.areas = d.areas || [];
+      // Ativa a primeira área por padrão se nenhuma estiver ativa
+      if (!estado.areaAtiva && estado.areas.length > 0) {
+        estado.areaAtiva = estado.areas[0];
+      }
+    }
     }
 
     if (resConversas?.ok) {
@@ -113,6 +125,9 @@ function renderizarSidebar() {
     </div>
   `).join('');
 
+  // Seletor de Área Ativa
+  renderizarSeletorArea();
+
   // Conversas
   renderizarListaConversas();
 
@@ -128,6 +143,53 @@ function renderizarSidebar() {
   if (btnVenda) {
     btnVenda.style.display = user?.empresa_id ? 'block' : 'none';
   }
+}
+
+// ─── Seletor de Área Ativa ───────────────────────────────────────────────────
+function renderizarSeletorArea() {
+  // Busca ou cria o container na sidebar
+  let container = document.getElementById('area-ativa-container');
+  if (!container) return; // será criado pelo HTML
+
+  if (!estado.areas.length) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  const ativa = estado.areaAtiva;
+
+  container.innerHTML = `
+    <div style="padding:0 10px;margin-bottom:4px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--text-muted);margin-bottom:6px">ÁREA ATIVA</div>
+      ${estado.areas.map(a => `
+        <div onclick="selecionarArea('${a.id}')"
+             style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;margin-bottom:3px;font-size:13px;transition:background .15s;
+                    background:${ativa?.id === a.id ? 'rgba(249,115,22,0.15)' : 'transparent'};
+                    border:1px solid ${ativa?.id === a.id ? 'rgba(249,115,22,0.35)' : 'transparent'};
+                    color:${ativa?.id === a.id ? 'var(--accent)' : 'var(--text-secondary)'}">
+          <span>${a.icone || '⚖️'}</span>
+          <span style="font-weight:${ativa?.id === a.id ? '600' : '400'}">${escapeHtml(a.nome)}</span>
+          ${ativa?.id === a.id ? '<span style="margin-left:auto;font-size:10px;opacity:.7">●</span>' : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selecionarArea(id) {
+  const area = estado.areas.find(a => a.id === id);
+  if (!area) return;
+  estado.areaAtiva = area;
+
+  // Atualiza label do chat se já houver uma área
+  const labelEl = document.getElementById('chat-tool-label');
+  if (labelEl && estado.ferramentaAtiva === 'chat') {
+    labelEl.textContent = `Área: ${area.nome}`;
+  }
+
+  renderizarSeletorArea();
+  mostrarToast(`Área "${area.nome}" ativada`, 'sucesso');
 }
 
 function renderizarListaConversas() {
@@ -327,6 +389,7 @@ async function enviarMensagem() {
       mensagem: texto,
       conversa_id: estado.conversaAtiva,
       ferramenta: estado.ferramentaAtiva,
+      area_ativa: estado.areaAtiva ? { nome: estado.areaAtiva.nome, icone: estado.areaAtiva.icone } : null,
     },
     // onChunk — recebe texto em streaming
     (chunk) => {
