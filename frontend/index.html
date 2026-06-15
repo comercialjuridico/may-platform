@@ -53,6 +53,9 @@
       <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;margin-bottom:4px;color:#7dcf97;border-color:rgba(125,207,151,0.3)">
         💰 Registrar venda
       </button>
+      <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px">
+        ⚖️ Áreas de trabalho <span id="areas-badge" style="font-size:0.7rem;color:var(--text-muted)"></span>
+      </button>
       <button class="btn-ghost btn-full" onclick="logout()" style="font-size:0.8rem">
         Sair
       </button>
@@ -253,6 +256,41 @@
 </div>
 
 
+<!-- ══════════════ MODAL: ÁREAS DE TRABALHO ══════════════ -->
+<div class="modal-overlay" id="modal-areas">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <span class="modal-title">⚖️ Áreas de trabalho</span>
+      <button class="modal-close" onclick="fecharModalAreas()">✕</button>
+    </div>
+    <p class="text-secondary text-sm" style="margin-bottom:16px">
+      Defina até <strong>3 áreas</strong> do seu escritório. A May personaliza scripts, objeções e simulações para cada uma.
+    </p>
+
+    <!-- Lista de áreas -->
+    <div id="areas-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+
+    <!-- Formulário de nova área -->
+    <div id="areas-form-novo" style="border:1px solid var(--border);border-radius:10px;padding:14px;display:none;margin-bottom:12px">
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Nome da área *</label>
+        <input id="area-nome" type="text" placeholder="Ex: Direito Previdenciário, Bancário, Trabalhista..." maxlength="60" />
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Descrição <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
+        <input id="area-descricao" type="text" placeholder="Ex: Revisão de aposentadoria, FGTS..." maxlength="120" />
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="salvarArea()" style="flex:1">Salvar</button>
+        <button class="btn btn-ghost" onclick="cancelarNovaArea()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Botão adicionar / aviso de limite -->
+    <div id="areas-footer"></div>
+  </div>
+</div>
+
 <!-- ══════════════ MODAL: REGISTRAR VENDA ══════════════ -->
 <div class="modal-overlay" id="modal-venda">
   <div class="modal" style="max-width:420px">
@@ -317,6 +355,114 @@
   // Fecha modal de venda ao clicar fora
   document.getElementById('modal-venda')?.addEventListener('click', function(e) {
     if (e.target === this) fecharModalVenda();
+  });
+
+  // ── Áreas de Trabalho ────────────────────────────────────────────────────────
+  let _areasCache = { areas: [], limite: 3, pode_adicionar: true };
+
+  async function abrirModalAreas() {
+    document.getElementById('modal-areas').classList.add('active');
+    await carregarAreas();
+  }
+
+  function fecharModalAreas() {
+    document.getElementById('modal-areas').classList.remove('active');
+    cancelarNovaArea();
+  }
+
+  document.getElementById('modal-areas')?.addEventListener('click', function(e) {
+    if (e.target === this) fecharModalAreas();
+  });
+
+  async function carregarAreas() {
+    try {
+      const data = await apiFetch('/areas');
+      _areasCache = data;
+      renderAreas(data);
+      // Atualiza badge na sidebar
+      const badge = document.getElementById('areas-badge');
+      if (badge) badge.textContent = `(${data.total}/${data.limite === 99 ? '∞' : data.limite})`;
+    } catch(e) {
+      document.getElementById('areas-lista').innerHTML = '<p style="color:var(--text-muted);font-size:13px">Erro ao carregar áreas.</p>';
+    }
+  }
+
+  function renderAreas(data) {
+    const lista = document.getElementById('areas-lista');
+    if (!data.areas.length) {
+      lista.innerHTML = '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:12px 0">Nenhuma área cadastrada ainda.</p>';
+    } else {
+      lista.innerHTML = data.areas.map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+          <div>
+            <div style="font-weight:500;font-size:14px">${a.icone} ${a.nome}</div>
+            ${a.descricao ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">${a.descricao}</div>` : ''}
+          </div>
+          <button onclick="removerArea('${a.id}')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;line-height:1" title="Remover">✕</button>
+        </div>
+      `).join('');
+    }
+
+    const footer = document.getElementById('areas-footer');
+    if (data.pode_adicionar) {
+      footer.innerHTML = `<button class="btn btn-ghost btn-full" onclick="mostrarFormNovaArea()">+ Adicionar área</button>`;
+    } else if (data.limite < 99) {
+      footer.innerHTML = `
+        <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:8px;padding:12px 14px;text-align:center">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px">Limite de ${_areasCache.limite} áreas atingido</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Faça upgrade para adicionar mais áreas de atuação.</div>
+          <button class="btn btn-primary" onclick="fecharModalAreas();abrirModalPlanos()">Ver planos</button>
+        </div>
+      `;
+    } else {
+      footer.innerHTML = `<button class="btn btn-ghost btn-full" onclick="mostrarFormNovaArea()">+ Adicionar área</button>`;
+    }
+  }
+
+  function mostrarFormNovaArea() {
+    document.getElementById('areas-form-novo').style.display = 'block';
+    document.getElementById('area-nome').focus();
+  }
+
+  function cancelarNovaArea() {
+    document.getElementById('areas-form-novo').style.display = 'none';
+    document.getElementById('area-nome').value = '';
+    document.getElementById('area-descricao').value = '';
+  }
+
+  async function salvarArea() {
+    const nome = document.getElementById('area-nome').value.trim();
+    const descricao = document.getElementById('area-descricao').value.trim();
+    if (!nome) { alert('Informe o nome da área.'); return; }
+
+    try {
+      await apiFetch('/areas', { method: 'POST', body: JSON.stringify({ nome, descricao }) });
+      cancelarNovaArea();
+      await carregarAreas();
+    } catch(e) {
+      const msg = e?.message || 'Erro ao salvar área.';
+      alert(msg);
+    }
+  }
+
+  async function removerArea(id) {
+    if (!confirm('Remover esta área de trabalho?')) return;
+    try {
+      await apiFetch(`/areas/${id}`, { method: 'DELETE' });
+      await carregarAreas();
+    } catch(e) {
+      alert('Erro ao remover área.');
+    }
+  }
+
+  // Carrega áreas no badge ao iniciar
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      apiFetch('/areas').then(data => {
+        const badge = document.getElementById('areas-badge');
+        if (badge) badge.textContent = `(${data.total}/${data.limite === 99 ? '∞' : data.limite})`;
+      }).catch(() => {});
+    }, 1500);
   });
 
   // PWA service worker
