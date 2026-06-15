@@ -178,7 +178,7 @@ router.get('/leaderboard', authMiddleware, async (req, res) => {
 
 // ─── GET /api/ranking/dashboard — gestor ─────────────────────────────────────
 router.get('/dashboard', authMiddleware, async (req, res) => {
-  if (!req.user.empresa_id || req.user.role !== 'gestor') {
+  if (!req.user.empresa_id || (req.user.role !== 'gestor' && req.user.role !== 'admin')) {
     return res.status(403).json({ erro: 'Acesso restrito ao gestor.' });
   }
   const acesso = await verificarAcesso(req.user.empresa_id);

@@ -221,7 +221,7 @@ router.get('/meu-resumo', authMiddleware, async (req, res) => {
 // ─── GET /api/vendas/todas ─────────────────────────────────────────────────────
 // Gestor: todas as vendas da equipe com dados completos do cliente
 router.get('/todas', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'gestor') {
+  if (req.user.role !== 'gestor' && req.user.role !== 'admin') {
     return res.status(403).json({ erro: 'Acesso restrito ao gestor.' });
   }
   if (!req.user.empresa_id) {

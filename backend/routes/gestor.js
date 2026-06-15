@@ -5,9 +5,9 @@ const { v4: uuidv4 } = require('uuid');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 
-// Middleware: verifica se usuário é gestor
+// Middleware: verifica se usuário é gestor ou admin
 async function gestorMiddleware(req, res, next) {
-  if (req.user.role !== 'gestor') {
+  if (req.user.role !== 'gestor' && req.user.role !== 'admin') {
     return res.status(403).json({ erro: 'Acesso restrito a gestores.' });
   }
   next();
@@ -253,11 +253,11 @@ router.get('/info', authMiddleware, async (req, res) => {
 // Dashboard completo do gestor com KPIs, vendedores, vendas, origens e insights
 router.get('/dashboard', authMiddleware, async (req, res) => {
   // Auth checks
-  if (req.user.role !== 'gestor') {
+  if (req.user.role !== 'gestor' && req.user.role !== 'admin') {
     return res.status(403).json({ erro: 'Acesso restrito a gestores.' });
   }
   if (!req.user.empresa_id) {
-    return res.status(403).json({ erro: 'Gestor sem empresa vinculada.' });
+    return res.status(400).json({ erro: 'SEM_EMPRESA', mensagem: 'Nenhuma equipe criada ainda.' });
   }
 
   try {

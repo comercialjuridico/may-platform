@@ -43,24 +43,35 @@ function calcularNivel(atual, m1, m2, m3) {
 
 // ─── GET /api/metas — metas visíveis para o usuário logado ──────────────────
 router.get('/', authMiddleware, async (req, res) => {
-  if (!req.user.empresa_id) return res.status(400).json({ erro: 'Sem equipe.' });
-  const hoje = new Date().toISOString().slice(0,10);
+  const corteData = new Date(Date.now() - 30*86400000).toISOString().slice(0,10);
 
   try {
-    // Busca metas da empresa onde data_fim >= hoje (ativas) ou últimas 30d
-    const { data: metas, error } = await supabase
-      .from('metas')
-      .select('*')
-      .eq('empresa_id', req.user.empresa_id)
-      .gte('data_fim', new Date(Date.now() - 30*86400000).toISOString().slice(0,10))
-      .order('data_inicio', { ascending: false });
+    let metas = [];
 
-    if (error) throw error;
+    if (req.user.empresa_id) {
+      // Usuário em equipe → metas da empresa
+      const { data, error } = await supabase
+        .from('metas')
+        .select('*')
+        .eq('empresa_id', req.user.empresa_id)
+        .gte('data_fim', corteData)
+        .order('data_inicio', { ascending: false });
+      if (error) throw error;
+      metas = (data||[]).filter(m => !m.user_ids || m.user_ids.includes(req.user.id));
+    } else {
+      // Usuário solo → metas individuais (empresa_id nulo, user_ids contém o usuário)
+      const { data, error } = await supabase
+        .from('metas')
+        .select('*')
+        .is('empresa_id', null)
+        .contains('user_ids', [req.user.id])
+        .gte('data_fim', corteData)
+        .order('data_inicio', { ascending: false });
+      if (error) throw error;
+      metas = data || [];
+    }
 
-    // Filtra metas visíveis para o usuário (user_ids null = todos, ou contém o id)
-    const minhas = (metas||[]).filter(m =>
-      !m.user_ids || m.user_ids.includes(req.user.id)
-    );
+    const minhas = metas;
 
     if (!minhas.length) return res.json({ metas: [] });
 
@@ -94,7 +105,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // ─── GET /api/metas/gestor — todas as metas + progresso de cada membro ───────
 router.get('/gestor', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'gestor') return res.status(403).json({ erro: 'Restrito ao gestor.' });
+  if (req.user.role !== 'gestor' && req.user.role !== 'admin') return res.status(403).json({ erro: 'Restrito ao gestor.' });
   if (!req.user.empresa_id)       return res.status(400).json({ erro: 'Sem equipe.' });
 
   try {
@@ -157,10 +168,13 @@ router.get('/gestor', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── POST /api/metas — gestor cria meta ──────────────────────────────────────
+// ─── POST /api/metas — gestor ou usuário solo cria meta ──────────────────────
 router.post('/', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'gestor') return res.status(403).json({ erro: 'Restrito ao gestor.' });
-  if (!req.user.empresa_id)       return res.status(400).json({ erro: 'Sem equipe.' });
+  const isGestorOuAdmin = req.user.role === 'gestor' || req.user.role === 'admin';
+  // Vendedores de equipe não podem criar metas para a equipe
+  if (!isGestorOuAdmin && req.user.empresa_id) {
+    return res.status(403).json({ erro: 'Apenas o gestor pode criar metas para a equipe.' });
+  }
 
   const { titulo, descricao, indicador, periodo, data_inicio, meta_1, meta_2, meta_3, user_ids } = req.body;
 
@@ -171,11 +185,15 @@ router.post('/', authMiddleware, async (req, res) => {
 
   const { fim } = calcularPeriodo(periodo, data_inicio);
 
+  // Usuário solo: meta individual (sem empresa, apenas para si)
+  const empresaId  = isGestorOuAdmin ? req.user.empresa_id : null;
+  const membros    = isGestorOuAdmin && user_ids?.length ? user_ids : [req.user.id];
+
   try {
     const { data, error } = await supabase
       .from('metas')
       .insert({
-        empresa_id:  req.user.empresa_id,
+        empresa_id:  empresaId,
         created_by:  req.user.id,
         titulo,
         descricao:   descricao || null,
@@ -186,7 +204,7 @@ router.post('/', authMiddleware, async (req, res) => {
         meta_1:      parseFloat(meta_1),
         meta_2:      parseFloat(meta_2),
         meta_3:      parseFloat(meta_3),
-        user_ids:    user_ids?.length ? user_ids : null,
+        user_ids:    membros,
       })
       .select()
       .single();
@@ -199,9 +217,14 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── PUT /api/metas/:id — gestor edita meta ──────────────────────────────────
+// ─── PUT /api/metas/:id — gestor ou dono da meta individual edita ────────────
 router.put('/:id', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'gestor') return res.status(403).json({ erro: 'Restrito ao gestor.' });
+  const isGestorOuAdmin = req.user.role === 'gestor' || req.user.role === 'admin';
+
+  // Verifica se o usuário tem permissão: gestor/admin da empresa OU criador da meta individual
+  const { data: metaExistente } = await supabase.from('metas').select('empresa_id, created_by').eq('id', req.params.id).single();
+  const ehDonoDaMeta = metaExistente?.created_by === req.user.id && !metaExistente?.empresa_id;
+  if (!isGestorOuAdmin && !ehDonoDaMeta) return res.status(403).json({ erro: 'Sem permissão para editar esta meta.' });
 
   const { titulo, descricao, indicador, periodo, data_inicio, meta_1, meta_2, meta_3, user_ids } = req.body;
   const updates = { updated_at: new Date().toISOString() };
@@ -212,7 +235,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   if (meta_1)      updates.meta_1      = parseFloat(meta_1);
   if (meta_2)      updates.meta_2      = parseFloat(meta_2);
   if (meta_3)      updates.meta_3      = parseFloat(meta_3);
-  if (user_ids !== undefined) updates.user_ids = user_ids?.length ? user_ids : null;
+  if (isGestorOuAdmin && user_ids !== undefined) updates.user_ids = user_ids?.length ? user_ids : null;
 
   if (periodo && data_inicio) {
     updates.periodo     = periodo;
@@ -225,7 +248,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
       .from('metas')
       .update(updates)
       .eq('id', req.params.id)
-      .eq('empresa_id', req.user.empresa_id)
       .select()
       .single();
 
@@ -239,14 +261,16 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
 // ─── DELETE /api/metas/:id ───────────────────────────────────────────────────
 router.delete('/:id', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'gestor') return res.status(403).json({ erro: 'Restrito ao gestor.' });
+  const isGestorOuAdmin = req.user.role === 'gestor' || req.user.role === 'admin';
+  const { data: metaExistente } = await supabase.from('metas').select('empresa_id, created_by').eq('id', req.params.id).single();
+  const ehDonoDaMeta = metaExistente?.created_by === req.user.id && !metaExistente?.empresa_id;
+  if (!isGestorOuAdmin && !ehDonoDaMeta) return res.status(403).json({ erro: 'Sem permissão para excluir esta meta.' });
 
   try {
     const { error } = await supabase
       .from('metas')
       .delete()
-      .eq('id', req.params.id)
-      .eq('empresa_id', req.user.empresa_id);
+      .eq('id', req.params.id);
 
     if (error) throw error;
     res.json({ ok: true });

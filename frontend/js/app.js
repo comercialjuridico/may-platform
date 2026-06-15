@@ -141,7 +141,7 @@ function renderizarSidebar() {
   // Botões contextuais — sempre re-avaliados com base no estado atual do usuário
   const linkGestor = document.getElementById('link-gestor');
   if (linkGestor) {
-    linkGestor.style.display = user?.role === 'gestor' ? 'block' : 'none';
+    linkGestor.style.display = (user?.role === 'gestor' || user?.role === 'admin') ? 'block' : 'none';
   }
   const btnVenda = document.getElementById('btn-registrar-venda');
   if (btnVenda) {
@@ -239,55 +239,117 @@ function selecionarFerramenta(id) {
 }
 
 // ─── Tela vazia com sugestões ────────────────────────────────────────────────
-function mostrarTelaVazia(ferramenta) {
-  const container = document.getElementById('messages-container');
-
-  const sugestoes = {
-    chat: [
+const TOOL_INFO = {
+  chat: {
+    desc: 'Pergunte qualquer coisa sobre vendas. A May responde com base no seu perfil e área de atuação.',
+    dica: null,
+    sugestoes: [
       'Como responder objeções de preço?',
       'Como qualificar um lead no primeiro contato?',
       'Me dá um script de abordagem para WhatsApp',
       'Como pedir indicação sem parecer chato?',
     ],
-    simulador_objecoes: [
+  },
+  simulador_objecoes: {
+    desc: 'A May cria um lead fictício com nome, situação e objeção provável. Você pratica como responderia — ela avalia e corrige em tempo real.',
+    dica: '💡 Quanto mais detalhe você der sobre o tipo de objeção, mais realista fica o treino.',
+    sugestoes: [
       'Iniciar simulação — nível fácil',
       'Iniciar simulação — nível médio',
       'Quero treinar a objeção "não tenho dinheiro"',
+      'Treinar objeção "preciso pensar"',
+      'Simular cliente que compara com concorrente',
     ],
-    gerador_proposta: [
-      'Quero gerar uma proposta comercial',
+  },
+  gerador_proposta: {
+    desc: 'Informe o nome do lead, o serviço contratado e o valor aproximado — a May monta uma proposta comercial completa, pronta para enviar.',
+    dica: '💡 Quanto mais contexto você fornecer (nicho, situação do lead, urgência), mais personalizada fica a proposta.',
+    sugestoes: [
+      'Proposta para revisão de benefício INSS — honorários R$ 2.500',
+      'Proposta para causa trabalhista — honorários R$ 3.000',
+      'Proposta para cliente que pediu desconto',
+      'Proposta para contrato de consultoria mensal',
+      'Modelo de proposta para novo cliente do escritório',
     ],
-    follow_up: [
-      'Lead sumiu após a proposta — gera um follow-up',
-      'Preciso de mensagem de reativação de lead frio',
+  },
+  follow_up: {
+    desc: 'Para leads que sumiram ou não responderam. A May gera mensagens de acompanhamento naturais, sem parecer insistente ou robótico.',
+    dica: '💡 Informe quantos dias passaram e qual foi o último contato para a May calibrar o tom certo.',
+    sugestoes: [
+      'Lead sumiu após receber a proposta há 4 dias',
+      'Cliente disse "vou pensar" há uma semana',
+      'Reativar lead frio que não responde há 30 dias',
+      'Follow-up após reunião de diagnóstico',
+      'Mensagem de reativação para ex-cliente',
     ],
-    negociacao: [
+  },
+  negociacao: {
+    desc: 'Cenários reais de objeção de preço e negociação. A May te entrega argumentos prontos, com linguagem de autoridade e sem ceder desconto desnecessário.',
+    dica: '💡 Descreva o perfil do lead (resistente, ansioso, comparador) para receber os argumentos mais certeiros.',
+    sugestoes: [
       'Preciso de argumentos para sustentar meu preço',
       'Lead comparou com concorrente mais barato',
+      'Cliente quer parcelar além do que ofereço',
+      'Como responder "tá caro" sem dar desconto',
+      'Cliente quer desconto mas o caso é complexo',
     ],
-    diagnostico: [
-      'Vou colar uma conversa real para análise',
+  },
+  diagnostico: {
+    desc: 'Cole aqui um atendimento real — conversa de WhatsApp, e-mail ou anotações de reunião. A May identifica onde você perdeu pontos e o que fazer diferente.',
+    dica: '💡 Quanto mais completo o histórico da conversa, mais precisa é a análise. Pode colar sem formatar.',
+    sugestoes: [
+      'Vou colar um atendimento que não fechou',
+      'Analise essa conversa do WhatsApp com o lead',
+      'O que errei nessa negociação?',
+      'Diagnóstico de reunião que não converteu',
     ],
-    spin: [
-      'Iniciar treino de reunião com SPIN Selling',
+  },
+  spin: {
+    desc: 'Treino baseado na metodologia SPIN Selling (Situação, Problema, Implicação, Necessidade). A May simula um cliente e você pratica fazer as perguntas certas para revelar a dor e criar urgência.',
+    dica: '💡 O SPIN é a técnica mais eficaz para vendas consultivas. Ideal para advogados que vendem serviços de alto valor.',
+    sugestoes: [
+      'Iniciar treino de SPIN Selling — nível iniciante',
+      'Preciso praticar perguntas de implicação',
+      'Me explica a metodologia SPIN com exemplos jurídicos',
+      'Simular reunião de diagnóstico usando SPIN',
+      'Como usar SPIN para vender planos de contrato?',
     ],
-    simulador_vendas: [
+  },
+  simulador_vendas: {
+    desc: 'Simulação completa de uma venda: Abertura → Desenvolvimento → Fechamento. A May cria um lead com perfil, histórico e resistências reais. Você conduz todo o processo.',
+    dica: '💡 Use depois do simulador de objeções — aqui o cenário é mais longo e você precisa conduzir todas as etapas.',
+    sugestoes: [
       'Iniciar simulação completa de vendas',
+      'Simular reunião de diagnóstico com lead frio',
+      'Simular abordagem inicial por WhatsApp',
+      'Simular cliente de alto valor — honorários acima de R$ 5.000',
     ],
-  };
+  },
+  criador_prompt: {
+    desc: 'Crie instruções personalizadas para a May se comportar de forma específica em um contexto seu. Útil para quem quer treinar um script ou roteiro particular.',
+    dica: '💡 Funcionalidade avançada. Descreva o cenário, o tom e o objetivo — a May monta o prompt pronto para usar.',
+    sugestoes: [
+      'Criar prompt para atendimento previdenciário',
+      'Criar roteiro para vendas de contratos recorrentes',
+      'Prompt para consultoria de revisão de benefício',
+    ],
+  },
+};
 
-  const ferr = FERRAMENTAS.find(f => f.id === ferramenta);
-  const qs = sugestoes[ferramenta] || [];
+function mostrarTelaVazia(ferramenta) {
+  const container = document.getElementById('messages-container');
+  const ferr   = FERRAMENTAS.find(f => f.id === ferramenta);
+  const info   = TOOL_INFO[ferramenta] || {};
+  const qs     = info.sugestoes || [];
+  const desc   = info.desc || 'Selecione uma opção abaixo para começar.';
+  const dica   = info.dica || null;
 
   container.innerHTML = `
     <div class="chat-empty">
       <div class="chat-empty-icon">${ferr?.icon || '💬'}</div>
       <h2>${ferr?.nome || 'Chat'}</h2>
-      <p class="text-secondary">
-        ${ferramenta === 'chat'
-          ? 'Pergunte qualquer coisa sobre vendas. A May responde com base no seu perfil.'
-          : 'Use esta ferramenta para ' + (ferr?.nome || '').toLowerCase() + '.'}
-      </p>
+      <p class="text-secondary" style="max-width:480px; margin:0 auto 4px;">${desc}</p>
+      ${dica ? `<p class="tool-tip">${dica}</p>` : ''}
       ${qs.length ? `
         <div class="quick-actions">
           ${qs.map(q => `

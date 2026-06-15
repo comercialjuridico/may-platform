@@ -334,6 +334,12 @@
 .chat-empty p {
   font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; max-width: 340px;
 }
+.tool-tip {
+  display: inline-block; margin: 6px auto 12px;
+  background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.25);
+  border-radius: 8px; padding: 7px 14px; font-size: 0.78rem;
+  color: #C4B5FD; line-height: 1.5; max-width: 460px;
+}
 .quick-actions {
   display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px;
 }

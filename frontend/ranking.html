@@ -662,7 +662,7 @@
       </div>
     </div>
 
-    <div class="meta-form-group">
+    <div class="meta-form-group" id="meta-membros-group">
       <label>Aplicar para (deixe vazio = toda a equipe)</label>
       <div class="meta-checkbox-list" id="meta-usuarios-list">
         <div style="color:rgba(200,190,255,.3);font-size:12px;padding:8px">Carregando membros...</div>
@@ -1241,17 +1241,22 @@ function renderMetaCard(m, membros) {
 }
 
 function renderMetas() {
-  const isGestor  = userRole === 'gestor';
+  const isGestor  = userRole === 'gestor' || userRole === 'admin';
+  const isSolo    = !isGestor;
   const metasData = isGestor ? (dadosMetasGestor?.metas || []) : (dadosMetas?.metas || []);
-  const novaBtnHtml = isGestor
-    ? `<button class="btn-nova-meta" onclick="abrirModalMeta()">+ Nova meta</button>`
-    : '';
+
+  const novaBtnHtml = `<button class="btn-nova-meta" onclick="abrirModalMeta()">
+    ${isGestor ? '+ Nova meta para a equipe' : '+ Criar minha meta'}
+  </button>`;
 
   if (!metasData.length) return `
     ${novaBtnHtml}
     <div class="empty-state">
       <div class="empty-icon">🎯</div>
-      <p>${isGestor ? 'Nenhuma meta criada ainda. Crie a primeira meta para a sua equipe!' : 'Nenhuma meta definida para você ainda.'}</p>
+      <p>${isGestor
+        ? 'Nenhuma meta criada ainda. Crie a primeira meta para a sua equipe!'
+        : 'Você ainda não criou nenhuma meta pessoal. Defina seus objetivos e acompanhe o progresso!'
+      }</p>
     </div>`;
 
   const cards = metasData.map(m => renderMetaCard(m, isGestor ? m.membros : null)).join('');
@@ -1270,17 +1275,23 @@ function abrirModalMeta(meta = null) {
   document.getElementById('meta-m2').value            = meta?.meta_2 || '';
   document.getElementById('meta-m3').value            = meta?.meta_3 || '';
 
-  // Popula lista de membros
+  // Seção de membros: só para gestores/admin
+  const isGestorOuAdmin = userRole === 'gestor' || userRole === 'admin';
+  const membrosGroup = document.getElementById('meta-membros-group');
+  if (membrosGroup) membrosGroup.style.display = isGestorOuAdmin ? '' : 'none';
+
   const lista = document.getElementById('meta-usuarios-list');
-  if (membrosCache.length) {
-    const selecionados = meta?.user_ids || [];
-    lista.innerHTML = membrosCache.map(m => `
-      <label class="meta-checkbox-item">
-        <input type="checkbox" value="${m.id}" ${selecionados.includes(m.id)?'checked':''} />
-        <span>${m.name}</span>
-      </label>`).join('');
-  } else {
-    lista.innerHTML = '<div style="color:rgba(200,190,255,.3);font-size:12px;padding:8px">Carregue a página novamente para ver os membros</div>';
+  if (isGestorOuAdmin) {
+    if (membrosCache.length) {
+      const selecionados = meta?.user_ids || [];
+      lista.innerHTML = membrosCache.map(m => `
+        <label class="meta-checkbox-item">
+          <input type="checkbox" value="${m.id}" ${selecionados.includes(m.id)?'checked':''} />
+          <span>${m.name}</span>
+        </label>`).join('');
+    } else {
+      lista.innerHTML = '<div style="color:rgba(200,190,255,.3);font-size:12px;padding:8px">Carregue a página novamente para ver os membros</div>';
+    }
   }
 
   document.getElementById('meta-modal').classList.add('active');
@@ -1332,8 +1343,9 @@ async function excluirMeta(id) {
 }
 
 function editarMeta(id) {
-  const metas = dadosMetasGestor?.metas || [];
-  const meta  = metas.find(m => m.id === id);
+  const isGestorOuAdmin = userRole === 'gestor' || userRole === 'admin';
+  const pool = isGestorOuAdmin ? (dadosMetasGestor?.metas || []) : (dadosMetas?.metas || []);
+  const meta = pool.find(m => m.id === id);
   if (meta) abrirModalMeta(meta);
 }
 </script>

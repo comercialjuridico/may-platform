@@ -382,6 +382,18 @@ function fmtBRL(v){ if(!v&&v!==0)return'—'; return'R$ '+Number(v).toLocaleStri
 function inicial(n){ return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 function fmtData(d){ if(!d)return'—'; return d.slice(0,10).split('-').reverse().join('/'); }
 
+// ── Criar empresa / equipe ────────────────────────────────────────────────────
+async function criarEmpresa(){
+  const nome = document.getElementById('input-empresa')?.value?.trim();
+  if(!nome){ alert('Informe o nome da equipe.'); return; }
+  const r = await apiFetch('/api/gestor/empresa',{method:'POST',body:JSON.stringify({nome})});
+  const d = await r.json();
+  if(!r.ok){ alert(d.erro||'Erro ao criar equipe.'); return; }
+  // Recarrega o dashboard após criação
+  await carregarDash();
+  await carregarMetas();
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',async()=>{
   const token = getToken();
@@ -410,8 +422,31 @@ async function carregarDash(){
 
   try{
     const r = await apiFetch('/api/gestor/dashboard'+qs);
-    if(r.status===403){ window.location.href='index.html'; return; }
-    dadosDash = await r.json();
+    if(r.status===403){
+      document.getElementById('dash-content').innerHTML = `
+        <div style="text-align:center;padding:80px 20px;">
+          <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+          <h2 style="color:var(--text-primary);margin-bottom:8px;">Acesso restrito</h2>
+          <p style="color:var(--text-muted);margin-bottom:24px;">Apenas gestores têm acesso a este painel.</p>
+          <a href="/" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Voltar à plataforma</a>
+        </div>`;
+      return;
+    }
+    const body = await r.json();
+    if(r.status===400 && body.erro==='SEM_EMPRESA'){
+      document.getElementById('dash-content').innerHTML = `
+        <div style="text-align:center;padding:80px 20px;">
+          <div style="font-size:3rem;margin-bottom:16px;">🏢</div>
+          <h2 style="color:var(--text-primary);margin-bottom:8px;">Crie sua equipe</h2>
+          <p style="color:var(--text-muted);margin-bottom:24px;">Você ainda não criou uma equipe. Defina o nome do escritório ou empresa para começar.</p>
+          <div style="display:flex;gap:12px;justify-content:center;align-items:center;">
+            <input id="input-empresa" type="text" placeholder="Nome do escritório..." style="padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-size:0.9rem;min-width:240px;" />
+            <button onclick="criarEmpresa()" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;font-weight:600;">Criar equipe</button>
+          </div>
+        </div>`;
+      return;
+    }
+    dadosDash = body;
 
     // Popula select de usuários (uma vez)
     if(todosUsers.length===0 && dadosDash.vendedores?.length){

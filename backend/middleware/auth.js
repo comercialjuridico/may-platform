@@ -76,6 +76,12 @@ async function verificarLimite(req, res, next) {
     user.mes_referencia = mesAtual;
   }
 
+  // Admin nunca é bloqueado
+  if (user.role === 'admin') {
+    req.limiteInfo = { limite: 999999, usado: user.mensagens_mes };
+    return next();
+  }
+
   // Limites por plano
   const limites = {
     free:    parseInt(process.env.LIMITE_FREE)    || 20,
