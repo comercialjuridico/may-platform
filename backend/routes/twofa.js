@@ -1,14 +1,11 @@
 // ─── Rotas de 2FA (TOTP via Google Authenticator / Authy) ──────────────────
 const express   = require('express');
 const router    = express.Router();
-const { authenticator } = require('otplib');
+const speakeasy = require('speakeasy');
 const QRCode    = require('qrcode');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 const { registrarAuditoria } = require('../middleware/auditLog');
-
-// Configuração: janela de ±1 intervalo (30s) para clock skew
-authenticator.options = { window: 1 };
 
 // ─── POST /api/2fa/setup ────────────────────────────────────────────────────
 // Gera o secret e retorna QR code para o usuário escanear no app
@@ -20,10 +17,13 @@ router.post('/setup', authMiddleware, async (req, res) => {
       return res.status(400).json({ erro: '2FA já está ativado para esta conta.' });
     }
 
-    const secret = authenticator.generateSecret();
-    const label  = encodeURIComponent(`May:${user.email}`);
-    const issuer = encodeURIComponent('May App');
-    const otpauth = `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
+    const secretObj = speakeasy.generateSecret({ length: 20, name: `May:${user.email}` });
+    const otpauth = speakeasy.otpauthURL({
+      secret: secretObj.base32,
+      label: `May:${user.email}`,
+      issuer: 'May App',
+      encoding: 'base32',
+    });
 
     const qrDataUrl = await QRCode.toDataURL(otpauth, {
       width: 200,
@@ -34,10 +34,10 @@ router.post('/setup', authMiddleware, async (req, res) => {
     // Salva o secret temporariamente (não ativado ainda — ativação exige verificação)
     await supabase
       .from('users')
-      .update({ totp_secret: secret })
+      .update({ totp_secret: secretObj.base32 })
       .eq('id', user.id);
 
-    res.json({ secret, qrDataUrl });
+    res.json({ secret: secretObj.base32, qrDataUrl });
   } catch (err) {
     console.error('Erro no setup 2FA:', err.message);
     res.status(500).json({ erro: 'Erro ao configurar 2FA.' });
@@ -65,7 +65,7 @@ router.post('/ativar', authMiddleware, async (req, res) => {
       return res.status(400).json({ erro: 'Inicie o setup primeiro.' });
     }
 
-    const valido = authenticator.verify({ token: codigo, secret: u.totp_secret });
+    const valido = speakeasy.totp.verify({ secret: u.totp_secret, encoding: 'base32', token: codigo, window: 1 });
     if (!valido) {
       return res.status(401).json({ erro: 'Código inválido. Tente novamente.' });
     }
@@ -100,7 +100,7 @@ router.post('/desativar', authMiddleware, async (req, res) => {
       .eq('id', user.id)
       .single();
 
-    const valido = authenticator.verify({ token: codigo, secret: u.totp_secret });
+    const valido = speakeasy.totp.verify({ secret: u.totp_secret, encoding: 'base32', token: codigo, window: 1 });
     if (!valido) return res.status(401).json({ erro: 'Código inválido.' });
 
     await supabase
@@ -147,7 +147,7 @@ router.post('/validar', async (req, res) => {
       return res.status(401).json({ erro: 'Usuário inválido.' });
     }
 
-    const valido = authenticator.verify({ token: codigo, secret: user.totp_secret });
+    const valido = speakeasy.totp.verify({ secret: user.totp_secret, encoding: 'base32', token: codigo, window: 1 });
     if (!valido) return res.status(401).json({ erro: 'Código incorreto.' });
 
     // Emite os tokens definitivos
