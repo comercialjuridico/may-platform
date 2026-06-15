@@ -327,6 +327,192 @@
     .uv-val  { font-weight: 700; color: var(--green); }
     .uv-val.exito { color: rgba(200,190,255,.4); font-style: italic; font-weight: 400; }
 
+    /* ── Metas ────────────────────────────────────────────── */
+    .metas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+    @media(max-width:620px){ .metas-grid { grid-template-columns: 1fr; } }
+
+    .meta-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 20px;
+      backdrop-filter: blur(8px);
+      transition: border-color .2s, transform .2s;
+      position: relative; overflow: hidden;
+    }
+    .meta-card:hover { transform: translateY(-2px); border-color: rgba(167,139,250,.25); }
+    .meta-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #7C3AED, #60A5FA);
+      border-radius: 16px 16px 0 0;
+    }
+    .meta-card.nivel-1::before { background: linear-gradient(90deg,#CD7F32,#F59E0B); }
+    .meta-card.nivel-2::before { background: linear-gradient(90deg,#94A3B8,#E2E8F0); }
+    .meta-card.nivel-3::before { background: linear-gradient(90deg,#F59E0B,#FDE68A); }
+
+    .meta-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .meta-titulo { font-size: 15px; font-weight: 700; color: #fff; }
+    .meta-periodo-badge {
+      font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+      background: rgba(124,58,237,.25); color: #C4B5FD;
+      border: 1px solid rgba(124,58,237,.3); text-transform: uppercase; letter-spacing: .06em;
+      white-space: nowrap;
+    }
+    .meta-indicador { font-size: 11px; color: rgba(200,190,255,.4); margin-bottom: 16px; }
+
+    /* Barra de progresso com 3 marcos */
+    .meta-progress-wrap { position: relative; margin-bottom: 20px; }
+    .meta-bar-bg {
+      height: 10px; background: rgba(255,255,255,.08); border-radius: 10px;
+      overflow: visible; position: relative;
+    }
+    .meta-bar-fill {
+      height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(.4,0,.2,1);
+      background: linear-gradient(90deg,#7C3AED,#A78BFA);
+      position: relative;
+    }
+    .meta-bar-fill.nivel-1 { background: linear-gradient(90deg,#92400E,#F59E0B); }
+    .meta-bar-fill.nivel-2 { background: linear-gradient(90deg,#64748B,#E2E8F0); }
+    .meta-bar-fill.nivel-3 { background: linear-gradient(90deg,#B45309,#FDE68A); }
+
+    .meta-marker {
+      position: absolute; top: 50%; transform: translate(-50%,-50%);
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.15); background: #0f0d1a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; z-index: 2;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .meta-marker.atingida { border-color: var(--green); box-shadow: 0 0 8px rgba(16,185,129,.5); }
+    .meta-marker.m1 { }
+    .meta-marker.m2 { }
+    .meta-marker.m3 { }
+
+    .meta-labels { display: flex; justify-content: space-between; margin-top: 10px; }
+    .meta-label {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 10px; flex: 1;
+    }
+    .meta-label .lbl-icon { font-size: 14px; }
+    .meta-label .lbl-val  { font-weight: 700; color: rgba(200,190,255,.8); }
+    .meta-label .lbl-txt  { color: rgba(200,190,255,.35); font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
+    .meta-label.atingida .lbl-val { color: var(--green); }
+
+    .meta-atual-row {
+      display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;
+    }
+    .meta-atual-num {
+      font-family: 'Syne',sans-serif; font-size: 28px; font-weight: 800;
+      background: linear-gradient(135deg,#A78BFA,#60A5FA);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .meta-atual-unit { font-size: 13px; color: rgba(200,190,255,.4); }
+    .meta-nivel-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      margin-top: 4px;
+    }
+    .meta-nivel-badge.n0 { background: rgba(239,68,68,.15);   color: #FCA5A5; border: 1px solid rgba(239,68,68,.2); }
+    .meta-nivel-badge.n1 { background: rgba(180,83,9,.2);     color: #FCD9BD; border: 1px solid rgba(180,83,9,.3); }
+    .meta-nivel-badge.n2 { background: rgba(148,163,184,.15); color: #E2E8F0; border: 1px solid rgba(148,163,184,.2); }
+    .meta-nivel-badge.n3 { background: rgba(245,158,11,.15);  color: #FDE68A; border: 1px solid rgba(245,158,11,.25); }
+
+    /* Equipe no card da meta (gestor) */
+    .meta-team-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .meta-team-av {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(124,58,237,.25); display: flex; align-items: center;
+      justify-content: center; font-size: 10px; font-weight: 700; color: #A78BFA;
+    }
+    .meta-team-name { font-size: 12px; color: rgba(200,190,255,.7); flex: 1; }
+    .meta-team-bar-bg {
+      flex: 2; height: 6px; background: rgba(255,255,255,.06);
+      border-radius: 6px; overflow: hidden;
+    }
+    .meta-team-bar-fill {
+      height: 100%; border-radius: 6px;
+      background: linear-gradient(90deg,#7C3AED,#A78BFA);
+      transition: width 1s ease;
+    }
+    .meta-team-bar-fill.n1 { background: linear-gradient(90deg,#92400E,#F59E0B); }
+    .meta-team-bar-fill.n2 { background: linear-gradient(90deg,#64748B,#E2E8F0); }
+    .meta-team-bar-fill.n3 { background: linear-gradient(90deg,#B45309,#FDE68A); }
+    .meta-team-val { font-size: 11px; font-weight: 700; color: rgba(200,190,255,.6); white-space: nowrap; }
+
+    /* Modal nova meta */
+    .meta-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; backdrop-filter: blur(4px);
+    }
+    .meta-modal-overlay.active { display: flex; }
+    .meta-modal {
+      background: #12102A; border: 1px solid rgba(167,139,250,.2);
+      border-radius: 20px; padding: 28px; width: 100%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .meta-modal h2 { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 20px; }
+    .meta-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .meta-form-group { margin-bottom: 14px; }
+    .meta-form-group label {
+      display: block; font-size: 11px; font-weight: 600; color: rgba(200,190,255,.5);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+    }
+    .meta-form-group input, .meta-form-group select, .meta-form-group textarea {
+      width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #fff;
+      font-family: 'Inter',sans-serif; outline: none;
+      transition: border-color .2s;
+    }
+    .meta-form-group input:focus, .meta-form-group select:focus, .meta-form-group textarea:focus {
+      border-color: rgba(124,58,237,.6);
+    }
+    .meta-form-group select option { background: #12102A; }
+    .meta-metas-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .meta-checkbox-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+    .meta-checkbox-item {
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+      background: rgba(255,255,255,.04); border-radius: 8px; cursor: pointer;
+      border: 1px solid transparent; transition: border-color .15s;
+    }
+    .meta-checkbox-item:hover { border-color: rgba(124,58,237,.3); }
+    .meta-checkbox-item input[type=checkbox] { accent-color: #7C3AED; width: 15px; height: 15px; }
+    .meta-checkbox-item span { font-size: 13px; color: rgba(200,190,255,.8); }
+    .meta-modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-meta-save {
+      flex: 1; background: linear-gradient(135deg,#7C3AED,#A78BFA);
+      color: #fff; border: none; border-radius: 10px; padding: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124,58,237,.4);
+    }
+    .btn-meta-cancel {
+      background: rgba(255,255,255,.06); color: rgba(200,190,255,.7);
+      border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px 20px;
+      font-size: 14px; cursor: pointer;
+    }
+    .btn-nova-meta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg,rgba(124,58,237,.3),rgba(167,139,250,.15));
+      border: 1px solid rgba(124,58,237,.4); border-radius: 10px;
+      padding: 10px 18px; font-size: 13px; font-weight: 700; color: #C4B5FD;
+      cursor: pointer; margin-bottom: 20px; transition: background .2s;
+    }
+    .btn-nova-meta:hover { background: linear-gradient(135deg,rgba(124,58,237,.5),rgba(167,139,250,.25)); }
+    .btn-excluir-meta {
+      background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2);
+      color: #FCA5A5; border-radius: 8px; padding: 5px 10px; font-size: 11px;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-excluir-meta:hover { background: rgba(239,68,68,.2); }
+    .btn-editar-meta {
+      background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.25);
+      color: #C4B5FD; border-radius: 8px; padding: 5px 10px; font-size: 11px;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-editar-meta:hover { background: rgba(124,58,237,.3); }
+
     /* ── Tabela de clientes ───────────────────────────────── */
     .clientes-table {
       width: 100%; border-collapse: collapse; font-size: 13px;
@@ -419,6 +605,75 @@
     <div class="loading">Carregando ranking</div>
   </div>
 
+</div>
+
+<!-- Modal Nova/Editar Meta -->
+<div class="meta-modal-overlay" id="meta-modal">
+  <div class="meta-modal">
+    <h2 id="meta-modal-titulo">🎯 Nova Meta</h2>
+    <input type="hidden" id="meta-edit-id" />
+
+    <div class="meta-form-group">
+      <label>Título da meta</label>
+      <input type="text" id="meta-titulo" placeholder="Ex: Meta de contratos — Q1" />
+    </div>
+
+    <div class="meta-form-row">
+      <div class="meta-form-group">
+        <label>Indicador</label>
+        <select id="meta-indicador">
+          <option value="contratos">Contratos fechados</option>
+          <option value="faturamento">Faturamento (R$)</option>
+        </select>
+      </div>
+      <div class="meta-form-group">
+        <label>Período</label>
+        <select id="meta-periodo">
+          <option value="semanal">Semanal</option>
+          <option value="mensal" selected>Mensal</option>
+          <option value="bimestral">Bimestral</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="meta-form-group">
+      <label>Data de início</label>
+      <input type="date" id="meta-data-inicio" />
+    </div>
+
+    <div class="meta-form-group">
+      <label>Metas (Bronze → Prata → Ouro)</label>
+      <div class="meta-metas-row">
+        <div>
+          <label style="color:rgba(205,127,50,.8)">🥉 Meta 1</label>
+          <input type="number" id="meta-m1" placeholder="Ex: 5" min="0" />
+        </div>
+        <div>
+          <label style="color:rgba(148,163,184,.9)">🥈 Meta 2</label>
+          <input type="number" id="meta-m2" placeholder="Ex: 10" min="0" />
+        </div>
+        <div>
+          <label style="color:rgba(245,158,11,.9)">🥇 Meta 3</label>
+          <input type="number" id="meta-m3" placeholder="Ex: 15" min="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-form-group">
+      <label>Aplicar para (deixe vazio = toda a equipe)</label>
+      <div class="meta-checkbox-list" id="meta-usuarios-list">
+        <div style="color:rgba(200,190,255,.3);font-size:12px;padding:8px">Carregando membros...</div>
+      </div>
+    </div>
+
+    <div class="meta-modal-footer">
+      <button class="btn-meta-cancel" onclick="fecharModalMeta()">Cancelar</button>
+      <button class="btn-meta-save" onclick="salvarMeta()">Salvar meta</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -547,8 +802,11 @@ let dadosDash         = null;
 let dadosSemana       = null;
 let dadosMinhasVendas = null;
 let dadosTodasVendas  = null;
+let dadosMetas        = null;
+let dadosMetasGestor  = null;
 let userRole          = null;
 let userId            = null;
+let membrosCache      = [];
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('may_access'); }
@@ -607,16 +865,23 @@ async function carregarDados() {
     const promises = [
       apiFetch('/api/ranking/minha-semana'),
       apiFetch('/api/vendas/meu-resumo'),
+      apiFetch('/api/metas'),
     ];
     if (userRole === 'gestor') {
       promises.push(apiFetch('/api/ranking/dashboard'));
       promises.push(apiFetch('/api/vendas/todas'));
+      promises.push(apiFetch('/api/metas/gestor'));
     }
     const results  = await Promise.all(promises);
     dadosSemana       = await results[0].json();
     dadosMinhasVendas = await results[1].json();
-    if (userRole === 'gestor' && results[2]) dadosDash        = await results[2].json();
-    if (userRole === 'gestor' && results[3]) dadosTodasVendas = await results[3].json();
+    dadosMetas        = await results[2].json();
+    if (userRole === 'gestor' && results[3]) dadosDash        = await results[3].json();
+    if (userRole === 'gestor' && results[4]) dadosTodasVendas = await results[4].json();
+    if (userRole === 'gestor' && results[5]) {
+      dadosMetasGestor = await results[5].json();
+      membrosCache     = dadosMetasGestor.membros || [];
+    }
 
     renderizarPagina();
   } catch(e) {
@@ -660,10 +925,12 @@ function renderizarPagina() {
     ? `<div class="tabs">
         <button class="tab-btn active" onclick="trocarTab('ranking',this)">🏆 Ranking</button>
         <button class="tab-btn"        onclick="trocarTab('gestor',this)">📊 Painel Gestor</button>
+        <button class="tab-btn"        onclick="trocarTab('metas',this)">🎯 Metas</button>
         <button class="tab-btn"        onclick="trocarTab('semana',this)">📅 Minha Semana</button>
        </div>`
     : `<div class="tabs">
         <button class="tab-btn active" onclick="trocarTab('ranking',this)">🏆 Ranking</button>
+        <button class="tab-btn"        onclick="trocarTab('metas',this)">🎯 Metas</button>
         <button class="tab-btn"        onclick="trocarTab('semana',this)">📅 Minha Semana</button>
        </div>`;
 
@@ -681,6 +948,7 @@ function renderizarPagina() {
       ${renderLeaderboard(ranking)}
     </div>
     ${temGestor ? `<div class="tab-panel" id="tab-gestor">${renderGestor()}</div>` : ''}
+    <div class="tab-panel" id="tab-metas">${renderMetas()}</div>
     <div class="tab-panel" id="tab-semana">${renderSemana()}</div>`;
 }
 
@@ -884,6 +1152,189 @@ function renderSemana() {
       </div>`:''}
     <p class="section-title" style="margin-top:8px">Meus clientes — mês atual</p>
     ${renderTabelaVendas(dadosMinhasVendas?.vendas, false)}`;
+}
+
+// ── Metas ──────────────────────────────────────────────────────────────────────
+const NIVEL_LABELS = ['Ainda não iniciada','🥉 Bronze','🥈 Prata','🥇 Ouro'];
+const NIVEL_ICONS  = ['🎯','🥉','🥈','🥇'];
+const PERIODO_PT   = { semanal:'Semanal', mensal:'Mensal', bimestral:'Bimestral',
+                       trimestral:'Trimestral', semestral:'Semestral', anual:'Anual' };
+
+function fmtMetaVal(v, indicador) {
+  if (indicador === 'faturamento') return fmtBRL(v);
+  return v + (v === 1 ? ' contrato' : ' contratos');
+}
+
+function renderMetaCard(m, membros) {
+  const pct3 = Math.min(100, Math.round((m.progresso_atual / m.meta_3) * 100));
+  // posição dos marcos na barra
+  const pos1 = Math.round((m.meta_1 / m.meta_3) * 100);
+  const pos2 = Math.round((m.meta_2 / m.meta_3) * 100);
+
+  const fillClass = m.nivel_atingido === 3 ? 'nivel-3' : m.nivel_atingido === 2 ? 'nivel-2' : m.nivel_atingido === 1 ? 'nivel-1' : '';
+
+  const diasRestantes = Math.max(0, Math.ceil((new Date(m.data_fim) - new Date()) / 86400000));
+  const expirou       = diasRestantes === 0 && new Date(m.data_fim) < new Date();
+
+  const teamRows = membros?.length ? membros.map(u => {
+    const pctU = Math.min(100, Math.round((u.progresso_atual / m.meta_3) * 100));
+    return `<div class="meta-team-row">
+      ${u.avatar_url
+        ? `<img src="${u.avatar_url}" class="meta-team-av" style="object-fit:cover" />`
+        : `<div class="meta-team-av">${inicial(u.name)}</div>`}
+      <span class="meta-team-name">${u.name.split(' ')[0]}</span>
+      <div class="meta-team-bar-bg"><div class="meta-team-bar-fill n${u.nivel_atingido}" style="width:${pctU}%"></div></div>
+      <span class="meta-team-val">${fmtMetaVal(u.progresso_atual, m.indicador)}</span>
+    </div>`;
+  }).join('') : '';
+
+  const editBtns = userRole === 'gestor' ? `
+    <div style="display:flex;gap:6px;margin-top:12px">
+      <button class="btn-editar-meta" onclick="editarMeta('${m.id}')">✏️ Editar</button>
+      <button class="btn-excluir-meta" onclick="excluirMeta('${m.id}')">🗑️ Excluir</button>
+    </div>` : '';
+
+  return `<div class="meta-card nivel-${m.nivel_atingido}">
+    <div class="meta-header">
+      <div>
+        <div class="meta-titulo">${m.titulo}</div>
+        <div class="meta-indicador">${m.indicador === 'faturamento' ? '💰 Faturamento' : '📋 Contratos'} · ${expirou ? '<span style="color:var(--red)">Encerrada</span>' : diasRestantes + ' dias restantes'}</div>
+      </div>
+      <span class="meta-periodo-badge">${PERIODO_PT[m.periodo]||m.periodo}</span>
+    </div>
+
+    <div class="meta-atual-row">
+      <div class="meta-atual-num">${m.indicador === 'faturamento' ? fmtBRL(m.progresso_atual) : m.progresso_atual}</div>
+      <div class="meta-atual-unit">${m.indicador === 'contratos' ? 'contratos' : ''}</div>
+    </div>
+    <div class="meta-nivel-badge n${m.nivel_atingido}">${NIVEL_ICONS[m.nivel_atingido]} ${NIVEL_LABELS[m.nivel_atingido]}</div>
+
+    <div class="meta-progress-wrap" style="margin-top:16px">
+      <div class="meta-bar-bg">
+        <div class="meta-bar-fill ${fillClass}" style="width:${pct3}%"></div>
+        <div class="meta-marker m1 ${m.nivel_atingido>=1?'atingida':''}" style="left:${pos1}%" title="Meta 1: ${fmtMetaVal(m.meta_1,m.indicador)}">🥉</div>
+        <div class="meta-marker m2 ${m.nivel_atingido>=2?'atingida':''}" style="left:${pos2}%" title="Meta 2: ${fmtMetaVal(m.meta_2,m.indicador)}">🥈</div>
+        <div class="meta-marker m3 ${m.nivel_atingido>=3?'atingida':''}" style="left:98%" title="Meta 3: ${fmtMetaVal(m.meta_3,m.indicador)}">🥇</div>
+      </div>
+    </div>
+    <div class="meta-labels">
+      <div class="meta-label ${m.nivel_atingido>=1?'atingida':''}">
+        <div class="lbl-icon">🥉</div>
+        <div class="lbl-val">${fmtMetaVal(m.meta_1, m.indicador)}</div>
+        <div class="lbl-txt">Bronze</div>
+      </div>
+      <div class="meta-label ${m.nivel_atingido>=2?'atingida':''}">
+        <div class="lbl-icon">🥈</div>
+        <div class="lbl-val">${fmtMetaVal(m.meta_2, m.indicador)}</div>
+        <div class="lbl-txt">Prata</div>
+      </div>
+      <div class="meta-label ${m.nivel_atingido>=3?'atingida':''}">
+        <div class="lbl-icon">🥇</div>
+        <div class="lbl-val">${fmtMetaVal(m.meta_3, m.indicador)}</div>
+        <div class="lbl-txt">Ouro</div>
+      </div>
+    </div>
+
+    ${teamRows ? `<div style="margin-top:14px">${teamRows}</div>` : ''}
+    ${editBtns}
+  </div>`;
+}
+
+function renderMetas() {
+  const isGestor  = userRole === 'gestor';
+  const metasData = isGestor ? (dadosMetasGestor?.metas || []) : (dadosMetas?.metas || []);
+  const novaBtnHtml = isGestor
+    ? `<button class="btn-nova-meta" onclick="abrirModalMeta()">+ Nova meta</button>`
+    : '';
+
+  if (!metasData.length) return `
+    ${novaBtnHtml}
+    <div class="empty-state">
+      <div class="empty-icon">🎯</div>
+      <p>${isGestor ? 'Nenhuma meta criada ainda. Crie a primeira meta para a sua equipe!' : 'Nenhuma meta definida para você ainda.'}</p>
+    </div>`;
+
+  const cards = metasData.map(m => renderMetaCard(m, isGestor ? m.membros : null)).join('');
+  return `${novaBtnHtml}<div class="metas-grid">${cards}</div>`;
+}
+
+// ── Modal de Metas ─────────────────────────────────────────────────────────────
+function abrirModalMeta(meta = null) {
+  document.getElementById('meta-edit-id').value       = meta?.id || '';
+  document.getElementById('meta-modal-titulo').textContent = meta ? '✏️ Editar Meta' : '🎯 Nova Meta';
+  document.getElementById('meta-titulo').value        = meta?.titulo || '';
+  document.getElementById('meta-indicador').value     = meta?.indicador || 'contratos';
+  document.getElementById('meta-periodo').value       = meta?.periodo || 'mensal';
+  document.getElementById('meta-data-inicio').value   = meta?.data_inicio || new Date().toISOString().slice(0,10);
+  document.getElementById('meta-m1').value            = meta?.meta_1 || '';
+  document.getElementById('meta-m2').value            = meta?.meta_2 || '';
+  document.getElementById('meta-m3').value            = meta?.meta_3 || '';
+
+  // Popula lista de membros
+  const lista = document.getElementById('meta-usuarios-list');
+  if (membrosCache.length) {
+    const selecionados = meta?.user_ids || [];
+    lista.innerHTML = membrosCache.map(m => `
+      <label class="meta-checkbox-item">
+        <input type="checkbox" value="${m.id}" ${selecionados.includes(m.id)?'checked':''} />
+        <span>${m.name}</span>
+      </label>`).join('');
+  } else {
+    lista.innerHTML = '<div style="color:rgba(200,190,255,.3);font-size:12px;padding:8px">Carregue a página novamente para ver os membros</div>';
+  }
+
+  document.getElementById('meta-modal').classList.add('active');
+}
+
+function fecharModalMeta() {
+  document.getElementById('meta-modal').classList.remove('active');
+}
+
+async function salvarMeta() {
+  const id       = document.getElementById('meta-edit-id').value;
+  const titulo   = document.getElementById('meta-titulo').value.trim();
+  const m1       = document.getElementById('meta-m1').value;
+  const m2       = document.getElementById('meta-m2').value;
+  const m3       = document.getElementById('meta-m3').value;
+
+  if (!titulo)      { alert('Informe o título.'); return; }
+  if (!m1||!m2||!m3){ alert('Preencha as 3 metas.'); return; }
+
+  const checkboxes = document.querySelectorAll('#meta-usuarios-list input[type=checkbox]:checked');
+  const user_ids   = Array.from(checkboxes).map(c => c.value);
+
+  const body = {
+    titulo,
+    indicador:   document.getElementById('meta-indicador').value,
+    periodo:     document.getElementById('meta-periodo').value,
+    data_inicio: document.getElementById('meta-data-inicio').value,
+    meta_1: parseFloat(m1), meta_2: parseFloat(m2), meta_3: parseFloat(m3),
+    user_ids: user_ids.length ? user_ids : [],
+  };
+
+  const url    = id ? `/api/metas/${id}` : '/api/metas';
+  const method = id ? 'PUT' : 'POST';
+
+  const r = await apiFetch(url, { method, body: JSON.stringify(body) });
+  if (!r.ok) { alert('Erro ao salvar meta.'); return; }
+
+  fecharModalMeta();
+  await carregarDados();
+  // Volta pra aba de metas
+  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('Metas')) b.click(); });
+}
+
+async function excluirMeta(id) {
+  if (!confirm('Excluir esta meta?')) return;
+  const r = await apiFetch(`/api/metas/${id}`, { method: 'DELETE' });
+  if (!r.ok) { alert('Erro ao excluir.'); return; }
+  await carregarDados();
+}
+
+function editarMeta(id) {
+  const metas = dadosMetasGestor?.metas || [];
+  const meta  = metas.find(m => m.id === id);
+  if (meta) abrirModalMeta(meta);
 }
 </script>
 </body>

@@ -1,614 +1,444 @@
 <!DOCTYPE html>
-<html lang="pt-BR" translate="no">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a1917" />
-  <title>May — Painel da Equipe</title>
+  <title>Dashboard da Equipe — May</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:#7C3AED; --brand-light:rgba(124,58,237,.15); --brand-glow:rgba(124,58,237,.4);
+      --gold:#F59E0B; --green:#10B981; --red:#EF4444; --blue:#60A5FA;
+      --surface:rgba(255,255,255,.05); --border:rgba(255,255,255,.09);
+      --text:#E8E4FF; --sub:rgba(200,190,255,.5); --radius:14px;
+    }
+    html,body { min-height:100vh; font-family:'Inter',sans-serif; background:#080B1A; color:var(--text); overflow-x:hidden; }
+    h1,h2,h3 { font-family:'Syne',sans-serif; }
+    #canvas-bg { position:fixed; inset:0; z-index:0; pointer-events:none; }
 
-    body {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-    }
+    /* ── Layout ─── */
+    .page { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:24px 16px 80px; }
 
-    /* ── Header ── */
-    .g-header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .g-header-left { display: flex; align-items: center; gap: 12px; }
-    .g-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .g-logo-mark {
-      width: 28px; height: 28px; border-radius: 6px;
-      background: var(--accent); color: #fff;
-      font-size: 13px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .g-logo-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-    .g-badge {
-      font-size: 11px; font-weight: 500; padding: 2px 8px;
-      background: rgba(201,125,78,0.15); color: var(--accent);
-      border-radius: 99px; border: 1px solid rgba(201,125,78,0.3);
-    }
-    .g-header-right { display: flex; align-items: center; gap: 8px; }
-    #nome-empresa { font-size: 13px; color: var(--text-muted); }
+    /* ── Header ─── */
+    .dash-header { display:flex; align-items:center; gap:14px; margin-bottom:28px; flex-wrap:wrap; }
+    .back-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:8px 14px; font-size:13px; font-weight:600; color:#C4B5FD;
+      text-decoration:none; display:flex; align-items:center; gap:6px; transition:background .2s; }
+    .back-btn:hover { background:var(--brand-light); }
+    .dash-title { flex:1; }
+    .dash-title h1 { font-size:24px; font-weight:800; letter-spacing:-.02em;
+      background:linear-gradient(135deg,#fff 30%,#A78BFA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .dash-title p { font-size:12px; color:var(--sub); margin-top:3px; }
 
-    /* ── Layout ── */
-    .g-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    /* ── Filtros ─── */
+    .filtros-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; align-items:flex-end; }
+    .filtro-group { display:flex; flex-direction:column; gap:5px; }
+    .filtro-group label { font-size:10px; font-weight:600; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; }
+    .filtro-group input, .filtro-group select {
+      background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:8px 12px; font-size:13px; color:var(--text); outline:none;
+      font-family:'Inter',sans-serif; transition:border-color .2s; min-width:140px;
+    }
+    .filtro-group input:focus, .filtro-group select:focus { border-color:rgba(124,58,237,.5); }
+    .filtro-group select option { background:#12102A; }
+    .btn-filtrar { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:9px 20px; font-size:13px; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); align-self:flex-end; }
 
-    /* ── Setup (sem equipe) ── */
-    .g-setup {
-      max-width: 480px; margin: 80px auto; text-align: center;
-    }
-    .g-setup h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
-    .g-setup p { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
-    .g-setup-input {
-      display: flex; gap: 8px; margin-bottom: 12px;
-    }
-    .g-setup-input input {
-      flex: 1; background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 14px;
-      font-size: 14px; color: var(--text-primary); font-family: inherit;
-    }
-    .g-setup-input input:focus { outline: none; border-color: var(--accent); }
+    /* ── KPI Cards ─── */
+    .kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
+    @media(max-width:700px){ .kpi-grid { grid-template-columns:1fr 1fr; } }
+    .kpi-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+      padding:18px 16px; text-align:center; backdrop-filter:blur(8px); transition:border-color .2s, transform .2s; }
+    .kpi-card:hover { transform:translateY(-2px); border-color:rgba(167,139,250,.3); }
+    .kpi-val { font-family:'Syne',sans-serif; font-size:22px; font-weight:800;
+      background:linear-gradient(135deg,#A78BFA,#60A5FA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .kpi-lbl { font-size:10px; color:var(--sub); margin-top:4px; text-transform:uppercase; letter-spacing:.06em; }
 
-    /* ── Stats cards ── */
-    .g-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 28px; }
-    .g-stat {
-      background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: var(--radius-md); padding: 20px;
-    }
-    .g-stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-    .g-stat-value { font-size: 28px; font-weight: 600; color: var(--text-primary); }
-    .g-stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .g-stat.alert .g-stat-value { color: #e07070; }
-    .g-stat.success .g-stat-value { color: #7dcf97; }
+    /* ── Section title ─── */
+    .sec-title { font-size:11px; font-weight:700; color:var(--sub); text-transform:uppercase;
+      letter-spacing:.08em; margin-bottom:12px; margin-top:28px; }
 
-    /* ── Alertas ── */
-    .g-alertas { margin-bottom: 24px; }
-    .g-alerta-item {
-      background: rgba(224,112,112,0.08); border: 1px solid rgba(224,112,112,0.2);
-      border-radius: var(--radius-sm); padding: 10px 14px;
-      font-size: 13px; color: #e07070; margin-bottom: 6px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .g-alerta-item::before { content: '⚠'; }
+    /* ── Insight Box ─── */
+    .insights-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:4px; }
+    @media(max-width:640px){ .insights-grid { grid-template-columns:1fr; } }
+    .insight-item { background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:14px 16px; display:flex; align-items:flex-start; gap:10px;
+      font-size:13px; color:var(--text); line-height:1.5; backdrop-filter:blur(8px); }
+    .insight-item .icon { font-size:20px; flex-shrink:0; }
+    .insight-item.warn { border-color:rgba(239,68,68,.25); background:rgba(239,68,68,.07); color:#FCA5A5; }
+    .insight-item.ok   { border-color:rgba(16,185,129,.2);  background:rgba(16,185,129,.06); color:#6EE7B7; }
+    .insight-item.info { border-color:rgba(96,165,250,.2);  background:rgba(96,165,250,.06); color:#BAE6FD; }
+    .insight-item.gold { border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.07); color:#FDE68A; }
 
-    /* ── Section header ── */
-    .g-section-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px;
-    }
-    .g-section-title { font-size: 15px; font-weight: 600; }
+    /* ── Reunião sugerida ─── */
+    .reuniao-box { background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(167,139,250,.08));
+      border:1px solid rgba(124,58,237,.35); border-radius:var(--radius); padding:20px 22px;
+      margin-bottom:4px; backdrop-filter:blur(8px); }
+    .reuniao-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .reuniao-header h3 { font-size:15px; font-weight:800; color:#fff; }
+    .reuniao-tipo { background:rgba(124,58,237,.3); color:#C4B5FD; font-size:11px;
+      font-weight:700; padding:3px 10px; border-radius:20px; border:1px solid rgba(124,58,237,.4); }
+    .reuniao-motivo { font-size:13px; color:rgba(200,190,255,.7); margin-bottom:12px; line-height:1.5; }
+    .pauta-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+    .pauta-list li { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:rgba(200,190,255,.75); }
+    .pauta-list li::before { content:'→'; color:#7C3AED; font-weight:700; flex-shrink:0; }
+    .btn-agendar { margin-top:14px; background:rgba(124,58,237,.3); border:1px solid rgba(124,58,237,.4);
+      color:#C4B5FD; border-radius:8px; padding:8px 18px; font-size:13px; font-weight:600;
+      cursor:pointer; transition:background .2s; }
+    .btn-agendar:hover { background:rgba(124,58,237,.5); }
 
-    /* ── Tabela de membros ── */
-    .g-table { width: 100%; border-collapse: collapse; }
-    .g-table th {
-      text-align: left; font-size: 11px; font-weight: 500;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
-      padding: 0 12px 10px; border-bottom: 1px solid var(--border);
-    }
-    .g-table td {
-      padding: 14px 12px; font-size: 13px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    .g-table tr:last-child td { border-bottom: none; }
-    .g-table tr:hover td { background: rgba(255,255,255,0.02); }
+    /* ── Vendedores cards ─── */
+    .vendedores-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:4px; }
+    @media(max-width:800px){ .vendedores-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:500px){ .vendedores-grid { grid-template-columns:1fr; } }
+    .vend-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+      padding:16px; backdrop-filter:blur(8px); transition:transform .2s, border-color .2s; position:relative; }
+    .vend-card:hover { transform:translateY(-2px); border-color:rgba(167,139,250,.25); }
+    .vend-card.status-destaque { border-left:3px solid var(--green); }
+    .vend-card.status-atencao  { border-left:3px solid var(--gold); }
+    .vend-card.status-queda    { border-left:3px solid var(--red); }
+    .vend-card.status-ok       { border-left:3px solid var(--border); }
+    .vend-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .vend-av { width:40px; height:40px; border-radius:50%; flex-shrink:0;
+      background:rgba(124,58,237,.25); display:flex; align-items:center;
+      justify-content:center; font-weight:700; font-size:14px; color:#A78BFA;
+      border:1px solid rgba(124,58,237,.3); }
+    .vend-name { font-size:14px; font-weight:700; color:#fff; }
+    .vend-sub  { font-size:11px; color:var(--sub); margin-top:1px; }
+    .vend-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+    .vend-stat { background:rgba(255,255,255,.03); border-radius:8px; padding:8px 10px; }
+    .vend-stat-val { font-size:14px; font-weight:700; color:#fff; }
+    .vend-stat-lbl { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin-top:1px; }
+    .vend-insights { font-size:11px; color:var(--sub); margin-top:6px; }
+    .vend-insights li { list-style:disc; margin-left:14px; margin-top:3px; }
+    .status-dot { width:8px; height:8px; border-radius:50%; position:absolute; top:14px; right:14px; }
+    .status-dot.destaque { background:var(--green); box-shadow:0 0 8px rgba(16,185,129,.6); }
+    .status-dot.atencao  { background:var(--gold);  box-shadow:0 0 8px rgba(245,158,11,.5); }
+    .status-dot.queda    { background:var(--red);   box-shadow:0 0 8px rgba(239,68,68,.5); }
+    .status-dot.ok       { background:rgba(255,255,255,.2); }
+    .treinar-tag { background:rgba(124,58,237,.2); color:#C4B5FD; font-size:10px;
+      font-weight:600; padding:3px 8px; border-radius:20px; border:1px solid rgba(124,58,237,.3); display:inline-block; margin:2px; }
 
-    .g-membro-nome { font-weight: 500; }
-    .g-membro-email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    /* ── Tabela de clientes ─── */
+    .table-wrap { overflow-x:auto; border-radius:var(--radius); margin-bottom:4px; }
+    .clientes-table { width:100%; border-collapse:collapse; font-size:13px;
+      background:rgba(255,255,255,.03); border-radius:var(--radius); overflow:hidden;
+      border:1px solid var(--border); }
+    .clientes-table th { background:rgba(255,255,255,.04); color:var(--sub); font-size:10px;
+      font-weight:600; text-transform:uppercase; letter-spacing:.06em; padding:10px 14px; text-align:left; white-space:nowrap; }
+    .clientes-table td { padding:12px 14px; border-top:1px solid rgba(255,255,255,.04);
+      color:rgba(200,190,255,.8); vertical-align:middle; }
+    .clientes-table tr:hover td { background:rgba(167,139,250,.06); }
+    .td-cliente { font-weight:700; color:#fff; }
+    .td-valor   { font-weight:700; color:var(--green); white-space:nowrap; }
+    .td-valor.exito { color:var(--sub); font-style:italic; font-weight:400; }
+    .origem-badge { background:rgba(124,58,237,.2); color:#C4B5FD; font-size:10px;
+      font-weight:600; padding:3px 8px; border-radius:20px; border:1px solid rgba(124,58,237,.3); white-space:nowrap; }
+    .td-vendedor-cell { display:flex; align-items:center; gap:7px; }
+    .td-av { width:24px; height:24px; border-radius:50%; flex-shrink:0;
+      background:rgba(124,58,237,.25); display:flex; align-items:center;
+      justify-content:center; font-size:9px; font-weight:700; color:#A78BFA; }
+    @media(max-width:650px){ .col-hide { display:none; } }
 
-    /* ── Habilidades (bolinhas coloridas) ── */
-    .g-skills { display: flex; gap: 4px; align-items: center; }
-    .g-skill-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      title: attr(data-label);
-    }
-    .skill-1 { background: #555; }
-    .skill-2, .skill-3 { background: #c97d4e; }
-    .skill-4, .skill-5 { background: #d4a04a; }
-    .skill-6, .skill-7 { background: #7dcf97; }
-    .skill-8, .skill-9, .skill-10 { background: #4ecf9a; }
+    /* ── Origens visual ─── */
+    .origens-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    @media(max-width:600px){ .origens-grid { grid-template-columns:1fr 1fr; } }
+    .origem-card { background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:16px; text-align:center; backdrop-filter:blur(8px); }
+    .origem-val { font-family:'Syne',sans-serif; font-size:24px; font-weight:800;
+      background:linear-gradient(135deg,#A78BFA,#60A5FA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .origem-lbl { font-size:11px; color:var(--sub); margin-top:4px; }
+    .origem-bar-bg { height:4px; background:rgba(255,255,255,.07); border-radius:4px; margin-top:8px; }
+    .origem-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#7C3AED,#A78BFA); }
 
-    /* ── Streak badge ── */
-    .g-streak {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 12px; font-weight: 500;
-    }
-    .g-streak.ativo { color: var(--accent); }
-    .g-streak.inativo { color: var(--text-muted); }
-
-    /* ── Inativo badge ── */
-    .g-inativo-badge {
-      font-size: 11px; padding: 2px 7px; border-radius: 99px;
-      font-weight: 500;
-    }
-    .g-inativo-badge.sim { background: rgba(224,112,112,0.15); color: #e07070; }
-    .g-inativo-badge.nao { background: rgba(125,207,151,0.15); color: #7dcf97; }
-
-    /* ── Modal de convite ── */
-    .g-modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); z-index: 100;
-      align-items: center; justify-content: center;
-    }
-    .g-modal-overlay.open { display: flex; }
-    .g-modal {
-      background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 28px; width: 440px; max-width: 90vw;
-    }
-    .g-modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-    .g-modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
-    .g-modal-input { display: flex; gap: 8px; margin-bottom: 16px; }
-    .g-modal-input input {
-      flex: 1; background: var(--bg-primary); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 14px;
-      font-size: 14px; color: var(--text-primary); font-family: inherit;
-    }
-    .g-modal-input input:focus { outline: none; border-color: var(--accent); }
-    .g-link-box {
-      background: var(--bg-primary); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 14px;
-      font-size: 12px; color: var(--text-muted); word-break: break-all;
-      margin-bottom: 12px; display: none;
-    }
-    .g-modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
-
-    /* ── Ranking de Vendas ── */
-    .g-rank-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-    .g-rank-table th {
-      text-align: left; font-size: 11px; font-weight: 500;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
-      padding: 0 12px 10px; border-bottom: 1px solid var(--border);
-    }
-    .g-rank-table td {
-      padding: 14px 12px; font-size: 13px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    .g-rank-table tr:last-child td { border-bottom: none; }
-    .g-rank-table tr:hover td { background: rgba(255,255,255,0.02); }
-
-    .g-pos { font-size: 18px; font-weight: 700; color: var(--text-muted); min-width: 28px; }
-    .g-pos.gold   { color: #f5c842; }
-    .g-pos.silver { color: #adb5bd; }
-    .g-pos.bronze { color: #cd7f32; }
-
-    .g-valor-grande { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-    .g-valor-zero   { font-size: 13px; color: var(--text-muted); }
-
-    .g-treino-bar { display: flex; align-items: center; gap: 6px; }
-    .g-treino-fill {
-      height: 6px; border-radius: 3px;
-      background: var(--accent); min-width: 2px;
-      transition: width 0.3s;
-    }
-    .g-treino-num { font-size: 11px; color: var(--text-muted); }
-
-    .g-corr-tag {
-      font-size: 10px; font-weight: 600; padding: 2px 6px;
-      border-radius: 99px; letter-spacing: 0.03em;
-    }
-    .g-corr-ok   { background: rgba(125,207,151,0.15); color: #7dcf97; }
-    .g-corr-risk { background: rgba(224,112,112,0.15); color: #e07070; }
-    .g-corr-gap  { background: rgba(255,200,80,0.15);  color: #f5c842; }
-
-    .g-section { margin-top: 40px; }
-
-    /* ── Empty state ── */
-    .g-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
-    .g-empty h3 { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
-
-    /* ── Toast ── */
-    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-    .toast {
-      background: var(--bg-tertiary); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 16px;
-      font-size: 13px; animation: slideUp 0.2s ease;
-    }
-    .toast.success { border-color: rgba(125,207,151,0.4); color: #7dcf97; }
-    .toast.error { border-color: rgba(224,112,112,0.4); color: #e07070; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* ── Misc ─── */
+    .loading { text-align:center; padding:60px; color:var(--sub); }
+    .loading::after { content:''; display:inline-block; width:20px; height:20px;
+      border:2px solid rgba(124,58,237,.3); border-top-color:#7C3AED;
+      border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; margin-left:10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .empty-msg { color:var(--sub); font-size:13px; padding:24px 0; text-align:center; }
+    .badge-warn { display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,.15);
+      color:#FCA5A5; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
   </style>
 </head>
 <body>
+<canvas id="canvas-bg"></canvas>
 
-<!-- Header -->
-<header class="g-header">
-  <div class="g-header-left">
-    <a href="/" class="g-logo">
-      <div class="g-logo-mark">M</div>
-      <span class="g-logo-name">May</span>
-    </a>
-    <span class="g-badge">Painel do Gestor</span>
-  </div>
-  <div class="g-header-right">
-    <span id="nome-empresa"></span>
-    <a href="/" class="btn btn-ghost btn-sm">← Voltar ao app</a>
-  </div>
-</header>
+<div class="page">
 
-<!-- Setup: criar equipe -->
-<div class="g-container" id="tela-setup" style="display:none">
-  <div class="g-setup">
-    <h1>Crie sua equipe</h1>
-    <p>Configure o painel de gestão para acompanhar a evolução dos seus vendedores. Você poderá convidar até 5 membros no plano atual.</p>
-    <div class="g-setup-input">
-      <input type="text" id="input-empresa" placeholder="Nome do escritório ou equipe" />
-      <button class="btn btn-primary" onclick="criarEmpresa()">Criar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Dashboard principal -->
-<div class="g-container" id="tela-dashboard" style="display:none">
-
-  <!-- Stats -->
-  <div class="g-stats" id="stats-cards">
-    <div class="g-stat">
-      <div class="g-stat-label">Total de membros</div>
-      <div class="g-stat-value" id="stat-total">—</div>
-      <div class="g-stat-sub">na sua equipe</div>
-    </div>
-    <div class="g-stat success">
-      <div class="g-stat-label">Ativos esta semana</div>
-      <div class="g-stat-value" id="stat-ativos">—</div>
-      <div class="g-stat-sub">treinaram nos últimos 5 dias</div>
-    </div>
-    <div class="g-stat alert">
-      <div class="g-stat-label">Inativos</div>
-      <div class="g-stat-value" id="stat-inativos">—</div>
-      <div class="g-stat-sub">precisam de atenção</div>
-    </div>
-    <div class="g-stat">
-      <div class="g-stat-label">Média da equipe</div>
-      <div class="g-stat-value" id="stat-media">—</div>
-      <div class="g-stat-sub">nível médio geral</div>
+  <!-- Header -->
+  <div class="dash-header">
+    <a class="back-btn" href="index.html">&#8592; Voltar</a>
+    <div class="dash-title">
+      <h1>📊 Dashboard da Equipe</h1>
+      <p id="dash-sub">Carregando...</p>
     </div>
   </div>
 
-  <!-- Alertas -->
-  <div class="g-alertas" id="alertas-container"></div>
-
-  <!-- Tabela de membros -->
-  <div class="g-section-header">
-    <span class="g-section-title">Membros da equipe</span>
-    <button class="btn btn-primary btn-sm" onclick="abrirModalConvite()">+ Convidar membro</button>
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="filtro-group">
+      <label>De</label>
+      <input type="date" id="f-inicio" />
+    </div>
+    <div class="filtro-group">
+      <label>Até</label>
+      <input type="date" id="f-fim" />
+    </div>
+    <div class="filtro-group">
+      <label>Vendedor</label>
+      <select id="f-usuario">
+        <option value="">Toda a equipe</option>
+      </select>
+    </div>
+    <button class="btn-filtrar" onclick="aplicarFiltros()">Filtrar</button>
   </div>
 
-  <div id="tabela-container">
-    <table class="g-table" id="tabela-membros">
-      <thead>
-        <tr>
-          <th>Membro</th>
-          <th>Streak</th>
-          <th>XP</th>
-          <th>Habilidades</th>
-          <th>Média</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="tbody-membros"></tbody>
-    </table>
-    <div class="g-empty" id="empty-state" style="display:none">
-      <h3>Nenhum membro ainda</h3>
-      <p>Convide membros para começar a acompanhar a evolução deles.</p>
-    </div>
-  </div>
-
-  <!-- ═══ RANKING DE VENDAS ═══ -->
-  <div class="g-section">
-    <div class="g-section-header">
-      <span class="g-section-title">🏆 Ranking de Vendas — <span id="mes-ranking"></span></span>
-      <span style="font-size:12px; color:var(--text-muted)">treino × resultado</span>
-    </div>
-
-    <!-- Stats de vendas -->
-    <div class="g-stats" id="stats-vendas" style="margin-bottom:20px">
-      <div class="g-stat success">
-        <div class="g-stat-label">Total vendido no mês</div>
-        <div class="g-stat-value" id="venda-total">R$ —</div>
-        <div class="g-stat-sub" id="venda-count">— vendas</div>
-      </div>
-      <div class="g-stat">
-        <div class="g-stat-label">Ticket médio</div>
-        <div class="g-stat-value" id="venda-ticket">R$ —</div>
-        <div class="g-stat-sub">por venda</div>
-      </div>
-      <div class="g-stat">
-        <div class="g-stat-label">Top vendedor</div>
-        <div class="g-stat-value" id="venda-top" style="font-size:16px">—</div>
-        <div class="g-stat-sub">este mês</div>
-      </div>
-    </div>
-
-    <!-- Tabela do ranking -->
-    <table class="g-rank-table" id="tabela-ranking">
-      <thead>
-        <tr>
-          <th style="width:40px">#</th>
-          <th>Vendedor</th>
-          <th>R$ no mês</th>
-          <th>Vendas</th>
-          <th>Treinos/mês</th>
-          <th>Correlação</th>
-        </tr>
-      </thead>
-      <tbody id="tbody-ranking"></tbody>
-    </table>
-
-    <p style="font-size:11px; color:var(--text-muted); margin-top:12px; text-align:right">
-      Vendas registradas pelos próprios membros · atualizado em tempo real
-    </p>
+  <div id="dash-content">
+    <div class="loading">Carregando dashboard</div>
   </div>
 
 </div>
 
-<!-- Modal convite -->
-<div class="g-modal-overlay" id="modal-convite">
-  <div class="g-modal">
-    <h2>Convidar membro</h2>
-    <p>Digite o e-mail do vendedor que você quer adicionar à equipe. Um link de acesso será gerado.</p>
-    <div class="g-modal-input">
-      <input type="email" id="input-email-convite" placeholder="email@exemplo.com" />
-      <button class="btn btn-primary" onclick="gerarConvite()">Gerar link</button>
-    </div>
-    <div class="g-link-box" id="link-convite-box"></div>
-    <div class="g-modal-footer">
-      <button class="btn btn-ghost" onclick="fecharModalConvite()">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast-container"></div>
-
-<script src="/js/api.js"></script>
 <script>
-// ─── Auth guard ───────────────────────────────────────────────────────────────
-const user = getUser();
-if (!user || !getAccessToken()) window.location.href = '/auth.html';
-
-// ─── Inicialização ────────────────────────────────────────────────────────────
-async function init() {
-  const res = await apiFetch('/gestor/info');
-  if (!res.ok) { mostrarToast('Erro ao carregar.', 'error'); return; }
-  const data = await res.json();
-
-  if (!data.tem_empresa || data.role !== 'gestor') {
-    document.getElementById('tela-setup').style.display = 'block';
-  } else {
-    document.getElementById('nome-empresa').textContent = data.empresa.nome;
-    document.getElementById('tela-dashboard').style.display = 'block';
-    await Promise.all([ carregarEquipe(), carregarRanking() ]);
+// ── Partículas (leve, poucos pontos) ─────────────────────────────────────────
+(function(){
+  const c = document.getElementById('canvas-bg'), ctx = c.getContext('2d');
+  let ps = [], W, H;
+  function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  for(let i=0;i<80;i++) ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,
+    vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:Math.random(),da:(Math.random()*.3+.1)*(Math.random()>.5?1:-1)*.006,
+    col:['#7C3AED','#A78BFA','#60A5FA','#fff'][Math.floor(Math.random()*4)]});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7);
+    g.addColorStop(0,'rgba(14,10,35,.98)'); g.addColorStop(1,'rgba(4,6,18,1)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ps.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<-5)p.x=W+5; if(p.x>W+5)p.x=-5;
+      if(p.y<-5)p.y=H+5; if(p.y>H+5)p.y=-5;
+      p.a+=p.da; if(p.a>1||p.a<0)p.da*=-1;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.a);
+      ctx.fillStyle=p.col; ctx.shadowColor=p.col; ctx.shadowBlur=p.r*3;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+    });
+    requestAnimationFrame(draw);
   }
+  draw();
+})();
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const API = window.location.hostname==='localhost'?'http://localhost:3000':'';
+let dadosDash   = null;
+let todosUsers  = [];
+
+const ORIGENS_PT = {indicacao:'Indicação',instagram:'Instagram',trafego_meta:'Meta Ads',
+  trafego_google:'Google Ads',grupo_whatsapp:'WhatsApp',parceria:'Parceria',tiktok:'TikTok',outro:'Outro'};
+
+function getToken(){ return localStorage.getItem('may_access'); }
+async function apiFetch(path, opts={}){
+  return fetch(API+path,{...opts,headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json',...(opts.headers||{})}});
 }
+function fmtBRL(v){ if(!v&&v!==0)return'—'; return'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function inicial(n){ return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function fmtData(d){ if(!d)return'—'; return d.slice(0,10).split('-').reverse().join('/'); }
 
-// ─── Criar empresa ────────────────────────────────────────────────────────────
-async function criarEmpresa() {
-  const nome = document.getElementById('input-empresa').value.trim();
-  if (!nome) return;
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',async()=>{
+  const token = getToken();
+  if(!token){ window.location.href='index.html'; return; }
 
-  const res = await apiFetch('/gestor/empresa', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nome }),
-  });
+  // Datas padrão: 1º do mês até hoje
+  const hoje   = new Date();
+  const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  document.getElementById('f-inicio').value = inicio.toISOString().slice(0,10);
+  document.getElementById('f-fim').value    = hoje.toISOString().slice(0,10);
 
-  if (res.ok) {
-    mostrarToast('Equipe criada!', 'success');
-    setTimeout(() => location.reload(), 800);
-  } else {
-    const d = await res.json();
-    mostrarToast(d.erro || 'Erro ao criar equipe.', 'error');
-  }
-}
-
-// ─── Carregar equipe ──────────────────────────────────────────────────────────
-async function carregarEquipe() {
-  const res = await apiFetch('/gestor/equipe');
-  if (!res.ok) { mostrarToast('Erro ao carregar equipe.', 'error'); return; }
-  const data = await res.json();
-
-  // Stats
-  document.getElementById('stat-total').textContent    = data.stats.total_membros;
-  document.getElementById('stat-ativos').textContent   = data.stats.ativos_semana;
-  document.getElementById('stat-inativos').textContent = data.stats.inativos;
-  document.getElementById('stat-media').textContent    = data.stats.media_equipe || '—';
-
-  // Alertas
-  const alertasEl = document.getElementById('alertas-container');
-  alertasEl.innerHTML = data.alertas.map(a =>
-    `<div class="g-alerta-item">${a.mensagem}</div>`
-  ).join('');
-
-  // Tabela
-  const tbody = document.getElementById('tbody-membros');
-  if (data.membros.length === 0) {
-    document.getElementById('tabela-membros').style.display = 'none';
-    document.getElementById('empty-state').style.display = 'block';
-    return;
-  }
-
-  const HABILIDADES = ['conexao','objecao','proposta','negociacao','fechamento','follow_up'];
-  const LABELS = ['Conexão','Objeção','Proposta','Negociação','Fechamento','Follow-up'];
-
-  tbody.innerHTML = data.membros.map(m => {
-    const dots = HABILIDADES.map((h, i) => {
-      const nv = m.habilidades[h];
-      return `<span class="g-skill-dot skill-${nv}" title="${LABELS[i]}: nível ${nv}"></span>`;
-    }).join('');
-
-    const streakClass = m.streak > 0 ? 'ativo' : 'inativo';
-    const streakText = m.streak > 0 ? `🔥 ${m.streak} dias` : '— sem streak';
-
-    const statusClass = m.inativo ? 'sim' : 'nao';
-    const statusText = m.inativo
-      ? (m.dias_sem_treinar === null ? 'Nunca treinou' : `${m.dias_sem_treinar}d sem treinar`)
-      : 'Ativo';
-
-    return `
-      <tr>
-        <td>
-          <div class="g-membro-nome">${m.name}</div>
-          <div class="g-membro-email">${m.email}</div>
-        </td>
-        <td><span class="g-streak ${streakClass}">${streakText}</span></td>
-        <td>${m.xp_total} XP</td>
-        <td><div class="g-skills">${dots}</div></td>
-        <td><strong>${m.media_geral || '—'}</strong></td>
-        <td><span class="g-inativo-badge ${statusClass}">${statusText}</span></td>
-      </tr>
-    `;
-  }).join('');
-}
-
-// ─── Ranking de Vendas ────────────────────────────────────────────────────────
-async function carregarRanking() {
-  const res = await apiFetch('/vendas/ranking');
-  if (!res.ok) return;
-  const data = await res.json();
-
-  // Mês
-  const mes = new Date(data.mes_referencia);
-  const nomeMes = mes.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  document.getElementById('mes-ranking').textContent = nomeMes;
-
-  // Stats
-  const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('venda-total').textContent  = fmt(data.stats.total_vendido);
-  document.getElementById('venda-count').textContent  = `${data.stats.total_vendas} venda${data.stats.total_vendas !== 1 ? 's' : ''}`;
-  document.getElementById('venda-ticket').textContent = fmt(data.stats.ticket_medio);
-  document.getElementById('venda-top').textContent    = data.stats.top_vendedor || '—';
-
-  // Tabela de ranking
-  const tbody = document.getElementById('tbody-ranking');
-  if (!data.ranking || data.ranking.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">
-      Nenhuma venda registrada ainda.<br>
-      <span style="font-size:12px">Os membros registram vendas pelo app principal.</span>
-    </td></tr>`;
-    return;
-  }
-
-  const maxTreinos = Math.max(...data.ranking.map(r => r.treinos_mes), 1);
-
-  tbody.innerHTML = data.ranking.map(r => {
-    // Ícone de posição
-    const posClass = r.posicao === 1 ? 'gold' : r.posicao === 2 ? 'silver' : r.posicao === 3 ? 'bronze' : '';
-    const posIcon  = r.posicao === 1 ? '🥇' : r.posicao === 2 ? '🥈' : r.posicao === 3 ? '🥉' : r.posicao;
-
-    // Valor formatado
-    const valorHtml = r.total_mes > 0
-      ? `<span class="g-valor-grande">${fmt(r.total_mes)}</span>`
-      : `<span class="g-valor-zero">R$ 0,00</span>`;
-
-    // Barra de treinos
-    const pct   = Math.round((r.treinos_mes / maxTreinos) * 100);
-    const width  = Math.max(pct, 4);
-    const treinoHtml = `
-      <div class="g-treino-bar">
-        <div class="g-treino-fill" style="width:${width}px; max-width:80px"></div>
-        <span class="g-treino-num">${r.treinos_mes}</span>
-      </div>`;
-
-    // Correlação treino × resultado
-    let corrTag = '';
-    if (r.total_mes > 0 && r.ativo) {
-      corrTag = `<span class="g-corr-tag g-corr-ok">Treina e vende ✓</span>`;
-    } else if (r.total_mes > 0 && !r.ativo) {
-      corrTag = `<span class="g-corr-tag g-corr-gap">Vende, pouco treino</span>`;
-    } else if (r.total_mes === 0 && r.ativo) {
-      corrTag = `<span class="g-corr-tag g-corr-gap">Treina, ainda sem venda</span>`;
-    } else {
-      corrTag = `<span class="g-corr-tag g-corr-risk">Sem treino e sem venda ⚠</span>`;
-    }
-
-    return `
-      <tr>
-        <td><span class="g-pos ${posClass}">${posIcon}</span></td>
-        <td>
-          <div class="g-membro-nome">${r.name}</div>
-          <div class="g-membro-email">${r.email}</div>
-        </td>
-        <td>${valorHtml}<br><span style="font-size:11px;color:var(--text-muted)">${r.count_mes} venda${r.count_mes !== 1 ? 's' : ''}</span></td>
-        <td>${r.count_mes}</td>
-        <td>${treinoHtml}</td>
-        <td>${corrTag}</td>
-      </tr>
-    `;
-  }).join('');
-}
-
-// ─── Modal convite ────────────────────────────────────────────────────────────
-function abrirModalConvite() {
-  document.getElementById('modal-convite').classList.add('open');
-  document.getElementById('link-convite-box').style.display = 'none';
-  document.getElementById('input-email-convite').value = '';
-}
-
-function fecharModalConvite() {
-  document.getElementById('modal-convite').classList.remove('open');
-}
-
-async function gerarConvite() {
-  const email = document.getElementById('input-email-convite').value.trim();
-  if (!email) return;
-
-  const res = await apiFetch('/gestor/convidar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-
-  const data = await res.json();
-  if (res.ok) {
-    const box = document.getElementById('link-convite-box');
-    box.style.display = 'block';
-    box.innerHTML = `Link gerado para <strong>${email}</strong>:<br><br>${data.link}<br><br>
-      <button class="btn btn-ghost btn-sm" onclick="copiar('${data.link}')">Copiar link</button>`;
-    mostrarToast('Link gerado!', 'success');
-  } else {
-    mostrarToast(data.erro || 'Erro ao gerar convite.', 'error');
-  }
-}
-
-function copiar(texto) {
-  navigator.clipboard.writeText(texto);
-  mostrarToast('Link copiado!', 'success');
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function mostrarToast(msg, tipo = 'info') {
-  const el = document.createElement('div');
-  el.className = `toast ${tipo}`;
-  el.textContent = msg;
-  document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-}
-
-// Fechar modal clicando fora
-document.getElementById('modal-convite').addEventListener('click', function(e) {
-  if (e.target === this) fecharModalConvite();
+  await carregarDash();
 });
 
-init();
+async function aplicarFiltros(){ await carregarDash(); }
+
+async function carregarDash(){
+  const ini  = document.getElementById('f-inicio').value;
+  const fim  = document.getElementById('f-fim').value;
+  const uid  = document.getElementById('f-usuario').value;
+  let qs     = `?data_inicio=${ini}&data_fim=${fim}`;
+  if(uid) qs += `&user_ids=${uid}`;
+
+  document.getElementById('dash-content').innerHTML = '<div class="loading">Carregando</div>';
+
+  try{
+    const r = await apiFetch('/api/gestor/dashboard'+qs);
+    if(r.status===403){ window.location.href='index.html'; return; }
+    dadosDash = await r.json();
+
+    // Popula select de usuários (uma vez)
+    if(todosUsers.length===0 && dadosDash.vendedores?.length){
+      todosUsers = dadosDash.vendedores;
+      const sel  = document.getElementById('f-usuario');
+      todosUsers.forEach(u=>{
+        const o = document.createElement('option');
+        o.value = u.user_id; o.textContent = u.name;
+        sel.appendChild(o);
+      });
+    }
+
+    document.getElementById('dash-sub').textContent =
+      `${dadosDash.vendedores?.length||0} vendedor${dadosDash.vendedores?.length!==1?'es':''} · ${ini} → ${fim}`;
+
+    renderDash();
+  } catch(e){
+    console.error(e);
+    document.getElementById('dash-content').innerHTML='<div class="empty-msg">Erro ao carregar dados.</div>';
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderDash(){
+  const d = dadosDash;
+  const k = d.kpis || {};
+  document.getElementById('dash-content').innerHTML = `
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-val">${k.total_contratos||0}</div><div class="kpi-lbl">Contratos</div></div>
+      <div class="kpi-card"><div class="kpi-val">${fmtBRL(k.total_faturamento)}</div><div class="kpi-lbl">Faturamento</div></div>
+      <div class="kpi-card"><div class="kpi-val">${fmtBRL(k.ticket_medio)}</div><div class="kpi-lbl">Ticket Médio</div></div>
+      <div class="kpi-card"><div class="kpi-val">${k.tempo_medio_fechamento!=null?k.tempo_medio_fechamento+' d':'—'}</div><div class="kpi-lbl">Ciclo Médio</div></div>
+      <div class="kpi-card"><div class="kpi-val">${k.taxa_exito!=null?k.taxa_exito+'%':'—'}</div><div class="kpi-lbl">Êxito (sem valor)</div></div>
+    </div>
+
+    <!-- Insights + Reunião -->
+    <p class="sec-title">Insights da Equipe</p>
+    ${renderInsights(d.insights_gestor)}
+
+    <p class="sec-title" style="margin-top:20px">Sugestão de Reunião</p>
+    ${renderReuniao(d.sugestao_reuniao)}
+
+    <!-- Vendedores -->
+    <p class="sec-title">Vendedores</p>
+    ${renderVendedores(d.vendedores)}
+
+    <!-- Origens -->
+    ${d.origens?.length?`
+      <p class="sec-title">Origem dos Clientes</p>
+      ${renderOrigens(d.origens, k.total_contratos)}
+    `:''}
+
+    <!-- Clientes -->
+    <p class="sec-title">Clientes Fechados</p>
+    ${renderClientes(d.vendas)}
+  `;
+}
+
+// ── Insights ──────────────────────────────────────────────────────────────────
+function renderInsights(insights){
+  if(!insights?.length) return '<div class="empty-msg">Sem insights disponíveis.</div>';
+  const icons  = ['🚨','⚠️','💡','📈','🎯','🔍'];
+  const types  = ['warn','gold','info','ok','info','info'];
+  return `<div class="insights-grid">${insights.map((ins,i)=>`
+    <div class="insight-item ${types[i%types.length]}">
+      <span class="icon">${icons[i%icons.length]}</span>
+      <span>${ins}</span>
+    </div>`).join('')}</div>`;
+}
+
+// ── Sugestão de Reunião ───────────────────────────────────────────────────────
+function renderReuniao(r){
+  if(!r) return '<div class="empty-msg">Nenhuma sugestão no momento — equipe está bem!</div>';
+  const tipoLabel = r.tipo==='individual' ? `Individual — ${r.vendedor_nome||'Vendedor'}` : 'Time completo';
+  return `<div class="reuniao-box">
+    <div class="reuniao-header">
+      <span style="font-size:28px">${r.tipo==='individual'?'🤝':'👥'}</span>
+      <div>
+        <h3>Reunião sugerida</h3>
+        <span class="reuniao-tipo">${tipoLabel}</span>
+      </div>
+    </div>
+    <p class="reuniao-motivo">${r.motivo}</p>
+    <ul class="pauta-list">
+      ${(r.pauta||[]).map(p=>`<li>${p}</li>`).join('')}
+    </ul>
+    <button class="btn-agendar" onclick="alert('Copie a pauta e agende pelo seu calendário!')">📋 Copiar pauta</button>
+  </div>`;
+}
+
+// ── Vendedores ────────────────────────────────────────────────────────────────
+function renderVendedores(vendedores){
+  if(!vendedores?.length) return '<div class="empty-msg">Nenhum vendedor encontrado.</div>';
+  return `<div class="vendedores-grid">${vendedores.map(v=>`
+    <div class="vend-card status-${v.status}">
+      <div class="status-dot ${v.status}"></div>
+      <div class="vend-head">
+        ${v.avatar_url
+          ? `<img src="${v.avatar_url}" class="vend-av" style="object-fit:cover" />`
+          : `<div class="vend-av">${inicial(v.name)}</div>`}
+        <div>
+          <div class="vend-name">${v.name}</div>
+          <div class="vend-sub">Maturidade ${v.maturidade||0}/5 · ${v.treinos_mes||0} treinos</div>
+        </div>
+      </div>
+      <div class="vend-stats">
+        <div class="vend-stat"><div class="vend-stat-val">${v.contratos}</div><div class="vend-stat-lbl">Contratos</div></div>
+        <div class="vend-stat"><div class="vend-stat-val">${fmtBRL(v.faturamento)||'—'}</div><div class="vend-stat-lbl">Faturado</div></div>
+        <div class="vend-stat"><div class="vend-stat-val">${fmtBRL(v.ticket_medio)||'—'}</div><div class="vend-stat-lbl">Ticket</div></div>
+        <div class="vend-stat"><div class="vend-stat-val">${v.tempo_medio_fechamento!=null?v.tempo_medio_fechamento+'d':'—'}</div><div class="vend-stat-lbl">Ciclo</div></div>
+      </div>
+      ${v.dias_sem_treinar>5?`<div class="badge-warn" style="margin-bottom:8px">⚠️ ${v.dias_sem_treinar} dias sem treinar</div>`:''}
+      ${v.insights?.length?`<ul class="vend-insights">${v.insights.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
+      ${v.dificuldades?`<div style="margin-top:8px">${v.dificuldades.split(',').filter(Boolean).slice(0,2).map(d=>`<span class="treinar-tag">📚 ${d}</span>`).join('')}</div>`:''}
+    </div>`).join('')}</div>`;
+}
+
+// ── Origens ───────────────────────────────────────────────────────────────────
+function renderOrigens(origens, total){
+  const maxCount = Math.max(...origens.map(o=>o.count), 1);
+  return `<div class="origens-grid">${origens.slice(0,8).map(o=>`
+    <div class="origem-card">
+      <div class="origem-val">${o.count}</div>
+      <div class="origem-lbl">${ORIGENS_PT[o.origem]||o.origem}</div>
+      ${o.total?`<div style="font-size:10px;color:rgba(200,190,255,.35);margin-top:2px">${fmtBRL(o.total)}</div>`:''}
+      <div class="origem-bar-bg">
+        <div class="origem-bar-fill" style="width:${Math.round((o.count/maxCount)*100)}%"></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ── Tabela Clientes ───────────────────────────────────────────────────────────
+function renderClientes(vendas){
+  if(!vendas?.length) return '<div class="empty-msg">Nenhum cliente registrado neste período.</div>';
+  const linhas = vendas.map(v=>`<tr>
+    <td><div class="td-vendedor-cell">
+      ${v.user_avatar
+        ? `<img src="${v.user_avatar}" class="td-av" style="object-fit:cover" />`
+        : `<div class="td-av">${inicial(v.user_name)}</div>`}
+      <span>${(v.user_name||'').split(' ')[0]}</span>
+    </div></td>
+    <td class="td-cliente">${v.cliente||'—'}</td>
+    <td>${v.telefone?`<a href="tel:${v.telefone}" style="color:#60A5FA">${v.telefone}</a>`:'—'}</td>
+    <td>${v.descricao||'—'}</td>
+    <td>${v.origem?`<span class="origem-badge">${ORIGENS_PT[v.origem]||v.origem}</span>`:'—'}</td>
+    <td class="${!v.valor?'td-valor exito':'td-valor'}">${v.valor?fmtBRL(parseFloat(v.valor)):'Êxito'}</td>
+    <td class="col-hide">${fmtData(v.data_contato)}</td>
+    <td class="col-hide">${fmtData(v.data_fechamento)}</td>
+  </tr>`).join('');
+  return `<div class="table-wrap"><table class="clientes-table">
+    <thead><tr>
+      <th>Vendedor</th><th>Cliente</th><th>Telefone</th>
+      <th>Produto/Serviço</th><th>Origem</th><th>Valor</th>
+      <th class="col-hide">1º Contato</th><th class="col-hide">Fechamento</th>
+    </tr></thead>
+    <tbody>${linhas}</tbody>
+  </table></div>`;
+}
 </script>
 </body>
 </html>

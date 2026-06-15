@@ -249,4 +249,365 @@ router.get('/info', authMiddleware, async (req, res) => {
   }
 });
 
+// ─── GET /api/gestor/dashboard ───────────────────────────────────────────────
+// Dashboard completo do gestor com KPIs, vendedores, vendas, origens e insights
+router.get('/dashboard', authMiddleware, async (req, res) => {
+  // Auth checks
+  if (req.user.role !== 'gestor') {
+    return res.status(403).json({ erro: 'Acesso restrito a gestores.' });
+  }
+  if (!req.user.empresa_id) {
+    return res.status(403).json({ erro: 'Gestor sem empresa vinculada.' });
+  }
+
+  try {
+    const agora = new Date();
+
+    // ── Default date range: first day of current month → today ──────────────
+    const primeiroDiaMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const dataInicioStr = req.query.data_inicio || primeiroDiaMes.toISOString().slice(0, 10);
+    const dataFimStr    = req.query.data_fim    || agora.toISOString().slice(0, 10);
+
+    const dataInicioISO = `${dataInicioStr}T00:00:00.000Z`;
+    const dataFimISO    = `${dataFimStr}T23:59:59.999Z`;
+
+    // Optional user filter
+    const userIdsParam = req.query.user_ids;
+    const userIdsArray = userIdsParam
+      ? userIdsParam.split(',').map(id => id.trim()).filter(Boolean)
+      : null;
+
+    // ── 1. Busca vendas ──────────────────────────────────────────────────────
+    let vendasQuery = supabase
+      .from('vendas')
+      .select('id, user_id, cliente, telefone, origem, descricao, valor, data_contato, data_fechamento, created_at')
+      .eq('empresa_id', req.user.empresa_id)
+      .gte('created_at', dataInicioISO)
+      .lte('created_at', dataFimISO);
+
+    if (userIdsArray) {
+      vendasQuery = vendasQuery.in('user_id', userIdsArray);
+    }
+
+    const { data: vendasRaw, error: vendasError } = await vendasQuery;
+    if (vendasError) throw vendasError;
+    const vendas = vendasRaw || [];
+
+    // ── 2. Busca usuários da empresa ─────────────────────────────────────────
+    const { data: usersRaw, error: usersError } = await supabase
+      .from('users')
+      .select('id, name, avatar_url, mensagens_mes, maturidade, dificuldades, role')
+      .eq('empresa_id', req.user.empresa_id);
+
+    if (usersError) throw usersError;
+    const users = usersRaw || [];
+
+    // ── 3. Busca streaks de todos os usuários da empresa ─────────────────────
+    const userIds = users.map(u => u.id);
+    let streaksMap = {};
+    if (userIds.length > 0) {
+      const { data: streaksRaw } = await supabase
+        .from('streak')
+        .select('user_id, ultimo_treino, dias_seguidos')
+        .in('user_id', userIds);
+
+      (streaksRaw || []).forEach(s => {
+        streaksMap[s.user_id] = s;
+      });
+    }
+
+    // ── 4. KPIs globais ──────────────────────────────────────────────────────
+    const totalContratos = vendas.length;
+
+    const totalFaturamento = vendas.reduce((sum, v) => {
+      return sum + (v.valor != null ? parseFloat(v.valor) : 0);
+    }, 0);
+
+    const ticketMedio = totalContratos > 0
+      ? Math.round((totalFaturamento / totalContratos) * 100) / 100
+      : 0;
+
+    // Tempo médio de fechamento (dias entre data_contato e data_fechamento)
+    const vendasComCiclo = vendas.filter(v => v.data_contato && v.data_fechamento);
+    const tempMedioFechamento = vendasComCiclo.length > 0
+      ? Math.round(
+          vendasComCiclo.reduce((sum, v) => {
+            const dias = (new Date(v.data_fechamento) - new Date(v.data_contato)) / (1000 * 60 * 60 * 24);
+            return sum + dias;
+          }, 0) / vendasComCiclo.length * 10
+        ) / 10
+      : null;
+
+    // Top origem
+    const origensCounts = {};
+    vendas.forEach(v => {
+      if (v.origem) {
+        origensCounts[v.origem] = (origensCounts[v.origem] || 0) + 1;
+      }
+    });
+    const topOrigem = Object.keys(origensCounts).length > 0
+      ? Object.keys(origensCounts).reduce((a, b) => origensCounts[a] > origensCounts[b] ? a : b)
+      : null;
+
+    // Taxa de êxito: % de vendas onde valor NÃO é null (tem valor = fechou)
+    const vendasComValor = vendas.filter(v => v.valor != null).length;
+    const taxaExito = totalContratos > 0
+      ? Math.round((vendasComValor / totalContratos) * 1000) / 10
+      : 0;
+
+    const kpis = {
+      total_contratos: totalContratos,
+      total_faturamento: Math.round(totalFaturamento * 100) / 100,
+      ticket_medio: ticketMedio,
+      tempo_medio_fechamento: tempMedioFechamento,
+      top_origem: topOrigem,
+      taxa_exito: taxaExito,
+    };
+
+    // ── 5. Stats por vendedor ─────────────────────────────────────────────────
+    const usersMap = {};
+    users.forEach(u => { usersMap[u.id] = u; });
+
+    // Agrupa vendas por user_id
+    const vendasPorUser = {};
+    vendas.forEach(v => {
+      if (!vendasPorUser[v.user_id]) vendasPorUser[v.user_id] = [];
+      vendasPorUser[v.user_id].push(v);
+    });
+
+    // Filtra apenas vendedores (não-gestores) da empresa
+    const vendedores = users
+      .filter(u => u.role !== 'gestor')
+      .map(u => {
+        const uVendas = vendasPorUser[u.id] || [];
+        const streak  = streaksMap[u.id] || {};
+
+        const contratos    = uVendas.length;
+        const faturamento  = uVendas.reduce((s, v) => s + (v.valor != null ? parseFloat(v.valor) : 0), 0);
+        const uTicket      = contratos > 0 ? Math.round((faturamento / contratos) * 100) / 100 : 0;
+
+        // Ciclo médio
+        const uComCiclo = uVendas.filter(v => v.data_contato && v.data_fechamento);
+        const uTempo = uComCiclo.length > 0
+          ? Math.round(
+              uComCiclo.reduce((s, v) => {
+                return s + (new Date(v.data_fechamento) - new Date(v.data_contato)) / (1000 * 60 * 60 * 24);
+              }, 0) / uComCiclo.length * 10
+            ) / 10
+          : null;
+
+        // Dias sem treinar
+        const ultimoTreino = streak.ultimo_treino ? new Date(streak.ultimo_treino) : null;
+        const diasSemTreinar = ultimoTreino
+          ? Math.floor((agora - ultimoTreino) / (1000 * 60 * 60 * 24))
+          : null;
+
+        // Status automático
+        let status = 'ok';
+        if (contratos === 0 && diasSemTreinar !== null && diasSemTreinar > 5) {
+          status = 'queda';
+        } else if (contratos === 0 || diasSemTreinar > 7) {
+          status = 'atencao';
+        } else if (
+          contratos >= Math.ceil(totalContratos / Math.max(users.filter(u2 => u2.role !== 'gestor').length, 1) * 1.2)
+        ) {
+          status = 'destaque';
+        }
+
+        // Insights individuais
+        const insights = [];
+        if (diasSemTreinar === null) {
+          insights.push('Nunca treinou — incentive o primeiro treino.');
+        } else if (diasSemTreinar > 7) {
+          insights.push(`Sem treinar há ${diasSemTreinar} dias — atenção ao engajamento.`);
+        } else if (diasSemTreinar > 3) {
+          insights.push(`${diasSemTreinar} dias sem treinar — considere um lembrete.`);
+        }
+        if (contratos === 0) {
+          insights.push('Nenhuma venda no período — verificar pipeline.');
+        } else if (uTicket > 0 && ticketMedio > 0 && uTicket < ticketMedio * 0.7) {
+          insights.push('Ticket médio abaixo da média da equipe — foco em upsell.');
+        }
+        if (uTempo !== null && tempMedioFechamento !== null && uTempo > tempMedioFechamento * 1.5) {
+          insights.push(`Ciclo de fechamento longo (${uTempo} dias) — considere reunião de apoio.`);
+        }
+        if (u.dificuldades) {
+          insights.push(`Dificuldades relatadas: ${u.dificuldades}`);
+        }
+
+        return {
+          user_id:               u.id,
+          name:                  u.name,
+          avatar_url:            u.avatar_url || null,
+          contratos,
+          faturamento:           Math.round(faturamento * 100) / 100,
+          ticket_medio:          uTicket,
+          tempo_medio_fechamento: uTempo,
+          dias_sem_treinar:      diasSemTreinar,
+          treinos_mes:           u.mensagens_mes || 0,
+          maturidade:            u.maturidade || null,
+          dificuldades:          u.dificuldades || null,
+          status,
+          insights,
+        };
+      });
+
+    // ── 6. Vendas enriquecidas com nome/avatar ────────────────────────────────
+    const vendasEnriquecidas = vendas.map(v => {
+      const u = usersMap[v.user_id] || {};
+      return {
+        ...v,
+        user_name:   u.name       || null,
+        user_avatar: u.avatar_url || null,
+      };
+    });
+
+    // ── 7. Origens ────────────────────────────────────────────────────────────
+    const origensMap = {};
+    vendas.forEach(v => {
+      if (!v.origem) return;
+      if (!origensMap[v.origem]) origensMap[v.origem] = { origem: v.origem, count: 0, total: 0 };
+      origensMap[v.origem].count++;
+      if (v.valor != null) origensMap[v.origem].total += parseFloat(v.valor);
+    });
+    const origens = Object.values(origensMap)
+      .map(o => ({ ...o, total: Math.round(o.total * 100) / 100 }))
+      .sort((a, b) => b.count - a.count);
+
+    // ── 8. Insights do gestor ─────────────────────────────────────────────────
+    const insightsGestor = [];
+
+    const semTreinarMaisDe5 = vendedores.filter(
+      v => v.dias_sem_treinar !== null && v.dias_sem_treinar > 5
+    );
+    if (semTreinarMaisDe5.length > 0) {
+      insightsGestor.push(
+        `${semTreinarMaisDe5.length} vendedor${semTreinarMaisDe5.length > 1 ? 'es' : ''} sem treinar há mais de 5 dias.`
+      );
+    }
+
+    const semVendas = vendedores.filter(v => v.contratos === 0);
+    if (semVendas.length > 0) {
+      const nomes = semVendas.map(v => v.name).join(', ');
+      insightsGestor.push(`${semVendas.length} vendedor${semVendas.length > 1 ? 'es' : ''} sem vendas no período: ${nomes}.`);
+    }
+
+    // Maior ciclo de fechamento
+    const comCiclo = vendedores.filter(v => v.tempo_medio_fechamento !== null);
+    if (comCiclo.length > 0) {
+      const maiorCiclo = comCiclo.reduce((a, b) =>
+        a.tempo_medio_fechamento > b.tempo_medio_fechamento ? a : b
+      );
+      if (tempMedioFechamento !== null && maiorCiclo.tempo_medio_fechamento > tempMedioFechamento * 1.4) {
+        insightsGestor.push(
+          `${maiorCiclo.name} tem o maior ciclo de fechamento (${maiorCiclo.tempo_medio_fechamento} dias) — considere uma reunião de apoio.`
+        );
+      }
+    }
+
+    // Ticket abaixo da média
+    const ticketAbaixo = vendedores.filter(
+      v => v.contratos > 0 && ticketMedio > 0 && v.ticket_medio < ticketMedio * 0.7
+    );
+    if (ticketAbaixo.length > 0) {
+      insightsGestor.push(
+        `${ticketAbaixo.length} vendedor${ticketAbaixo.length > 1 ? 'es' : ''} com ticket médio abaixo de 70% da média da equipe.`
+      );
+    }
+
+    if (topOrigem) {
+      const topCount = origensCounts[topOrigem];
+      const pct = totalContratos > 0 ? Math.round((topCount / totalContratos) * 100) : 0;
+      if (pct > 50) {
+        insightsGestor.push(
+          `Origem "${topOrigem}" representa ${pct}% das vendas — considere diversificar canais.`
+        );
+      }
+    }
+
+    // ── 9. Sugestão de reunião (lógica, não IA) ───────────────────────────────
+    let sugestaoReuniao = null;
+
+    // Prioridade 1: vendedor sem vendas
+    const vendedorSemVenda = vendedores.find(v => v.contratos === 0);
+    if (vendedorSemVenda) {
+      const pauta = ['Revisar pipeline de oportunidades em aberto.'];
+      if (vendedorSemVenda.dias_sem_treinar !== null && vendedorSemVenda.dias_sem_treinar > 3) {
+        pauta.push(`Retomar rotina de treinos (${vendedorSemVenda.dias_sem_treinar} dias parado).`);
+      }
+      if (vendedorSemVenda.dificuldades) {
+        pauta.push(`Trabalhar dificuldades relatadas: ${vendedorSemVenda.dificuldades}.`);
+      }
+      pauta.push('Definir metas de atividade para a próxima semana.');
+      pauta.push('Avaliar se o script de abordagem precisa ser ajustado.');
+
+      sugestaoReuniao = {
+        tipo:          'individual',
+        vendedor_nome: vendedorSemVenda.name,
+        motivo:        `${vendedorSemVenda.name} não registrou vendas no período e pode precisar de suporte.`,
+        pauta,
+      };
+    } else {
+      // Prioridade 2: média da equipe abaixo de algum limiar (ex.: ticket médio baixo ou muitos sem treino)
+      const mediaContratosPorVendedor = vendedores.length > 0
+        ? totalContratos / vendedores.length
+        : 0;
+      const precisaReuniaoTime =
+        semTreinarMaisDe5.length >= Math.ceil(vendedores.length / 2) ||
+        (mediaContratosPorVendedor < 2 && totalContratos < vendedores.length);
+
+      if (precisaReuniaoTime) {
+        const pauta = ['Revisão dos números do período e metas restantes do mês.'];
+        if (semTreinarMaisDe5.length > 0) {
+          pauta.push(`Reforçar importância dos treinos — ${semTreinarMaisDe5.length} vendedor${semTreinarMaisDe5.length > 1 ? 'es' : ''} inativos.`);
+        }
+        if (topOrigem) {
+          pauta.push(`Avaliar qualidade dos leads de "${topOrigem}" e estratégias de diversificação.`);
+        }
+        pauta.push('Compartilhar boas práticas dos vendedores em destaque.');
+        pauta.push('Alinhar abordagem de objeções e ciclo de fechamento.');
+
+        sugestaoReuniao = {
+          tipo:   'time',
+          motivo: 'Desempenho geral abaixo do esperado — alinhamento de equipe recomendado.',
+          pauta,
+        };
+      } else if (comCiclo.length > 0) {
+        // Prioridade 3: vendedor com ciclo de fechamento muito longo
+        const maiorCiclo = comCiclo.reduce((a, b) =>
+          a.tempo_medio_fechamento > b.tempo_medio_fechamento ? a : b
+        );
+        if (tempMedioFechamento !== null && maiorCiclo.tempo_medio_fechamento > tempMedioFechamento * 1.4) {
+          sugestaoReuniao = {
+            tipo:          'individual',
+            vendedor_nome: maiorCiclo.name,
+            motivo:        `${maiorCiclo.name} tem ciclo de fechamento de ${maiorCiclo.tempo_medio_fechamento} dias, acima da média da equipe.`,
+            pauta: [
+              'Mapear em quais etapas o cliente trava mais.',
+              'Revisar técnicas de negociação e manejo de objeções.',
+              'Analisar os últimos 3 casos que demoraram mais para fechar.',
+              'Definir gatilhos de urgência adequados ao perfil do cliente.',
+              'Acompanhar próximas negociações em tempo real se necessário.',
+            ],
+          };
+        }
+      }
+    }
+
+    // ── Resposta final ────────────────────────────────────────────────────────
+    return res.json({
+      periodo:          { data_inicio: dataInicioStr, data_fim: dataFimStr },
+      kpis,
+      vendedores,
+      vendas:           vendasEnriquecidas,
+      origens,
+      insights_gestor:  insightsGestor,
+      sugestao_reuniao: sugestaoReuniao,
+    });
+  } catch (err) {
+    console.error('Erro ao buscar dashboard do gestor:', err.message);
+    res.status(500).json({ erro: 'Erro ao carregar dashboard.' });
+  }
+});
+
 module.exports = router;
