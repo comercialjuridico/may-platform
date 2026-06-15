@@ -461,25 +461,10 @@ async function enviarMensagem() {
         estado.conversaAtiva = evento.conversa_id;
       }
       if (tipo === 'fim') {
-        // Adiciona botões de ação pós-mensagem
+        // Adiciona botões de ação pós-streaming
         const msgEl = document.getElementById(msgId);
-        if (msgEl) {
-          msgEl.insertAdjacentHTML('beforeend', `
-            <div class="msg-actions">
-              <button class="msg-action-btn" onclick="copiarMensagem('${msgId}')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                Copiar
-              </button>
-              <button class="msg-action-btn" onclick="salvarTemplate('${msgId}')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                Salvar
-              </button>
-              <button class="msg-action-btn" onclick="exportarDocx('${msgId}')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                Word
-              </button>
-            </div>
-          `);
+        if (msgEl && !msgEl.querySelector('.msg-actions')) {
+          msgEl.querySelector('.msg-content').insertAdjacentHTML('beforeend', msgActionButtons(msgId));
         }
         // Atualiza uso
         estado.uso.mensagens_usadas++;
@@ -502,17 +487,36 @@ async function enviarMensagem() {
 }
 
 // ─── Adicionar mensagem ao DOM ────────────────────────────────────────────────
+function msgActionButtons(msgId) {
+  return `<div class="msg-actions">
+    <button class="msg-action-btn" onclick="copiarMensagem('${msgId}')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copiar
+    </button>
+    <button class="msg-action-btn" onclick="salvarTemplate('${msgId}')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Salvar
+    </button>
+    <button class="msg-action-btn" onclick="exportarDocx('${msgId}')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      Word
+    </button>
+  </div>`;
+}
+
 function adicionarMensagem(role, conteudo, scroll = true) {
   const container = document.getElementById('messages-container');
   const isUser = role === 'user';
   const inicial = (estado.user?.name || 'V').charAt(0).toUpperCase();
+  const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
 
   const html = `
-    <div class="message ${isUser ? 'user' : ''}">
+    <div class="message ${isUser ? 'user' : ''}" id="${msgId}">
       <div class="msg-avatar ${isUser ? 'user-av' : 'may'}">${isUser ? inicial : 'M'}</div>
       <div class="msg-content">
         <div class="msg-name">${isUser ? 'Você' : 'May'}</div>
         <div class="msg-bubble">${isUser ? escapeHtml(conteudo) : renderMarkdown(conteudo)}</div>
+        ${!isUser ? msgActionButtons(msgId) : ''}
       </div>
     </div>
   `;
