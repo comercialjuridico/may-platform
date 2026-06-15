@@ -983,10 +983,14 @@ function logout() {
 
 // ─── Mobile sidebar ──────────────────────────────────────────────────────────
 function toggleMenuMobile() {
-  document.getElementById('sidebar').classList.toggle('open');
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sidebar-overlay');
+  const isOpen   = sidebar.classList.toggle('open');
+  overlay?.classList.toggle('visible', isOpen);
 }
 function fecharMenuMobile() {
   document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('visible');
 }
 
 // ─── Nova conversa ───────────────────────────────────────────────────────────

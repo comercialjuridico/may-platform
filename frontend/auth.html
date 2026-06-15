@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#4B47D4" />
+  <meta name="theme-color" content="#7C3AED" />
   <title>May — Entrar</title>
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" href="/assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/auth.css" />
 </head>
 <body class="auth-page">
+
+<canvas id="canvas-auth"></canvas>
 
 <div class="auth-container">
 
@@ -23,21 +25,18 @@
     <span class="auth-logo-name">May</span>
   </div>
 
-  <!-- Tabs -->
-  <div style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; box-shadow:var(--shadow-lg);">
+  <!-- Card -->
+  <div class="auth-card">
 
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login" onclick="mostrarTab('login')">Entrar</button>
       <button class="auth-tab" id="tab-register" onclick="mostrarTab('register')">Criar conta</button>
     </div>
 
-    <!-- Alerta de erros -->
     <div class="auth-error" id="auth-error"></div>
+    <div id="auth-aviso" style="display:none; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); border-radius:var(--radius-sm); padding:10px 14px; font-size:0.85rem; color:#6EE7B7; margin-bottom:16px;"></div>
 
-    <!-- Sucesso/avisos via query param -->
-    <div id="auth-aviso" style="display:none; background:rgba(90,158,111,0.1); border:1px solid rgba(90,158,111,0.3); border-radius:var(--radius-sm); padding:10px 14px; font-size:0.85rem; color:#7dcf97; margin-bottom:16px;"></div>
-
-    <!-- ── PAINEL LOGIN ── -->
+    <!-- LOGIN -->
     <div class="auth-panel active" id="panel-login">
       <div class="form-group">
         <label class="form-label">E-mail</label>
@@ -51,14 +50,12 @@
         </div>
       </div>
       <div style="text-align:right; margin-bottom:20px;">
-        <a href="#" onclick="mostrarTab('forgot')" class="text-sm" style="color:var(--text-muted)">Esqueci minha senha</a>
+        <a href="#" onclick="mostrarTab('forgot')" style="font-size:0.82rem; color:var(--text-muted)">Esqueci minha senha</a>
       </div>
-      <button class="btn btn-primary btn-full btn-lg" id="btn-login" onclick="fazerLogin()">
-        Entrar
-      </button>
+      <button class="btn btn-primary btn-full btn-lg" id="btn-login" onclick="fazerLogin()">Entrar</button>
     </div>
 
-    <!-- ── PAINEL CADASTRO ── -->
+    <!-- CADASTRO -->
     <div class="auth-panel" id="panel-register">
       <div class="form-group">
         <label class="form-label">Nome completo</label>
@@ -75,17 +72,15 @@
           <button class="btn-toggle-pw" onclick="toggleSenha('reg-senha')">👁</button>
         </div>
       </div>
-      <button class="btn btn-primary btn-full btn-lg" id="btn-register" onclick="criarConta()">
-        Criar conta grátis
-      </button>
-      <p class="text-xs text-muted" style="text-align:center; margin-top:12px;">
-        Ao criar conta, você concorda com os nossos termos de uso.
+      <button class="btn btn-primary btn-full btn-lg" id="btn-register" onclick="criarConta()">Criar conta grátis</button>
+      <p style="text-align:center; margin-top:12px; font-size:0.78rem; color:var(--text-muted);">
+        Ao criar conta, você concorda com nossos termos de uso.
       </p>
     </div>
 
-    <!-- ── PAINEL ESQUECI SENHA ── -->
+    <!-- ESQUECI SENHA -->
     <div class="auth-panel" id="panel-forgot">
-      <p class="text-secondary text-sm mb-16">
+      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
         Informe seu e-mail e enviaremos um link para redefinir sua senha.
       </p>
       <div class="form-group">
@@ -94,7 +89,7 @@
       </div>
       <button class="btn btn-primary btn-full" onclick="enviarReset()">Enviar link</button>
       <div style="text-align:center; margin-top:12px;">
-        <a href="#" onclick="mostrarTab('login')" class="text-sm text-muted">Voltar ao login</a>
+        <a href="#" onclick="mostrarTab('login')" style="font-size:0.82rem; color:var(--text-muted)">Voltar ao login</a>
       </div>
     </div>
 
@@ -105,145 +100,113 @@
 
 <script src="/js/api.js"></script>
 <script>
-  // ─── Verificar se já está logado ──────────────────────────────────────────
-  if (getAccessToken() && getUser()) {
-    window.location.href = '/';
-  }
-
-  // ─── Verificar query params ───────────────────────────────────────────────
-  const params = new URLSearchParams(window.location.search);
-  const aviso  = document.getElementById('auth-aviso');
-
-  if (params.get('verificado')) {
-    aviso.style.display = 'block';
-    aviso.textContent = 'E-mail verificado com sucesso! Faça login.';
-  }
-  if (params.get('erro') === 'token_invalido') {
-    mostrarErro('Link inválido ou expirado.');
-  }
-
-  // ─── Tabs ─────────────────────────────────────────────────────────────────
-  function mostrarTab(tab) {
-    ['login','register','forgot'].forEach(t => {
-      document.getElementById(`panel-${t}`)?.classList.toggle('active', t === tab);
-      document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
-    });
-    limparErro();
-  }
-
-  // ─── Login ────────────────────────────────────────────────────────────────
-  async function fazerLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const senha = document.getElementById('login-senha').value;
-    if (!email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
-
-    const btn = document.getElementById('btn-login');
-    btn.disabled = true;
-    btn.textContent = 'Entrando...';
-
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: senha }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      mostrarErro(data.erro || 'Erro ao fazer login.');
-      btn.disabled = false;
-      btn.textContent = 'Entrar';
-      return;
-    }
-
-    salvarTokens(data.accessToken, data.refreshToken);
-    salvarUser(data.user);
-    window.location.href = '/';
-  }
-
-  // ─── Cadastro ─────────────────────────────────────────────────────────────
-  async function criarConta() {
-    const nome  = document.getElementById('reg-nome').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const senha = document.getElementById('reg-senha').value;
-
-    if (!nome || !email || !senha) { mostrarErro('Preencha todos os campos.'); return; }
-    if (senha.length < 8) { mostrarErro('Senha deve ter no mínimo 8 caracteres.'); return; }
-
-    const btn = document.getElementById('btn-register');
-    btn.disabled = true;
-    btn.textContent = 'Criando conta...';
-
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: nome, email, password: senha }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      mostrarErro(data.erro || 'Erro ao criar conta.');
-      btn.disabled = false;
-      btn.textContent = 'Criar conta grátis';
-      return;
-    }
-
-    salvarTokens(data.accessToken, data.refreshToken);
-    salvarUser(data.user);
-    window.location.href = '/';
-  }
-
-  // ─── Esqueci a senha ──────────────────────────────────────────────────────
-  async function enviarReset() {
-    const email = document.getElementById('forgot-email').value.trim();
-    if (!email) { mostrarErro('Informe seu e-mail.'); return; }
-
-    const res = await fetch('/api/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-
-    const data = await res.json();
-    aviso.style.display = 'block';
-    aviso.textContent = data.mensagem || 'Se o e-mail existir, você receberá as instruções.';
-    limparErro();
-  }
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-  function mostrarErro(msg) {
-    const el = document.getElementById('auth-error');
-    el.textContent = msg;
-    el.classList.add('visible');
-  }
-  function limparErro() {
-    const el = document.getElementById('auth-error');
-    el.textContent = '';
-    el.classList.remove('visible');
-  }
-  function toggleSenha(id) {
-    const input = document.getElementById(id);
-    input.type = input.type === 'password' ? 'text' : 'password';
-  }
-
-  // Enter para enviar
-  document.addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
-    const ativo = document.querySelector('.auth-panel.active')?.id;
-    if (ativo === 'panel-login')    fazerLogin();
-    if (ativo === 'panel-register') criarConta();
-    if (ativo === 'panel-forgot')   enviarReset();
+// ── Partículas ────────────────────────────────────────────────
+(function(){
+  const c = document.getElementById('canvas-auth'), ctx = c.getContext('2d');
+  let ps = [], W, H;
+  function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  for(let i=0;i<70;i++) ps.push({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.1+.2,
+    vx:(Math.random()-.5)*.2, vy:(Math.random()-.5)*.2,
+    a:Math.random(), da:(Math.random()*.4+.1)*(Math.random()>.5?1:-1)*.006,
+    col:['#7C3AED','#A78BFA','#60A5FA','#fff'][Math.floor(Math.random()*4)]
   });
-
-  function mostrarToast(msg, tipo = 'info') {
-    const container = document.getElementById('toast-container');
-    const el = document.createElement('div');
-    el.className = `toast ${tipo}`;
-    el.textContent = msg;
-    container.appendChild(el);
-    setTimeout(() => el.remove(), 4000);
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7);
+    g.addColorStop(0,'rgba(14,10,35,.99)'); g.addColorStop(1,'rgba(4,6,18,1)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ps.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<-5)p.x=W+5; if(p.x>W+5)p.x=-5;
+      if(p.y<-5)p.y=H+5; if(p.y>H+5)p.y=-5;
+      p.a+=p.da; if(p.a>1||p.a<0)p.da*=-1;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.a);
+      ctx.fillStyle=p.col; ctx.shadowColor=p.col; ctx.shadowBlur=p.r*3;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+    });
+    requestAnimationFrame(draw);
   }
+  draw();
+})();
+
+// ── Auth já logado ────────────────────────────────────────────
+if (getAccessToken() && getUser()) window.location.href = '/';
+
+const params = new URLSearchParams(window.location.search);
+const aviso  = document.getElementById('auth-aviso');
+if (params.get('verificado')) { aviso.style.display='block'; aviso.textContent='E-mail verificado com sucesso! Faça login.'; }
+if (params.get('erro')==='token_invalido') mostrarErro('Link inválido ou expirado.');
+
+function mostrarTab(tab) {
+  ['login','register','forgot'].forEach(t => {
+    document.getElementById(`panel-${t}`)?.classList.toggle('active', t===tab);
+    document.getElementById(`tab-${t}`)?.classList.toggle('active', t===tab);
+  });
+  limparErro();
+}
+
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  if (!email||!senha) { mostrarErro('Preencha todos os campos.'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled=true; btn.textContent='Entrando...';
+  const res  = await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+  const data = await res.json();
+  if (!res.ok) { mostrarErro(data.erro||'Erro ao fazer login.'); btn.disabled=false; btn.textContent='Entrar'; return; }
+  salvarTokens(data.accessToken, data.refreshToken);
+  salvarUser(data.user);
+  window.location.href = '/';
+}
+
+async function criarConta() {
+  const nome  = document.getElementById('reg-nome').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const senha = document.getElementById('reg-senha').value;
+  if (!nome||!email||!senha) { mostrarErro('Preencha todos os campos.'); return; }
+  if (senha.length<8) { mostrarErro('Senha deve ter no mínimo 8 caracteres.'); return; }
+  const btn = document.getElementById('btn-register');
+  btn.disabled=true; btn.textContent='Criando conta...';
+  const res  = await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nome,email,password:senha})});
+  const data = await res.json();
+  if (!res.ok) { mostrarErro(data.erro||'Erro ao criar conta.'); btn.disabled=false; btn.textContent='Criar conta grátis'; return; }
+  salvarTokens(data.accessToken, data.refreshToken);
+  salvarUser(data.user);
+  window.location.href = '/';
+}
+
+async function enviarReset() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { mostrarErro('Informe seu e-mail.'); return; }
+  const res  = await fetch('/api/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  const data = await res.json();
+  aviso.style.display='block'; aviso.textContent = data.mensagem||'Se o e-mail existir, você receberá as instruções.';
+  limparErro();
+}
+
+function mostrarErro(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.classList.add('visible');
+}
+function limparErro() {
+  const el = document.getElementById('auth-error');
+  el.textContent=''; el.classList.remove('visible');
+}
+function toggleSenha(id) {
+  const input = document.getElementById(id);
+  input.type = input.type==='password'?'text':'password';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const ativo = document.querySelector('.auth-panel.active')?.id;
+  if (ativo==='panel-login')    fazerLogin();
+  if (ativo==='panel-register') criarConta();
+  if (ativo==='panel-forgot')   enviarReset();
+});
 </script>
 </body>
 </html>

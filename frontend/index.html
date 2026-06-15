@@ -9,11 +9,14 @@
   <link rel="icon" href="/assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/app.css" />
 </head>
 <body>
+
+<canvas id="canvas-app"></canvas>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenuMobile()"></div>
 
 <!-- ══════════════ APP LAYOUT ══════════════ -->
 <div id="app">
@@ -495,37 +498,38 @@
 <script src="/js/markdown.js"></script>
 <script src="/js/app.js"></script>
 <script>
-  // ── Toggle de Tema ────────────────────────────────────────────────────────────
-  (function() {
-    const saved = localStorage.getItem('may_tema') || 'light';
-    if (saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
+  // ── Partículas ────────────────────────────────────────────────────────────────
+  (function(){
+    const c = document.getElementById('canvas-app'), ctx = c.getContext('2d');
+    let ps = [], W, H;
+    function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    for(let i=0;i<60;i++) ps.push({
+      x:Math.random()*W, y:Math.random()*H, r:Math.random()*.9+.2,
+      vx:(Math.random()-.5)*.18, vy:(Math.random()-.5)*.18,
+      a:Math.random(), da:(Math.random()*.3+.1)*(Math.random()>.5?1:-1)*.005,
+      col:['#7C3AED','#A78BFA','#60A5FA','#fff'][Math.floor(Math.random()*4)]
+    });
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7);
+      g.addColorStop(0,'rgba(14,10,35,.99)'); g.addColorStop(1,'rgba(4,6,18,1)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ps.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<-5)p.x=W+5; if(p.x>W+5)p.x=-5;
+        if(p.y<-5)p.y=H+5; if(p.y>H+5)p.y=-5;
+        p.a+=p.da; if(p.a>1||p.a<0)p.da*=-1;
+        ctx.save(); ctx.globalAlpha=Math.max(0,p.a);
+        ctx.fillStyle=p.col; ctx.shadowColor=p.col; ctx.shadowBlur=p.r*2;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+      });
+      requestAnimationFrame(draw);
     }
+    draw();
   })();
 
-  function toggleTema() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('may_tema', 'light');
-      document.getElementById('theme-icon').textContent  = '🌙';
-      document.getElementById('theme-label').textContent = 'Escuro';
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('may_tema', 'dark');
-      document.getElementById('theme-icon').textContent  = '☀️';
-      document.getElementById('theme-label').textContent = 'Claro';
-    }
-  }
-
-  // Aplica label correto ao carregar
-  document.addEventListener('DOMContentLoaded', () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if (isDark) {
-      document.getElementById('theme-icon').textContent  = '☀️';
-      document.getElementById('theme-label').textContent = 'Claro';
-    }
-  });
+  function toggleTema() { /* design sempre dark — botão desativado */ }
 
   // Abre modal de planos
   function abrirModalPlanos() {
