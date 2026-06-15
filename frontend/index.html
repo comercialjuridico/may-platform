@@ -124,68 +124,142 @@
 
 <!-- ══════════════ MODAL: DIAGNÓSTICO ══════════════ -->
 <div class="modal-overlay" id="modal-diagnostico">
-  <div class="modal" style="max-width:520px">
+  <div class="modal" style="max-width:540px">
     <div class="modal-header">
-      <span class="modal-title">Diagnóstico inicial</span>
+      <div>
+        <span class="modal-title" id="diag-titulo">Diagnóstico Comercial</span>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="diag-passo-label">Passo 1 de 5</div>
+      </div>
       <button class="modal-close" onclick="document.getElementById('modal-diagnostico').classList.remove('active')">✕</button>
     </div>
-    <p class="text-secondary text-sm mb-16">
-      Em 2 minutos, a May fica personalizada para o seu contexto de vendas.
-    </p>
 
-    <div class="form-group">
-      <label class="form-label">Qual é o seu nicho de atuação?</label>
-      <select id="diag-nicho">
-        <option value="">Selecione...</option>
-        <option value="juridico">Jurídico</option>
-        <option value="seguros">Seguros</option>
-        <option value="imoveis">Imóveis</option>
-        <option value="saude">Saúde</option>
-        <option value="financeiro">Financeiro</option>
-        <option value="tecnologia">Tecnologia / SaaS</option>
-        <option value="educacao">Educação</option>
-        <option value="outro">Outro</option>
-      </select>
+    <!-- Barra de progresso -->
+    <div style="height:4px;background:var(--bg-tertiary);border-radius:99px;margin-bottom:24px;overflow:hidden">
+      <div id="diag-progress" style="height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease;width:20%"></div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">O que você vende especificamente?</label>
-      <input id="diag-produto" type="text" placeholder="Ex: Ações de BPC/LOAS para crianças com deficiência" />
+    <!-- ── PASSO 1: Experiência ── -->
+    <div id="diag-step-1">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Há quanto tempo você trabalha com vendas?</p>
+      <p class="text-secondary text-sm mb-16">Contando qualquer experiência comercial, não só jurídica.</p>
+      <div class="diag-options" id="diag-exp">
+        <button class="diag-opt" data-val="nunca"  onclick="selecionarOpcao('diag-exp',this)">Nunca vendi</button>
+        <button class="diag-opt" data-val="menos6" onclick="selecionarOpcao('diag-exp',this)">Menos de 6 meses</button>
+        <button class="diag-opt" data-val="6a12"   onclick="selecionarOpcao('diag-exp',this)">6 meses a 1 ano</button>
+        <button class="diag-opt" data-val="1a3"    onclick="selecionarOpcao('diag-exp',this)">1 a 3 anos</button>
+        <button class="diag-opt" data-val="mais3"  onclick="selecionarOpcao('diag-exp',this)">Mais de 3 anos</button>
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="diagProximo(2)">Próximo →</button>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Para quem você vende (público-alvo)?</label>
-      <input id="diag-publico" type="text" placeholder="Ex: Famílias de baixa renda com membros com deficiência" />
+    <!-- ── PASSO 2: Contratos ── -->
+    <div id="diag-step-2" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quantos contratos você fecha em média por mês?</p>
+      <p class="text-secondary text-sm mb-16">Seja honesto — isso define sua trilha de treinamento.</p>
+      <div class="diag-options" id="diag-contr">
+        <button class="diag-opt" data-val="0"      onclick="selecionarOpcao('diag-contr',this)">Nenhum ainda</button>
+        <button class="diag-opt" data-val="1a2"    onclick="selecionarOpcao('diag-contr',this)">1 a 2 por mês</button>
+        <button class="diag-opt" data-val="3a5"    onclick="selecionarOpcao('diag-contr',this)">3 a 5 por mês</button>
+        <button class="diag-opt" data-val="6a9"    onclick="selecionarOpcao('diag-contr',this)">6 a 9 por mês</button>
+        <button class="diag-opt" data-val="10mais" onclick="selecionarOpcao('diag-contr',this)">10 ou mais</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(1)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(3)">Próximo →</button>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Seu nível em vendas</label>
-      <select id="diag-nivel">
-        <option value="iniciante">Iniciante — estou aprendendo</option>
-        <option value="intermediario">Intermediário — já vendo, quero melhorar</option>
-        <option value="avancado">Avançado — tenho equipe, quero escalar</option>
-      </select>
+    <!-- ── PASSO 3: Leads por semana ── -->
+    <div id="diag-step-3" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quantos leads chegam para você por semana?</p>
+      <p class="text-secondary text-sm mb-16">Inclua WhatsApp, indicações, redes sociais, site.</p>
+      <div class="diag-options" id="diag-leads">
+        <button class="diag-opt" data-val="0a3"    onclick="selecionarOpcao('diag-leads',this)">0 a 3 leads</button>
+        <button class="diag-opt" data-val="4a10"   onclick="selecionarOpcao('diag-leads',this)">4 a 10 leads</button>
+        <button class="diag-opt" data-val="11a20"  onclick="selecionarOpcao('diag-leads',this)">11 a 20 leads</button>
+        <button class="diag-opt" data-val="21mais" onclick="selecionarOpcao('diag-leads',this)">21 ou mais</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(2)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(4)">Próximo →</button>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Qual sua maior dificuldade hoje?</label>
-      <select id="diag-dificuldade">
-        <option value="">Selecione...</option>
-        <option value="objecoes">Responder objeções do lead</option>
-        <option value="abordagem">Abordagem inicial (WhatsApp, ligação)</option>
-        <option value="qualificacao">Qualificar leads corretamente</option>
-        <option value="proposta">Montar e passar proposta</option>
-        <option value="negociacao">Negociar sem ceder no preço</option>
-        <option value="follow_up">Fazer follow-up sem parecer chato</option>
-        <option value="fechamento">Fechar no momento certo</option>
-      </select>
+    <!-- ── PASSO 4: Dificuldades (múltipla escolha) ── -->
+    <div id="diag-step-4" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quais são suas maiores dificuldades? <span style="font-weight:400;color:var(--text-muted)">(escolha até 3)</span></p>
+      <p class="text-secondary text-sm mb-16">Isso desbloqueia trilhas e conquistas específicas para você.</p>
+      <div class="diag-options" id="diag-dific">
+        <button class="diag-opt diag-multi" data-val="abordagem"   onclick="toggleMulti(this)">Abordagem inicial</button>
+        <button class="diag-opt diag-multi" data-val="qualificacao" onclick="toggleMulti(this)">Qualificar leads</button>
+        <button class="diag-opt diag-multi" data-val="proposta"    onclick="toggleMulti(this)">Montar proposta</button>
+        <button class="diag-opt diag-multi" data-val="objecoes"    onclick="toggleMulti(this)">Responder objeções</button>
+        <button class="diag-opt diag-multi" data-val="negociacao"  onclick="toggleMulti(this)">Negociar o preço</button>
+        <button class="diag-opt diag-multi" data-val="follow_up"   onclick="toggleMulti(this)">Fazer follow-up</button>
+        <button class="diag-opt diag-multi" data-val="fechamento"  onclick="toggleMulti(this)">Fechar no momento certo</button>
+        <button class="diag-opt diag-multi" data-val="mentalidade" onclick="toggleMulti(this)">Mentalidade e consistência</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(3)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(5)">Próximo →</button>
+      </div>
     </div>
 
-    <button class="btn btn-primary btn-full" onclick="salvarDiagnostico()">
-      Salvar e personalizar May ✓
-    </button>
+    <!-- ── PASSO 5: O que quer melhorar ── -->
+    <div id="diag-step-5" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">O que você mais quer alcançar com a May?</p>
+      <p class="text-secondary text-sm mb-16">Isso define sua prioridade de treinamento.</p>
+      <div class="diag-options" id="diag-melhora">
+        <button class="diag-opt" data-val="fechar_mais"    onclick="selecionarOpcao('diag-melhora',this)">Fechar mais contratos todo mês</button>
+        <button class="diag-opt" data-val="converter_mais" onclick="selecionarOpcao('diag-melhora',this)">Converter mais leads em clientes</button>
+        <button class="diag-opt" data-val="cobrar_mais"    onclick="selecionarOpcao('diag-melhora',this)">Cobrar mais sem perder clientes</button>
+        <button class="diag-opt" data-val="processo"       onclick="selecionarOpcao('diag-melhora',this)">Ter um processo comercial estruturado</button>
+        <button class="diag-opt" data-val="equipe"         onclick="selecionarOpcao('diag-melhora',this)">Treinar minha equipe de vendas</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(4)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" id="btn-finalizar-diag" onclick="salvarDiagnostico()">
+          Calcular minha maturidade →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── RESULTADO ── -->
+    <div id="diag-resultado" style="display:none;text-align:center">
+      <div id="diag-nivel-badge" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;font-size:2rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"></div>
+      <div style="font-size:0.75rem;font-weight:700;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Maturidade Comercial</div>
+      <div id="diag-nivel-titulo" style="font-size:1.4rem;font-weight:800;margin-bottom:8px"></div>
+      <div id="diag-nivel-desc" style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:24px;line-height:1.5"></div>
+
+      <div style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:14px 16px;margin-bottom:12px;text-align:left">
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:6px">🎯 Trilha desbloqueada</div>
+        <div id="diag-trilha" style="font-weight:600;font-size:0.9rem"></div>
+      </div>
+
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px;text-align:left">
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">📅 Meta desta semana</div>
+        <div id="diag-meta" style="font-size:0.875rem;color:var(--text-primary);line-height:1.5"></div>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="fecharDiagnostico()">
+        Começar agora →
+      </button>
+    </div>
+
   </div>
 </div>
+
+<style>
+.diag-options { display:flex; flex-direction:column; gap:8px; }
+.diag-opt {
+  text-align:left; padding:12px 16px; border-radius:8px;
+  background:var(--bg-secondary); border:2px solid var(--border);
+  color:var(--text-primary); font-size:0.875rem; font-weight:500;
+  cursor:pointer; transition:all .15s ease;
+}
+.diag-opt:hover { border-color:var(--accent-border); background:var(--accent-dim); }
+.diag-opt.selected { border-color:var(--accent); background:var(--accent-dim); color:var(--accent); font-weight:700; }
+</style>
 
 <!-- ══════════════ MODAL: PERFIL ══════════════ -->
 <div class="modal-overlay" id="modal-perfil">

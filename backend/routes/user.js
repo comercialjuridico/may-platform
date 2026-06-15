@@ -22,31 +22,104 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // ─── PUT /api/user/diagnostico ──────────────────────────────────────────────
-// Salva o diagnóstico inicial do usuário
+// Salva o diagnóstico de maturidade comercial (0-5) e gera trilha + meta
 router.put('/diagnostico', authMiddleware, async (req, res) => {
   try {
-    const { nicho, produto, publico_alvo, nivel, maior_dificuldade } = req.body;
+    const {
+      tempo_experiencia,
+      contratos_mes,
+      dificuldades,        // string: ex "objecoes,follow_up,fechamento"
+      quero_melhorar,
+      leads_semana,
+    } = req.body;
 
-    if (!nicho || !produto || !publico_alvo || !nivel || !maior_dificuldade) {
-      return res.status(400).json({ erro: 'Todos os campos do diagnóstico são obrigatórios.' });
+    if (!tempo_experiencia || !contratos_mes || !dificuldades || !quero_melhorar || !leads_semana) {
+      return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
     }
+
+    // ── Cálculo de maturidade comercial (0-5) ──────────────────────────────
+    // Pontuação máxima: 10 → divide por 2 → 0-5
+
+    // Pontos por tempo de experiência (0-3)
+    const ptExp = {
+      'nunca':  0,
+      'menos6': 1,
+      '6a12':   2,
+      '1a3':    3,
+      'mais3':  4,
+    }[tempo_experiencia] ?? 0;
+
+    // Pontos por contratos fechados/mês (0-4)
+    const ptContr = {
+      '0':     0,
+      '1a2':   1,
+      '3a5':   2,
+      '6a9':   3,
+      '10mais':4,
+    }[contratos_mes] ?? 0;
+
+    // Pontos por leads/semana (0-3)
+    const ptLeads = {
+      '0a3':   0,
+      '4a10':  1,
+      '11a20': 2,
+      '21mais':3,
+    }[leads_semana] ?? 0;
+
+    const scoreBruto = ptExp + ptContr + ptLeads; // 0-11
+    const maturidade = Math.min(5, Math.round(scoreBruto / 11 * 5));
+
+    // ── Trilha baseada na dificuldade principal ────────────────────────────
+    const dificArr   = dificuldades.split(',').filter(Boolean);
+    const trilhaMap  = {
+      objecoes:      'Quebrando Objeções',
+      abordagem:     'Primeiros Contatos',
+      qualificacao:  'Qualificação de Leads',
+      proposta:      'Proposta que Fecha',
+      negociacao:    'Negociação sem Ceder',
+      follow_up:     'Follow-up Estratégico',
+      fechamento:    'Técnicas de Fechamento',
+    };
+    const trilhaPrincipal = dificArr[0] ? (trilhaMap[dificArr[0]] || 'Fundamentos Comerciais') : 'Fundamentos Comerciais';
+
+    // ── Meta semanal por nível ─────────────────────────────────────────────
+    const metas = [
+      'Fazer 1 atendimento completo usando o Clean Script da May',
+      'Treinar 3 objeções na May e fazer 2 atendimentos reais com o script',
+      'Fechar 1 contrato e fazer follow-up em todos os leads em aberto',
+      'Fechar 2 contratos e treinar 1 simulação de negociação',
+      'Fechar 3 contratos e identificar o maior gargalo do funil',
+      'Fechar 4+ contratos e estruturar processo para replicar com equipe',
+    ];
+    const meta_semanal = metas[maturidade];
 
     const { data, error } = await supabase
       .from('users')
       .update({
-        nicho,
-        produto,
-        publico_alvo,
-        nivel,
-        maior_dificuldade,
+        tempo_experiencia,
+        contratos_mes,
+        dificuldades,
+        quero_melhorar,
+        leads_semana,
+        maturidade,
+        meta_semanal,
+        trilha_ativa:       trilhaPrincipal,
         diagnostico_completo: true,
       })
       .eq('id', req.user.id)
-      .select('id, nicho, produto, publico_alvo, nivel, maior_dificuldade, diagnostico_completo')
+      .select('id, maturidade, meta_semanal, trilha_ativa, diagnostico_completo')
       .single();
 
     if (error) throw error;
-    res.json({ mensagem: 'Diagnóstico salvo.', user: data });
+
+    res.json({
+      mensagem:    'Diagnóstico salvo.',
+      maturidade,
+      meta_semanal,
+      trilha_ativa: trilhaPrincipal,
+      dificuldades: dificArr,
+      user: data,
+    });
   } catch (err) {
     console.error('Erro no diagnóstico:', err.message);
     res.status(500).json({ erro: 'Erro ao salvar diagnóstico.' });

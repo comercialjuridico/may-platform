@@ -612,35 +612,121 @@ async function toggleGravacao() {
   }
 }
 
-// ─── Modal de diagnóstico ────────────────────────────────────────────────────
+// ─── Modal de diagnóstico — Maturidade Comercial ─────────────────────────────
+const NIVEIS_MATURIDADE = [
+  { titulo: 'Sem Experiência',    desc: 'Você está no ponto de partida. A May vai te guiar do zero com scripts prontos e treinos práticos.' },
+  { titulo: 'Aprendiz',           desc: 'Você está começando a entender o processo. Vamos solidificar a base e criar consistência.' },
+  { titulo: 'Desenvolvendo',      desc: 'Você já tem resultados, mas ainda é irregular. O foco agora é processo e repetição.' },
+  { titulo: 'Praticante',         desc: 'Você fecha contratos com consistência. Hora de aumentar ticket e velocidade de fechamento.' },
+  { titulo: 'Experiente',         desc: 'Você tem um processo que funciona. Agora é escalar e estruturar equipe.' },
+  { titulo: 'Referência',         desc: 'Você é referência comercial. A May vai te ajudar a replicar e liderar seu time.' },
+];
+
 function abrirModalDiagnostico() {
+  // Reset ao abrir
+  diagIrPara(1);
+  // Limpa seleções
+  document.querySelectorAll('.diag-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('diag-resultado').style.display = 'none';
+  document.getElementById('diag-step-1').style.display    = 'block';
   document.getElementById('modal-diagnostico').classList.add('active');
 }
 
-async function salvarDiagnostico() {
-  const dados = {
-    nicho:             document.getElementById('diag-nicho').value,
-    produto:           document.getElementById('diag-produto').value.trim(),
-    publico_alvo:      document.getElementById('diag-publico').value.trim(),
-    nivel:             document.getElementById('diag-nivel').value,
-    maior_dificuldade: document.getElementById('diag-dificuldade').value,
-  };
+function fecharDiagnostico() {
+  document.getElementById('modal-diagnostico').classList.remove('active');
+}
 
-  if (!dados.nicho || !dados.produto || !dados.publico_alvo || !dados.nivel || !dados.maior_dificuldade) {
-    mostrarToast('Preencha todos os campos.', 'erro');
+function diagIrPara(passo) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`diag-step-${i}`);
+    if (el) el.style.display = i === passo ? 'block' : 'none';
+  }
+  document.getElementById('diag-passo-label').textContent = `Passo ${passo} de 5`;
+  document.getElementById('diag-progress').style.width    = `${passo * 20}%`;
+}
+
+function diagProximo(passo) {
+  // Valida passo anterior
+  const validacoes = {
+    2: () => !!document.querySelector('#diag-exp .selected'),
+    3: () => !!document.querySelector('#diag-contr .selected'),
+    4: () => !!document.querySelector('#diag-leads .selected'),
+    5: () => document.querySelectorAll('#diag-dific .selected').length > 0,
+  };
+  if (validacoes[passo] && !validacoes[passo]()) {
+    mostrarToast('Selecione uma opção para continuar.', 'aviso');
+    return;
+  }
+  diagIrPara(passo);
+}
+
+function diagAnterior(passo) { diagIrPara(passo); }
+
+function selecionarOpcao(grupoId, btn) {
+  document.querySelectorAll(`#${grupoId} .diag-opt`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function toggleMulti(btn) {
+  const selecionados = document.querySelectorAll('#diag-dific .selected');
+  if (!btn.classList.contains('selected') && selecionados.length >= 3) {
+    mostrarToast('Escolha no máximo 3 dificuldades.', 'aviso');
+    return;
+  }
+  btn.classList.toggle('selected');
+}
+
+async function salvarDiagnostico() {
+  const exp     = document.querySelector('#diag-exp .selected')?.dataset.val;
+  const contr   = document.querySelector('#diag-contr .selected')?.dataset.val;
+  const leads   = document.querySelector('#diag-leads .selected')?.dataset.val;
+  const dificEls= document.querySelectorAll('#diag-dific .selected');
+  const melhora = document.querySelector('#diag-melhora .selected')?.dataset.val;
+
+  if (!exp || !contr || !leads || !dificEls.length || !melhora) {
+    mostrarToast('Complete todas as etapas antes de finalizar.', 'erro');
     return;
   }
 
-  const res = await api.put('/user/diagnostico', dados);
+  const dificuldades = Array.from(dificEls).map(b => b.dataset.val).join(',');
+
+  const btn = document.getElementById('btn-finalizar-diag');
+  btn.disabled = true;
+  btn.textContent = 'Calculando...';
+
+  const res = await api.put('/user/diagnostico', {
+    tempo_experiencia: exp,
+    contratos_mes:     contr,
+    leads_semana:      leads,
+    dificuldades,
+    quero_melhorar:    melhora,
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Calcular minha maturidade →';
+
   if (!res?.ok) { mostrarToast('Erro ao salvar diagnóstico', 'erro'); return; }
 
   const data = await res.json();
-  estado.user = { ...estado.user, ...data.user };
+  estado.user = { ...estado.user, ...data.user, diagnostico_completo: true };
   salvarUser(estado.user);
-
-  document.getElementById('modal-diagnostico').classList.remove('active');
-  mostrarToast('Diagnóstico salvo! A May está personalizada para você.', 'sucesso');
   renderizarSidebar();
+
+  // Mostra resultado
+  const nivel    = data.maturidade ?? 0;
+  const nivelInfo= NIVEIS_MATURIDADE[nivel];
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`diag-step-${i}`);
+    if (el) el.style.display = 'none';
+  }
+  document.getElementById('diag-progress').style.width = '100%';
+  document.getElementById('diag-passo-label').textContent = 'Diagnóstico concluído';
+  document.getElementById('diag-nivel-badge').textContent  = nivel;
+  document.getElementById('diag-nivel-titulo').textContent = nivelInfo.titulo;
+  document.getElementById('diag-nivel-desc').textContent   = nivelInfo.desc;
+  document.getElementById('diag-trilha').textContent       = data.trilha_ativa;
+  document.getElementById('diag-meta').textContent         = data.meta_semanal;
+  document.getElementById('diag-resultado').style.display  = 'block';
 }
 
 // ─── Modal de perfil ─────────────────────────────────────────────────────────
