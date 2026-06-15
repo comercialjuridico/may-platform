@@ -4,613 +4,485 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#7C3AED" />
-  <title>May — A IA que treina advogados para vender mais</title>
-  <meta name="description" content="May é a inteligência artificial especializada em vendas jurídicas. Simule objeções, crie propostas irresistíveis e feche mais contratos." />
+  <title>May — Treinamento comercial para escritórios jurídicos</title>
+  <meta name="description" content="May é a plataforma de desenvolvimento comercial para advogados. Treine sua equipe para conduzir conversas, apresentar honorários e fechar contratos com confiança." />
   <link rel="icon" href="/assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg: #080B1A;
       --bg2: #0D1024;
       --purple: #7C3AED;
       --purple-light: #A78BFA;
-      --purple-dim: rgba(124,58,237,.15);
-      --gold: #F59E0B;
       --text: #E8E4FF;
       --muted: rgba(200,190,255,.5);
       --border: rgba(255,255,255,.07);
       --glass: rgba(255,255,255,.04);
       --radius: 16px;
     }
-
     html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
-
-    canvas#bg-canvas {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; }
+    canvas#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    section, nav, footer { position: relative; z-index: 1; }
 
     /* ── NAV ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 6vw;
-      background: rgba(8,11,26,.85);
-      backdrop-filter: blur(20px);
+      padding: 16px 6vw;
+      background: rgba(8,11,26,.9); backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-    .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-    .nav-logo-mark {
-      width:36px; height:36px; border-radius:10px;
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 9px;
       background: linear-gradient(135deg, #7C3AED, #5B21B6);
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem; color:#fff;
-      box-shadow: 0 0 20px rgba(124,58,237,.4);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; color: #fff; font-size: 1rem;
+      box-shadow: 0 0 18px rgba(124,58,237,.4);
     }
-    .nav-logo-name { font-family:'Syne',sans-serif; font-weight:700; font-size:1.2rem; color:var(--text); }
-    .nav-actions { display:flex; align-items:center; gap:12px; }
-    .btn-nav-ghost {
-      background: transparent; border: 1px solid var(--border);
-      color: var(--muted); padding: 8px 18px; border-radius:8px;
-      font-size:.875rem; cursor:pointer; transition:all .2s;
-      font-family:'Inter',sans-serif;
-    }
-    .btn-nav-ghost:hover { border-color:var(--purple-light); color:var(--text); }
-    .btn-nav-primary {
-      background: linear-gradient(135deg, #7C3AED, #6D28D9);
-      border: none; color: #fff; padding: 9px 22px; border-radius:8px;
-      font-size:.875rem; font-weight:600; cursor:pointer; transition:all .2s;
-      font-family:'Inter',sans-serif;
-      box-shadow: 0 4px 20px rgba(124,58,237,.35);
-    }
-    .btn-nav-primary:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(124,58,237,.5); }
-
-    /* ── SECTIONS ── */
-    section { position:relative; z-index:1; }
+    .logo-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 18px; border-radius: 8px; font-size: .85rem; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; }
+    .btn-ghost:hover { border-color: var(--purple-light); color: var(--text); }
+    .btn-cta { background: linear-gradient(135deg, #7C3AED, #6D28D9); border: none; color: #fff; padding: 9px 22px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; box-shadow: 0 4px 18px rgba(124,58,237,.35); }
+    .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 26px rgba(124,58,237,.5); }
 
     /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      padding: 120px 6vw 80px;
-      text-align: center;
-    }
-    .hero-inner { max-width: 820px; }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.3);
-      border-radius: 50px; padding: 6px 16px;
-      font-size: .8rem; color: var(--purple-light); margin-bottom: 28px;
-      letter-spacing: .03em;
-    }
-    .hero-badge::before { content:'✦'; font-size:.65rem; }
-    .hero-title {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(2.4rem, 6vw, 4.2rem);
-      font-weight: 900; line-height: 1.08;
-      margin-bottom: 24px;
-      letter-spacing: -.02em;
-    }
-    .hero-title .grad {
-      background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #60A5FA 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-sub {
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      color: var(--muted); max-width: 580px; margin: 0 auto 40px;
-      line-height: 1.65;
-    }
-    .hero-cta { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
-    .btn-hero-primary {
-      background: linear-gradient(135deg, #7C3AED, #6D28D9);
-      color:#fff; border:none; padding:15px 34px; border-radius:12px;
-      font-size:1rem; font-weight:600; cursor:pointer; transition:all .25s;
-      font-family:'Inter',sans-serif;
-      box-shadow: 0 8px 32px rgba(124,58,237,.4);
-    }
-    .btn-hero-primary:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(124,58,237,.55); }
-    .btn-hero-ghost {
-      background:transparent; color:var(--text);
-      border:1px solid rgba(255,255,255,.15); padding:15px 34px;
-      border-radius:12px; font-size:1rem; cursor:pointer; transition:all .25s;
-      font-family:'Inter',sans-serif;
-    }
-    .btn-hero-ghost:hover { border-color:var(--purple-light); color:var(--purple-light); }
-    .hero-proof {
-      margin-top:52px; display:flex; align-items:center; justify-content:center;
-      gap:24px; flex-wrap:wrap;
-    }
-    .hero-proof-item { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.85rem; }
-    .hero-proof-item svg { color: #6EE7B7; flex-shrink:0; }
-    .hero-divider { width:1px; height:16px; background:var(--border); }
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 6vw 80px; text-align: center; }
+    .hero-inner { max-width: 800px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.3); border-radius: 50px; padding: 5px 14px; font-size: .78rem; color: var(--purple-light); margin-bottom: 28px; letter-spacing: .02em; }
+    h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.2rem, 5.5vw, 4rem); font-weight: 900; line-height: 1.08; margin-bottom: 22px; letter-spacing: -.02em; }
+    .grad { background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #60A5FA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { font-size: clamp(.95rem, 2vw, 1.15rem); color: var(--muted); max-width: 560px; margin: 0 auto 36px; line-height: 1.7; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero-p { background: linear-gradient(135deg, #7C3AED, #6D28D9); border: none; color: #fff; padding: 14px 32px; border-radius: 12px; font-size: .95rem; font-weight: 600; cursor: pointer; transition: all .25s; font-family: 'Inter', sans-serif; box-shadow: 0 8px 30px rgba(124,58,237,.4); }
+    .btn-hero-p:hover { transform: translateY(-2px); box-shadow: 0 12px 38px rgba(124,58,237,.55); }
+    .btn-hero-g { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,.15); padding: 14px 32px; border-radius: 12px; font-size: .95rem; cursor: pointer; transition: all .25s; font-family: 'Inter', sans-serif; }
+    .btn-hero-g:hover { border-color: var(--purple-light); color: var(--purple-light); }
+    .trial-note { margin-top: 18px; font-size: .8rem; color: var(--muted); }
+    .trial-note strong { color: #6EE7B7; }
 
-    /* ── FEATURES ── */
-    .features {
-      padding: 100px 6vw;
-      background: linear-gradient(180deg, transparent 0%, rgba(124,58,237,.03) 50%, transparent 100%);
-    }
-    .section-label {
-      text-align:center; margin-bottom:14px;
-      font-size:.8rem; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--purple-light); font-weight:600;
-    }
-    .section-title {
-      font-family:'Syne',sans-serif; font-weight:800;
-      font-size:clamp(1.8rem, 4vw, 2.8rem);
-      text-align:center; line-height:1.15; margin-bottom:14px;
-    }
-    .section-sub {
-      text-align:center; color:var(--muted);
-      font-size:1rem; max-width:540px; margin:0 auto 60px;
-    }
-    .features-grid {
-      display:grid; gap:20px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      max-width:1100px; margin:0 auto;
-    }
-    .feat-card {
-      background: var(--glass); border: 1px solid var(--border);
-      border-radius:var(--radius); padding:28px;
-      transition:all .25s;
-      backdrop-filter:blur(10px);
-    }
-    .feat-card:hover {
-      border-color:rgba(124,58,237,.3);
-      background:rgba(124,58,237,.06);
-      transform:translateY(-3px);
-    }
-    .feat-icon {
-      width:46px; height:46px; border-radius:12px;
-      background:rgba(124,58,237,.15); border:1px solid rgba(124,58,237,.25);
-      display:flex; align-items:center; justify-content:center;
-      font-size:1.3rem; margin-bottom:18px;
-    }
-    .feat-name {
-      font-family:'Syne',sans-serif; font-weight:700;
-      font-size:1.05rem; margin-bottom:8px; color:var(--text);
-    }
-    .feat-desc { font-size:.9rem; color:var(--muted); line-height:1.6; }
+    /* ── SEÇÃO GENÉRICA ── */
+    .sec { padding: 90px 6vw; }
+    .sec-alt { background: linear-gradient(180deg, transparent, rgba(124,58,237,.03) 50%, transparent); }
+    .sec-label { text-align: center; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--purple-light); font-weight: 600; margin-bottom: 12px; }
+    .sec-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.7rem, 3.5vw, 2.6rem); text-align: center; line-height: 1.12; margin-bottom: 12px; }
+    .sec-sub { text-align: center; color: var(--muted); font-size: .95rem; max-width: 520px; margin: 0 auto 52px; }
 
-    /* ── COMO FUNCIONA ── */
-    .how { padding:100px 6vw; }
-    .steps {
-      display:grid; gap:32px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      max-width:900px; margin:0 auto; position:relative;
-    }
-    .step { text-align:center; padding:0 12px; }
-    .step-num {
-      width:52px; height:52px; border-radius:50%;
-      background:linear-gradient(135deg,#7C3AED,#5B21B6);
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem;
-      margin:0 auto 18px;
-      box-shadow:0 0 24px rgba(124,58,237,.4);
-    }
-    .step-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; margin-bottom:8px; }
-    .step-desc { font-size:.875rem; color:var(--muted); line-height:1.6; }
+    /* ── O QUE É A MAY ── */
+    .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 960px; margin: 0 auto; align-items: center; }
+    .what-text p { color: var(--muted); font-size: .95rem; line-height: 1.75; margin-bottom: 18px; }
+    .what-text p:last-child { margin-bottom: 0; }
+    .what-text strong { color: var(--text); }
+    .what-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .what-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .what-card-icon { font-size: 1.4rem; margin-bottom: 8px; }
+    .what-card-title { font-size: .82rem; font-weight: 700; margin-bottom: 4px; }
+    .what-card-desc { font-size: .75rem; color: var(--muted); line-height: 1.55; }
+    @media (max-width: 700px) { .what-grid { grid-template-columns: 1fr; } }
 
-    /* ── PREÇOS ── */
-    .pricing {
-      padding:100px 6vw;
-      background:linear-gradient(180deg,transparent,rgba(124,58,237,.03) 50%,transparent);
-    }
-    .pricing-grid {
-      display:grid; gap:20px;
-      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-      max-width:1000px; margin:0 auto;
-    }
-    .plan-card {
-      background:var(--glass); border:1px solid var(--border);
-      border-radius:var(--radius); padding:32px 28px;
-      display:flex; flex-direction:column;
-      transition:all .25s; position:relative; overflow:hidden;
-    }
-    .plan-card.featured {
-      border-color:rgba(124,58,237,.5);
-      background:rgba(124,58,237,.08);
-    }
-    .plan-card.featured::before {
-      content:'Mais popular';
-      position:absolute; top:16px; right:-28px;
-      background:linear-gradient(135deg,#7C3AED,#5B21B6);
-      color:#fff; font-size:.7rem; font-weight:700; padding:4px 40px;
-      transform:rotate(45deg); letter-spacing:.05em;
-    }
-    .plan-name {
-      font-family:'Syne',sans-serif; font-weight:700;
-      font-size:1rem; color:var(--muted); margin-bottom:12px;
-      text-transform:uppercase; letter-spacing:.08em;
-    }
-    .plan-price {
-      font-family:'Syne',sans-serif; font-weight:900;
-      font-size:2.6rem; color:var(--text); line-height:1;
-      margin-bottom:6px;
-    }
-    .plan-price span { font-size:1rem; font-weight:400; color:var(--muted); }
-    .plan-desc { font-size:.85rem; color:var(--muted); margin-bottom:24px; }
-    .plan-features { list-style:none; flex:1; margin-bottom:28px; }
-    .plan-features li {
-      font-size:.875rem; color:var(--text);
-      padding:7px 0; border-bottom:1px solid var(--border);
-      display:flex; align-items:center; gap:10px;
-    }
-    .plan-features li:last-child { border-bottom:none; }
-    .plan-features li::before { content:'✓'; color:#6EE7B7; font-weight:700; flex-shrink:0; }
-    .plan-features li.na { color:var(--muted); }
-    .plan-features li.na::before { content:'–'; color:var(--muted); }
-    .btn-plan {
-      width:100%; padding:12px; border-radius:10px; font-size:.9rem;
-      font-weight:600; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif;
-      border:1px solid var(--border); background:var(--glass); color:var(--text);
-    }
-    .btn-plan:hover { border-color:var(--purple-light); }
-    .btn-plan.primary {
-      background:linear-gradient(135deg,#7C3AED,#6D28D9);
-      border:none; color:#fff;
-      box-shadow:0 6px 24px rgba(124,58,237,.35);
-    }
-    .btn-plan.primary:hover { transform:translateY(-1px); box-shadow:0 8px 32px rgba(124,58,237,.5); }
+    /* ── DIA A DIA ── */
+    .day-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 1000px; margin: 0 auto; }
+    .day-card { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; transition: all .25s; }
+    .day-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-3px); background: rgba(124,58,237,.06); }
+    .day-situation { font-size: .78rem; font-weight: 600; color: var(--purple-light); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+    .day-problem { font-size: .92rem; color: var(--text); font-weight: 600; margin-bottom: 10px; line-height: 1.45; }
+    .day-arrow { color: var(--muted); font-size: .82rem; margin-bottom: 8px; }
+    .day-solution { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+    .day-solution strong { color: #A78BFA; }
+
+    /* ── FERRAMENTAS ── */
+    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 1050px; margin: 0 auto; }
+    .tool-card { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; transition: all .25s; }
+    .tool-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-3px); }
+    .tool-icon { width: 44px; height: 44px; border-radius: 11px; background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.22); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 16px; }
+    .tool-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 7px; }
+    .tool-desc { font-size: .875rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── PLANOS ── */
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 700px; margin: 0 auto; }
+    .plan-card { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column; position: relative; overflow: hidden; transition: all .25s; }
+    .plan-card:hover { transform: translateY(-3px); }
+    .plan-card.featured { border-color: rgba(124,58,237,.45); background: rgba(124,58,237,.08); }
+    .plan-badge { position: absolute; top: 18px; right: -24px; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: #fff; font-size: .65rem; font-weight: 700; padding: 4px 36px; transform: rotate(45deg); letter-spacing: .04em; }
+    .plan-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; }
+    .plan-price { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 3rem; line-height: 1; margin-bottom: 4px; }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--muted); }
+    .plan-trial { font-size: .8rem; color: #6EE7B7; margin-bottom: 8px; }
+    .plan-desc { font-size: .85rem; color: var(--muted); margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .plan-feats { list-style: none; flex: 1; margin-bottom: 26px; }
+    .plan-feats li { font-size: .875rem; padding: 7px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 10px; line-height: 1.45; }
+    .plan-feats li:last-child { border-bottom: none; }
+    .plan-feats li::before { content: '✓'; color: #6EE7B7; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .btn-plan { width: 100%; padding: 13px; border-radius: 10px; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; border: 1px solid var(--border); background: var(--glass); color: var(--text); }
+    .btn-plan:hover { border-color: var(--purple-light); }
+    .btn-plan.p { background: linear-gradient(135deg, #7C3AED, #6D28D9); border: none; color: #fff; box-shadow: 0 6px 22px rgba(124,58,237,.35); }
+    .btn-plan.p:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(124,58,237,.5); }
+    .plan-note { text-align: center; margin-top: 14px; font-size: .75rem; color: var(--muted); }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .faq-q { width: 100%; background: none; border: none; text-align: left; padding: 20px 24px; color: var(--text); font-size: .95rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-family: 'Inter', sans-serif; }
+    .faq-q:hover { background: rgba(124,58,237,.05); }
+    .faq-icon { font-size: 1.2rem; color: var(--muted); flex-shrink: 0; transition: transform .25s; }
+    .faq-a { display: none; padding: 0 24px 20px; font-size: .9rem; color: var(--muted); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 16px; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
 
     /* ── CTA FINAL ── */
-    .cta-final {
-      padding:100px 6vw; text-align:center;
-    }
-    .cta-final-box {
-      max-width:700px; margin:0 auto;
-      background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(109,40,217,.06));
-      border:1px solid rgba(124,58,237,.3); border-radius:24px;
-      padding:60px 40px;
-    }
-    .cta-final-box h2 {
-      font-family:'Syne',sans-serif; font-weight:900;
-      font-size:clamp(1.8rem,4vw,2.6rem); margin-bottom:16px; line-height:1.15;
-    }
-    .cta-final-box p { color:var(--muted); font-size:1rem; margin-bottom:32px; }
+    .cta-sec { padding: 90px 6vw; text-align: center; }
+    .cta-box { max-width: 640px; margin: 0 auto; background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(109,40,217,.05)); border: 1px solid rgba(124,58,237,.3); border-radius: 24px; padding: 56px 40px; }
+    .cta-box h2 { font-family: 'Syne', sans-serif; font-weight: 900; font-size: clamp(1.7rem, 3.5vw, 2.4rem); margin-bottom: 14px; line-height: 1.15; }
+    .cta-box p { color: var(--muted); font-size: .95rem; margin-bottom: 30px; line-height: 1.65; }
+    .cta-box .trial-note { margin-top: 14px; }
 
     /* ── FOOTER ── */
-    footer {
-      border-top:1px solid var(--border); padding:32px 6vw;
-      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
-      color:var(--muted); font-size:.82rem;
-    }
-    footer a { color:var(--muted); text-decoration:none; }
-    footer a:hover { color:var(--text); }
+    footer { border-top: 1px solid var(--border); padding: 28px 6vw; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .8rem; }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    .footer-links { display: flex; gap: 22px; }
 
     /* ── MODAL ── */
-    .modal-overlay {
-      display:none; position:fixed; inset:0; z-index:200;
-      background:rgba(4,6,18,.85); backdrop-filter:blur(12px);
-      align-items:center; justify-content:center; padding:20px;
-    }
-    .modal-overlay.open { display:flex; }
-    .modal-box {
-      background:#0E1230; border:1px solid rgba(124,58,237,.3);
-      border-radius:20px; padding:40px 36px; width:100%; max-width:420px;
-      position:relative; box-shadow:0 32px 80px rgba(0,0,0,.6);
-    }
-    .modal-close {
-      position:absolute; top:16px; right:18px;
-      background:none; border:none; color:var(--muted); font-size:1.4rem;
-      cursor:pointer; line-height:1; padding:4px;
-    }
-    .modal-close:hover { color:var(--text); }
-    .modal-logo { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
-    .modal-logo-mark {
-      width:34px; height:34px; border-radius:9px;
-      background:linear-gradient(135deg,#7C3AED,#5B21B6);
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Syne',sans-serif; font-weight:800; color:#fff; font-size:1rem;
-    }
-    .modal-logo-name { font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; }
-    .auth-tabs { display:flex; gap:4px; background:rgba(255,255,255,.05); border-radius:10px; padding:4px; margin-bottom:24px; }
-    .auth-tab {
-      flex:1; padding:8px; border-radius:7px; border:none; background:none;
-      color:var(--muted); font-size:.875rem; cursor:pointer; transition:all .2s;
-      font-family:'Inter',sans-serif;
-    }
-    .auth-tab.active { background:#1A1F42; color:var(--text); font-weight:600; }
-    .auth-panel { display:none; }
-    .auth-panel.active { display:block; }
-    .form-group { margin-bottom:16px; }
-    .form-label { display:block; font-size:.82rem; color:var(--muted); margin-bottom:6px; }
-    .form-group input {
-      width:100%; background:rgba(255,255,255,.05); border:1px solid var(--border);
-      border-radius:9px; padding:11px 14px; color:var(--text); font-size:.9rem;
-      font-family:'Inter',sans-serif; outline:none; transition:border .2s;
-    }
-    .form-group input:focus { border-color:rgba(124,58,237,.5); }
-    .pw-wrap { position:relative; }
-    .pw-wrap input { padding-right:42px; }
-    .btn-toggle-pw {
-      position:absolute; right:10px; top:50%; transform:translateY(-50%);
-      background:none; border:none; cursor:pointer; font-size:1rem; color:var(--muted);
-    }
-    .auth-error {
-      background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25);
-      border-radius:8px; padding:10px 14px; font-size:.83rem; color:#FCA5A5;
-      margin-bottom:16px; display:none;
-    }
-    .auth-success {
-      background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.25);
-      border-radius:8px; padding:10px 14px; font-size:.83rem; color:#6EE7B7;
-      margin-bottom:16px; display:none;
-    }
-    .btn-auth {
-      width:100%; padding:13px; border:none; border-radius:10px;
-      background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff;
-      font-size:.95rem; font-weight:600; cursor:pointer; transition:all .2s;
-      font-family:'Inter',sans-serif; margin-top:4px;
-      box-shadow:0 6px 24px rgba(124,58,237,.35);
-    }
-    .btn-auth:hover { transform:translateY(-1px); box-shadow:0 8px 32px rgba(124,58,237,.5); }
-    .btn-auth:disabled { opacity:.6; cursor:not-allowed; transform:none; }
-    .forgot-link {
-      text-align:right; margin-bottom:16px;
-    }
-    .forgot-link a {
-      font-size:.8rem; color:var(--muted); text-decoration:none;
-    }
-    .forgot-link a:hover { color:var(--text); }
-    .terms-note {
-      text-align:center; margin-top:14px; font-size:.76rem; color:var(--muted);
-    }
-    .back-link { text-align:center; margin-top:12px; }
-    .back-link a { font-size:.82rem; color:var(--muted); text-decoration:none; cursor:pointer; }
-    .back-link a:hover { color:var(--text); }
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(4,6,18,.88); backdrop-filter: blur(14px); align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: #0E1230; border: 1px solid rgba(124,58,237,.3); border-radius: 20px; padding: 38px 34px; width: 100%; max-width: 410px; position: relative; box-shadow: 0 32px 80px rgba(0,0,0,.6); }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+    .modal-close:hover { color: var(--text); }
+    .modal-logo { display: flex; align-items: center; gap: 9px; margin-bottom: 26px; }
+    .modal-logo .logo-mark { width: 30px; height: 30px; border-radius: 8px; font-size: .9rem; }
+    .modal-logo .logo-name { font-size: 1rem; }
+    .auth-tabs { display: flex; gap: 3px; background: rgba(255,255,255,.05); border-radius: 9px; padding: 3px; margin-bottom: 22px; }
+    .auth-tab { flex: 1; padding: 8px; border-radius: 6px; border: none; background: none; color: var(--muted); font-size: .85rem; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; }
+    .auth-tab.active { background: #1A1F42; color: var(--text); font-weight: 600; }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 5px; }
+    .form-group input { width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; color: var(--text); font-size: .88rem; font-family: 'Inter', sans-serif; outline: none; transition: border .2s; }
+    .form-group input:focus { border-color: rgba(124,58,237,.5); }
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 40px; }
+    .btn-toggle-pw { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: .95rem; color: var(--muted); }
+    .auth-error { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25); border-radius: 8px; padding: 9px 13px; font-size: .8rem; color: #FCA5A5; margin-bottom: 14px; display: none; }
+    .auth-success { background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25); border-radius: 8px; padding: 9px 13px; font-size: .8rem; color: #6EE7B7; margin-bottom: 14px; display: none; }
+    .btn-auth { width: 100%; padding: 12px; border: none; border-radius: 9px; background: linear-gradient(135deg, #7C3AED, #6D28D9); color: #fff; font-size: .92rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 2px; box-shadow: 0 6px 22px rgba(124,58,237,.35); transition: all .2s; }
+    .btn-auth:hover { transform: translateY(-1px); }
+    .btn-auth:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .forgot-link { text-align: right; margin-bottom: 14px; }
+    .forgot-link a { font-size: .78rem; color: var(--muted); text-decoration: none; }
+    .terms-note { text-align: center; margin-top: 12px; font-size: .73rem; color: var(--muted); }
+    .back-link { text-align: center; margin-top: 10px; }
+    .back-link a { font-size: .8rem; color: var(--muted); cursor: pointer; text-decoration: none; }
 
-    /* ── MOBILE ── */
-    @media (max-width:640px) {
-      nav { padding:14px 5vw; }
-      .btn-nav-ghost { display:none; }
-      .hero { padding:100px 5vw 60px; }
-      .modal-box { padding:32px 24px; }
-      footer { flex-direction:column; text-align:center; }
+    @media (max-width: 640px) {
+      nav { padding: 14px 5vw; }
+      .btn-ghost { display: none; }
+      .what-visual { grid-template-columns: 1fr; }
+      .cta-box { padding: 36px 22px; }
+      .modal-box { padding: 30px 22px; }
+      footer { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
+<canvas id="bg"></canvas>
 
 <!-- ══ NAV ══ -->
 <nav>
   <a href="/" class="nav-logo">
-    <div class="nav-logo-mark">M</div>
-    <span class="nav-logo-name">May</span>
+    <div class="logo-mark">M</div>
+    <span class="logo-name">May</span>
   </a>
-  <div class="nav-actions">
-    <button class="btn-nav-ghost" onclick="abrirModal('login')">Entrar</button>
-    <button class="btn-nav-primary" onclick="abrirModal('register')">Começar grátis</button>
+  <div class="nav-right">
+    <button class="btn-ghost" onclick="abrirModal('login')">Entrar</button>
+    <button class="btn-cta" onclick="abrirModal('register')">Testar 7 dias grátis</button>
   </div>
 </nav>
 
 <!-- ══ HERO ══ -->
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-badge">IA especializada em vendas jurídicas</div>
-    <h1 class="hero-title">
-      A IA que treina<br>
-      advogados para<br>
-      <span class="grad">fechar mais contratos</span>
-    </h1>
+    <div class="badge">✦ Treinamento comercial para escritórios jurídicos</div>
+    <h1>Seu escritório precisa<br>vender. <span class="grad">May te ensina como.</span></h1>
     <p class="hero-sub">
-      May entende o mercado jurídico por dentro. Simule objeções reais, crie propostas irresistíveis e desenvolva suas habilidades comerciais — sem sair do escritório.
+      Plataforma de desenvolvimento comercial com IA especializada no mercado jurídico — para advogados que querem conduzir conversas, apresentar honorários e fechar contratos com confiança.
     </p>
-    <div class="hero-cta">
-      <button class="btn-hero-primary" onclick="abrirModal('register')">Criar conta grátis</button>
-      <button class="btn-hero-ghost" onclick="abrirModal('login')">Já tenho conta</button>
+    <div class="hero-btns">
+      <button class="btn-hero-p" onclick="abrirModal('register')">Começar trial gratuito</button>
+      <button class="btn-hero-g" onclick="abrirModal('login')">Já tenho conta</button>
     </div>
-    <div class="hero-proof">
-      <div class="hero-proof-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Sem cartão de crédito
+    <p class="trial-note"><strong>7 dias grátis</strong> — sem cartão de crédito para começar</p>
+  </div>
+</section>
+
+<!-- ══ O QUE É A MAY ══ -->
+<section class="sec sec-alt" id="sobre">
+  <div class="sec-label">O que é a May</div>
+  <h2 class="sec-title">Uma plataforma feita para<br>quem vende advocacia</h2>
+  <p class="sec-sub">Não é um CRM. Não é um curso. É um parceiro de treino — disponível a qualquer hora, especializado no contexto real do seu escritório.</p>
+  <div class="what-grid">
+    <div class="what-text">
+      <p>Advocacia é uma das profissões mais exigentes do mundo — e também uma das que menos oferece formação comercial. A maioria dos advogados sabe fazer o trabalho técnico, mas hesita na hora de apresentar um honorário, conduzir uma reunião de fechamento ou responder a uma objeção.</p>
+      <p><strong>May preenche essa lacuna.</strong> Com inteligência artificial treinada na metodologia Comercial Jurídico, a plataforma simula situações reais, gera materiais de venda e desenvolve as habilidades comerciais da sua equipe — sem precisar contratar consultores caros ou tirar o time do trabalho.</p>
+      <p>Para advogados solos que querem crescer. Para gestores que querem acompanhar e desenvolver o time comercial do escritório.</p>
+    </div>
+    <div class="what-visual">
+      <div class="what-card">
+        <div class="what-card-icon">🎯</div>
+        <div class="what-card-title">Treinamento prático</div>
+        <div class="what-card-desc">Simulações de objeções, reuniões e negociações antes de acontecerem de verdade</div>
       </div>
-      <div class="hero-divider"></div>
-      <div class="hero-proof-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Acesso imediato
+      <div class="what-card">
+        <div class="what-card-icon">📊</div>
+        <div class="what-card-title">Acompanhamento de equipe</div>
+        <div class="what-card-desc">Gestor visualiza desempenho, metas e ranking interno do escritório em tempo real</div>
       </div>
-      <div class="hero-divider"></div>
-      <div class="hero-proof-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Cancele quando quiser
+      <div class="what-card">
+        <div class="what-card-icon">⚡</div>
+        <div class="what-card-title">Uso imediato</div>
+        <div class="what-card-desc">Sem configuração complexa. O advogado entra e já começa a usar nas situações do dia a dia</div>
+      </div>
+      <div class="what-card">
+        <div class="what-card-icon">⚖️</div>
+        <div class="what-card-title">Ética sempre</div>
+        <div class="what-card-desc">Metodologia desenvolvida dentro das normas da OAB — vender advocacia com dignidade</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══ FEATURES ══ -->
-<section class="features">
-  <div class="section-label">Ferramentas</div>
-  <h2 class="section-title">Tudo que você precisa para<br>vender consultoria jurídica</h2>
-  <p class="section-sub">Ferramentas desenvolvidas com a metodologia Comercial Jurídico — para o contexto real do seu escritório.</p>
-  <div class="features-grid">
-    <div class="feat-card">
-      <div class="feat-icon">💬</div>
-      <div class="feat-name">Chat Estratégico</div>
-      <div class="feat-desc">Converse com a May sobre qualquer desafio comercial. Tire dúvidas, refine argumentos e planeje abordagens com uma IA que entende advocacia.</div>
+<!-- ══ COMO AJUDA NO DIA A DIA ══ -->
+<section class="sec" id="como-funciona">
+  <div class="sec-label">Como te ajuda no dia a dia</div>
+  <h2 class="sec-title">Para cada situação do escritório,<br>May tem uma resposta</h2>
+  <p class="sec-sub">Situações reais que acontecem toda semana — e como a May te prepara para elas.</p>
+  <div class="day-grid">
+    <div class="day-card">
+      <div class="day-situation">Antes da reunião</div>
+      <div class="day-problem">"Tenho uma apresentação amanhã e não sei como defender meu honorário."</div>
+      <div class="day-arrow">↓ May simula a conversa antes</div>
+      <div class="day-solution">Treine o pitch, antecipe objeções e chegue preparado. <strong>May faz o papel do cliente</strong> e te dá feedback em tempo real.</div>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🎯</div>
-      <div class="feat-name">Simulador de Objeções</div>
-      <div class="feat-desc">Treine como responder "tá caro", "vou pensar" e "meu cunhado é advogado" antes da reunião real. Chegue preparado para qualquer resistência.</div>
+    <div class="day-card">
+      <div class="day-situation">Após a reunião</div>
+      <div class="day-problem">"Cliente disse 'vou pensar'. Já faz 3 dias e não sei o que falar."</div>
+      <div class="day-arrow">↓ May gera o follow-up certo</div>
+      <div class="day-solution">Mensagens de acompanhamento personalizadas para cada situação — <strong>sem parecer invasivo</strong>, sem parecer desesperado.</div>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">📄</div>
-      <div class="feat-name">Gerador de Propostas</div>
-      <div class="feat-desc">Crie propostas comerciais persuasivas em minutos. May adapta a linguagem e os argumentos para cada perfil de cliente.</div>
+    <div class="day-card">
+      <div class="day-situation">Na proposta</div>
+      <div class="day-problem">"Preciso enviar uma proposta hoje mas não tenho tempo de montar do zero."</div>
+      <div class="day-arrow">↓ May cria em minutos</div>
+      <div class="day-solution">Proposta comercial estruturada, com linguagem adaptada ao perfil do cliente e ao tipo de serviço. <strong>Pronta para enviar.</strong></div>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">📩</div>
-      <div class="feat-name">Follow-up Inteligente</div>
-      <div class="feat-desc">Nunca mais perca um cliente por falta de acompanhamento. Gere mensagens de follow-up personalizadas para cada etapa do processo.</div>
+    <div class="day-card">
+      <div class="day-situation">Com objeções</div>
+      <div class="day-problem">"Meu cliente disse que é caro demais. Travei e perdi o contrato."</div>
+      <div class="day-arrow">↓ May treina sua resposta</div>
+      <div class="day-solution">Simulador de objeções com as mais comuns do mercado jurídico. <strong>Treine até a resposta sair natural</strong> — sem improvisar na hora H.</div>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🤝</div>
-      <div class="feat-name">Negociação Avançada</div>
-      <div class="feat-desc">Aprenda técnicas de negociação adaptadas à realidade jurídica. Defenda seu honorário com confiança e autoridade.</div>
+    <div class="day-card">
+      <div class="day-situation">Como gestor</div>
+      <div class="day-problem">"Não consigo acompanhar o desempenho comercial da minha equipe."</div>
+      <div class="day-arrow">↓ May entrega visibilidade</div>
+      <div class="day-solution">Painel com métricas, metas e ranking interno do escritório. <strong>Saiba quem está evoluindo</strong> — e quem precisa de apoio.</div>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🏆</div>
-      <div class="feat-name">Arena de Vendas</div>
-      <div class="feat-desc">Registre suas vendas, acompanhe suas metas e dispute o ranking com outros advogados. Gamificação que transforma resultados em motivação.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ COMO FUNCIONA ══ -->
-<section class="how">
-  <div class="section-label">Como funciona</div>
-  <h2 class="section-title">Simples assim</h2>
-  <p class="section-sub" style="margin-bottom:52px">Sem cursos intermináveis. Aprenda enquanto pratica, no ritmo do seu escritório.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-title">Crie sua conta</div>
-      <div class="step-desc">Cadastro gratuito em 30 segundos. Nenhuma configuração técnica necessária.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-title">Descreva seu contexto</div>
-      <div class="step-desc">Conte para May sua área de atuação, seu perfil de clientes e seus desafios comerciais.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-title">Treine e pratique</div>
-      <div class="step-desc">Use as ferramentas diariamente. May acompanha seu progresso e evolui com você.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-title">Feche mais contratos</div>
-      <div class="step-desc">Aplique o que treinou. Veja seus resultados no ranking e bata suas metas.</div>
+    <div class="day-card">
+      <div class="day-situation">No desenvolvimento</div>
+      <div class="day-problem">"Quero melhorar, mas não tenho tempo para cursos longos."</div>
+      <div class="day-arrow">↓ May se encaixa na sua rotina</div>
+      <div class="day-solution">Ferramentas práticas que você usa <strong>enquanto trabalha</strong> — não precisa parar a operação para se desenvolver.</div>
     </div>
   </div>
 </section>
 
-<!-- ══ PREÇOS ══ -->
-<section class="pricing" id="planos">
-  <div class="section-label">Planos</div>
-  <h2 class="section-title">Escolha o seu plano</h2>
-  <p class="section-sub">Comece grátis. Evolua quando quiser.</p>
-  <div class="pricing-grid">
+<!-- ══ FERRAMENTAS ══ -->
+<section class="sec sec-alt" id="ferramentas">
+  <div class="sec-label">Ferramentas</div>
+  <h2 class="sec-title">Tudo no mesmo lugar</h2>
+  <p class="sec-sub">Cada ferramenta foi desenvolvida para uma situação específica da venda jurídica.</p>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-icon">💬</div>
+      <div class="tool-name">Chat Estratégico</div>
+      <div class="tool-desc">Converse com a May sobre qualquer desafio comercial. Tire dúvidas, refine argumentos, planeje abordagens. Disponível 24h.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🎯</div>
+      <div class="tool-name">Simulador de Objeções</div>
+      <div class="tool-desc">May faz o papel do cliente e lança as objeções mais comuns do mercado jurídico. Treine sua resposta até ficar natural.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">📄</div>
+      <div class="tool-name">Gerador de Propostas</div>
+      <div class="tool-desc">Propostas comerciais estruturadas em minutos. Linguagem adaptada ao tipo de serviço e ao perfil do potencial cliente.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">📩</div>
+      <div class="tool-name">Follow-up Inteligente</div>
+      <div class="tool-desc">Mensagens de acompanhamento para cada etapa — após reunião, após proposta, após silêncio. Sem parecer invasivo.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🤝</div>
+      <div class="tool-name">Negociação de Honorário</div>
+      <div class="tool-desc">Técnicas para defender o seu valor com segurança. Scripts e argumentos adaptados para o contexto jurídico.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🏆</div>
+      <div class="tool-name">Arena da Equipe</div>
+      <div class="tool-desc">Ranking interno do escritório com metas e resultados. O gestor acompanha a evolução de cada membro da equipe comercial.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PLANOS ══ -->
+<section class="sec" id="planos">
+  <div class="sec-label">Planos</div>
+  <h2 class="sec-title">Simples e direto</h2>
+  <p class="sec-sub">7 dias para experimentar. Depois, escolha o plano certo para você.</p>
+  <div class="plans-grid">
 
     <div class="plan-card">
-      <div class="plan-name">Grátis</div>
-      <div class="plan-price">R$0<span>/mês</span></div>
-      <div class="plan-desc">Para conhecer a May</div>
-      <ul class="plan-features">
-        <li>20 mensagens por mês</li>
-        <li>Chat estratégico</li>
-        <li>3 ferramentas base</li>
-        <li class="na">Ferramentas avançadas</li>
-        <li class="na">Áreas de trabalho</li>
-        <li class="na">Arena de vendas</li>
+      <div class="plan-name">Mensal</div>
+      <div class="plan-price">R$97<span>/mês</span></div>
+      <div class="plan-trial">✓ 7 dias grátis para começar</div>
+      <div class="plan-desc">Para o advogado que quer se desenvolver individualmente — sem precisar gerenciar equipe.</div>
+      <ul class="plan-feats">
+        <li>Mensagens ilimitadas com May</li>
+        <li>Todas as ferramentas de treino</li>
+        <li>Áreas de trabalho (até 3)</li>
+        <li>Exportar respostas para Word</li>
+        <li>Histórico de conversas</li>
+        <li>Suporte por e-mail</li>
       </ul>
-      <button class="btn-plan" onclick="abrirModal('register')">Começar grátis</button>
+      <button class="btn-plan" onclick="abrirModal('register')">Começar trial grátis</button>
+      <p class="plan-note">Cancele quando quiser</p>
     </div>
 
     <div class="plan-card featured">
-      <div class="plan-name">Mensal</div>
-      <div class="plan-price">R$97<span>/mês</span></div>
-      <div class="plan-desc">Para advogados ativos</div>
-      <ul class="plan-features">
-        <li>500 mensagens por mês</li>
-        <li>Todas as ferramentas</li>
-        <li>3 áreas de trabalho</li>
-        <li>Arena de vendas</li>
-        <li>Exportar para Word</li>
-        <li class="na">Gestão de equipe</li>
-      </ul>
-      <button class="btn-plan primary" onclick="abrirModal('register')">Assinar agora</button>
-    </div>
-
-    <div class="plan-card">
-      <div class="plan-name">Anual</div>
-      <div class="plan-price">R$67<span>/mês</span></div>
-      <div class="plan-desc">Cobrado R$797/ano — economize 31%</div>
-      <ul class="plan-features">
-        <li>Mensagens ilimitadas</li>
-        <li>Todas as ferramentas</li>
-        <li>Áreas de trabalho ilimitadas</li>
-        <li>Arena de vendas + metas</li>
-        <li>Exportar para Word</li>
-        <li class="na">Gestão de equipe</li>
-      </ul>
-      <button class="btn-plan" onclick="abrirModal('register')">Assinar anual</button>
-    </div>
-
-    <div class="plan-card">
+      <div class="plan-badge">Equipes</div>
       <div class="plan-name">Gestor</div>
-      <div class="plan-price">R$197<span>/mês</span></div>
-      <div class="plan-desc">Para escritórios com equipe</div>
-      <ul class="plan-features">
-        <li>Tudo do plano Anual</li>
-        <li>Painel do gestor</li>
-        <li>Ranking da equipe</li>
-        <li>Metas comerciais</li>
-        <li>Até 10 membros</li>
-        <li>Relatórios semanais</li>
+      <div class="plan-price">R$297<span>/mês</span></div>
+      <div class="plan-trial">✓ 7 dias grátis para começar</div>
+      <div class="plan-desc">Para escritórios com equipe comercial — gestão, acompanhamento e desenvolvimento do time.</div>
+      <ul class="plan-feats">
+        <li>Tudo do plano Mensal</li>
+        <li>Painel do gestor completo</li>
+        <li>Ranking interno da equipe</li>
+        <li>Metas comerciais por membro</li>
+        <li>Relatórios de desempenho</li>
+        <li>Até 10 membros na equipe</li>
       </ul>
-      <button class="btn-plan" onclick="abrirModal('register')">Falar com a equipe</button>
+      <button class="btn-plan p" onclick="abrirModal('register')">Começar trial grátis</button>
+      <p class="plan-note">Cancele quando quiser</p>
     </div>
 
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section class="sec sec-alt" id="faq">
+  <div class="sec-label">Dúvidas frequentes</div>
+  <h2 class="sec-title">Perguntas e respostas</h2>
+  <p class="sec-sub" style="margin-bottom: 40px">Ainda tem dúvida? Fala com a gente.</p>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        May serve para qualquer área da advocacia?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">Sim. May foi desenvolvida para o contexto comercial jurídico em geral — trabalhista, cível, previdenciário, empresarial, tributário e outros. Você informa sua área de atuação no início e May adapta todos os exemplos, scripts e simulações para o seu contexto específico.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Como funciona o trial de 7 dias?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">Você cria sua conta e tem 7 dias de acesso completo, sem precisar informar cartão de crédito. Ao final do período, escolhe o plano que mais faz sentido para você e realiza o pagamento para continuar. Se preferir não continuar, é só não assinar — sem cobranças automáticas.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Preciso saber usar IA para aproveitar May?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">Não. A interface é simples como um WhatsApp. Você escreve o que precisa em linguagem natural — "me ajuda a responder uma objeção de preço" ou "cria uma proposta para um cliente de direito trabalhista" — e May entrega a resposta. Nenhuma configuração técnica necessária.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        O ranking da Arena é com outros escritórios?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">Não. O ranking é interno ao seu escritório — apenas os membros da sua equipe comercial participam e se veem. Cada escritório tem sua própria Arena, com metas definidas pelo gestor e resultados visíveis apenas para a equipe interna. Nenhuma informação é compartilhada externamente.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Posso cancelar quando quiser?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">Sim. Não há fidelidade nem multa de cancelamento. Você pode cancelar a qualquer momento pela plataforma e o acesso fica ativo até o fim do período já pago.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        May substitui um consultor de vendas?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">May é um complemento de alto impacto para escritórios que não têm budget para consultoria contínua — e um acelerador para os que já têm. Ela aplica os princípios da metodologia Comercial Jurídico no dia a dia, de forma acessível e escalável para toda a equipe.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Minha equipe é grande. Posso adicionar mais de 10 membros?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-a">O plano Gestor comporta até 10 membros. Para equipes maiores, entre em contato com a gente — temos soluções customizadas para escritórios com times comerciais mais robustos.</div>
+    </div>
   </div>
 </section>
 
 <!-- ══ CTA FINAL ══ -->
-<section class="cta-final">
-  <div class="cta-final-box">
-    <h2>Pronto para fechar mais contratos?</h2>
-    <p>Junte-se aos advogados que já usam May para treinar, praticar e vender mais — dentro da ética da advocacia.</p>
-    <button class="btn-hero-primary" onclick="abrirModal('register')">Criar conta grátis agora</button>
+<section class="cta-sec">
+  <div class="cta-box">
+    <h2>Comece a treinar sua equipe hoje</h2>
+    <p>7 dias para experimentar todas as ferramentas, sem compromisso. Depois disso, você decide se quer continuar.</p>
+    <button class="btn-hero-p" onclick="abrirModal('register')">Começar trial gratuito</button>
+    <p class="trial-note"><strong>7 dias grátis</strong> · Sem cartão de crédito · Cancele quando quiser</p>
   </div>
 </section>
 
 <!-- ══ FOOTER ══ -->
 <footer>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <div class="nav-logo-mark" style="width:28px;height:28px;font-size:.85rem;border-radius:7px;">M</div>
-    <span style="font-family:'Syne',sans-serif;font-weight:700;">May</span>
+  <div class="nav-logo" style="text-decoration:none">
+    <div class="logo-mark" style="width:26px;height:26px;font-size:.8rem;border-radius:7px;">M</div>
+    <span class="logo-name" style="font-size:.9rem;">May</span>
   </div>
-  <div style="display:flex;gap:24px;">
+  <div class="footer-links">
     <a href="#">Termos de uso</a>
     <a href="#">Privacidade</a>
     <a href="#planos">Planos</a>
+    <a href="#faq">FAQ</a>
   </div>
   <span>© 2025 May App. Todos os direitos reservados.</span>
 </footer>
 
-<!-- ══ MODAL LOGIN/CADASTRO ══ -->
+<!-- ══ MODAL ══ -->
 <div class="modal-overlay" id="modal-auth" onclick="fecharModalSeFora(event)">
   <div class="modal-box">
     <button class="modal-close" onclick="fecharModal()">×</button>
     <div class="modal-logo">
-      <div class="modal-logo-mark">M</div>
-      <span class="modal-logo-name">May</span>
+      <div class="logo-mark">M</div>
+      <span class="logo-name">May</span>
     </div>
-
     <div class="auth-error" id="auth-error"></div>
     <div class="auth-success" id="auth-success"></div>
-
-    <!-- TABS -->
-    <div class="auth-tabs" id="auth-tabs-container">
+    <div class="auth-tabs" id="auth-tabs">
       <button class="auth-tab active" id="tab-login" onclick="mostrarTab('login')">Entrar</button>
       <button class="auth-tab" id="tab-register" onclick="mostrarTab('register')">Criar conta</button>
     </div>
-
     <!-- LOGIN -->
     <div class="auth-panel active" id="panel-login">
       <div class="form-group">
@@ -624,12 +496,9 @@
           <button class="btn-toggle-pw" onclick="toggleSenha('login-senha')" tabindex="-1">👁</button>
         </div>
       </div>
-      <div class="forgot-link">
-        <a href="#" onclick="mostrarTab('forgot')">Esqueci minha senha</a>
-      </div>
+      <div class="forgot-link"><a href="#" onclick="mostrarTab('forgot')">Esqueci minha senha</a></div>
       <button class="btn-auth" id="btn-login" onclick="fazerLogin()">Entrar</button>
     </div>
-
     <!-- CADASTRO -->
     <div class="auth-panel" id="panel-register">
       <div class="form-group">
@@ -647,73 +516,68 @@
           <button class="btn-toggle-pw" onclick="toggleSenha('reg-senha')" tabindex="-1">👁</button>
         </div>
       </div>
-      <button class="btn-auth" id="btn-register" onclick="criarConta()">Criar conta grátis</button>
+      <button class="btn-auth" id="btn-register" onclick="criarConta()">Começar trial de 7 dias</button>
       <p class="terms-note">Ao criar conta, você concorda com nossos termos de uso.</p>
     </div>
-
     <!-- ESQUECI SENHA -->
     <div class="auth-panel" id="panel-forgot">
-      <p style="font-size:.875rem;color:var(--muted);margin-bottom:18px;line-height:1.6;">
-        Informe seu e-mail e enviaremos um link para redefinir sua senha.
-      </p>
+      <p style="font-size:.875rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">Informe seu e-mail e enviaremos um link para redefinir sua senha.</p>
       <div class="form-group">
         <label class="form-label">E-mail</label>
         <input type="email" id="forgot-email" placeholder="seu@email.com" />
       </div>
       <button class="btn-auth" onclick="enviarReset()">Enviar link</button>
-      <div class="back-link">
-        <a onclick="mostrarTab('login')">← Voltar ao login</a>
-      </div>
+      <div class="back-link"><a onclick="mostrarTab('login')">← Voltar ao login</a></div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ── Partículas ────────────────────────────────────────────────────────────────
+// ── Partículas ──────────────────────────────────────────────────────────────
 (function(){
-  const c = document.getElementById('bg-canvas'), ctx = c.getContext('2d');
-  let ps = [], W, H;
-  function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
-  window.addEventListener('resize', resize); resize();
-  for(let i=0;i<80;i++) ps.push({
-    x:Math.random()*W, y:Math.random()*H,
-    r:Math.random()*1.2+.2,
-    vx:(Math.random()-.5)*.18, vy:(Math.random()-.5)*.18,
-    a:Math.random(), da:(Math.random()*.4+.1)*(Math.random()>.5?1:-1)*.005,
-    col:['#7C3AED','#A78BFA','#60A5FA','#ffffff'][Math.floor(Math.random()*4)]
-  });
+  const c=document.getElementById('bg'),ctx=c.getContext('2d');
+  let ps=[],W,H;
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  window.addEventListener('resize',resize);resize();
+  for(let i=0;i<80;i++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+.2,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,a:Math.random(),da:(Math.random()*.4+.1)*(Math.random()>.5?1:-1)*.005,col:['#7C3AED','#A78BFA','#60A5FA','#fff'][Math.floor(Math.random()*4)]});
   function draw(){
     ctx.clearRect(0,0,W,H);
     const g=ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,Math.max(W,H)*.8);
-    g.addColorStop(0,'rgba(13,16,36,.98)'); g.addColorStop(1,'rgba(8,11,26,1)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    g.addColorStop(0,'rgba(13,16,36,.98)');g.addColorStop(1,'rgba(8,11,26,1)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     ps.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<-5)p.x=W+5; if(p.x>W+5)p.x=-5;
-      if(p.y<-5)p.y=H+5; if(p.y>H+5)p.y=-5;
-      p.a+=p.da; if(p.a>1||p.a<0)p.da*=-1;
-      ctx.save(); ctx.globalAlpha=Math.max(0,Math.min(1,p.a))*.7;
-      ctx.fillStyle=p.col; ctx.shadowColor=p.col; ctx.shadowBlur=p.r*4;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<-5)p.x=W+5;if(p.x>W+5)p.x=-5;
+      if(p.y<-5)p.y=H+5;if(p.y>H+5)p.y=-5;
+      p.a+=p.da;if(p.a>1||p.a<0)p.da*=-1;
+      ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,p.a))*.65;
+      ctx.fillStyle=p.col;ctx.shadowColor=p.col;ctx.shadowBlur=p.r*4;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();
     });
     requestAnimationFrame(draw);
   }
   draw();
 })();
 
-// ── Redireciona se já logado ──────────────────────────────────────────────────
+// ── Redireciona se já logado ────────────────────────────────────────────────
 (function(){
-  const token = localStorage.getItem('may_access');
-  const user  = localStorage.getItem('may_user');
-  if (token && user) window.location.replace('/app');
+  if(localStorage.getItem('may_access')&&localStorage.getItem('may_user'))
+    window.location.replace('/app');
 })();
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// ── FAQ ─────────────────────────────────────────────────────────────────────
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// ── Modal ────────────────────────────────────────────────────────────────────
 function abrirModal(tab) {
   document.getElementById('modal-auth').classList.add('open');
   mostrarTab(tab || 'login');
-  limparErro();
+  limparMensagens();
   document.body.style.overflow = 'hidden';
 }
 function fecharModal() {
@@ -727,9 +591,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') fecharModal();
   if (e.key !== 'Enter') return;
   const ativo = document.querySelector('.auth-panel.active')?.id;
-  if (ativo === 'panel-login')    fazerLogin();
+  if (ativo === 'panel-login') fazerLogin();
   if (ativo === 'panel-register') criarConta();
-  if (ativo === 'panel-forgot')   enviarReset();
+  if (ativo === 'panel-forgot') enviarReset();
 });
 
 function mostrarTab(tab) {
@@ -737,12 +601,11 @@ function mostrarTab(tab) {
     document.getElementById(`panel-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
   });
-  const tabs = document.getElementById('auth-tabs-container');
-  tabs.style.display = tab === 'forgot' ? 'none' : 'flex';
+  document.getElementById('auth-tabs').style.display = tab === 'forgot' ? 'none' : 'flex';
   limparMensagens();
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+// ── Auth ─────────────────────────────────────────────────────────────────────
 async function fazerLogin() {
   const email = document.getElementById('login-email').value.trim();
   const senha = document.getElementById('login-senha').value;
@@ -750,18 +613,15 @@ async function fazerLogin() {
   const btn = document.getElementById('btn-login');
   btn.disabled = true; btn.textContent = 'Entrando...';
   try {
-    const res  = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:senha}) });
+    const res = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
     const data = await res.json();
     if (!res.ok) { mostrarErro(data.erro || 'Erro ao fazer login.'); return; }
-    localStorage.setItem('may_access',  data.accessToken);
+    localStorage.setItem('may_access', data.accessToken);
     localStorage.setItem('may_refresh', data.refreshToken);
-    localStorage.setItem('may_user',    JSON.stringify(data.user));
+    localStorage.setItem('may_user', JSON.stringify(data.user));
     window.location.href = '/app';
-  } catch(e) {
-    mostrarErro('Erro de conexão. Tente novamente.');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Entrar';
-  }
+  } catch(e) { mostrarErro('Erro de conexão. Tente novamente.'); }
+  finally { btn.disabled = false; btn.textContent = 'Entrar'; }
 }
 
 async function criarConta() {
@@ -773,24 +633,21 @@ async function criarConta() {
   const btn = document.getElementById('btn-register');
   btn.disabled = true; btn.textContent = 'Criando conta...';
   try {
-    const res  = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name:nome, email, password:senha}) });
+    const res = await fetch('/api/auth/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nome,email,password:senha})});
     const data = await res.json();
     if (!res.ok) { mostrarErro(data.erro || 'Erro ao criar conta.'); return; }
-    localStorage.setItem('may_access',  data.accessToken);
+    localStorage.setItem('may_access', data.accessToken);
     localStorage.setItem('may_refresh', data.refreshToken);
-    localStorage.setItem('may_user',    JSON.stringify(data.user));
+    localStorage.setItem('may_user', JSON.stringify(data.user));
     window.location.href = '/app';
-  } catch(e) {
-    mostrarErro('Erro de conexão. Tente novamente.');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Criar conta grátis';
-  }
+  } catch(e) { mostrarErro('Erro de conexão. Tente novamente.'); }
+  finally { btn.disabled = false; btn.textContent = 'Começar trial de 7 dias'; }
 }
 
 async function enviarReset() {
   const email = document.getElementById('forgot-email').value.trim();
   if (!email) { mostrarErro('Informe seu e-mail.'); return; }
-  const res  = await fetch('/api/auth/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+  const res = await fetch('/api/auth/forgot-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
   const data = await res.json();
   mostrarSucesso(data.mensagem || 'Se o e-mail existir, você receberá as instruções.');
 }
@@ -799,18 +656,14 @@ function toggleSenha(id) {
   const input = document.getElementById(id);
   input.type = input.type === 'password' ? 'text' : 'password';
 }
-
 function mostrarErro(msg) {
-  const el = document.getElementById('auth-error');
-  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('auth-error').textContent = msg;
+  document.getElementById('auth-error').style.display = 'block';
   document.getElementById('auth-success').style.display = 'none';
 }
 function mostrarSucesso(msg) {
-  const el = document.getElementById('auth-success');
-  el.textContent = msg; el.style.display = 'block';
-  document.getElementById('auth-error').style.display = 'none';
-}
-function limparErro() {
+  document.getElementById('auth-success').textContent = msg;
+  document.getElementById('auth-success').style.display = 'block';
   document.getElementById('auth-error').style.display = 'none';
 }
 function limparMensagens() {
