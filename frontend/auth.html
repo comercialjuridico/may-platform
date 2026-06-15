@@ -133,7 +133,7 @@
 })();
 
 // ── Auth já logado ────────────────────────────────────────────
-if (getAccessToken() && getUser()) window.location.href = '/';
+if (getAccessToken() && getUser()) window.location.href = '/app';
 
 const params = new URLSearchParams(window.location.search);
 const aviso  = document.getElementById('auth-aviso');
@@ -159,7 +159,7 @@ async function fazerLogin() {
   if (!res.ok) { mostrarErro(data.erro||'Erro ao fazer login.'); btn.disabled=false; btn.textContent='Entrar'; return; }
   salvarTokens(data.accessToken, data.refreshToken);
   salvarUser(data.user);
-  window.location.href = '/';
+  window.location.href = '/app';
 }
 
 async function criarConta() {
@@ -175,7 +175,7 @@ async function criarConta() {
   if (!res.ok) { mostrarErro(data.erro||'Erro ao criar conta.'); btn.disabled=false; btn.textContent='Criar conta grátis'; return; }
   salvarTokens(data.accessToken, data.refreshToken);
   salvarUser(data.user);
-  window.location.href = '/';
+  window.location.href = '/app';
 }
 
 async function enviarReset() {

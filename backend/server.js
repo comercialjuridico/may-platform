@@ -65,8 +65,18 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ─── Rotas do frontend ─────────────────────────────────────────────────────
+// Raiz → landing page pública
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/landing.html'));
+});
+
+// /app → aplicação (requer auth no lado do cliente)
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
 // ─── Fallback SPA ──────────────────────────────────────────────────────────
-// Redireciona rotas desconhecidas para o frontend
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ erro: 'Rota não encontrada.' });
