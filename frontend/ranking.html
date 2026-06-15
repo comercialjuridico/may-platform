@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,201 +8,350 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    /* ── Reset & Tokens ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --brand:        #7C3AED;
-      --brand-light:  #EDE9FE;
-      --brand-dark:   #5B21B6;
-      --gold:         #F59E0B;
-      --silver:       #94A3B8;
-      --bronze:       #B45309;
-      --bg:           #F8F7FF;
-      --surface:      #FFFFFF;
-      --surface2:     #F3F0FF;
-      --border:       #E5E4F0;
-      --text:         #1E1B2E;
-      --text-sub:     #6B7280;
-      --green:        #10B981;
-      --red:          #EF4444;
-      --radius:       14px;
-      --shadow:       0 2px 16px rgba(124,58,237,.08);
+      --gold:    #F59E0B;
+      --silver:  #94A3B8;
+      --bronze:  #B45309;
+      --brand:   #7C3AED;
+      --green:   #10B981;
+      --red:     #EF4444;
+      --radius:  14px;
     }
-    [data-theme="dark"] {
-      --bg:       #0F0D1A;
-      --surface:  #1A1726;
-      --surface2: #221E33;
-      --border:   #2D2845;
-      --text:     #F0EEFF;
-      --text-sub: #9CA3AF;
-      --brand-light: #2D1A5E;
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: #080B1A;
+      color: #E8E4FF;
+      overflow-x: hidden;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
     h1,h2,h3 { font-family: 'Syne', sans-serif; }
 
-    /* ── Layout ────────────────────────────────────────────────── */
-    .page { max-width: 960px; margin: 0 auto; padding: 24px 16px 80px; }
-
-    /* ── Header ────────────────────────────────────────────────── */
-    .header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
-    .header-back { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--brand);
-      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .header-back:hover { background: var(--brand-light); }
-    .header-title { flex: 1; }
-    .header-title h1 { font-size: 26px; font-weight: 800; }
-    .header-title p  { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
-    .periodo-tabs { display: flex; gap: 6px; background: var(--surface2);
-      border-radius: 10px; padding: 4px; }
-    .periodo-tab { padding: 6px 16px; border-radius: 8px; border: none;
-      background: none; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-sub); }
-    .periodo-tab.active { background: var(--brand); color: #fff; }
-
-    /* ── Trial Banner ───────────────────────────────────────────── */
-    .trial-banner { background: linear-gradient(135deg, var(--brand), #A78BFA);
-      border-radius: var(--radius); padding: 16px 20px; color: #fff;
-      display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
-    .trial-banner .trial-icon { font-size: 28px; }
-    .trial-banner h3 { font-size: 15px; font-weight: 700; }
-    .trial-banner p  { font-size: 12px; opacity: .85; margin-top: 2px; }
-    .trial-banner .trial-cta { margin-left: auto; background: #fff; color: var(--brand);
-      border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700;
-      font-size: 13px; cursor: pointer; white-space: nowrap; }
-    .trial-banner .trial-cta:hover { opacity: .9; }
-
-    /* ── Stats Bar ──────────────────────────────────────────────── */
-    .stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
-    @media(max-width:600px){ .stats-bar { grid-template-columns: 1fr 1fr; } }
-    .stat-card { background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px; text-align: center; }
-    .stat-card .stat-val { font-family: 'Syne',sans-serif; font-size: 22px; font-weight: 800; color: var(--brand); }
-    .stat-card .stat-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
-
-    /* ── Podium ─────────────────────────────────────────────────── */
-    .podium-wrap { display: flex; justify-content: center; align-items: flex-end;
-      gap: 12px; margin-bottom: 32px; padding: 0 8px; }
-    .podium-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 200px; }
-    .podium-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
-      background: var(--brand-light); display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 800; color: var(--brand); border: 3px solid var(--border); }
-    .podium-avatar.gold   { border-color: var(--gold); }
-    .podium-avatar.silver { border-color: var(--silver); }
-    .podium-avatar.bronze { border-color: var(--bronze); }
-    .podium-name  { font-size: 13px; font-weight: 700; text-align: center; }
-    .podium-count { font-size: 12px; color: var(--text-sub); }
-    .podium-block { width: 100%; border-radius: 10px 10px 0 0; display: flex;
-      align-items: center; justify-content: center; font-family: 'Syne',sans-serif;
-      font-size: 26px; font-weight: 800; }
-    .podium-block.gold   { height: 90px; background: linear-gradient(135deg,#FEF3C7,#FDE68A); color: var(--gold); }
-    .podium-block.silver { height: 65px; background: linear-gradient(135deg,#F1F5F9,#E2E8F0); color: var(--silver); }
-    .podium-block.bronze { height: 50px; background: linear-gradient(135deg,#FEF0E8,#FCD9BD); color: var(--bronze); }
-
-    /* ── Leaderboard Table ──────────────────────────────────────── */
-    .section-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
-    .leaderboard { background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden; margin-bottom: 28px; }
-    .lb-row { display: grid; grid-template-columns: 40px 1fr 80px 80px 80px 70px;
-      gap: 0; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
-    .lb-row:last-child { border-bottom: none; }
-    .lb-row.header-row { background: var(--surface2); font-size: 11px; font-weight: 600;
-      color: var(--text-sub); text-transform: uppercase; letter-spacing: .04em; padding: 10px 16px; }
-    @media(max-width:600px){
-      .lb-row { grid-template-columns: 32px 1fr 60px 60px; }
-      .lb-row .col-tempo, .lb-row .col-xp { display: none; }
+    /* ── Canvas de partículas ─────────────────────────────── */
+    #canvas-bg {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none;
     }
-    .lb-pos { font-family: 'Syne',sans-serif; font-weight: 800; font-size: 16px; color: var(--text-sub); }
-    .lb-pos.p1 { color: var(--gold); }
-    .lb-pos.p2 { color: var(--silver); }
-    .lb-pos.p3 { color: var(--bronze); }
-    .lb-user { display: flex; align-items: center; gap: 10px; }
-    .lb-av { width: 34px; height: 34px; border-radius: 50%; background: var(--brand-light);
-      display: flex; align-items: center; justify-content: center; font-weight: 700;
-      font-size: 13px; color: var(--brand); flex-shrink: 0; }
-    .lb-name { font-size: 14px; font-weight: 600; }
-    .lb-sub  { font-size: 11px; color: var(--text-sub); }
-    .lb-val  { font-size: 14px; font-weight: 700; text-align: right; }
-    .lb-val.green { color: var(--green); }
-    .badge-streak { display: inline-flex; align-items: center; gap: 3px; background: var(--brand-light);
-      color: var(--brand); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-top: 2px; }
 
-    /* ── Tabs (gestor / membro) ─────────────────────────────────── */
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 0; }
-    .tab-btn { background: none; border: none; font-size: 14px; font-weight: 600;
-      color: var(--text-sub); padding: 8px 16px 10px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-    .tab-btn.active { color: var(--brand); border-bottom-color: var(--brand); }
+    /* ── Layout ───────────────────────────────────────────── */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 980px; margin: 0 auto;
+      padding: 24px 16px 100px;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    .header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 36px; flex-wrap: wrap;
+    }
+    .header-back {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px; padding: 8px 14px;
+      font-size: 14px; font-weight: 600; color: #C4B5FD;
+      text-decoration: none; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      backdrop-filter: blur(8px);
+      transition: background .2s;
+    }
+    .header-back:hover { background: rgba(124,58,237,.25); }
+    .header-title { flex: 1; }
+    .header-title h1 { font-size: 28px; font-weight: 800; letter-spacing: -.02em;
+      background: linear-gradient(135deg, #fff 30%, #A78BFA);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-title p  { font-size: 13px; color: rgba(200,190,255,.5); margin-top: 3px; }
+    .periodo-tabs {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 4px;
+    }
+    .periodo-tab {
+      padding: 6px 18px; border-radius: 8px; border: none;
+      background: none; font-size: 13px; font-weight: 600;
+      cursor: pointer; color: rgba(200,190,255,.5);
+      transition: all .2s;
+    }
+    .periodo-tab.active {
+      background: linear-gradient(135deg, #7C3AED, #A78BFA);
+      color: #fff; box-shadow: 0 2px 12px rgba(124,58,237,.4);
+    }
+
+    /* ── Trial Banner ─────────────────────────────────────── */
+    .trial-banner {
+      background: linear-gradient(135deg, rgba(124,58,237,.3), rgba(167,139,250,.15));
+      border: 1px solid rgba(167,139,250,.3);
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 28px; backdrop-filter: blur(8px);
+    }
+    .trial-banner .trial-icon { font-size: 28px; }
+    .trial-banner h3 { font-size: 15px; font-weight: 700; color: #fff; }
+    .trial-banner p  { font-size: 12px; color: rgba(200,190,255,.6); margin-top: 2px; }
+    .trial-cta {
+      margin-left: auto; background: linear-gradient(135deg, #7C3AED, #A78BFA);
+      color: #fff; border: none; border-radius: 8px;
+      padding: 8px 18px; font-weight: 700; font-size: 13px; cursor: pointer;
+      white-space: nowrap; box-shadow: 0 4px 14px rgba(124,58,237,.5);
+    }
+
+    /* ── Stats Bar ────────────────────────────────────────── */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+      margin-bottom: 32px;
+    }
+    @media(max-width:600px){ .stats-bar { grid-template-columns: 1fr 1fr; } }
+    .stat-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); padding: 18px 16px; text-align: center;
+      backdrop-filter: blur(8px);
+      transition: border-color .25s, transform .25s;
+    }
+    .stat-card:hover { border-color: rgba(167,139,250,.4); transform: translateY(-2px); }
+    .stat-val {
+      font-family: 'Syne',sans-serif; font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg,#A78BFA,#60A5FA);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-lbl {
+      font-size: 10px; color: rgba(200,190,255,.45); margin-top: 4px;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    /* ── Podium ───────────────────────────────────────────── */
+    .podium-section {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px; padding: 32px 24px 24px;
+      margin-bottom: 28px; backdrop-filter: blur(8px);
+      position: relative; overflow: hidden;
+    }
+    .podium-section::before {
+      content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 200px;
+      background: radial-gradient(ellipse, rgba(124,58,237,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .podium-wrap {
+      display: flex; justify-content: center; align-items: flex-end;
+      gap: 16px; padding: 0 8px;
+    }
+    .podium-item {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      flex: 1; max-width: 200px;
+    }
+    .podium-crown { font-size: 22px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    .podium-avatar {
+      border-radius: 50%; object-fit: cover;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: #fff;
+      border: 3px solid rgba(255,255,255,.15);
+      box-shadow: 0 0 0 0 transparent;
+      transition: box-shadow .3s;
+    }
+    .podium-avatar.gold   { border-color: var(--gold);   box-shadow: 0 0 20px rgba(245,158,11,.4); }
+    .podium-avatar.silver { border-color: var(--silver); box-shadow: 0 0 16px rgba(148,163,184,.3); }
+    .podium-avatar.bronze { border-color: #CD7F32;       box-shadow: 0 0 14px rgba(205,127,50,.3); }
+    .podium-name  { font-size: 13px; font-weight: 700; text-align: center; color: #fff; }
+    .podium-count { font-size: 11px; color: rgba(200,190,255,.5); }
+    .podium-block {
+      width: 100%; border-radius: 12px 12px 0 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne',sans-serif; font-size: 28px; font-weight: 800;
+    }
+    .podium-block.gold   { height: 96px; background: linear-gradient(180deg,rgba(245,158,11,.3),rgba(245,158,11,.08)); color: var(--gold); border-top: 2px solid rgba(245,158,11,.5); }
+    .podium-block.silver { height: 68px; background: linear-gradient(180deg,rgba(148,163,184,.2),rgba(148,163,184,.04)); color: var(--silver); border-top: 2px solid rgba(148,163,184,.4); }
+    .podium-block.bronze { height: 52px; background: linear-gradient(180deg,rgba(205,127,50,.2),rgba(205,127,50,.04)); color: #CD7F32; border-top: 2px solid rgba(205,127,50,.4); }
+
+    /* ── Tabs ─────────────────────────────────────────────── */
+    .tabs {
+      display: flex; gap: 0; margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .tab-btn {
+      background: none; border: none; font-size: 14px; font-weight: 600;
+      color: rgba(200,190,255,.45); padding: 10px 20px 12px; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn.active { color: #A78BFA; border-bottom-color: #7C3AED; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── Gestor Dashboard ───────────────────────────────────────── */
-    .alert-box { border-radius: 10px; padding: 12px 16px; font-size: 13px;
-      margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; }
-    .alert-box.atencao  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
-    .alert-box.aviso    { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
-    .alert-box.destaque { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    /* ── Leaderboard ──────────────────────────────────────── */
+    .leaderboard {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); overflow: hidden;
+      margin-bottom: 28px; backdrop-filter: blur(8px);
+    }
+    .lb-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 80px 90px 80px 70px;
+      align-items: center; padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      transition: background .15s;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:not(.header-row):hover { background: rgba(167,139,250,.07); }
+    .lb-row.header-row {
+      background: rgba(255,255,255,.03); font-size: 10px; font-weight: 600;
+      color: rgba(200,190,255,.35); text-transform: uppercase;
+      letter-spacing: .06em; padding: 10px 16px;
+    }
+    .lb-row.highlight { background: rgba(124,58,237,.12) !important; }
+    @media(max-width:600px){
+      .lb-row { grid-template-columns: 32px 1fr 60px 70px; }
+      .lb-row .col-tempo, .lb-row .col-xp { display: none; }
+    }
+    .lb-pos { font-family: 'Syne',sans-serif; font-weight: 800; font-size: 16px; color: rgba(200,190,255,.3); }
+    .lb-pos.p1 { color: var(--gold); text-shadow: 0 0 12px rgba(245,158,11,.6); }
+    .lb-pos.p2 { color: var(--silver); }
+    .lb-pos.p3 { color: #CD7F32; }
+    .lb-user { display: flex; align-items: center; gap: 10px; }
+    .lb-av {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(124,58,237,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 12px; color: #A78BFA; flex-shrink: 0;
+      border: 1px solid rgba(124,58,237,.4);
+    }
+    .lb-name { font-size: 14px; font-weight: 600; color: #fff; }
+    .lb-sub  { font-size: 11px; color: rgba(200,190,255,.4); }
+    .lb-val  { font-size: 14px; font-weight: 700; text-align: right; color: rgba(200,190,255,.7); }
+    .lb-val.green { color: var(--green); }
+    .badge-streak {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: rgba(245,158,11,.15); color: var(--gold);
+      font-size: 10px; font-weight: 700; padding: 2px 7px;
+      border-radius: 20px; margin-top: 2px;
+    }
+    .section-title {
+      font-size: 12px; font-weight: 700; color: rgba(200,190,255,.4);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px;
+    }
+
+    /* ── Gestor ───────────────────────────────────────────── */
+    .alert-box {
+      border-radius: 10px; padding: 12px 16px; font-size: 13px;
+      margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;
+      backdrop-filter: blur(8px);
+    }
+    .alert-box.atencao  { background: rgba(239,68,68,.1);  color: #FCA5A5; border: 1px solid rgba(239,68,68,.2); }
+    .alert-box.aviso    { background: rgba(245,158,11,.1); color: #FDE68A; border: 1px solid rgba(245,158,11,.2); }
+    .alert-box.destaque { background: rgba(16,185,129,.1); color: #6EE7B7; border: 1px solid rgba(16,185,129,.2); }
     .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: -1px; }
     .colab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
     @media(max-width:620px){ .colab-grid { grid-template-columns: 1fr; } }
-    .colab-card { background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px; }
-    .colab-card.status-queda    { border-left: 4px solid var(--red); }
-    .colab-card.status-destaque { border-left: 4px solid var(--green); }
-    .colab-card.status-atencao  { border-left: 4px solid var(--gold); }
-    .colab-card.status-ok       { border-left: 4px solid var(--border); }
+    .colab-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); padding: 16px;
+      backdrop-filter: blur(8px);
+      transition: border-color .2s, transform .2s;
+    }
+    .colab-card:hover { transform: translateY(-2px); border-color: rgba(167,139,250,.2); }
+    .colab-card.status-queda    { border-left: 3px solid var(--red); }
+    .colab-card.status-destaque { border-left: 3px solid var(--green); }
+    .colab-card.status-atencao  { border-left: 3px solid var(--gold); }
+    .colab-card.status-ok       { border-left: 3px solid rgba(255,255,255,.1); }
     .colab-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .colab-av { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-light);
-      display: flex; align-items: center; justify-content: center; font-weight: 700;
-      font-size: 13px; color: var(--brand); flex-shrink: 0; }
-    .colab-name { font-size: 14px; font-weight: 700; }
-    .colab-stats { font-size: 12px; color: var(--text-sub); }
-    .colab-insights { font-size: 12px; color: var(--text-sub); margin-top: 8px; }
+    .colab-av {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(124,58,237,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; color: #A78BFA; flex-shrink: 0;
+      border: 1px solid rgba(124,58,237,.4);
+    }
+    .colab-name { font-size: 14px; font-weight: 700; color: #fff; }
+    .colab-stats { font-size: 12px; color: rgba(200,190,255,.5); }
+    .colab-insights { font-size: 12px; color: rgba(200,190,255,.5); margin-top: 8px; }
     .colab-insights li { list-style: disc; margin-left: 16px; margin-top: 3px; }
     .treinar-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .treinar-tag { background: var(--brand-light); color: var(--brand); font-size: 11px;
-      font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+    .treinar-tag {
+      background: rgba(124,58,237,.2); color: #C4B5FD;
+      font-size: 11px; font-weight: 600; padding: 4px 10px;
+      border-radius: 20px; border: 1px solid rgba(124,58,237,.3);
+    }
 
-    /* ── Minha Semana ───────────────────────────────────────────── */
+    /* ── Minha Semana ─────────────────────────────────────── */
     .semana-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
     @media(max-width:500px){ .semana-grid { grid-template-columns: 1fr 1fr; } }
-    .semana-card { background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px; text-align: center; }
-    .semana-val { font-family: 'Syne',sans-serif; font-size: 24px; font-weight: 800; color: var(--brand); }
+    .semana-card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); padding: 18px; text-align: center;
+      backdrop-filter: blur(8px);
+    }
+    .semana-val {
+      font-family: 'Syne',sans-serif; font-size: 26px; font-weight: 800;
+      background: linear-gradient(135deg,#A78BFA,#60A5FA);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
     .semana-var { font-size: 12px; font-weight: 600; margin-top: 2px; }
     .semana-var.up   { color: var(--green); }
     .semana-var.down { color: var(--red); }
-    .semana-lbl { font-size: 11px; color: var(--text-sub); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
-    .insight-box { background: var(--brand-light); border-radius: var(--radius); padding: 16px 20px;
-      margin-bottom: 20px; font-size: 14px; color: var(--brand-dark); font-weight: 500; line-height: 1.5; }
-    .insight-box .insight-emoji { font-size: 20px; margin-right: 8px; }
-    .posicao-destaque { display: flex; align-items: center; gap: 12px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 20px; }
-    .posicao-num { font-family: 'Syne',sans-serif; font-size: 36px; font-weight: 800; color: var(--brand); }
-    .posicao-txt { font-size: 13px; color: var(--text-sub); }
-    .ultimas-vendas { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .uv-row { display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .semana-lbl { font-size: 10px; color: rgba(200,190,255,.4); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+    .insight-box {
+      background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3);
+      border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px;
+      font-size: 14px; color: #C4B5FD; line-height: 1.6;
+    }
+    .posicao-destaque {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px;
+    }
+    .posicao-num {
+      font-family: 'Syne',sans-serif; font-size: 40px; font-weight: 800;
+      background: linear-gradient(135deg, var(--gold), #FDE68A);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .posicao-txt { font-size: 13px; color: rgba(200,190,255,.5); }
+    .ultimas-vendas {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); overflow: hidden; backdrop-filter: blur(8px);
+    }
+    .uv-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,.05);
+      font-size: 13px; transition: background .15s;
+    }
+    .uv-row:hover { background: rgba(167,139,250,.06); }
     .uv-row:last-child { border-bottom: none; }
-    .uv-desc { font-weight: 600; }
-    .uv-meta { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
+    .uv-desc { font-weight: 600; color: #fff; }
+    .uv-meta { font-size: 11px; color: rgba(200,190,255,.4); margin-top: 1px; }
     .uv-val  { font-weight: 700; color: var(--green); }
-    .uv-val.exito { color: var(--text-sub); font-style: italic; }
+    .uv-val.exito { color: rgba(200,190,255,.4); font-style: italic; font-weight: 400; }
 
-    /* ── Misc ────────────────────────────────────────────────────── */
-    .empty-state { text-align: center; padding: 48px 16px; color: var(--text-sub); font-size: 14px; }
-    .empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
-    .loading { text-align: center; padding: 40px; color: var(--text-sub); }
-    .skeleton { background: var(--border); border-radius: 6px; animation: pulse 1.4s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    /* ── Misc ─────────────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 56px 16px; color: rgba(200,190,255,.4); font-size: 14px; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .loading { text-align: center; padding: 60px; color: rgba(200,190,255,.4); font-size: 14px; }
+    .loading::after { content: ''; display: inline-block; width: 20px; height: 20px;
+      border: 2px solid rgba(124,58,237,.3); border-top-color: #7C3AED;
+      border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-left: 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .acesso-bloqueado { text-align: center; padding: 60px 24px; }
-    .acesso-bloqueado .lock-icon { font-size: 56px; margin-bottom: 16px; }
-    .acesso-bloqueado h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-    .acesso-bloqueado p  { font-size: 14px; color: var(--text-sub); max-width: 360px; margin: 0 auto 20px; }
-    .btn-activar { background: var(--brand); color: #fff; border: none; border-radius: 10px;
-      padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; }
-    .btn-activar:hover { background: var(--brand-dark); }
+    .acesso-bloqueado { text-align: center; padding: 80px 24px; }
+    .acesso-bloqueado .lock-icon { font-size: 64px; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(124,58,237,.5)); }
+    .acesso-bloqueado h2 { font-size: 26px; font-weight: 800; margin-bottom: 10px; color: #fff; }
+    .acesso-bloqueado p  { font-size: 14px; color: rgba(200,190,255,.5); max-width: 360px; margin: 0 auto 24px; line-height: 1.6; }
+    .btn-activar {
+      background: linear-gradient(135deg, #7C3AED, #A78BFA); color: #fff; border: none;
+      border-radius: 12px; padding: 14px 32px; font-size: 15px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 6px 24px rgba(124,58,237,.5);
+    }
   </style>
 </head>
 <body>
+
+<!-- Canvas de partículas -->
+<canvas id="canvas-bg"></canvas>
+
 <div class="page" id="page">
 
   <!-- Header -->
@@ -229,13 +378,130 @@
   </div>
 
   <div id="main-content">
-    <div class="loading">Carregando ranking...</div>
+    <div class="loading">Carregando ranking</div>
   </div>
 
 </div>
 
 <script>
-// ── Config ───────────────────────────────────────────────────────────────────
+// ── Partículas ─────────────────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx    = canvas.getContext('2d');
+  let particles = [];
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COLORS = ['#7C3AED','#A78BFA','#60A5FA','#F59E0B','#fff'];
+
+  function Particle() {
+    this.reset = function() {
+      this.x    = Math.random() * W;
+      this.y    = Math.random() * H;
+      this.r    = Math.random() * 1.6 + .3;
+      this.vx   = (Math.random() - .5) * .35;
+      this.vy   = (Math.random() - .5) * .35;
+      this.a    = Math.random();
+      this.da   = (Math.random() * .4 + .2) * (Math.random() > .5 ? 1 : -1) * .008;
+      this.col  = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.twinkle = Math.random() > .65;  // some particles twinkle
+    };
+    this.reset();
+  }
+
+  for (let i = 0; i < 160; i++) { const p = new Particle(); particles.push(p); }
+
+  // Add "shooting star" occasionally
+  let stars = [];
+  function addStar() {
+    stars.push({ x: Math.random() * W, y: Math.random() * H * .5,
+      vx: (Math.random() * 3 + 2), vy: (Math.random() * 1.5 + .5),
+      life: 1, len: Math.random() * 80 + 40 });
+  }
+  setInterval(addStar, 3200);
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Background gradient
+    const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*.7);
+    grad.addColorStop(0,   'rgba(14,10,35,.98)');
+    grad.addColorStop(.5,  'rgba(8,11,26,.99)');
+    grad.addColorStop(1,   'rgba(4,6,18,1)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+
+    // Particles
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -5) p.x = W+5;
+      if (p.x > W+5) p.x = -5;
+      if (p.y < -5) p.y = H+5;
+      if (p.y > H+5) p.y = -5;
+      p.a += p.da;
+      if (p.a > 1 || p.a < 0) p.da *= -1;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.a);
+
+      if (p.twinkle) {
+        // 4-pointed star shape
+        const s = p.r * 2.5;
+        ctx.fillStyle = p.col;
+        ctx.shadowColor = p.col;
+        ctx.shadowBlur  = 6;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - s);
+        ctx.lineTo(p.x + s*.25, p.y - s*.25);
+        ctx.lineTo(p.x + s, p.y);
+        ctx.lineTo(p.x + s*.25, p.y + s*.25);
+        ctx.lineTo(p.x, p.y + s);
+        ctx.lineTo(p.x - s*.25, p.y + s*.25);
+        ctx.lineTo(p.x - s, p.y);
+        ctx.lineTo(p.x - s*.25, p.y - s*.25);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        ctx.fillStyle = p.col;
+        ctx.shadowColor = p.col;
+        ctx.shadowBlur  = p.r * 3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    // Shooting stars
+    stars = stars.filter(s => s.life > 0);
+    stars.forEach(s => {
+      ctx.save();
+      ctx.globalAlpha = s.life * .7;
+      const grad2 = ctx.createLinearGradient(s.x - s.len, s.y - s.len*.4, s.x, s.y);
+      grad2.addColorStop(0, 'transparent');
+      grad2.addColorStop(1, '#fff');
+      ctx.strokeStyle = grad2;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(s.x - s.len, s.y - s.len*.4);
+      ctx.lineTo(s.x, s.y);
+      ctx.stroke();
+      ctx.restore();
+      s.x += s.vx; s.y += s.vy; s.life -= .015;
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Config ─────────────────────────────────────────────────────────────────────
 const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
 let periodoAtual = 'mes';
 let dadosRanking = null;
@@ -244,7 +510,7 @@ let dadosSemana  = null;
 let userRole     = null;
 let userId       = null;
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// ── Auth ───────────────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('may_access'); }
 async function apiFetch(path, opts = {}) {
   const token = getToken();
@@ -254,83 +520,71 @@ async function apiFetch(path, opts = {}) {
   });
 }
 
-// ── Formatação ───────────────────────────────────────────────────────────────
+// ── Utils ──────────────────────────────────────────────────────────────────────
 function fmtBRL(v) {
   if (!v && v !== 0) return '—';
   return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-function inicial(name) { return (name || '?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
-function avatarHtml(name, url, cls = '', size = 60) {
-  if (url) {
-    return `<img src="${url}" alt="${name}" class="podium-avatar ${cls}" style="width:${size}px;height:${size}px;object-fit:cover;" />`;
-  }
-  return `<div class="podium-avatar ${cls}" style="width:${size}px;height:${size}px;">${inicial(name)}</div>`;
+function inicial(name) { return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function avatarHtml(name, url, cls='', size=60) {
+  const style = `width:${size}px;height:${size}px;`;
+  if (url) return `<img src="${url}" alt="${name}" class="podium-avatar ${cls}" style="${style}object-fit:cover;" />`;
+  return `<div class="podium-avatar ${cls}" style="${style}background:rgba(124,58,237,.25);">${inicial(name)}</div>`;
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   const token = getToken();
   if (!token) { window.location.href = 'index.html'; return; }
-
   try {
     const r = await apiFetch('/api/user/me');
-    if (!r.ok) throw new Error('not auth');
+    if (!r.ok) throw new Error();
     const me = await r.json();
-    userRole = me.role;
-    userId   = me.id;
+    userRole = me.role; userId = me.id;
   } catch { window.location.href = 'index.html'; return; }
-
   await carregarDados();
 });
 
 async function setPeriodo(p) {
   periodoAtual = p;
-  document.querySelectorAll('.periodo-tab').forEach((b,i) => b.classList.toggle('active', (i===0&&p==='mes')||(i===1&&p==='semana')));
+  document.querySelectorAll('.periodo-tab').forEach((b,i) =>
+    b.classList.toggle('active', (i===0&&p==='mes')||(i===1&&p==='semana')));
   await carregarDados();
 }
 
 async function carregarDados() {
-  document.getElementById('main-content').innerHTML = '<div class="loading">Carregando...</div>';
+  document.getElementById('main-content').innerHTML = '<div class="loading">Carregando ranking</div>';
   try {
-    const r = await apiFetch(`/api/ranking/leaderboard?periodo=${periodoAtual}`);
+    const r    = await apiFetch(`/api/ranking/leaderboard?periodo=${periodoAtual}`);
     const data = await r.json();
-
-    if (!data.acesso || !data.acesso.acesso) {
-      mostrarBloqueado(data.acesso);
-      return;
-    }
+    if (!data.acesso?.acesso) { mostrarBloqueado(data.acesso); return; }
 
     dadosRanking = data;
     handleTrialBanner(data.acesso);
-    document.getElementById('header-sub').textContent = periodoAtual === 'mes'
-      ? `Ranking do mês — ${data.ranking?.length || 0} participantes`
-      : `Ranking da semana — ${data.ranking?.length || 0} participantes`;
+    document.getElementById('header-sub').textContent =
+      `${periodoAtual === 'mes' ? 'Ranking do mês' : 'Ranking da semana'} · ${data.ranking?.length||0} participantes`;
 
-    // Paralelamente busca dados gestor / minha-semana
     const promises = [apiFetch('/api/ranking/minha-semana')];
     if (userRole === 'gestor') promises.push(apiFetch('/api/ranking/dashboard'));
-    const results = await Promise.all(promises);
-    const semData = await results[0].json();
-    dadosSemana  = semData;
+    const results  = await Promise.all(promises);
+    dadosSemana    = await results[0].json();
     if (userRole === 'gestor' && results[1]) dadosDash = await results[1].json();
 
     renderizarPagina();
   } catch(e) {
     console.error(e);
     document.getElementById('main-content').innerHTML =
-      '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Erro ao carregar ranking. Verifique sua conexão.</p></div>';
+      '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Erro ao carregar ranking.</p></div>';
   }
 }
 
 function handleTrialBanner(acesso) {
-  const banner = document.getElementById('trial-banner');
-  if (acesso.trial) {
-    banner.style.display = 'flex';
+  const b = document.getElementById('trial-banner');
+  if (acesso?.trial) {
+    b.style.display = 'flex';
     document.getElementById('trial-dias-txt').textContent =
-      `Restam ${acesso.dias_restantes} dia${acesso.dias_restantes !== 1 ? 's' : ''} de acesso gratuito`;
-  } else {
-    banner.style.display = 'none';
-  }
+      `Restam ${acesso.dias_restantes} dia${acesso.dias_restantes!==1?'s':''} de acesso gratuito`;
+  } else { b.style.display = 'none'; }
 }
 
 function mostrarBloqueado(acesso) {
@@ -341,20 +595,19 @@ function mostrarBloqueado(acesso) {
       <h2>Arena de Vendas</h2>
       <p>${acesso?.motivo === 'trial_expirado'
         ? 'Seu período de teste encerrou. Ative o plano para continuar acompanhando o ranking da sua equipe.'
-        : 'Ative o ranking para transformar suas vendas em uma competição saudável e motivadora.'
-      }</p>
+        : 'Ative o ranking e transforme as vendas da sua equipe em uma competição saudável e motivadora.'}</p>
       <button class="btn-activar" onclick="alert('Entre em contato com a May para ativar!')">
-        ${acesso?.motivo === 'trial_expirado' ? '🚀 Ativar Plano Completo' : '⚡ Começar Trial Gratuito (7 dias)'}
+        ${acesso?.motivo === 'trial_expirado' ? '🚀 Ativar Plano Completo' : '⚡ Testar Grátis por 7 dias'}
       </button>
     </div>`;
 }
 
-// ── Render Principal ──────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────────
 function renderizarPagina() {
   const ranking = dadosRanking?.ranking || [];
   const stats   = dadosRanking?.stats_time || {};
-
   const temGestor = userRole === 'gestor' && dadosDash;
+
   const tabs = temGestor
     ? `<div class="tabs">
         <button class="tab-btn active" onclick="trocarTab('ranking',this)">🏆 Ranking</button>
@@ -367,41 +620,20 @@ function renderizarPagina() {
        </div>`;
 
   document.getElementById('main-content').innerHTML = `
-    <!-- Stats Bar -->
     <div class="stats-bar">
-      <div class="stat-card">
-        <div class="stat-val">${stats.total_contratos || 0}</div>
-        <div class="stat-lbl">Contratos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">${fmtBRL(stats.total_faturado)}</div>
-        <div class="stat-lbl">Faturamento</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">${stats.tempo_medio_fechamento != null ? stats.tempo_medio_fechamento + 'd' : '—'}</div>
-        <div class="stat-lbl">Tempo Médio</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">${stats.melhor_origem || '—'}</div>
-        <div class="stat-lbl">Melhor Origem</div>
-      </div>
+      <div class="stat-card"><div class="stat-val">${stats.total_contratos||0}</div><div class="stat-lbl">Contratos</div></div>
+      <div class="stat-card"><div class="stat-val">${fmtBRL(stats.total_faturado)}</div><div class="stat-lbl">Faturamento</div></div>
+      <div class="stat-card"><div class="stat-val">${stats.tempo_medio_fechamento!=null?stats.tempo_medio_fechamento+'d':'—'}</div><div class="stat-lbl">Tempo Médio</div></div>
+      <div class="stat-card"><div class="stat-val">${stats.melhor_origem||'—'}</div><div class="stat-lbl">Melhor Origem</div></div>
     </div>
-
     ${tabs}
-
-    <!-- Aba Ranking -->
     <div class="tab-panel active" id="tab-ranking">
       ${renderPodium(ranking)}
-      <p class="section-title">Todos os participantes</p>
+      <p class="section-title" style="margin-top:24px">Todos os participantes</p>
       ${renderLeaderboard(ranking)}
     </div>
-
-    <!-- Aba Gestor -->
     ${temGestor ? `<div class="tab-panel" id="tab-gestor">${renderGestor()}</div>` : ''}
-
-    <!-- Aba Minha Semana -->
-    <div class="tab-panel" id="tab-semana">${renderSemana()}</div>
-  `;
+    <div class="tab-panel" id="tab-semana">${renderSemana()}</div>`;
 }
 
 function trocarTab(nome, btn) {
@@ -412,66 +644,66 @@ function trocarTab(nome, btn) {
   if (panel) panel.classList.add('active');
 }
 
-// ── Pódio ────────────────────────────────────────────────────────────────────
+// ── Pódio ──────────────────────────────────────────────────────────────────────
 function renderPodium(ranking) {
-  if (ranking.length === 0) return '<div class="empty-state"><div class="empty-icon">🏆</div><p>Nenhuma venda registrada ainda.</p></div>';
+  if (!ranking.length) return '<div class="empty-state"><div class="empty-icon">🏆</div><p>Nenhuma venda registrada ainda.</p></div>';
   const [p1, p2, p3] = ranking;
+  const crowns = { gold:'👑', silver:'🥈', bronze:'🥉' };
   const makeItem = (p, cls, label) => p ? `
     <div class="podium-item">
-      ${avatarHtml(p.name, p.avatar_url, cls, 60)}
+      <div class="podium-crown">${crowns[cls]||''}</div>
+      ${avatarHtml(p.name, p.avatar_url, cls, 64)}
       <div class="podium-name">${p.name.split(' ')[0]}</div>
-      <div class="podium-count">${p.count_mes} contrato${p.count_mes !== 1?'s':''}</div>
+      <div class="podium-count">${p.count_mes} contrato${p.count_mes!==1?'s':''}</div>
       <div class="podium-block ${cls}">${label}</div>
     </div>` : '';
 
-  return `<div class="podium-wrap">
-    ${makeItem(p2, 'silver', '2')}
-    ${makeItem(p1, 'gold',   '1')}
-    ${makeItem(p3, 'bronze', '3')}
+  return `<div class="podium-section">
+    <div class="podium-wrap">
+      ${makeItem(p2,'silver','2')}
+      ${makeItem(p1,'gold','1')}
+      ${makeItem(p3,'bronze','3')}
+    </div>
   </div>`;
 }
 
-// ── Leaderboard ───────────────────────────────────────────────────────────────
+// ── Leaderboard ────────────────────────────────────────────────────────────────
 function renderLeaderboard(ranking) {
-  if (ranking.length === 0) return '';
+  if (!ranking.length) return '';
   const posClass = i => i===1?'p1':i===2?'p2':i===3?'p3':'';
   const rows = ranking.map(r => `
-    <div class="lb-row${r.user_id === userId ? ' style="background:var(--brand-light)"' : ''}">
+    <div class="lb-row${r.user_id===userId?' highlight':''}">
       <div class="lb-pos ${posClass(r.posicao)}">${r.posicao}</div>
       <div class="lb-user">
         ${r.avatar_url
           ? `<img src="${r.avatar_url}" class="lb-av" style="object-fit:cover;" alt="${r.name}" />`
-          : `<div class="lb-av">${inicial(r.name)}</div>`
-        }
+          : `<div class="lb-av">${inicial(r.name)}</div>`}
         <div>
-          <div class="lb-name">${r.name}</div>
-          ${r.streak > 0 ? `<span class="badge-streak">🔥 ${r.streak}</span>` : ''}
+          <div class="lb-name">${r.name}${r.user_id===userId?' <span style="font-size:10px;color:#A78BFA">(você)</span>':''}</div>
+          ${r.streak>0?`<span class="badge-streak">🔥 ${r.streak} dias</span>`:''}
         </div>
       </div>
       <div class="lb-val">${r.count_mes}</div>
-      <div class="lb-val green">${fmtBRL(r.total_mes) === 'R$ 0' ? '—' : fmtBRL(r.total_mes)}</div>
-      <div class="lb-val col-tempo">${r.tempo_medio_fechamento != null ? r.tempo_medio_fechamento + ' d' : '—'}</div>
+      <div class="lb-val green">${r.total_mes>0?fmtBRL(r.total_mes):'—'}</div>
+      <div class="lb-val col-tempo">${r.tempo_medio_fechamento!=null?r.tempo_medio_fechamento+' d':'—'}</div>
       <div class="lb-val col-xp">${r.xp_total} XP</div>
     </div>`).join('');
 
-  return `
-    <div class="leaderboard">
-      <div class="lb-row header-row">
-        <div>#</div><div>Vendedor</div>
-        <div style="text-align:right">Contratos</div>
-        <div style="text-align:right">Faturado</div>
-        <div style="text-align:right" class="col-tempo">T. Médio</div>
-        <div style="text-align:right" class="col-xp">XP</div>
-      </div>
-      ${rows}
-    </div>`;
+  return `<div class="leaderboard">
+    <div class="lb-row header-row">
+      <div>#</div><div>Vendedor</div>
+      <div style="text-align:right">Contratos</div>
+      <div style="text-align:right">Faturado</div>
+      <div style="text-align:right" class="col-tempo">T. Médio</div>
+      <div style="text-align:right" class="col-xp">XP</div>
+    </div>${rows}
+  </div>`;
 }
 
-// ── Painel Gestor ─────────────────────────────────────────────────────────────
+// ── Gestor ─────────────────────────────────────────────────────────────────────
 function renderGestor() {
-  if (!dadosDash) return '<div class="empty-state"><div class="empty-icon">📊</div><p>Sem dados do painel.</p></div>';
+  if (!dadosDash) return '<div class="empty-state"><div class="empty-icon">📊</div><p>Sem dados.</p></div>';
   const { colaboradores, alertas, origens_time } = dadosDash;
-
   const alertHtml = (alertas||[]).map(a => `
     <div class="alert-box ${a.tipo}">
       <span class="alert-icon">${a.tipo==='atencao'?'🚨':a.tipo==='aviso'?'⚠️':'🚀'}</span>
@@ -483,90 +715,77 @@ function renderGestor() {
       <div class="colab-head">
         ${c.avatar_url
           ? `<img src="${c.avatar_url}" class="colab-av" style="object-fit:cover;" alt="${c.name}" />`
-          : `<div class="colab-av">${inicial(c.name)}</div>`
-        }
+          : `<div class="colab-av">${inicial(c.name)}</div>`}
         <div>
           <div class="colab-name">${c.name}</div>
-          <div class="colab-stats">${c.contratos_mes} contrato${c.contratos_mes!==1?'s':''} · ${fmtBRL(c.faturamento_mes) === 'R$ 0' ? '—' : fmtBRL(c.faturamento_mes)}
-            ${c.variacao_contratos != null ? `<span style="color:${c.variacao_contratos>=0?'var(--green)':'var(--red)'}">(${c.variacao_contratos>0?'+':''}${c.variacao_contratos}%)</span>` : ''}
+          <div class="colab-stats">${c.contratos_mes} contrato${c.contratos_mes!==1?'s':''} · ${c.faturamento_mes>0?fmtBRL(c.faturamento_mes):'—'}
+            ${c.variacao_contratos!=null?`<span style="color:${c.variacao_contratos>=0?'var(--green)':'var(--red)'}">(${c.variacao_contratos>0?'+':''}${c.variacao_contratos}%)</span>`:''}
           </div>
         </div>
       </div>
       <ul class="colab-insights">${c.insights.map(i=>`<li>${i}</li>`).join('')}</ul>
-      ${c.o_que_treinar?.length ? `
-        <div class="treinar-tags">
-          ${c.o_que_treinar.map(t=>`<span class="treinar-tag">📚 ${t}</span>`).join('')}
-        </div>` : ''}
+      ${c.o_que_treinar?.length?`<div class="treinar-tags">${c.o_que_treinar.map(t=>`<span class="treinar-tag">📚 ${t}</span>`).join('')}</div>`:''}
     </div>`).join('');
 
   return `
-    ${alertHtml ? alertHtml : ''}
+    ${alertHtml}
     <p class="section-title" style="margin-top:16px">Colaboradores</p>
-    <div class="colab-grid">${colabHtml || '<p style="color:var(--text-sub);font-size:13px">Sem colaboradores cadastrados.</p>'}</div>
-    ${origens_time?.length ? `
+    <div class="colab-grid">${colabHtml||'<p style="color:rgba(200,190,255,.4);font-size:13px">Sem colaboradores.</p>'}</div>
+    ${origens_time?.length?`
       <p class="section-title" style="margin-top:24px">Origem dos clientes</p>
       <div class="stats-bar" style="grid-template-columns:repeat(${Math.min(origens_time.length,4)},1fr)">
-        ${origens_time.slice(0,4).map(o=>`
-          <div class="stat-card"><div class="stat-val">${o.count}</div><div class="stat-lbl">${o.origem}</div></div>
-        `).join('')}
-      </div>` : ''}`;
+        ${origens_time.slice(0,4).map(o=>`<div class="stat-card"><div class="stat-val">${o.count}</div><div class="stat-lbl">${o.origem}</div></div>`).join('')}
+      </div>`:''}`
 }
 
-// ── Minha Semana ──────────────────────────────────────────────────────────────
+// ── Minha Semana ───────────────────────────────────────────────────────────────
 function renderSemana() {
-  if (!dadosSemana) return '<div class="empty-state"><div class="empty-icon">📅</div><p>Sem dados da semana.</p></div>';
+  if (!dadosSemana) return '<div class="empty-state"><div class="empty-icon">📅</div><p>Sem dados.</p></div>';
   const { semana, variacao, posicao_semana, o_que_treinar, insight, ultimas_vendas } = dadosSemana;
-
-  const varC = variacao?.contratos;
-  const varF = variacao?.faturamento;
-
+  const varC = variacao?.contratos, varF = variacao?.faturamento;
   return `
     <div class="semana-grid">
       <div class="semana-card">
         <div class="semana-val">${semana.contratos}</div>
-        ${varC != null ? `<div class="semana-var ${varC>=0?'up':'down'}">${varC>0?'+':''}${varC}% vs ant.</div>` : ''}
+        ${varC!=null?`<div class="semana-var ${varC>=0?'up':'down'}">${varC>0?'+':''}${varC}% vs ant.</div>`:''}
         <div class="semana-lbl">Contratos</div>
       </div>
       <div class="semana-card">
-        <div class="semana-val">${semana.faturamento > 0 ? fmtBRL(semana.faturamento) : '—'}</div>
-        ${varF != null ? `<div class="semana-var ${varF>=0?'up':'down'}">${varF>0?'+':''}${varF}%</div>` : ''}
+        <div class="semana-val">${semana.faturamento>0?fmtBRL(semana.faturamento):'—'}</div>
+        ${varF!=null?`<div class="semana-var ${varF>=0?'up':'down'}">${varF>0?'+':''}${varF}%</div>`:''}
         <div class="semana-lbl">Faturamento</div>
       </div>
       <div class="semana-card">
-        <div class="semana-val">${semana.tempo_medio_fechamento != null ? semana.tempo_medio_fechamento + 'd' : '—'}</div>
+        <div class="semana-val">${semana.tempo_medio_fechamento!=null?semana.tempo_medio_fechamento+'d':'—'}</div>
         <div class="semana-lbl">Tempo médio</div>
       </div>
     </div>
-
-    ${posicao_semana ? `
+    ${posicao_semana?`
       <div class="posicao-destaque">
         <div class="posicao-num">#${posicao_semana}</div>
         <div>
-          <div style="font-weight:700;font-size:14px">Sua posição esta semana</div>
+          <div style="font-weight:700;font-size:14px;color:#fff">Sua posição esta semana</div>
           <div class="posicao-txt">no ranking da equipe</div>
         </div>
-      </div>` : ''}
-
-    <div class="insight-box"><span class="insight-emoji">💡</span>${insight || ''}</div>
-
-    ${o_que_treinar?.length ? `
+      </div>`:''}
+    <div class="insight-box">💡 ${insight||''}</div>
+    ${o_que_treinar?.length?`
       <p class="section-title">O que treinar esta semana</p>
-      <div class="treinar-tags" style="margin-bottom:20px">
-        ${o_que_treinar.map(t=>`<span class="treinar-tag" style="font-size:13px;padding:6px 14px">📚 ${t}</span>`).join('')}
-      </div>` : ''}
-
-    ${ultimas_vendas?.length ? `
+      <div class="treinar-tags" style="margin-bottom:24px">
+        ${o_que_treinar.map(t=>`<span class="treinar-tag" style="font-size:13px;padding:6px 16px">📚 ${t}</span>`).join('')}
+      </div>`:''}
+    ${ultimas_vendas?.length?`
       <p class="section-title">Últimas vendas</p>
       <div class="ultimas-vendas">
-        ${ultimas_vendas.map(v => `
+        ${ultimas_vendas.map(v=>`
           <div class="uv-row">
             <div>
-              <div class="uv-desc">${v.descricao || 'Venda'}</div>
-              <div class="uv-meta">${v.origem || ''} ${v.data ? '· ' + v.data : ''}</div>
+              <div class="uv-desc">${v.descricao||'Venda'}</div>
+              <div class="uv-meta">${v.origem||''} ${v.data?'· '+v.data:''}</div>
             </div>
-            <div class="uv-val ${!v.valor ? 'exito' : ''}">${v.valor ? fmtBRL(v.valor) : 'Êxito'}</div>
+            <div class="uv-val ${!v.valor?'exito':''}">${v.valor?fmtBRL(v.valor):'Êxito'}</div>
           </div>`).join('')}
-      </div>` : ''}`;
+      </div>`:''}`;
 }
 </script>
 </body>
