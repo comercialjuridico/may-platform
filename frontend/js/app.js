@@ -635,7 +635,7 @@ function fecharDiagnostico() {
   document.getElementById('modal-diagnostico').classList.remove('active');
 }
 
-const TOTAL_PASSOS_DIAG = 7;
+const TOTAL_PASSOS_DIAG = 6;
 
 function diagIrPara(passo) {
   for (let i = 1; i <= TOTAL_PASSOS_DIAG; i++) {
@@ -645,18 +645,18 @@ function diagIrPara(passo) {
   document.getElementById('diag-passo-label').textContent = `Passo ${passo} de ${TOTAL_PASSOS_DIAG}`;
   document.getElementById('diag-progress').style.width    = `${Math.round(passo / TOTAL_PASSOS_DIAG * 100)}%`;
 
-  // Ao chegar no passo 7, preenche as opções de faturamento dinamicamente
-  if (passo === 7) mostrarOpcoesFaturamento();
+  // Passo 4 = faturamento → preenche opções dinamicamente com base no modelo (passo 2)
+  if (passo === 4) mostrarOpcoesFaturamento();
 }
 
 function diagProximo(passo) {
+  // Chave = destino; valida o passo ANTERIOR (origem)
   const validacoes = {
     2: () => !!document.querySelector('#diag-exp .selected'),
-    3: () => !!document.querySelector('#diag-contr .selected'),
-    4: () => !!document.querySelector('#diag-leads .selected'),
-    5: () => document.querySelectorAll('#diag-dific .selected').length > 0,
-    6: () => !!document.querySelector('#diag-melhora .selected'),
-    7: () => !!document.querySelector('#diag-modelo .selected'),
+    3: () => !!document.querySelector('#diag-modelo .selected'),
+    4: () => !!document.querySelector('#diag-contr .selected'),
+    5: () => !!document.querySelector('#diag-fat .selected'),
+    6: () => document.querySelectorAll('#diag-dific .selected').length > 0,
   };
   if (validacoes[passo] && !validacoes[passo]()) {
     mostrarToast('Selecione uma opção para continuar.', 'aviso');
@@ -713,16 +713,27 @@ function toggleMulti(btn) {
   btn.classList.toggle('selected');
 }
 
-async function salvarDiagnostico() {
-  const exp          = document.querySelector('#diag-exp .selected')?.dataset.val;
-  const contr        = document.querySelector('#diag-contr .selected')?.dataset.val;
-  const leads        = document.querySelector('#diag-leads .selected')?.dataset.val;
-  const dificEls     = document.querySelectorAll('#diag-dific .selected');
-  const melhora      = document.querySelector('#diag-melhora .selected')?.dataset.val;
-  const modeloCobr   = document.querySelector('#diag-modelo .selected')?.dataset.val;
-  const faturamento  = document.querySelector('#diag-fat .selected')?.dataset.val;
+// Mapeamento de dificuldades → insight empático + ferramentas May
+const DIFICULDADES_INFO = {
+  abordagem:    { insight: 'Saber como iniciar a conversa com um novo cliente é o que separa quem fecha de quem só prospecta. Cada palavra do primeiro contato conta.', ferramentas: ['Chat livre com a May', 'Simulador de Objeções'] },
+  proposta:     { insight: 'Uma proposta fraca é descartada em segundos. A forma como você apresenta o valor define se o cliente compra por preço ou por confiança.', ferramentas: ['Gerador de Proposta', 'Simulador de Negociação'] },
+  objecoes:     { insight: '"Tá caro", "vou pensar", "não é o momento" — essas frases são oportunidades disfarçadas. Quem treina a resposta certa fecha onde outros desistem.', ferramentas: ['Simulador de Objeções', 'Método SPIN'] },
+  negociacao:   { insight: 'Dar desconto é o caminho mais rápido para desvalorizar seu trabalho. Negociar bem é uma habilidade treinável, não um dom.', ferramentas: ['Simulador de Negociação', 'Gerador de Proposta'] },
+  follow_up:    { insight: 'A maioria das vendas acontece no 5º ao 8º contato. Quem não faz follow-up estruturado está deixando dinheiro na mesa todo dia.', ferramentas: ['Gerador de Follow-up', 'Chat livre com a May'] },
+  fechamento:   { insight: 'O momento do fechamento é o mais sensível da venda. Perder ali, depois de tudo construído, é frustrante — e evitável com treino.', ferramentas: ['Simulador de Vendas', 'Método SPIN'] },
+  qualificacao: { insight: 'Atender quem nunca vai contratar custa tempo e energia. Identificar o cliente certo antes de investir na venda muda o jogo.', ferramentas: ['Chat livre com a May', 'Diagnóstico com a May'] },
+  mentalidade:  { insight: 'Consistência vende mais do que talento. Criar uma rotina comercial e manter o ritmo nos dias difíceis é o que diferencia resultados médios dos excepcionais.', ferramentas: ['Metas semanais', 'Chat livre com a May'] },
+};
 
-  if (!exp || !contr || !leads || !dificEls.length || !melhora || !modeloCobr || !faturamento) {
+async function salvarDiagnostico() {
+  const exp         = document.querySelector('#diag-exp .selected')?.dataset.val;
+  const modeloCobr  = document.querySelector('#diag-modelo .selected')?.dataset.val;
+  const contr       = document.querySelector('#diag-contr .selected')?.dataset.val;
+  const faturamento = document.querySelector('#diag-fat .selected')?.dataset.val;
+  const dificEls    = document.querySelectorAll('#diag-dific .selected');
+  const melhora     = document.querySelector('#diag-melhora .selected')?.dataset.val;
+
+  if (!exp || !modeloCobr || !contr || !faturamento || !dificEls.length || !melhora) {
     mostrarToast('Complete todas as etapas antes de finalizar.', 'erro');
     return;
   }
@@ -736,7 +747,6 @@ async function salvarDiagnostico() {
   const res = await api.put('/user/diagnostico', {
     tempo_experiencia:  exp,
     contratos_mes:      contr,
-    leads_semana:       leads,
     dificuldades,
     quero_melhorar:     melhora,
     modelo_cobranca:    modeloCobr,
@@ -754,20 +764,37 @@ async function salvarDiagnostico() {
   renderizarSidebar();
 
   // Mostra resultado
-  const nivel    = data.maturidade ?? 0;
-  const nivelInfo= NIVEIS_MATURIDADE[nivel];
+  const nivel     = data.maturidade ?? 0;
+  const nivelInfo = NIVEIS_MATURIDADE[nivel];
+
   for (let i = 1; i <= TOTAL_PASSOS_DIAG; i++) {
     const el = document.getElementById(`diag-step-${i}`);
     if (el) el.style.display = 'none';
   }
-  document.getElementById('diag-progress').style.width = '100%';
-  document.getElementById('diag-passo-label').textContent = 'Diagnóstico concluído';
+  document.getElementById('diag-progress').style.width     = '100%';
+  document.getElementById('diag-passo-label').textContent  = 'Diagnóstico concluído';
   document.getElementById('diag-nivel-badge').textContent  = nivel;
   document.getElementById('diag-nivel-titulo').textContent = nivelInfo.titulo;
   document.getElementById('diag-nivel-desc').textContent   = nivelInfo.desc;
   document.getElementById('diag-trilha').textContent       = data.trilha_ativa;
   document.getElementById('diag-meta').textContent         = data.meta_semanal;
-  document.getElementById('diag-resultado').style.display  = 'block';
+
+  // Insight empático baseado na principal dificuldade
+  const dificArr       = (data.dificuldades || []);
+  const principalDific = DIFICULDADES_INFO[dificArr[0]];
+  if (principalDific) {
+    document.getElementById('diag-insight').textContent = principalDific.insight;
+    document.getElementById('diag-ferramentas').innerHTML =
+      '<strong style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Comece por aqui:</strong><br>' +
+      principalDific.ferramentas.map(f => `• ${f}`).join('<br>');
+  } else {
+    document.getElementById('diag-insight').textContent =
+      'A May tem tudo o que você precisa para criar um processo comercial que funciona. Vamos juntas.';
+    document.getElementById('diag-ferramentas').innerHTML =
+      '<strong style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Comece por aqui:</strong><br>• Chat livre com a May<br>• Simulador de Objeções';
+  }
+
+  document.getElementById('diag-resultado').style.display = 'block';
 }
 
 // ─── Modal de perfil ─────────────────────────────────────────────────────────

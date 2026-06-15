@@ -51,22 +51,14 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
       'mais3':  4,
     }[tempo_experiencia] ?? 0;
 
-    // Pontos por contratos fechados/mês (0-4)
+    // Pontos por contratos vendidos/mês (0-4) — nova escala
     const ptContr = {
-      '0':     0,
-      '1a2':   1,
-      '3a5':   2,
-      '6a9':   3,
-      '10mais':4,
+      '0_10':   0,
+      '11_20':  1,
+      '21_35':  2,
+      '36_55':  3,
+      '60_mais':4,
     }[contratos_mes] ?? 0;
-
-    // Pontos por leads/semana (0-3)
-    const ptLeads = {
-      '0a3':   0,
-      '4a10':  1,
-      '11a20': 2,
-      '21mais':3,
-    }[leads_semana] ?? 0;
 
     // Pontos por faturamento mensal (0-4)
     const ptFat = {
@@ -80,19 +72,20 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
       'fat_60k_mais':4,
     }[faturamento_mensal] ?? 0;
 
-    const scoreBruto = ptExp + ptContr + ptLeads + ptFat; // 0-15
-    const maturidade = Math.min(5, Math.round(scoreBruto / 15 * 5));
+    const scoreBruto = ptExp + ptContr + ptFat; // 0-12
+    const maturidade = Math.min(5, Math.round(scoreBruto / 12 * 5));
 
     // ── Trilha baseada na dificuldade principal ────────────────────────────
     const dificArr   = dificuldades.split(',').filter(Boolean);
     const trilhaMap  = {
-      objecoes:      'Quebrando Objeções',
-      abordagem:     'Primeiros Contatos',
-      qualificacao:  'Qualificação de Leads',
-      proposta:      'Proposta que Fecha',
-      negociacao:    'Negociação sem Ceder',
-      follow_up:     'Follow-up Estratégico',
-      fechamento:    'Técnicas de Fechamento',
+      objecoes:     'Quebrando Objeções',
+      abordagem:    'Primeiros Contatos',
+      qualificacao: 'Qualificação de Leads',
+      proposta:     'Proposta que Fecha',
+      negociacao:   'Negociação sem Ceder',
+      follow_up:    'Follow-up Estratégico',
+      fechamento:   'Técnicas de Fechamento',
+      mentalidade:  'Mentalidade e Consistência',
     };
     const trilhaPrincipal = dificArr[0] ? (trilhaMap[dificArr[0]] || 'Fundamentos Comerciais') : 'Fundamentos Comerciais';
 
@@ -114,7 +107,6 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
         contratos_mes,
         dificuldades,
         quero_melhorar,
-        leads_semana,
         modelo_cobranca:    modelo_cobranca    || null,
         faturamento_mensal: faturamento_mensal || null,
         maturidade,

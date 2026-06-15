@@ -152,16 +152,14 @@
       <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="diagProximo(2)">Próximo →</button>
     </div>
 
-    <!-- ── PASSO 2: Contratos ── -->
+    <!-- ── PASSO 2: Modelo de cobrança ── -->
     <div id="diag-step-2" style="display:none">
-      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quantos contratos você fecha em média por mês?</p>
-      <p class="text-secondary text-sm mb-16">Seja honesto — isso define sua trilha de treinamento.</p>
-      <div class="diag-options" id="diag-contr">
-        <button class="diag-opt" data-val="0"      onclick="selecionarOpcao('diag-contr',this)">Nenhum ainda</button>
-        <button class="diag-opt" data-val="1a2"    onclick="selecionarOpcao('diag-contr',this)">1 a 2 por mês</button>
-        <button class="diag-opt" data-val="3a5"    onclick="selecionarOpcao('diag-contr',this)">3 a 5 por mês</button>
-        <button class="diag-opt" data-val="6a9"    onclick="selecionarOpcao('diag-contr',this)">6 a 9 por mês</button>
-        <button class="diag-opt" data-val="10mais" onclick="selecionarOpcao('diag-contr',this)">10 ou mais</button>
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Como você costuma cobrar seus clientes?</p>
+      <p class="text-secondary text-sm mb-16">Isso personaliza sua trilha e as simulações da May.</p>
+      <div class="diag-options" id="diag-modelo">
+        <button class="diag-opt" data-val="exito"   onclick="selecionarOpcao('diag-modelo',this)">Só êxito — recebo quando ganho a causa</button>
+        <button class="diag-opt" data-val="inicial" onclick="selecionarOpcao('diag-modelo',this)">Honorários iniciais — cobro antes de começar</button>
+        <button class="diag-opt" data-val="misto"   onclick="selecionarOpcao('diag-modelo',this)">Misto — inicial + êxito</button>
       </div>
       <div style="display:flex;gap:8px;margin-top:20px">
         <button class="btn btn-ghost" onclick="diagAnterior(1)">← Voltar</button>
@@ -169,15 +167,16 @@
       </div>
     </div>
 
-    <!-- ── PASSO 3: Leads por semana ── -->
+    <!-- ── PASSO 3: Quantos vende por mês ── -->
     <div id="diag-step-3" style="display:none">
-      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quantos leads chegam para você por semana?</p>
-      <p class="text-secondary text-sm mb-16">Inclua WhatsApp, indicações, redes sociais, site.</p>
-      <div class="diag-options" id="diag-leads">
-        <button class="diag-opt" data-val="0a3"    onclick="selecionarOpcao('diag-leads',this)">0 a 3 leads</button>
-        <button class="diag-opt" data-val="4a10"   onclick="selecionarOpcao('diag-leads',this)">4 a 10 leads</button>
-        <button class="diag-opt" data-val="11a20"  onclick="selecionarOpcao('diag-leads',this)">11 a 20 leads</button>
-        <button class="diag-opt" data-val="21mais" onclick="selecionarOpcao('diag-leads',this)">21 ou mais</button>
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quantos você vende por mês?</p>
+      <p class="text-secondary text-sm mb-16">Seja honesto — isso define sua trilha de treinamento.</p>
+      <div class="diag-options" id="diag-contr">
+        <button class="diag-opt" data-val="0_10"    onclick="selecionarOpcao('diag-contr',this)">Até 10 contratos</button>
+        <button class="diag-opt" data-val="11_20"   onclick="selecionarOpcao('diag-contr',this)">11 a 20 contratos</button>
+        <button class="diag-opt" data-val="21_35"   onclick="selecionarOpcao('diag-contr',this)">21 a 35 contratos</button>
+        <button class="diag-opt" data-val="36_55"   onclick="selecionarOpcao('diag-contr',this)">36 a 55 contratos</button>
+        <button class="diag-opt" data-val="60_mais" onclick="selecionarOpcao('diag-contr',this)">Acima de 60 contratos</button>
       </div>
       <div style="display:flex;gap:8px;margin-top:20px">
         <button class="btn btn-ghost" onclick="diagAnterior(2)">← Voltar</button>
@@ -185,19 +184,12 @@
       </div>
     </div>
 
-    <!-- ── PASSO 4: Dificuldades (múltipla escolha) ── -->
+    <!-- ── PASSO 4: Faturamento ── -->
     <div id="diag-step-4" style="display:none">
-      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quais são suas maiores dificuldades? <span style="font-weight:400;color:var(--text-muted)">(escolha até 3)</span></p>
-      <p class="text-secondary text-sm mb-16">Isso desbloqueia trilhas e conquistas específicas para você.</p>
-      <div class="diag-options" id="diag-dific">
-        <button class="diag-opt diag-multi" data-val="abordagem"   onclick="toggleMulti(this)">Abordagem inicial</button>
-        <button class="diag-opt diag-multi" data-val="qualificacao" onclick="toggleMulti(this)">Qualificar leads</button>
-        <button class="diag-opt diag-multi" data-val="proposta"    onclick="toggleMulti(this)">Montar proposta</button>
-        <button class="diag-opt diag-multi" data-val="objecoes"    onclick="toggleMulti(this)">Responder objeções</button>
-        <button class="diag-opt diag-multi" data-val="negociacao"  onclick="toggleMulti(this)">Negociar o preço</button>
-        <button class="diag-opt diag-multi" data-val="follow_up"   onclick="toggleMulti(this)">Fazer follow-up</button>
-        <button class="diag-opt diag-multi" data-val="fechamento"  onclick="toggleMulti(this)">Fechar no momento certo</button>
-        <button class="diag-opt diag-multi" data-val="mentalidade" onclick="toggleMulti(this)">Mentalidade e consistência</button>
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Qual seu faturamento médio mensal?</p>
+      <p class="text-secondary text-sm mb-16">Considere os últimos 3 meses.</p>
+      <div class="diag-options" id="diag-fat">
+        <!-- preenchido dinamicamente com base no modelo de cobrança (passo 2) -->
       </div>
       <div style="display:flex;gap:8px;margin-top:20px">
         <button class="btn btn-ghost" onclick="diagAnterior(3)">← Voltar</button>
@@ -205,10 +197,30 @@
       </div>
     </div>
 
-    <!-- ── PASSO 5: O que quer melhorar ── -->
+    <!-- ── PASSO 5: Dificuldades (múltipla escolha) ── -->
     <div id="diag-step-5" style="display:none">
+      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Quais são suas maiores dificuldades? <span style="font-weight:400;color:var(--text-muted)">(escolha até 3)</span></p>
+      <p class="text-secondary text-sm mb-16">A May monta um caminho mastigado pra você resolver cada uma.</p>
+      <div class="diag-options" id="diag-dific">
+        <button class="diag-opt diag-multi" data-val="abordagem"   onclick="toggleMulti(this)">Abordagem inicial com o cliente</button>
+        <button class="diag-opt diag-multi" data-val="proposta"    onclick="toggleMulti(this)">Montar uma proposta que convence</button>
+        <button class="diag-opt diag-multi" data-val="objecoes"    onclick="toggleMulti(this)">Responder objeções ("tá caro", "vou pensar")</button>
+        <button class="diag-opt diag-multi" data-val="negociacao"  onclick="toggleMulti(this)">Negociar sem dar desconto</button>
+        <button class="diag-opt diag-multi" data-val="follow_up"   onclick="toggleMulti(this)">Fazer follow-up sem parecer chato</button>
+        <button class="diag-opt diag-multi" data-val="fechamento"  onclick="toggleMulti(this)">Saber a hora de fechar</button>
+        <button class="diag-opt diag-multi" data-val="qualificacao" onclick="toggleMulti(this)">Identificar quem realmente vai contratar</button>
+        <button class="diag-opt diag-multi" data-val="mentalidade" onclick="toggleMulti(this)">Consistência e motivação para vender</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="diagAnterior(4)">← Voltar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(6)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- ── PASSO 6: O que quer alcançar ── -->
+    <div id="diag-step-6" style="display:none">
       <p style="font-size:1rem;font-weight:700;margin-bottom:6px">O que você mais quer alcançar com a May?</p>
-      <p class="text-secondary text-sm mb-16">Isso define sua prioridade de treinamento.</p>
+      <p class="text-secondary text-sm mb-16">Sua resposta define o foco das suas próximas semanas.</p>
       <div class="diag-options" id="diag-melhora">
         <button class="diag-opt" data-val="fechar_mais"    onclick="selecionarOpcao('diag-melhora',this)">Fechar mais contratos todo mês</button>
         <button class="diag-opt" data-val="converter_mais" onclick="selecionarOpcao('diag-melhora',this)">Converter mais leads em clientes</button>
@@ -217,35 +229,7 @@
         <button class="diag-opt" data-val="equipe"         onclick="selecionarOpcao('diag-melhora',this)">Treinar minha equipe de vendas</button>
       </div>
       <div style="display:flex;gap:8px;margin-top:20px">
-        <button class="btn btn-ghost" onclick="diagAnterior(4)">← Voltar</button>
-        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(6)">Próximo →</button>
-      </div>
-    </div>
-
-    <!-- ── PASSO 6: Modelo de cobrança ── -->
-    <div id="diag-step-6" style="display:none">
-      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Como você costuma cobrar seus clientes?</p>
-      <p class="text-secondary text-sm mb-16">Isso personaliza sua trilha de faturamento.</p>
-      <div class="diag-options" id="diag-modelo">
-        <button class="diag-opt" data-val="exito"   onclick="selecionarOpcao('diag-modelo',this)">Só êxito — recebo quando ganho a causa</button>
-        <button class="diag-opt" data-val="inicial" onclick="selecionarOpcao('diag-modelo',this)">Honorários iniciais — cobro antes de começar</button>
-        <button class="diag-opt" data-val="misto"   onclick="selecionarOpcao('diag-modelo',this)">Misto — inicial + êxito</button>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:20px">
         <button class="btn btn-ghost" onclick="diagAnterior(5)">← Voltar</button>
-        <button class="btn btn-primary" style="flex:1" onclick="diagProximo(7)">Próximo →</button>
-      </div>
-    </div>
-
-    <!-- ── PASSO 7: Faturamento ── -->
-    <div id="diag-step-7" style="display:none">
-      <p style="font-size:1rem;font-weight:700;margin-bottom:6px">Qual seu faturamento médio mensal?</p>
-      <p class="text-secondary text-sm mb-16">Considere os últimos 3 meses.</p>
-      <div class="diag-options" id="diag-fat">
-        <!-- preenchido dinamicamente via JS com base no modelo de cobrança -->
-      </div>
-      <div style="display:flex;gap:8px;margin-top:20px">
-        <button class="btn btn-ghost" onclick="diagAnterior(6)">← Voltar</button>
         <button class="btn btn-primary" style="flex:1" id="btn-finalizar-diag" onclick="salvarDiagnostico()">
           Calcular minha maturidade →
         </button>
@@ -253,19 +237,32 @@
     </div>
 
     <!-- ── RESULTADO ── -->
-    <div id="diag-resultado" style="display:none;text-align:center">
-      <div id="diag-nivel-badge" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;font-size:2rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"></div>
-      <div style="font-size:0.75rem;font-weight:700;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Maturidade Comercial</div>
-      <div id="diag-nivel-titulo" style="font-size:1.4rem;font-weight:800;margin-bottom:8px"></div>
-      <div id="diag-nivel-desc" style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:24px;line-height:1.5"></div>
+    <div id="diag-resultado" style="display:none">
 
-      <div style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:14px 16px;margin-bottom:12px;text-align:left">
-        <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:6px">🎯 Trilha desbloqueada</div>
-        <div id="diag-trilha" style="font-weight:600;font-size:0.9rem"></div>
+      <!-- Nível -->
+      <div style="text-align:center;margin-bottom:20px">
+        <div id="diag-nivel-badge" style="width:72px;height:72px;border-radius:50%;background:var(--accent);color:#fff;font-size:1.8rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px"></div>
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Maturidade Comercial</div>
+        <div id="diag-nivel-titulo" style="font-size:1.3rem;font-weight:800;margin-bottom:6px"></div>
+        <div id="diag-nivel-desc" style="font-size:0.85rem;color:var(--text-secondary);line-height:1.5"></div>
       </div>
 
-      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px;text-align:left">
-        <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">📅 Meta desta semana</div>
+      <!-- Insight empático da May -->
+      <div style="background:rgba(75,71,212,0.07);border:1px solid var(--accent-border);border-radius:10px;padding:14px 16px;margin-bottom:12px">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:8px">💡 A May entende o que você vive</div>
+        <div id="diag-insight" style="font-size:0.875rem;color:var(--text-primary);line-height:1.65"></div>
+      </div>
+
+      <!-- Trilha + ferramentas -->
+      <div style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:14px 16px;margin-bottom:12px">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:6px">🎯 Trilha desbloqueada para você</div>
+        <div id="diag-trilha" style="font-weight:700;font-size:0.9rem;margin-bottom:8px"></div>
+        <div id="diag-ferramentas" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.7"></div>
+      </div>
+
+      <!-- Meta semanal -->
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">📅 Sua meta desta semana</div>
         <div id="diag-meta" style="font-size:0.875rem;color:var(--text-primary);line-height:1.5"></div>
       </div>
 
