@@ -120,6 +120,7 @@
   <div class="modal" style="max-width:520px">
     <div class="modal-header">
       <span class="modal-title">Diagnóstico inicial</span>
+      <button class="modal-close" onclick="document.getElementById('modal-diagnostico').classList.remove('active')">✕</button>
     </div>
     <p class="text-secondary text-sm mb-16">
       Em 2 minutos, a May fica personalizada para o seu contexto de vendas.
@@ -345,8 +346,7 @@
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) {
-        // Não fecha o diagnóstico se não estiver completo
-        if (overlay.id === 'modal-diagnostico' && !window.estado?.user?.diagnostico_completo) return;
+        // Diagnóstico pode ser fechado livremente
         overlay.classList.remove('active');
       }
     });
