@@ -275,14 +275,14 @@
   margin-top: 2px;
 }
 .msg-avatar.may {
-  background: var(--accent-dim);
-  color: var(--accent-light);
-  border: 1px solid var(--accent-border);
+  background: var(--accent);
+  color: #fff;
   font-size: 0.75rem;
 }
 .msg-avatar.user-av {
-  background: var(--bg-hover);
-  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
 }
 
 .msg-content { flex: 1; min-width: 0; }
@@ -305,8 +305,9 @@
   word-break: break-word;
 }
 .message.user .msg-bubble {
-  background: var(--bg-tertiary);
-  border-color: var(--border);
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--text-primary);
 }
 
 /* Markdown renderizado */

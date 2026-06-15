@@ -1,53 +1,66 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   main.css — Estilos globais e variáveis
-   Paleta: dark neutro + cobre quente (inspirado no Claude)
+   main.css — Sistema de temas: Light (padrão) + Dark
+   Paleta: Roxo #4B47D4 + Branco/Preto
 ═══════════════════════════════════════════════════════════════════════════════ */
 
+/* ─── Tema Claro (padrão) ────────────────────────────────────────────────── */
 :root {
-  /* Cores base */
-  --bg-primary:   #1a1917;
-  --bg-secondary: #232220;
-  --bg-tertiary:  #2c2b28;
-  --bg-hover:     #333230;
+  --accent:        #4B47D4;
+  --accent-light:  #6966E0;
+  --accent-dim:    rgba(75, 71, 212, 0.10);
+  --accent-border: rgba(75, 71, 212, 0.25);
 
-  /* Acento cobre */
-  --accent:       #c97d4e;
-  --accent-light: #e0956a;
-  --accent-dim:   rgba(201, 125, 78, 0.15);
-  --accent-border:rgba(201, 125, 78, 0.3);
+  --bg-primary:    #ffffff;
+  --bg-secondary:  #f4f4f8;
+  --bg-tertiary:   #ebebf2;
+  --bg-hover:      #e2e2ec;
 
-  /* Texto */
-  --text-primary:   #f0ede8;
-  --text-secondary: #a09e99;
-  --text-muted:     #6b6965;
-  --text-inverse:   #1a1917;
+  --text-primary:   #111118;
+  --text-secondary: #52527a;
+  --text-muted:     #9898b8;
+  --text-inverse:   #ffffff;
 
-  /* Bordas */
-  --border:       rgba(255,255,255,0.08);
-  --border-light: rgba(255,255,255,0.05);
+  --border:        rgba(75, 71, 212, 0.12);
+  --border-light:  rgba(75, 71, 212, 0.07);
 
-  /* Estados */
-  --success: #5a9e6f;
-  --warning: #d4a843;
-  --error:   #c96060;
+  --success: #2d8a55;
+  --warning: #b07d1a;
+  --error:   #c04040;
 
-  /* Tipografia */
-  --font:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font:      'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Espaçamento */
   --radius-sm: 6px;
   --radius:    10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  /* Sombras */
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
-  --shadow:     0 4px 12px rgba(0,0,0,0.5);
-  --shadow-lg:  0 8px 32px rgba(0,0,0,0.6);
+  --shadow-sm:  0 1px 4px rgba(75,71,212,0.08);
+  --shadow:     0 4px 16px rgba(75,71,212,0.12);
+  --shadow-lg:  0 8px 36px rgba(75,71,212,0.16);
 
-  /* Transições */
   --transition: 0.18s ease;
+}
+
+/* ─── Tema Escuro ────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-primary:    #0f0f1a;
+  --bg-secondary:  #16162a;
+  --bg-tertiary:   #1e1e35;
+  --bg-hover:      #26263e;
+
+  --text-primary:   #eeeef8;
+  --text-secondary: #9898c8;
+  --text-muted:     #5555880;
+  --text-muted:     #666690;
+  --text-inverse:   #ffffff;
+
+  --border:        rgba(255,255,255,0.09);
+  --border-light:  rgba(255,255,255,0.05);
+
+  --shadow-sm:  0 1px 4px rgba(0,0,0,0.4);
+  --shadow:     0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 36px rgba(0,0,0,0.6);
 }
 
 /* ─── Reset ──────────────────────────────────────────────────────────────── */
@@ -62,9 +75,10 @@ body {
   line-height: 1.6;
   overflow: hidden;
   height: 100dvh;
+  transition: background var(--transition), color var(--transition);
 }
 
-a { color: var(--accent-light); text-decoration: none; }
+a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 button {
@@ -84,24 +98,21 @@ input, textarea, select {
   border-radius: var(--radius-sm);
   padding: 10px 14px;
   font-size: 0.9rem;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), background var(--transition);
   width: 100%;
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent);
+  background: var(--bg-secondary);
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
-input::placeholder, textarea::placeholder {
-  color: var(--text-muted);
-}
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--bg-hover);
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-border); }
 
 /* ─── Botões ─────────────────────────────────────────────────────────────── */
 .btn {
@@ -117,7 +128,7 @@ input::placeholder, textarea::placeholder {
 
 .btn-primary {
   background: var(--accent);
-  color: var(--text-inverse);
+  color: #fff;
 }
 .btn-primary:hover { background: var(--accent-light); }
 
@@ -133,14 +144,17 @@ input::placeholder, textarea::placeholder {
   color: var(--text-secondary);
   padding: 7px 12px;
 }
-.btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.btn-ghost:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
 
 .btn-danger {
   background: transparent;
   color: var(--error);
-  border: 1px solid rgba(201,96,96,0.3);
+  border: 1px solid rgba(192,64,64,0.25);
 }
-.btn-danger:hover { background: rgba(201,96,96,0.1); }
+.btn-danger:hover { background: rgba(192,64,64,0.08); }
 
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
 .btn-lg { padding: 12px 24px; font-size: 1rem; }
@@ -157,16 +171,38 @@ input::placeholder, textarea::placeholder {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.badge-free    { background: var(--bg-hover); color: var(--text-secondary); }
-.badge-mensal  { background: var(--accent-dim); color: var(--accent-light); border: 1px solid var(--accent-border); }
-.badge-anual   { background: rgba(90,158,111,0.15); color: #7dcf97; border: 1px solid rgba(90,158,111,0.3); }
+.badge-free   { background: var(--bg-tertiary); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-mensal { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+.badge-anual  { background: rgba(45,138,85,0.12); color: var(--success); border: 1px solid rgba(45,138,85,0.25); }
+
+/* ─── Toggle de Tema ─────────────────────────────────────────────────────── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.theme-toggle:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+.theme-toggle-icon { font-size: 14px; }
 
 /* ─── Modal ──────────────────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -176,12 +212,13 @@ input::placeholder, textarea::placeholder {
   pointer-events: none;
   transition: opacity var(--transition);
 }
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.65); }
 .modal-overlay.active {
   opacity: 1;
   pointer-events: all;
 }
 .modal {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -191,7 +228,7 @@ input::placeholder, textarea::placeholder {
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
   transform: translateY(12px);
-  transition: transform var(--transition);
+  transition: transform var(--transition), background var(--transition);
 }
 .modal-overlay.active .modal { transform: translateY(0); }
 
@@ -209,11 +246,14 @@ input::placeholder, textarea::placeholder {
 .modal-close {
   background: transparent;
   color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 4px;
+  font-size: 1.1rem;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
 }
-.modal-close:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+.modal-close:hover {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
 
 /* ─── Toast ──────────────────────────────────────────────────────────────── */
 #toast-container {
@@ -226,7 +266,7 @@ input::placeholder, textarea::placeholder {
   gap: 8px;
 }
 .toast {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   color: var(--text-primary);
@@ -251,11 +291,11 @@ input::placeholder, textarea::placeholder {
 .form-label {
   display: block;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 .form-error {
   font-size: 0.78rem;
@@ -263,7 +303,7 @@ input::placeholder, textarea::placeholder {
   margin-top: 4px;
 }
 
-/* ─── Loading / Skeleton ─────────────────────────────────────────────────── */
+/* ─── Loading / Spinner ──────────────────────────────────────────────────── */
 .spinner {
   width: 20px;
   height: 20px;
@@ -282,7 +322,7 @@ input::placeholder, textarea::placeholder {
 .gap-12 { gap: 12px; }
 .text-muted    { color: var(--text-muted); }
 .text-secondary{ color: var(--text-secondary); }
-.text-accent   { color: var(--accent-light); }
+.text-accent   { color: var(--accent); }
 .text-sm  { font-size: 0.85rem; }
 .text-xs  { font-size: 0.75rem; }
 .font-semibold { font-weight: 600; }

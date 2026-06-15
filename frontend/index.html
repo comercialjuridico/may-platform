@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a1917" />
+  <meta name="theme-color" content="#4B47D4" />
   <title>May — Assistente de Vendas</title>
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" href="/assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/app.css" />
 </head>
@@ -80,6 +80,10 @@
       <div class="header-actions">
         <button class="btn-ghost btn-sm" onclick="abrirModalPlanos()" title="Planos">
           ⭐ Planos
+        </button>
+        <button class="theme-toggle" id="btn-theme" onclick="toggleTema()" title="Alternar tema">
+          <span class="theme-toggle-icon" id="theme-icon">🌙</span>
+          <span id="theme-label">Escuro</span>
         </button>
         <button class="btn-ghost btn-sm" onclick="abrirModalDiagnostico()" title="Editar diagnóstico">
           ⚙️
@@ -340,6 +344,38 @@
 <script src="/js/markdown.js"></script>
 <script src="/js/app.js"></script>
 <script>
+  // ── Toggle de Tema ────────────────────────────────────────────────────────────
+  (function() {
+    const saved = localStorage.getItem('may_tema') || 'light';
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  })();
+
+  function toggleTema() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('may_tema', 'light');
+      document.getElementById('theme-icon').textContent  = '🌙';
+      document.getElementById('theme-label').textContent = 'Escuro';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('may_tema', 'dark');
+      document.getElementById('theme-icon').textContent  = '☀️';
+      document.getElementById('theme-label').textContent = 'Claro';
+    }
+  }
+
+  // Aplica label correto ao carregar
+  document.addEventListener('DOMContentLoaded', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.getElementById('theme-icon').textContent  = '☀️';
+      document.getElementById('theme-label').textContent = 'Claro';
+    }
+  });
+
   // Abre modal de planos
   function abrirModalPlanos() {
     document.getElementById('modal-planos').classList.add('active');
