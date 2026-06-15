@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   verificarDiagnostico();
   verificarQueryParams();
   if (!estado.conversaAtiva) mostrarHomeDashboard();
+  inicializarPushNotificacoes();
 });
 
 async function carregarDadosIniciais() {
@@ -1304,6 +1305,66 @@ function mostrarToast(msg, tipo = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
+// ─── Push Notifications ──────────────────────────────────────────────────────
+async function inicializarPushNotificacoes() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+  try {
+    // Registra o Service Worker
+    const reg = await navigator.serviceWorker.register('/sw.js');
+
+    // Só pede permissão depois de 30s (não interrompe o onboarding)
+    const jaAtivo = localStorage.getItem('may_push_ativo');
+    if (jaAtivo) {
+      // Já tem permissão — garante que a subscription está atualizada
+      await garantirSubscription(reg);
+      return;
+    }
+
+    // Aguarda 30 segundos e pergunta
+    setTimeout(() => solicitarPermissaoPush(reg), 30 * 1000);
+  } catch (err) {
+    console.warn('SW não registrado:', err.message);
+  }
+}
+
+async function solicitarPermissaoPush(reg) {
+  const permissao = await Notification.requestPermission();
+  if (permissao !== 'granted') return;
+  await garantirSubscription(reg);
+}
+
+async function garantirSubscription(reg) {
+  try {
+    const res = await fetch('/api/notificacoes/vapid-public');
+    const { publicKey } = await res.json();
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+
+    await api.post('/notificacoes/subscribe', { subscription: sub.toJSON() });
+    localStorage.setItem('may_push_ativo', '1');
+  } catch (err) {
+    console.warn('Erro ao registrar push:', err.message);
+  }
+}
+
+async function testarNotificacao() {
+  const res = await api.post('/notificacoes/testar', {});
+  const data = await res?.json();
+  if (data?.ok > 0) mostrarToast('Notificação enviada! Verifique seu dispositivo.', 'sucesso');
+  else mostrarToast('Ative as notificações primeiro (clique no cadeado da URL).', 'aviso');
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
 // ─── Home Dashboard ──────────────────────────────────────────────────────────
 function mostrarHomeDashboard() {
   const container = document.getElementById('messages-container');
@@ -1552,4 +1613,5 @@ Object.assign(window, {
   abrirModalVenda, fecharModalVenda, registrarVenda,
   toggle2FA, confirmar2FAAtivacao, confirmar2FADesativacao,
   abrirModalTrilha, marcarExercicio, iniciarSimulacao, iniciarExercicioTrilha,
+  testarNotificacao,
 });

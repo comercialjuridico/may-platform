@@ -84,7 +84,8 @@ app.use('/api/vendas',   require('./routes/vendas'));
 app.use('/api/areas',   require('./routes/areas'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/metas',  require('./routes/metas'));
-app.use('/api/2fa',   require('./routes/twofa'));
+app.use('/api/2fa',          require('./routes/twofa'));
+app.use('/api/notificacoes', require('./routes/notificacoes'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -110,6 +111,34 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✓ May rodando na porta ${PORT}`);
   console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  iniciarCronPush();
 });
+
+// ─── Cron de notificações push ───────────────────────────────────────────────
+function iniciarCronPush() {
+  if (!process.env.CRON_SECRET || !process.env.VAPID_PUBLIC_KEY) return;
+
+  // Verifica a cada 1 hora se é hora de disparar
+  setInterval(async () => {
+    const agora    = new Date();
+    const hora     = agora.getUTCHours(); // UTC — ajuste para BRT (UTC-3): hora 12 UTC = 9h BRT
+    const diaSem   = agora.getUTCDay();   // 0=dom, 1=seg
+
+    // Push diário: 12h UTC (9h BRT), todos os dias
+    if (hora === 12) {
+      try {
+        const res = await fetch(`http://localhost:${PORT}/api/notificacoes/enviar-cron`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-cron-secret': process.env.CRON_SECRET },
+          body: JSON.stringify({ tipo: diaSem === 1 ? 'semanal' : 'diario' }),
+        });
+        const data = await res.json();
+        console.log(`✓ Push ${diaSem === 1 ? 'semanal' : 'diário'}: ${data.enviados} enviados`);
+      } catch (err) {
+        console.error('Erro no cron push:', err.message);
+      }
+    }
+  }, 60 * 60 * 1000); // a cada 1 hora
+}
 
 module.exports = app;
