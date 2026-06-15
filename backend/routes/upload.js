@@ -34,6 +34,56 @@ const upload = multer({
   },
 });
 
+const uploadImagem = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (req, file, cb) => {
+    const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    permitidos.includes(file.mimetype) ? cb(null, true) : cb(new Error('Envie uma imagem JPG, PNG ou WebP.'));
+  },
+});
+
+// ─── POST /api/upload/avatar ────────────────────────────────────────────────
+// Faz upload de foto de perfil para o Supabase Storage e atualiza avatar_url
+router.post('/avatar', authMiddleware, uploadImagem.single('foto'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ erro: 'Nenhuma imagem enviada.' });
+
+  try {
+    const ext      = req.file.mimetype.split('/')[1].replace('jpeg', 'jpg');
+    const filename = `avatars/${req.user.id}.${ext}`;
+
+    // Faz upload ao bucket "avatars" no Supabase Storage
+    const { error: uploadErr } = await supabase.storage
+      .from('avatars')
+      .upload(filename, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true,       // substitui se já existir
+      });
+
+    if (uploadErr) throw uploadErr;
+
+    // Gera URL pública
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filename);
+
+    const avatar_url = urlData.publicUrl;
+
+    // Salva no perfil do usuário
+    const { error: updateErr } = await supabase
+      .from('users')
+      .update({ avatar_url })
+      .eq('id', req.user.id);
+
+    if (updateErr) throw updateErr;
+
+    res.json({ avatar_url });
+  } catch (err) {
+    console.error('Erro ao fazer upload do avatar:', err.message);
+    res.status(500).json({ erro: 'Erro ao salvar foto de perfil.' });
+  }
+});
+
 // ─── POST /api/upload/documento ─────────────────────────────────────────────
 // Recebe PDF ou DOCX, extrai texto e salva no banco
 router.post('/documento', authMiddleware, upload.single('arquivo'), async (req, res) => {

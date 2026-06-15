@@ -297,6 +297,19 @@
       <button class="modal-close" onclick="document.getElementById('modal-perfil').classList.remove('active')">✕</button>
     </div>
 
+    <!-- Foto de perfil -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:20px;">
+      <div id="perfil-avatar-preview" onclick="document.getElementById('perfil-foto-input').click()"
+        style="width:80px;height:80px;border-radius:50%;background:var(--bg-tertiary);border:2px dashed var(--border);
+               display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;
+               color:var(--accent);cursor:pointer;overflow:hidden;position:relative;">
+        <span id="perfil-avatar-inicial">U</span>
+        <img id="perfil-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" />
+      </div>
+      <span style="font-size:11px;color:var(--text-muted)">Clique para alterar foto</span>
+      <input id="perfil-foto-input" type="file" accept="image/*" style="display:none" onchange="uploadFotoPerfil(this)" />
+    </div>
+
     <div class="form-group">
       <label class="form-label">Nome</label>
       <input id="perfil-nome" type="text" />

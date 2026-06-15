@@ -109,8 +109,12 @@ function renderizarSidebar() {
   const user = estado.user;
 
   // Avatar e nome
-  document.getElementById('user-avatar-text').textContent =
-    (user?.name || 'U').charAt(0).toUpperCase();
+  const avatarEl = document.getElementById('user-avatar-text');
+  if (user?.avatar_url) {
+    avatarEl.innerHTML = `<img src="${user.avatar_url}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+  } else {
+    avatarEl.textContent = (user?.name || 'U').charAt(0).toUpperCase();
+  }
   document.getElementById('user-name-text').textContent = user?.name || '';
   document.getElementById('user-plan-badge').innerHTML =
     `<span class="badge badge-${user?.plano || 'free'}">${user?.plano || 'free'}</span>`;
@@ -805,7 +809,58 @@ async function salvarDiagnostico() {
 function abrirModalPerfil() {
   const user = estado.user;
   document.getElementById('perfil-nome').value = user?.name || '';
+
+  // Avatar no modal
+  const inicial = document.getElementById('perfil-avatar-inicial');
+  const img     = document.getElementById('perfil-avatar-img');
+  if (user?.avatar_url) {
+    img.src = user.avatar_url;
+    img.style.display = 'block';
+    inicial.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    inicial.style.display = '';
+    inicial.textContent = (user?.name || 'U').charAt(0).toUpperCase();
+  }
+
   document.getElementById('modal-perfil').classList.add('active');
+}
+
+async function uploadFotoPerfil(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('foto', file);
+
+  mostrarToast('Enviando foto...', 'info');
+
+  try {
+    const token = getAccessToken();
+    const res = await fetch('/api/upload/avatar', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+
+    // Atualiza estado e UI imediatamente
+    estado.user = { ...estado.user, avatar_url: data.avatar_url };
+    salvarUser(estado.user);
+
+    // Preview no modal
+    const img     = document.getElementById('perfil-avatar-img');
+    const inicial = document.getElementById('perfil-avatar-inicial');
+    img.src = data.avatar_url;
+    img.style.display = 'block';
+    inicial.style.display = 'none';
+
+    renderizarSidebar();
+    mostrarToast('Foto atualizada!', 'sucesso');
+  } catch {
+    mostrarToast('Erro ao enviar foto.', 'erro');
+  }
 }
 
 async function salvarPerfil() {
@@ -964,7 +1019,7 @@ Object.assign(window, {
   enviarMensagem, novaConversa, carregarConversa, excluirConversa,
   selecionarFerramenta, uploadArquivo, toggleGravacao,
   abrirModalDiagnostico, salvarDiagnostico,
-  abrirModalPerfil, salvarPerfil,
+  abrirModalPerfil, salvarPerfil, uploadFotoPerfil,
   iniciarCheckout, abrirPortalStripe, logout,
   toggleMenuMobile, mostrarToast,
   copiarMensagem, exportarDocx, salvarTemplate,
