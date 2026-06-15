@@ -202,20 +202,9 @@ router.get('/conversa/:id', authMiddleware, async (req, res) => {
 });
 
 // ─── DELETE /api/chat/conversa/:id ──────────────────────────────────────────
+// Exclusão de conversas desativada pela administração da plataforma.
 router.delete('/conversa/:id', authMiddleware, async (req, res) => {
-  try {
-    const { error } = await supabase
-      .from('conversations')
-      .delete()
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id);
-
-    if (error) throw error;
-    res.json({ mensagem: 'Conversa excluída.' });
-  } catch (err) {
-    console.error('Erro ao excluir conversa:', err.message);
-    res.status(500).json({ erro: 'Erro ao excluir conversa.' });
-  }
+  return res.status(403).json({ erro: 'Exclusão de conversas não é permitida.' });
 });
 
 module.exports = router;

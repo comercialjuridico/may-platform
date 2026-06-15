@@ -210,8 +210,6 @@ function renderizarListaConversas() {
     <div class="conv-item ${estado.conversaAtiva === c.id ? 'active' : ''}"
          onclick="carregarConversa('${c.id}')">
       <span class="conv-item-title">${escapeHtml(c.titulo)}</span>
-      <button class="conv-delete" onclick="event.stopPropagation(); excluirConversa('${c.id}')"
-              title="Excluir">✕</button>
     </div>
   `).join('');
 }
@@ -335,18 +333,8 @@ async function carregarConversa(id) {
 }
 
 // ─── Excluir conversa ────────────────────────────────────────────────────────
-async function excluirConversa(id) {
-  if (!confirm('Excluir esta conversa?')) return;
-  const res = await api.delete(`/chat/conversa/${id}`);
-  if (res?.ok) {
-    estado.conversas = estado.conversas.filter(c => c.id !== id);
-    if (estado.conversaAtiva === id) {
-      estado.conversaAtiva = null;
-      selecionarFerramenta(estado.ferramentaAtiva);
-    }
-    renderizarSidebar();
-  }
-}
+// Desativado: exclusão de conversas não é permitida nesta plataforma.
+function excluirConversa() { /* desativado */ }
 
 // ─── Enviar mensagem ─────────────────────────────────────────────────────────
 async function enviarMensagem() {
