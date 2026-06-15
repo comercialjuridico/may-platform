@@ -18,6 +18,7 @@ const estado = {
 // ─── Ferramentas disponíveis ─────────────────────────────────────────────────
 const FERRAMENTAS = [
   { id: 'chat',               nome: 'Chat livre',                  icon: '💬' },
+  { id: 'simular_reuniao',    nome: 'Simular reunião',             icon: '🎭' },
   { id: 'simulador_objecoes', nome: 'Simulador de objeções',       icon: '🎯' },
   { id: 'gerador_proposta',   nome: 'Gerador de proposta',         icon: '📄' },
   { id: 'follow_up',          nome: 'Script de follow-up',         icon: '🔁' },
@@ -27,6 +28,84 @@ const FERRAMENTAS = [
   { id: 'simulador_vendas',   nome: 'Simulador de vendas',         icon: '🏋️' },
   { id: 'criador_prompt',     nome: 'Criador de prompt de IA',     icon: '🤖' },
 ];
+
+// ─── Fases da Trilha ──────────────────────────────────────────────────────────
+const FASES_TRILHA = [
+  {
+    id: 'mentalidade', nome: 'Mentalidade', icon: '🧭',
+    desc: 'Supere o bloqueio de vender e defina seu posicionamento',
+    exercicios: [
+      { id: 'a', label: 'Aprender: Por que advogados travam na venda', tipo: 'chat', prompt: 'Me explica por que advogados têm bloqueio com vendas e como superar isso na prática. Quero entender a raiz do problema e os primeiros passos.' },
+      { id: 'b', label: 'Praticar: Montar minha proposta de valor', tipo: 'chat', prompt: 'Quero montar minha proposta de valor como advogado. Me faz perguntas para eu entender o que realmente ofereço e como comunicar isso com clareza para o cliente.' },
+      { id: 'c', label: 'Simular: Apresentação inicial para um lead', tipo: 'simular_reuniao', cenario: 'apresentacao_inicial' },
+    ],
+  },
+  {
+    id: 'captacao', nome: 'Captação', icon: '🎯',
+    desc: 'Prospecte ativamente e use indicações de forma profissional',
+    exercicios: [
+      { id: 'a', label: 'Aprender: Os 3 canais de prospecção que funcionam', tipo: 'chat', prompt: 'Quais as formas de prospecção que realmente funcionam para advogados? Quero entender cada canal com exemplos práticos de como começar.' },
+      { id: 'b', label: 'Praticar: Script de abordagem inicial', tipo: 'follow_up', prompt: 'Me dá um script de abordagem para um contato que ainda não é cliente — por WhatsApp. Precisa soar natural, não como vendedor.' },
+      { id: 'c', label: 'Simular: Pedir indicação para um cliente satisfeito', tipo: 'simular_reuniao', cenario: 'pedir_indicacao' },
+    ],
+  },
+  {
+    id: 'qualificacao', nome: 'Qualificação', icon: '🔍',
+    desc: 'Identifique quem realmente vai contratar antes de investir tempo',
+    exercicios: [
+      { id: 'a', label: 'Aprender: As perguntas que qualificam qualquer lead', tipo: 'spin', prompt: 'Me ensina as perguntas fundamentais para qualificar um lead no contexto jurídico. Como identificar se o cliente tem urgência, orçamento e autoridade para decidir?' },
+      { id: 'b', label: 'Praticar: Roteiro de diagnóstico do cliente', tipo: 'diagnostico', prompt: 'Quero criar um roteiro de perguntas para a primeira reunião com um lead. Me ajuda a montar um diagnóstico comercial completo.' },
+      { id: 'c', label: 'Simular: Primeira reunião com lead frio', tipo: 'simular_reuniao', cenario: 'primeira_reuniao' },
+    ],
+  },
+  {
+    id: 'proposta', nome: 'Proposta', icon: '💰',
+    desc: 'Apresente honorários com confiança e responda objeções de preço',
+    exercicios: [
+      { id: 'a', label: 'Aprender: A estrutura de proposta que converte', tipo: 'chat', prompt: 'Como montar uma proposta de honorários que foque no valor e não no preço? Me dá a estrutura e os princípios para apresentar sem medo.' },
+      { id: 'b', label: 'Praticar: Gerar minha proposta', tipo: 'gerador_proposta', prompt: 'Preciso montar uma proposta para um novo caso. Me ajuda a estruturar mostrando valor antes de falar em preço.' },
+      { id: 'c', label: 'Simular: Responder "tá caro" do cliente', tipo: 'simular_reuniao', cenario: 'objecao_preco' },
+    ],
+  },
+  {
+    id: 'fechamento', nome: 'Fechamento', icon: '🤝',
+    desc: 'Feche sem pressão e transforme clientes em fãs',
+    exercicios: [
+      { id: 'a', label: 'Aprender: Sinais de compra e como fechar sem pressionar', tipo: 'chat', prompt: 'Como identificar os sinais de compra e fechar a venda sem pressionar o cliente? Quero técnicas práticas para o contexto jurídico.' },
+      { id: 'b', label: 'Praticar: Follow-up pós-proposta sem parecer chato', tipo: 'follow_up', prompt: 'Preciso de um script de follow-up para 4 dias após enviar a proposta. O lead não respondeu. Precisa soar natural, não insistente.' },
+      { id: 'c', label: 'Simular: Negociação final com cliente indeciso', tipo: 'simular_reuniao', cenario: 'fechamento_final' },
+    ],
+  },
+];
+
+// ─── Cenários de simulação ───────────────────────────────────────────────────
+const CENARIOS_SIMULACAO = {
+  apresentacao_inicial: {
+    nome: 'Apresentação inicial', icon: '🤝',
+    desc: 'Você foi indicado para alguém. É a primeira ligação — o lead está cético.',
+    promptSistema: 'Você é um potencial cliente que foi indicado para esse advogado. Tem uma dúvida sobre disputa trabalhista com seu antigo empregador. Está cético em contratar advogado — acha caro e não sabe se vale. Seja natural, faça perguntas, demonstre resistência inicial razoável. Quando o advogado perguntar, responda com informações reais mas não se convença fácil.',
+  },
+  pedir_indicacao: {
+    nome: 'Pedir indicação', icon: '🌟',
+    desc: 'Seu cliente ficou satisfeito. Hora de pedir indicação sem parecer chato.',
+    promptSistema: 'Você é um cliente que fechou um caso com esse advogado e ficou muito satisfeito com o resultado. Estão encerrando o caso. Quando o advogado tentar pedir indicação, seja um pouco reticente a dar nomes — é algo delicado — mas aberto se a abordagem for boa e natural. Não dê a indicação sem o advogado conduzir bem.',
+  },
+  primeira_reuniao: {
+    nome: 'Primeira reunião', icon: '🔍',
+    desc: 'Lead frio que veio do Instagram. Tem problema real mas não está convicto.',
+    promptSistema: 'Você é um lead que veio do Instagram do escritório. Tem um problema real: seu patrão não pagou FGTS nos últimos 2 anos. Mas você ainda não está convicto de que precisa de advogado — acha que pode resolver sozinho, tem medo do custo. Faça perguntas, demonstre dúvidas. Deixe o advogado te qualificar e descobrir a dor.',
+  },
+  objecao_preco: {
+    nome: 'Objeção de preço', icon: '💰',
+    desc: 'O cliente recebeu a proposta de R$ 3.500 e voltou dizendo "tá caro".',
+    promptSistema: 'Você é um cliente que recebeu uma proposta de honorários de R$ 3.500 para uma causa trabalhista. Consultou outro escritório que cobrou R$ 2.000. Você gostou do advogado mas quer negociar ou entender por que custa mais. Mantenha a posição de que acha caro — não ceda fácil, exija bons argumentos.',
+  },
+  fechamento_final: {
+    nome: 'Fechamento com indeciso', icon: '⏰',
+    desc: 'Lead disse "vou pensar" há 1 semana. Você ligou para fazer follow-up.',
+    promptSistema: 'Você é um lead que disse "vou pensar" há 1 semana após receber uma proposta. Está interessado mas com medo do custo e ainda avaliando. Quando o advogado ligar, seja educado mas um pouco esquivo. Responda mas não tome decisão fácil — exija que o advogado conduza o fechamento com cuidado.',
+  },
+};
 
 // ─── Inicialização ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -41,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderizarSidebar();
   verificarDiagnostico();
   verificarQueryParams();
+  if (!estado.conversaAtiva) mostrarHomeDashboard();
 });
 
 async function carregarDadosIniciais() {
@@ -240,7 +320,12 @@ function selecionarFerramenta(id) {
   document.getElementById('chat-tool-label').textContent =
     id === 'chat' ? 'May — Assistente de vendas' : 'Ferramenta ativa';
 
-  mostrarTelaVazia(id);
+  mostrarInputChat();
+  if (id === 'simular_reuniao') {
+    mostrarCenariosSimulacao();
+  } else {
+    mostrarTelaVazia(id);
+  }
   renderizarSidebar();
   fecharMenuMobile();
 }
@@ -256,6 +341,11 @@ const TOOL_INFO = {
       'Me dá um script de abordagem para WhatsApp',
       'Como pedir indicação sem parecer chato?',
     ],
+  },
+  simular_reuniao: {
+    desc: 'Escolha um cenário real e pratique antes de ir para o cliente. A May joga o papel do cliente — com resistências, objeções e personalidade.',
+    dica: '💡 A simulação é a forma mais eficaz de treinar. Quanto mais vezes você fizer, mais natural fica na hora real.',
+    sugestoes: [],
   },
   simulador_objecoes: {
     desc: 'A May cria um lead fictício com nome, situação e objeção provável. Você pratica como responderia — ela avalia e corrige em tempo real.',
@@ -388,6 +478,7 @@ async function carregarConversa(id) {
     document.getElementById('chat-title').textContent = conversa.titulo;
     document.getElementById('chat-tool-label').textContent = 'Conversa anterior';
 
+    mostrarInputChat();
     const container = document.getElementById('messages-container');
     container.innerHTML = '';
 
@@ -1213,6 +1304,232 @@ function mostrarToast(msg, tipo = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
+// ─── Home Dashboard ──────────────────────────────────────────────────────────
+function mostrarHomeDashboard() {
+  const container = document.getElementById('messages-container');
+  const wrapper   = document.getElementById('chat-input-wrapper');
+  if (wrapper) wrapper.style.display = 'none';
+
+  const user  = estado.user;
+  const diag  = user?.diagnostico || {};
+  const nivel = calcularNivel(diag);
+  const meta  = metaDaSemana(diag);
+  const streak = estado.streak?.dias_seguidos || 0;
+  const prox  = proximosExercicios();
+  const hora  = new Date().getHours();
+  const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+  const nome  = (user?.name || '').split(' ')[0];
+
+  container.innerHTML = `
+    <div class="home-dashboard">
+      <div class="hd-header">
+        <div>
+          <h2 class="hd-greeting">${saudacao}, ${escapeHtml(nome)}! 👋</h2>
+          <p class="hd-sub">Aqui está seu progresso comercial</p>
+        </div>
+        ${streak > 1 ? `<div class="hd-streak">🔥 ${streak} dias seguidos</div>` : ''}
+      </div>
+
+      <div class="hd-cards-row">
+        <div class="hd-card hd-nivel-card">
+          <div class="hd-card-label">Seu nível</div>
+          <div class="hd-nivel-badge">Nível ${nivel.n}</div>
+          <div class="hd-nivel-nome">${nivel.nome}</div>
+          <div class="hd-progress-bar"><div class="hd-progress-fill" style="width:${nivel.pct}%"></div></div>
+          <div class="hd-progress-label">${nivel.pct}% para o próximo nível</div>
+        </div>
+        <div class="hd-card">
+          <div class="hd-card-label">Meta da semana</div>
+          <p class="hd-meta-text">${meta}</p>
+        </div>
+      </div>
+
+      <div class="hd-cards-row" style="margin-bottom:20px">
+        <div class="hd-card" style="grid-column:1/-1">
+          <div class="hd-card-label">Trilha de hoje — próximos exercícios</div>
+          <div class="hd-trilha-items">
+            ${prox.map(ex => `
+              <div class="hd-trilha-item" onclick="${ex.onclick}">
+                <div class="hd-check ${ex.feito ? 'done' : ''}">${ex.feito ? '✓' : ''}</div>
+                <span class="hd-trilha-label">${escapeHtml(ex.label)}</span>
+                ${!ex.feito ? '<span style="font-size:.72rem;color:var(--accent-light);margin-left:auto">→ Iniciar</span>' : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="hd-actions">
+        <button class="hd-btn primary" onclick="abrirModalTrilha()">📚 Ver trilha completa</button>
+        <button class="hd-btn" onclick="selecionarFerramenta('simular_reuniao')">🎭 Simular reunião</button>
+        <button class="hd-btn" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
+        ${user?.empresa_id ? `<button class="hd-btn" onclick="abrirModalVenda()">💰 Registrar venda</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function mostrarInputChat() {
+  const wrapper = document.getElementById('chat-input-wrapper');
+  if (wrapper) wrapper.style.display = '';
+}
+
+function calcularNivel(diag) {
+  const expMap  = { nunca:0, menos6:1, '6a12':2, '1a3':3, mais3:4 };
+  const contrMap = { '0_10':0, '11_20':1, '21_35':2, '36_55':3, '60_mais':4 };
+  const exp   = expMap[diag.experiencia] ?? 0;
+  const contr = contrMap[diag.contr]     ?? 0;
+  const score = Math.round((exp + contr) / 2);
+  const nomes = ['Iniciante','Construtor','Praticante','Avançado','Expert'];
+  const n   = Math.min(5, score + 1);
+  const pct = Math.round(((exp + contr) / 8) * 100);
+  return { n, nome: nomes[score] || 'Expert', pct: Math.min(95, pct) };
+}
+
+function metaDaSemana(diag) {
+  const map = {
+    abordagem:   'Melhorar a abordagem inicial com novos leads',
+    proposta:    'Montar propostas que convencem pelo valor',
+    objecoes:    'Responder objeções sem perder o cliente',
+    negociacao:  'Negociar sem ceder desconto',
+    follow_up:   'Fazer follow-up de forma natural',
+    fechamento:  'Identificar o momento certo de fechar',
+    qualificacao:'Qualificar bem antes de investir tempo',
+    mentalidade: 'Criar consistência e motivação para vender',
+  };
+  const difs = diag.dificuldades || [];
+  return map[difs[0]] || 'Dominar a venda consultiva jurídica';
+}
+
+function getTrilhaProgress() {
+  try { return JSON.parse(localStorage.getItem('may_trilha') || '{}'); } catch { return {}; }
+}
+function setTrilhaProgress(p) {
+  localStorage.setItem('may_trilha', JSON.stringify(p));
+}
+
+function proximosExercicios() {
+  const prog = getTrilhaProgress();
+  const lista = [];
+  for (const fase of FASES_TRILHA) {
+    for (const ex of fase.exercicios) {
+      const feito = !!(prog[fase.id]?.[ex.id]);
+      const onclick = ex.tipo === 'simular_reuniao'
+        ? `iniciarSimulacao('${ex.cenario}')`
+        : `iniciarExercicioTrilha('${fase.id}','${ex.id}','${ex.tipo}',\`${ex.prompt?.replace(/`/g,"'")}\`)`;
+      lista.push({ label: `${fase.nome}: ${ex.label}`, feito, onclick });
+      if (lista.length >= 3) return lista;
+    }
+  }
+  return lista;
+}
+
+function iniciarExercicioTrilha(faseId, exId, tipo, prompt) {
+  const prog = getTrilhaProgress();
+  if (!prog[faseId]) prog[faseId] = {};
+  prog[faseId][exId] = true;
+  setTrilhaProgress(prog);
+  selecionarFerramenta(tipo);
+  setTimeout(() => enviarMensagemRapida(prompt), 200);
+}
+
+// ─── Trilha Modal ────────────────────────────────────────────────────────────
+function abrirModalTrilha() {
+  const prog = getTrilhaProgress();
+  let totalEx = 0, totalFeito = 0;
+  FASES_TRILHA.forEach(f => f.exercicios.forEach(e => {
+    totalEx++;
+    if (prog[f.id]?.[e.id]) totalFeito++;
+  }));
+  document.getElementById('trilha-progresso-label').textContent =
+    `${totalFeito} de ${totalEx} exercícios concluídos`;
+
+  const html = FASES_TRILHA.map(fase => {
+    const faseFeito = fase.exercicios.filter(e => prog[fase.id]?.[e.id]).length;
+    const fasePct   = Math.round((faseFeito / fase.exercicios.length) * 100);
+    const exHtml    = fase.exercicios.map(ex => {
+      const feito = !!(prog[fase.id]?.[ex.id]);
+      const onclick = ex.tipo === 'simular_reuniao'
+        ? `document.getElementById('modal-trilha').classList.remove('active'); iniciarSimulacao('${ex.cenario}')`
+        : `document.getElementById('modal-trilha').classList.remove('active'); iniciarExercicioTrilha('${fase.id}','${ex.id}','${ex.tipo}',\`${ex.prompt?.replace(/`/g,"'")}\`)`;
+      return `
+        <div class="trilha-ex">
+          <div class="trilha-ex-check ${feito ? 'done' : ''}" onclick="marcarExercicio('${fase.id}','${ex.id}',this)">${feito ? '✓' : ''}</div>
+          <span class="trilha-ex-label ${feito ? 'done' : ''}">${escapeHtml(ex.label)}</span>
+          <button class="trilha-ex-btn" onclick="${onclick}">Iniciar →</button>
+        </div>`;
+    }).join('');
+    return `
+      <div class="trilha-fase">
+        <div class="trilha-fase-header">
+          <span class="trilha-fase-icon">${fase.icon}</span>
+          <div class="trilha-fase-info">
+            <div class="trilha-fase-nome">${fase.nome}</div>
+            <div class="trilha-fase-desc">${fase.desc}</div>
+          </div>
+          <span class="trilha-fase-pct">${faseFeito}/${fase.exercicios.length}</span>
+        </div>
+        <div class="trilha-fase-body">${exHtml}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('trilha-conteudo').innerHTML = html;
+  document.getElementById('modal-trilha').classList.add('active');
+}
+
+function marcarExercicio(faseId, exId, el) {
+  const prog = getTrilhaProgress();
+  if (!prog[faseId]) prog[faseId] = {};
+  prog[faseId][exId] = !prog[faseId][exId];
+  setTrilhaProgress(prog);
+  el.classList.toggle('done', prog[faseId][exId]);
+  el.textContent = prog[faseId][exId] ? '✓' : '';
+  const label = el.nextElementSibling;
+  if (label) label.classList.toggle('done', prog[faseId][exId]);
+  // Atualiza o label de progresso
+  const prog2 = getTrilhaProgress();
+  let totalEx = 0, totalFeito = 0;
+  FASES_TRILHA.forEach(f => f.exercicios.forEach(e => {
+    totalEx++; if (prog2[f.id]?.[e.id]) totalFeito++;
+  }));
+  document.getElementById('trilha-progresso-label').textContent =
+    `${totalFeito} de ${totalEx} exercícios concluídos`;
+}
+
+// ─── Cenários de Simulação ───────────────────────────────────────────────────
+function mostrarCenariosSimulacao() {
+  const container = document.getElementById('messages-container');
+  const cenariosHtml = Object.entries(CENARIOS_SIMULACAO).map(([id, c]) => `
+    <div class="cenario-card" onclick="iniciarSimulacao('${id}')">
+      <span class="cenario-icon">${c.icon}</span>
+      <div class="cenario-nome">${c.nome}</div>
+      <div class="cenario-desc">${c.desc}</div>
+    </div>
+  `).join('');
+  container.innerHTML = `
+    <div class="chat-empty">
+      <div class="chat-empty-icon">🎭</div>
+      <h2>Simular Reunião</h2>
+      <p class="text-secondary" style="max-width:480px;margin:0 auto 20px">
+        A May joga o papel do cliente. Você conduz a conversa como faria na vida real.
+      </p>
+      <div class="cenarios-grid">${cenariosHtml}</div>
+    </div>
+  `;
+}
+
+function iniciarSimulacao(cenarioId) {
+  const cenario = CENARIOS_SIMULACAO[cenarioId];
+  if (!cenario) return;
+  selecionarFerramenta('simular_reuniao');
+  mostrarInputChat();
+  // Injeta o cenário como primeiro prompt do sistema via mensagem especial
+  setTimeout(() => {
+    const prompt = `[MODO SIMULAÇÃO — ${cenario.nome}]\n\nInstruções para a May: ${cenario.promptSistema}\n\nAgora o advogado vai começar a conversa. Você responde como o cliente. Comece aguardando — quando o advogado falar, você reage naturalmente como esse cliente.`;
+    enviarMensagemRapida(prompt);
+  }, 100);
+}
+
 // ─── Utilitários ─────────────────────────────────────────────────────────────
 function escapeHtml(str) {
   return String(str)
@@ -1234,4 +1551,5 @@ Object.assign(window, {
   abrirArquivosArea, copiarArquivo, excluirArquivo,
   abrirModalVenda, fecharModalVenda, registrarVenda,
   toggle2FA, confirmar2FAAtivacao, confirmar2FADesativacao,
+  abrirModalTrilha, marcarExercicio, iniciarSimulacao, iniciarExercicioTrilha,
 });

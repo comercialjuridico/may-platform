@@ -172,3 +172,59 @@ textarea { resize: vertical; min-height: 80px; }
   border-radius: var(--radius);
   padding: 16px;
 }
+
+/* ══ Home Dashboard ══════════════════════════════════════════ */
+.home-dashboard { padding:40px 24px 24px; max-width:860px; margin:0 auto; width:100%; animation:fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.hd-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+.hd-greeting { font-size:1.5rem; font-weight:700; color:var(--text-primary); margin:0 0 4px; font-family:'Syne',sans-serif; }
+.hd-sub { font-size:.875rem; color:var(--text-muted); margin:0; }
+.hd-streak { background:rgba(251,146,60,.15); border:1px solid rgba(251,146,60,.3); border-radius:20px; padding:6px 14px; font-size:.85rem; color:#FB923C; white-space:nowrap; }
+.hd-cards-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+@media(max-width:600px){ .hd-cards-row{grid-template-columns:1fr} }
+.hd-card { background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.hd-card-label { font-size:10px; font-weight:700; letter-spacing:.1em; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; }
+.hd-nivel-card { background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(99,102,241,.08)); border:1px solid rgba(124,58,237,.25); }
+.hd-nivel-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(124,58,237,.25); border-radius:20px; padding:3px 10px; font-size:.78rem; font-weight:600; color:#A78BFA; margin-bottom:6px; }
+.hd-nivel-nome { font-size:1.05rem; font-weight:700; color:var(--text-primary); margin-bottom:14px; }
+.hd-progress-bar { height:5px; background:rgba(255,255,255,.1); border-radius:99px; overflow:hidden; margin-bottom:5px; }
+.hd-progress-fill { height:100%; background:linear-gradient(90deg,#7C3AED,#A78BFA); border-radius:99px; transition:width .6s ease; }
+.hd-progress-label { font-size:.72rem; color:var(--text-muted); }
+.hd-meta-text { font-size:.88rem; color:var(--text-primary); font-weight:500; line-height:1.5; }
+.hd-trilha-items { display:flex; flex-direction:column; gap:9px; }
+.hd-trilha-item { display:flex; align-items:center; gap:10px; font-size:.8rem; color:var(--text-secondary); cursor:pointer; }
+.hd-trilha-item:hover .hd-trilha-label { color:var(--accent-light); }
+.hd-check { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; }
+.hd-check.done { background:var(--green); border-color:var(--green); color:#fff; }
+.hd-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+.hd-btn { flex:1; min-width:130px; padding:12px 16px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-primary); font-size:.85rem; font-weight:500; cursor:pointer; transition:all .18s; }
+.hd-btn:hover { border-color:var(--accent); color:var(--accent-light); background:var(--accent-dim); }
+.hd-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.hd-btn.primary:hover { background:#6D28D9; }
+
+/* ══ Trilha Modal ════════════════════════════════════════════ */
+.trilha-fase { margin-bottom:12px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.trilha-fase-header { display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--bg-secondary); cursor:pointer; transition:background .15s; }
+.trilha-fase-header:hover { background:rgba(255,255,255,.06); }
+.trilha-fase-icon { font-size:1.2rem; flex-shrink:0; }
+.trilha-fase-info { flex:1; }
+.trilha-fase-nome { font-weight:600; font-size:.92rem; color:var(--text-primary); }
+.trilha-fase-desc { font-size:.76rem; color:var(--text-muted); margin-top:2px; }
+.trilha-fase-pct { font-size:.75rem; color:var(--text-muted); white-space:nowrap; }
+.trilha-fase-body { padding:10px 18px 14px; background:var(--bg-primary); border-top:1px solid var(--border); }
+.trilha-ex { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+.trilha-ex:last-child { border-bottom:none; }
+.trilha-ex-check { width:20px; height:20px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; transition:all .2s; }
+.trilha-ex-check.done { background:var(--green); border-color:var(--green); color:#fff; }
+.trilha-ex-label { flex:1; font-size:.82rem; color:var(--text-secondary); }
+.trilha-ex-label.done { text-decoration:line-through; color:var(--text-muted); }
+.trilha-ex-btn { font-size:.73rem; padding:4px 10px; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--accent-light); cursor:pointer; transition:all .2s; white-space:nowrap; }
+.trilha-ex-btn:hover { background:var(--accent-dim); border-color:var(--accent); }
+
+/* ══ Cenários de Simulação ═══════════════════════════════════ */
+.cenarios-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-top:8px; }
+.cenario-card { background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius); padding:18px; cursor:pointer; transition:all .2s; text-align:left; }
+.cenario-card:hover { border-color:var(--accent); background:var(--accent-dim); }
+.cenario-icon { font-size:1.6rem; margin-bottom:10px; display:block; }
+.cenario-nome { font-weight:600; font-size:.88rem; color:var(--text-primary); margin-bottom:5px; }
+.cenario-desc { font-size:.76rem; color:var(--text-muted); line-height:1.45; }

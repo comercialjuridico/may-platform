@@ -62,6 +62,9 @@
       <a id="link-ranking" href="/ranking.html" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px;color:#F59E0B;border-color:rgba(245,158,11,0.3)">
         🏆 Arena de Vendas
       </a>
+      <button onclick="abrirModalTrilha()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px;color:#A78BFA;border-color:rgba(167,139,250,0.25)">
+        📚 Minha Trilha
+      </button>
       <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px">
         ⚖️ Áreas de trabalho <span id="areas-badge" style="font-size:0.7rem;color:var(--text-muted)"></span>
       </button>
@@ -101,7 +104,7 @@
     <div id="messages-container"></div>
 
     <!-- Input -->
-    <div style="max-width:900px; width:100%; margin:0 auto; padding:0 24px; box-sizing:border-box;">
+    <div id="chat-input-wrapper" style="max-width:900px; width:100%; margin:0 auto; padding:0 24px; box-sizing:border-box;">
       <div id="input-area" style="padding:16px 0 20px">
         <div class="input-wrapper">
           <textarea
@@ -127,6 +130,20 @@
 
 <!-- Toast container -->
 <div id="toast-container"></div>
+
+<!-- ══════════════ MODAL: TRILHA ══════════════ -->
+<div class="modal-overlay" id="modal-trilha">
+  <div class="modal" style="max-width:660px;max-height:88vh;overflow-y:auto">
+    <div class="modal-header">
+      <div>
+        <span class="modal-title">📚 Minha Trilha</span>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="trilha-progresso-label">Carregando…</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-trilha').classList.remove('active')">✕</button>
+    </div>
+    <div id="trilha-conteudo" style="padding:4px 0 8px"></div>
+  </div>
+</div>
 
 <!-- ══════════════ MODAL: DIAGNÓSTICO ══════════════ -->
 <div class="modal-overlay" id="modal-diagnostico">
