@@ -192,7 +192,7 @@ router.get('/ranking', authMiddleware, async (req, res) => {
 });
 
 // ─── GET /api/vendas/meu-resumo ────────────────────────────────────────────────
-// Resumo das vendas do usuário logado no mês
+// Resumo + lista completa de vendas do usuário logado (todos os campos)
 router.get('/meu-resumo', authMiddleware, async (req, res) => {
   try {
     const mesInicio = new Date();
@@ -201,12 +201,12 @@ router.get('/meu-resumo', authMiddleware, async (req, res) => {
 
     const { data: vendas } = await supabase
       .from('vendas')
-      .select('id, valor, descricao, cliente, created_at')
+      .select('id, cliente, telefone, origem, descricao, valor, data_contato, data_fechamento, created_at')
       .eq('user_id', req.user.id)
       .gte('created_at', mesInicio.toISOString())
       .order('created_at', { ascending: false });
 
-    const total = (vendas || []).reduce((s, v) => s + parseFloat(v.valor), 0);
+    const total = (vendas || []).reduce((s, v) => s + (parseFloat(v.valor) || 0), 0);
 
     res.json({
       vendas:    vendas || [],
@@ -215,6 +215,41 @@ router.get('/meu-resumo', authMiddleware, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao buscar resumo de vendas.' });
+  }
+});
+
+// ─── GET /api/vendas/todas ─────────────────────────────────────────────────────
+// Gestor: todas as vendas da equipe com dados completos do cliente
+router.get('/todas', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'gestor') {
+    return res.status(403).json({ erro: 'Acesso restrito ao gestor.' });
+  }
+  if (!req.user.empresa_id) {
+    return res.status(400).json({ erro: 'Sem equipe associada.' });
+  }
+
+  try {
+    const mesInicio = new Date();
+    mesInicio.setDate(1);
+    mesInicio.setHours(0, 0, 0, 0);
+
+    const { data: vendas, error } = await supabase
+      .from('vendas')
+      .select(`
+        id, cliente, telefone, origem, descricao, valor,
+        data_contato, data_fechamento, created_at,
+        users (id, name, avatar_url)
+      `)
+      .eq('empresa_id', req.user.empresa_id)
+      .gte('created_at', mesInicio.toISOString())
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ vendas: vendas || [] });
+  } catch (err) {
+    console.error('Erro ao buscar todas as vendas:', err.message);
+    res.status(500).json({ erro: 'Erro ao buscar vendas da equipe.' });
   }
 });
 
