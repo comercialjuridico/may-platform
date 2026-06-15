@@ -164,6 +164,68 @@
     .empty-msg { color:var(--sub); font-size:13px; padding:24px 0; text-align:center; }
     .badge-warn { display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,.15);
       color:#FCA5A5; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
+
+    /* ── Metas ─── */
+    .metas-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; margin-top:28px; }
+    .btn-nova-meta { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:8px 18px; font-size:13px; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); }
+    .meta-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+      padding:20px; backdrop-filter:blur(8px); margin-bottom:14px; }
+    .meta-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .meta-card-title { font-size:15px; font-weight:700; color:#fff; }
+    .meta-card-sub { font-size:11px; color:var(--sub); margin-top:3px; }
+    .meta-actions { display:flex; gap:8px; flex-shrink:0; }
+    .btn-edit-meta, .btn-del-meta { background:none; border:1px solid var(--border); border-radius:8px;
+      padding:5px 10px; font-size:12px; cursor:pointer; transition:background .2s; }
+    .btn-edit-meta { color:#A78BFA; } .btn-edit-meta:hover { background:var(--brand-light); }
+    .btn-del-meta  { color:#FCA5A5; } .btn-del-meta:hover  { background:rgba(239,68,68,.1); }
+    .meta-levels { display:flex; gap:8px; margin-bottom:14px; }
+    .nivel-badge { flex:1; text-align:center; padding:8px 4px; border-radius:10px; font-size:11px; font-weight:700; }
+    .nivel-badge.bronze { background:rgba(205,127,50,.15); color:#CD7F32; border:1px solid rgba(205,127,50,.3); }
+    .nivel-badge.prata  { background:rgba(192,192,192,.1);  color:#C0C0C0; border:1px solid rgba(192,192,192,.25); }
+    .nivel-badge.ouro   { background:rgba(245,158,11,.12);  color:#F59E0B; border:1px solid rgba(245,158,11,.3); }
+    .nivel-val { font-size:15px; display:block; margin-top:2px; }
+    .meta-progress-bar { height:8px; background:rgba(255,255,255,.07); border-radius:8px; position:relative; margin-bottom:6px; overflow:visible; }
+    .meta-progress-fill { height:100%; border-radius:8px; transition:width .4s; position:relative;
+      background:linear-gradient(90deg,#7C3AED,#A78BFA); }
+    .meta-progress-fill.lvl2 { background:linear-gradient(90deg,#7C3AED,#C0C0C0); }
+    .meta-progress-fill.lvl3 { background:linear-gradient(90deg,#7C3AED,#F59E0B); }
+    .meta-marker { position:absolute; top:-4px; width:2px; height:16px; background:rgba(255,255,255,.25); border-radius:2px; }
+    .meta-membros { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .membro-row { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.03);
+      border-radius:10px; padding:6px 10px; flex:1; min-width:160px; }
+    .membro-av { width:26px; height:26px; border-radius:50%; flex-shrink:0; background:rgba(124,58,237,.25);
+      display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#A78BFA; }
+    .membro-info { flex:1; }
+    .membro-name { font-size:12px; font-weight:600; color:#fff; }
+    .membro-prog { font-size:10px; color:var(--sub); }
+
+    /* ── Modal ─── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+      backdrop-filter:blur(4px); z-index:999; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#0F0C24; border:1px solid rgba(124,58,237,.35); border-radius:18px;
+      padding:28px; width:min(520px,95vw); max-height:90vh; overflow-y:auto; }
+    .modal-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:#fff; margin-bottom:20px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .form-group label { font-size:11px; font-weight:600; color:var(--sub); text-transform:uppercase; letter-spacing:.05em; }
+    .form-group input, .form-group select, .form-group textarea {
+      background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:10px;
+      padding:10px 12px; font-size:13px; color:var(--text); outline:none; font-family:'Inter',sans-serif; }
+    .form-group input:focus, .form-group select:focus { border-color:rgba(124,58,237,.5); }
+    .form-group select option { background:#12102A; }
+    .membros-check { display:flex; flex-direction:column; gap:6px; max-height:140px; overflow-y:auto; }
+    .membro-check-row { display:flex; align-items:center; gap:8px; padding:6px 8px;
+      border-radius:8px; cursor:pointer; transition:background .15s; }
+    .membro-check-row:hover { background:rgba(124,58,237,.1); }
+    .membro-check-row input { accent-color:#7C3AED; width:15px; height:15px; cursor:pointer; }
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+    .btn-cancel { background:none; border:1px solid var(--border); color:var(--sub);
+      border-radius:10px; padding:9px 20px; font-size:13px; cursor:pointer; }
+    .btn-save { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:9px 24px; font-size:13px; font-weight:700; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -203,6 +265,76 @@
     <div class="loading">Carregando dashboard</div>
   </div>
 
+  <!-- Seção Metas -->
+  <div class="metas-header">
+    <p class="sec-title" style="margin:0">🎯 Metas da Equipe</p>
+    <button class="btn-nova-meta" onclick="abrirModalMeta()">+ Nova Meta</button>
+  </div>
+  <div id="metas-content"><div class="loading">Carregando metas</div></div>
+
+</div>
+
+<!-- Modal de Meta -->
+<div class="modal-overlay" id="modal-meta">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-meta-titulo">Nova Meta</div>
+    <input type="hidden" id="meta-id" />
+
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="meta-titulo" placeholder="Ex: Meta de Contratos — Julho" />
+    </div>
+    <div class="form-group">
+      <label>Descrição (opcional)</label>
+      <textarea id="meta-descricao" rows="2" placeholder="Objetivo, contexto..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Indicador</label>
+        <select id="meta-indicador">
+          <option value="contratos">Contratos fechados</option>
+          <option value="faturamento">Faturamento (R$)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Período</label>
+        <select id="meta-periodo">
+          <option value="semanal">Semanal</option>
+          <option value="mensal" selected>Mensal</option>
+          <option value="bimestral">Bimestral</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Data de início</label>
+      <input type="date" id="meta-inicio" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>🥉 Meta 1 (Bronze)</label>
+        <input type="number" id="meta-1" placeholder="Ex: 3" min="0" />
+      </div>
+      <div class="form-group">
+        <label>🥈 Meta 2 (Prata)</label>
+        <input type="number" id="meta-2" placeholder="Ex: 6" min="0" />
+      </div>
+    </div>
+    <div class="form-group" style="max-width:50%">
+      <label>🥇 Meta 3 (Ouro)</label>
+      <input type="number" id="meta-3" placeholder="Ex: 10" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Vendedores (deixe todos desmarcados = equipe toda)</label>
+      <div class="membros-check" id="membros-check-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalMeta()">Cancelar</button>
+      <button class="btn-save" onclick="salvarMeta()">Salvar Meta</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -262,6 +394,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('f-fim').value    = hoje.toISOString().slice(0,10);
 
   await carregarDash();
+  await carregarMetas();
 });
 
 async function aplicarFiltros(){ await carregarDash(); }
@@ -410,6 +543,126 @@ function renderOrigens(origens, total){
         <div class="origem-bar-fill" style="width:${Math.round((o.count/maxCount)*100)}%"></div>
       </div>
     </div>`).join('')}</div>`;
+}
+
+// ── Metas ─────────────────────────────────────────────────────────────────────
+let dadosMetas = [];
+let membrosCache = [];
+
+async function carregarMetas(){
+  try{
+    const r = await apiFetch('/api/metas/gestor');
+    const d = await r.json();
+    dadosMetas   = d.metas   || [];
+    membrosCache = d.membros || [];
+    renderMetasGestor();
+  } catch(e){ document.getElementById('metas-content').innerHTML='<div class="empty-msg">Erro ao carregar metas.</div>'; }
+}
+
+function renderMetasGestor(){
+  const el = document.getElementById('metas-content');
+  if(!dadosMetas.length){ el.innerHTML='<div class="empty-msg">Nenhuma meta criada ainda. Clique em "+ Nova Meta" para começar.</div>'; return; }
+  el.innerHTML = dadosMetas.map(m => renderMetaCard(m)).join('');
+}
+
+function renderMetaCard(m){
+  const ind = m.indicador==='faturamento' ? 'R$' : 'contratos';
+  const fmtVal = v => m.indicador==='faturamento' ? fmtBRL(v) : v;
+  const pct  = m.meta_3>0 ? Math.min(100, Math.round((m.media_equipe/m.meta_3)*100)) : 0;
+  const pct1 = m.meta_3>0 ? Math.round((m.meta_1/m.meta_3)*100) : 33;
+  const pct2 = m.meta_3>0 ? Math.round((m.meta_2/m.meta_3)*100) : 66;
+  const fillCls = m.nivel_atingido>=3?'lvl3':m.nivel_atingido>=2?'lvl2':'';
+  const periodoLabel = {semanal:'Semanal',mensal:'Mensal',bimestral:'Bimestral',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual'}[m.periodo]||m.periodo;
+  const membrosHtml = (m.membros||[]).map(u=>`
+    <div class="membro-row">
+      ${u.avatar_url?`<img src="${u.avatar_url}" class="membro-av" style="object-fit:cover"/>`:`<div class="membro-av">${inicial(u.name)}</div>`}
+      <div class="membro-info">
+        <div class="membro-name">${u.name.split(' ')[0]}</div>
+        <div class="membro-prog">${fmtVal(u.progresso_atual)} / ${fmtVal(m.meta_3)} ${u.nivel_atingido>=3?'🥇':u.nivel_atingido>=2?'🥈':u.nivel_atingido>=1?'🥉':''}</div>
+      </div>
+    </div>`).join('');
+  return `<div class="meta-card">
+    <div class="meta-card-header">
+      <div>
+        <div class="meta-card-title">${m.titulo}</div>
+        <div class="meta-card-sub">${periodoLabel} · ${fmtData(m.data_inicio)} → ${fmtData(m.data_fim)} · ${ind} · Média equipe: ${fmtVal(m.media_equipe)}</div>
+      </div>
+      <div class="meta-actions">
+        <button class="btn-edit-meta" onclick="editarMeta('${m.id}')">✏️ Editar</button>
+        <button class="btn-del-meta"  onclick="excluirMeta('${m.id}')">🗑</button>
+      </div>
+    </div>
+    <div class="meta-levels">
+      <div class="nivel-badge bronze">🥉 Bronze<span class="nivel-val">${fmtVal(m.meta_1)}</span></div>
+      <div class="nivel-badge prata" >🥈 Prata <span class="nivel-val">${fmtVal(m.meta_2)}</span></div>
+      <div class="nivel-badge ouro"  >🥇 Ouro  <span class="nivel-val">${fmtVal(m.meta_3)}</span></div>
+    </div>
+    <div class="meta-progress-bar">
+      <div class="meta-progress-fill ${fillCls}" style="width:${pct}%"></div>
+      <div class="meta-marker" style="left:${pct1}%"></div>
+      <div class="meta-marker" style="left:${pct2}%"></div>
+    </div>
+    ${m.membros?.length?`<div class="meta-membros">${membrosHtml}</div>`:''}
+  </div>`;
+}
+
+function abrirModalMeta(dados){
+  document.getElementById('modal-meta-titulo').textContent = dados ? 'Editar Meta' : 'Nova Meta';
+  document.getElementById('meta-id').value        = dados?.id || '';
+  document.getElementById('meta-titulo').value    = dados?.titulo || '';
+  document.getElementById('meta-descricao').value = dados?.descricao || '';
+  document.getElementById('meta-indicador').value = dados?.indicador || 'contratos';
+  document.getElementById('meta-periodo').value   = dados?.periodo   || 'mensal';
+  document.getElementById('meta-inicio').value    = dados?.data_inicio || new Date().toISOString().slice(0,10);
+  document.getElementById('meta-1').value         = dados?.meta_1 || '';
+  document.getElementById('meta-2').value         = dados?.meta_2 || '';
+  document.getElementById('meta-3').value         = dados?.meta_3 || '';
+  const lista = document.getElementById('membros-check-list');
+  lista.innerHTML = membrosCache.map(u=>`
+    <label class="membro-check-row">
+      <input type="checkbox" value="${u.id}" ${dados?.user_ids?.includes(u.id)?'checked':''} />
+      ${u.name}
+    </label>`).join('');
+  document.getElementById('modal-meta').classList.add('open');
+}
+function fecharModalMeta(){ document.getElementById('modal-meta').classList.remove('open'); }
+
+async function salvarMeta(){
+  const id      = document.getElementById('meta-id').value;
+  const checked = [...document.querySelectorAll('#membros-check-list input:checked')].map(i=>i.value);
+  const payload = {
+    titulo:      document.getElementById('meta-titulo').value.trim(),
+    descricao:   document.getElementById('meta-descricao').value.trim(),
+    indicador:   document.getElementById('meta-indicador').value,
+    periodo:     document.getElementById('meta-periodo').value,
+    data_inicio: document.getElementById('meta-inicio').value,
+    meta_1:      parseFloat(document.getElementById('meta-1').value),
+    meta_2:      parseFloat(document.getElementById('meta-2').value),
+    meta_3:      parseFloat(document.getElementById('meta-3').value),
+    user_ids:    checked.length ? checked : [],
+  };
+  if(!payload.titulo) return alert('Informe o título.');
+  if(!payload.meta_1||!payload.meta_2||!payload.meta_3) return alert('Preencha as 3 metas.');
+  if(payload.meta_1>=payload.meta_2||payload.meta_2>=payload.meta_3) return alert('As metas precisam ser crescentes: Bronze < Prata < Ouro.');
+  const method = id ? 'PUT' : 'POST';
+  const url    = id ? `/api/metas/${id}` : '/api/metas';
+  try{
+    const r = await apiFetch(url, {method, body:JSON.stringify(payload)});
+    if(!r.ok){ const e=await r.json(); alert(e.erro||'Erro ao salvar.'); return; }
+    fecharModalMeta();
+    carregarMetas();
+  } catch(e){ alert('Erro de conexão.'); }
+}
+
+async function excluirMeta(id){
+  if(!confirm('Excluir esta meta?')) return;
+  await apiFetch(`/api/metas/${id}`, {method:'DELETE'});
+  carregarMetas();
+}
+
+function editarMeta(id){
+  const m = dadosMetas.find(x=>x.id===id);
+  if(m) abrirModalMeta(m);
 }
 
 // ── Tabela Clientes ───────────────────────────────────────────────────────────
