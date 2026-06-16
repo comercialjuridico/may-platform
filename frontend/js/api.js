@@ -119,16 +119,33 @@ const api = {
 
   // Streaming SSE para o chat
   stream: async (url, body, onChunk, onDone, onError) => {
-    const token = getAccessToken();
+    let token = getAccessToken();
+
+    const fazerRequisicao = () => fetch(`${API_BASE}${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+
     try {
-      const res = await fetch(`${API_BASE}${url}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(body),
-      });
+      let res = await fazerRequisicao();
+
+      // Token expirado — tenta refresh e repete
+      if (res.status === 401) {
+        const errBody = await res.json().catch(() => ({}));
+        if (errBody.code === 'TOKEN_EXPIRADO') {
+          try {
+            token = await refreshToken();
+            res = await fazerRequisicao();
+          } catch {
+            onError('Sessão expirada. Faça login novamente.');
+            return;
+          }
+        }
+      }
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ erro: 'Erro desconhecido' }));
