@@ -109,6 +109,8 @@ const CENARIOS_SIMULACAO = {
 
 // ─── Inicialização ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  aplicarTemaInicial();
+
   const user = getUser();
   if (!user || !getAccessToken()) {
     window.location.href = '/auth.html';
@@ -1211,6 +1213,42 @@ function logout() {
   window.location.href = '/auth.html';
 }
 
+// ─── Tema claro / escuro ─────────────────────────────────────────────────────
+function toggleTema() {
+  const html    = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  const novoTema = isLight ? 'dark' : 'light';
+  html.setAttribute('data-theme', novoTema);
+  localStorage.setItem('may-tema', novoTema);
+
+  const icon  = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (novoTema === 'light') {
+    if (icon)  icon.textContent  = '☀️';
+    if (label) label.textContent = 'Claro';
+  } else {
+    if (icon)  icon.textContent  = '🌙';
+    if (label) label.textContent = 'Escuro';
+  }
+}
+
+function aplicarTemaInicial() {
+  const salvo = localStorage.getItem('may-tema');
+  // Se nunca escolheu manualmente, respeita o tema do sistema operacional
+  const temaDoSistema = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  const tema = salvo || temaDoSistema;
+  document.documentElement.setAttribute('data-theme', tema);
+  const icon  = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (tema === 'light') {
+    if (icon)  icon.textContent  = '☀️';
+    if (label) label.textContent = 'Claro';
+  } else {
+    if (icon)  icon.textContent  = '🌙';
+    if (label) label.textContent = 'Escuro';
+  }
+}
+
 // ─── Mobile sidebar ──────────────────────────────────────────────────────────
 function toggleMenuMobile() {
   const sidebar  = document.getElementById('sidebar');
@@ -1663,4 +1701,5 @@ Object.assign(window, {
   abrirModalTrilha, marcarExercicio, iniciarSimulacao, iniciarExercicioTrilha,
   testarNotificacao,
   instalarPWA, fecharBannerPWA,
+  toggleTema,
 });
