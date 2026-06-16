@@ -173,6 +173,48 @@ textarea { resize: vertical; min-height: 80px; }
   padding: 16px;
 }
 
+/* ══ Banner de instalação PWA ════════════════════════════════ */
+#pwa-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  width: min(420px, calc(100vw - 32px));
+  background: linear-gradient(135deg, #1a0f3c 0%, #0e0a28 100%);
+  border: 1px solid rgba(167,139,250,.35);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6), 0 0 0 1px rgba(124,58,237,.2);
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+#pwa-banner.visible { transform: translateX(-50%) translateY(0); }
+#pwa-banner .pwa-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: linear-gradient(135deg,#7C3AED,#A78BFA);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+}
+#pwa-banner .pwa-texto { flex: 1; }
+#pwa-banner .pwa-titulo { font-weight: 700; font-size: .95rem; color: #E8E4FF; margin-bottom: 2px; }
+#pwa-banner .pwa-sub { font-size: .78rem; color: rgba(200,190,255,.6); }
+#pwa-banner .pwa-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+#pwa-banner .btn-instalar {
+  background: #7C3AED; color: #fff; border: none;
+  border-radius: 8px; padding: 8px 16px; font-size: .82rem;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: background .15s;
+}
+#pwa-banner .btn-instalar:hover { background: #6D28D9; }
+#pwa-banner .btn-fechar-pwa {
+  background: transparent; color: rgba(200,190,255,.5); border: none;
+  font-size: .75rem; cursor: pointer; text-align: center;
+}
+#pwa-banner .btn-fechar-pwa:hover { color: rgba(200,190,255,.8); }
+
 /* ══ Home Dashboard ══════════════════════════════════════════ */
 .home-dashboard { padding:40px 24px 24px; max-width:860px; margin:0 auto; width:100%; animation:fadeIn .3s ease; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }

@@ -131,6 +131,19 @@
 <!-- Toast container -->
 <div id="toast-container"></div>
 
+<!-- Banner de instalação PWA -->
+<div id="pwa-banner" style="display:none">
+  <div class="pwa-icon">M</div>
+  <div class="pwa-texto">
+    <div class="pwa-titulo">Instale o May no celular</div>
+    <div class="pwa-sub">Acesso rápido + notificações de treino</div>
+  </div>
+  <div class="pwa-btns">
+    <button class="btn-instalar" onclick="instalarPWA()">Instalar</button>
+    <button class="btn-fechar-pwa" onclick="fecharBannerPWA()">Agora não</button>
+  </div>
+</div>
+
 <!-- ══════════════ MODAL: TRILHA ══════════════ -->
 <div class="modal-overlay" id="modal-trilha">
   <div class="modal" style="max-width:660px;max-height:88vh;overflow-y:auto">

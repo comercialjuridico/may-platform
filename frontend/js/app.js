@@ -1305,6 +1305,54 @@ function mostrarToast(msg, tipo = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
+// ─── PWA Install Banner ───────────────────────────────────────────────────────
+let _pwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // Mostra banner após 20 segundos se o usuário nunca dispensou
+  if (!localStorage.getItem('may_pwa_dispensado')) {
+    setTimeout(mostrarBannerPWA, 20 * 1000);
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('may_pwa_instalado', '1');
+  fecharBannerPWA();
+  mostrarToast('May instalado no seu celular! 🎉', 'sucesso');
+});
+
+function mostrarBannerPWA() {
+  const banner = document.getElementById('pwa-banner');
+  if (!banner || !_pwaPrompt) return;
+  banner.style.display = 'flex';
+  setTimeout(() => banner.classList.add('visible'), 50);
+}
+
+function fecharBannerPWA() {
+  const banner = document.getElementById('pwa-banner');
+  if (!banner) return;
+  banner.classList.remove('visible');
+  setTimeout(() => { banner.style.display = 'none'; }, 400);
+  localStorage.setItem('may_pwa_dispensado', Date.now());
+}
+
+async function instalarPWA() {
+  if (!_pwaPrompt) {
+    mostrarToast('Abra o menu do Chrome e toque em "Adicionar à tela inicial".', 'aviso');
+    return;
+  }
+  fecharBannerPWA();
+  _pwaPrompt.prompt();
+  const { outcome } = await _pwaPrompt.userChoice;
+  if (outcome === 'accepted') {
+    mostrarToast('Instalando May…', 'sucesso');
+    localStorage.setItem('may_pwa_instalado', '1');
+  }
+  _pwaPrompt = null;
+}
+
 // ─── Push Notifications ──────────────────────────────────────────────────────
 async function inicializarPushNotificacoes() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
@@ -1614,4 +1662,5 @@ Object.assign(window, {
   toggle2FA, confirmar2FAAtivacao, confirmar2FADesativacao,
   abrirModalTrilha, marcarExercicio, iniciarSimulacao, iniciarExercicioTrilha,
   testarNotificacao,
+  instalarPWA, fecharBannerPWA,
 });
