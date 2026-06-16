@@ -1,22 +1,48 @@
 /* ══════════════════════════════════════════════════════════════
-   main.css — Design system dark May
+   main.css — Design system May (dark + light)
    ══════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── Cores base ── */
   --bg-primary:    #080B1A;
   --bg-secondary:  rgba(255,255,255,.05);
   --bg-tertiary:   rgba(255,255,255,.03);
   --border:        rgba(255,255,255,.09);
   --border-hover:  rgba(167,139,250,.3);
 
+  /* ── Superfícies específicas ── */
+  --bg-sidebar:       rgba(10,7,28,.85);
+  --bg-header:        rgba(10,7,28,.6);
+  --bg-modal-surface: #0F0C24;
+  --bg-input-area:    rgba(255,255,255,.05);
+  --border-input-area:rgba(255,255,255,.12);
+  --sidebar-border:   rgba(255,255,255,.07);
+  --header-border:    rgba(255,255,255,.07);
+  --sidebar-section-border: rgba(255,255,255,.06);
+  --item-hover-bg:    rgba(255,255,255,.05);
+  --msg-user-bg:      rgba(124,58,237,.15);
+  --msg-user-border:  rgba(124,58,237,.3);
+  --msg-action-bg:    rgba(255,255,255,.05);
+  --msg-action-border:rgba(255,255,255,.08);
+  --msg-action-color: rgba(200,190,255,.55);
+  --code-pre-bg:      rgba(0,0,0,.3);
+  --code-pre-border:  rgba(255,255,255,.08);
+  --table-td-border:  rgba(255,255,255,.06);
+  --quick-action-bg:  rgba(255,255,255,.05);
+  --quick-action-border: rgba(255,255,255,.1);
+  --select-option-bg: #12102A;
+  --canvas-opacity:   1;
+
+  /* ── Accent ── */
   --accent:        #7C3AED;
   --accent-light:  #A78BFA;
   --accent-dim:    rgba(124,58,237,.12);
   --accent-border: rgba(124,58,237,.35);
   --brand-glow:    rgba(124,58,237,.4);
 
+  /* ── Texto ── */
   --text-primary:   #E8E4FF;
   --text-secondary: rgba(200,190,255,.65);
   --text-muted:     rgba(200,190,255,.4);
@@ -28,6 +54,48 @@
   --radius-sm:  8px;
   --radius-lg: 16px;
   --shadow-lg: 0 16px 40px rgba(0,0,0,.5);
+}
+
+/* ── Modo claro ──────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary:    #F3F0FF;
+  --bg-secondary:  rgba(0,0,0,.04);
+  --bg-tertiary:   rgba(0,0,0,.02);
+  --border:        rgba(0,0,0,.1);
+  --border-hover:  rgba(124,58,237,.35);
+
+  --bg-sidebar:       rgba(237,232,255,.97);
+  --bg-header:        rgba(237,232,255,.9);
+  --bg-modal-surface: #FFFFFF;
+  --bg-input-area:    rgba(0,0,0,.04);
+  --border-input-area:rgba(0,0,0,.12);
+  --sidebar-border:   rgba(0,0,0,.08);
+  --header-border:    rgba(0,0,0,.08);
+  --sidebar-section-border: rgba(0,0,0,.07);
+  --item-hover-bg:    rgba(0,0,0,.05);
+  --msg-user-bg:      rgba(124,58,237,.1);
+  --msg-user-border:  rgba(124,58,237,.25);
+  --msg-action-bg:    rgba(0,0,0,.04);
+  --msg-action-border:rgba(0,0,0,.08);
+  --msg-action-color: rgba(80,60,140,.6);
+  --code-pre-bg:      rgba(0,0,0,.05);
+  --code-pre-border:  rgba(0,0,0,.1);
+  --table-td-border:  rgba(0,0,0,.07);
+  --quick-action-bg:  rgba(0,0,0,.04);
+  --quick-action-border: rgba(0,0,0,.1);
+  --select-option-bg: #EDE8FF;
+  --canvas-opacity:   0;
+
+  --accent-dim:    rgba(124,58,237,.08);
+  --accent-border: rgba(124,58,237,.3);
+  --brand-glow:    rgba(124,58,237,.25);
+
+  --text-primary:   #1A1040;
+  --text-secondary: rgba(30,15,80,.65);
+  --text-muted:     rgba(30,15,80,.45);
+  --text-inverse:   #F3F0FF;
+
+  --shadow-lg: 0 16px 40px rgba(0,0,0,.12);
 }
 
 html, body {
@@ -99,7 +167,7 @@ input, select, textarea {
 }
 input::placeholder, textarea::placeholder { color: var(--text-muted); }
 input:focus, select:focus, textarea:focus { border-color: rgba(124,58,237,.5); }
-select option { background: #12102A; color: var(--text-primary); }
+select option { background: var(--select-option-bg); color: var(--text-primary); }
 textarea { resize: vertical; min-height: 80px; }
 
 .password-toggle { position: relative; }
@@ -118,7 +186,7 @@ textarea { resize: vertical; min-height: 80px; }
 .modal-overlay.active { display: flex; }
 
 .modal {
-  background: #0F0C24; border: 1px solid var(--accent-border);
+  background: var(--bg-modal-surface); border: 1px solid var(--accent-border);
   border-radius: var(--radius-lg); padding: 24px; width: 100%;
   max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
 }
@@ -180,7 +248,7 @@ textarea { resize: vertical; min-height: 80px; }
   left: 50%;
   transform: translateX(-50%) translateY(120px);
   width: min(420px, calc(100vw - 32px));
-  background: linear-gradient(135deg, #1a0f3c 0%, #0e0a28 100%);
+  background: var(--bg-modal-surface);
   border: 1px solid rgba(167,139,250,.35);
   border-radius: 16px;
   padding: 18px 20px;
