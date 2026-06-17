@@ -292,17 +292,18 @@
         </div>
         <div class="form-group">
           <label class="form-label">Origem do Lead</label>
-          <select id="l-origem" class="form-input">
-            <option value="referência">Referência</option>
+          <select id="l-origem" class="form-input" onchange="toggleOutroLead(this.value)">
+            <option value="indicação">Indicação</option>
             <option value="instagram">Instagram</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="google">Google / Site</option>
-            <option value="evento">Evento</option>
-            <option value="outbound">Outbound (SDR)</option>
-            <option value="indicação de cliente">Indicação de cliente</option>
+            <option value="tráfego pago — meta">Tráfego pago — Meta (Facebook/Instagram Ads)</option>
+            <option value="tráfego pago — google">Tráfego pago — Google</option>
+            <option value="grupo de whatsapp">Grupo de WhatsApp</option>
             <option value="parceria">Parceria</option>
-            <option value="não informada">Não informada</option>
+            <option value="tiktok">TikTok</option>
+            <option value="outro">Outro</option>
           </select>
+          <input type="text" id="l-origem-outro" class="form-input" placeholder="Descreva a origem…"
+            style="margin-top:6px;display:none" />
         </div>
         <div class="form-group">
           <label class="form-label">Data da Reunião</label>
@@ -495,7 +496,16 @@ function abrirEdicao(id) {
   document.getElementById('l-produto').value      = l.produto || '';
   document.getElementById('l-valor').value        = l.valor_honorarios || '';
   document.getElementById('l-prioridade').value   = l.prioridade || 'media';
-  document.getElementById('l-origem').value       = l.origem_canal || l.origem || 'não informada';
+  const origemVal = l.origem_canal || l.origem || 'indicação';
+  const origemOpts = ['indicação','instagram','tráfego pago — meta','tráfego pago — google','grupo de whatsapp','parceria','tiktok','outro'];
+  if (origemOpts.includes(origemVal)) {
+    document.getElementById('l-origem').value = origemVal;
+    toggleOutroLead(origemVal);
+  } else {
+    document.getElementById('l-origem').value = 'outro';
+    document.getElementById('l-origem-outro').value = origemVal;
+    toggleOutroLead('outro');
+  }
   document.getElementById('l-contexto').value     = l.contexto || '';
   document.getElementById('l-status').value       = l.status || 'briefing_gerado';
   document.getElementById('l-local').value        = l.local_reuniao || '';
@@ -516,6 +526,10 @@ function fecharModal() {
   document.getElementById('modal-lead').classList.remove('active');
 }
 
+function toggleOutroLead(val) {
+  document.getElementById('l-origem-outro').style.display = val === 'outro' ? 'block' : 'none';
+}
+
 function limparForm() {
   ['l-id','l-nome','l-whatsapp','l-empresa','l-produto','l-valor',
    'l-contexto','l-local','l-data-reuniao','l-fechamento'].forEach(id => {
@@ -523,7 +537,9 @@ function limparForm() {
     if (el) el.value = '';
   });
   document.getElementById('l-prioridade').value = 'media';
-  document.getElementById('l-origem').value     = 'referência';
+  document.getElementById('l-origem').value     = 'indicação';
+  document.getElementById('l-origem-outro').value = '';
+  document.getElementById('l-origem-outro').style.display = 'none';
   document.getElementById('l-status').value     = 'briefing_gerado';
   document.getElementById('l-participou').value = '';
   document.getElementById('l-gerar-briefing').value = 'false';
@@ -549,7 +565,9 @@ async function salvarLead(e) {
     produto:          document.getElementById('l-produto').value.trim() || null,
     valor_honorarios: document.getElementById('l-valor').value || null,
     prioridade:       document.getElementById('l-prioridade').value,
-    origem_canal:     document.getElementById('l-origem').value,
+    origem_canal:     document.getElementById('l-origem').value === 'outro'
+                        ? (document.getElementById('l-origem-outro').value.trim() || 'outro')
+                        : document.getElementById('l-origem').value,
     contexto:         document.getElementById('l-contexto').value.trim() || 'Registrado manualmente.',
     status:           document.getElementById('l-status').value,
     local_reuniao:    document.getElementById('l-local').value.trim() || null,

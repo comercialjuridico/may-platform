@@ -658,14 +658,18 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="form-group">
             <label class="form-label">Origem</label>
-            <select id="fl-origem" class="form-input">
-              <option value="referência">Referência</option>
-              <option value="site">Site</option>
-              <option value="evento">Evento</option>
-              <option value="outbound">Outbound</option>
-              <option value="redes sociais">Redes sociais</option>
-              <option value="não informada">Não informada</option>
+            <select id="fl-origem" class="form-input" onchange="toggleOutroFunil(this.value)">
+              <option value="indicação">Indicação</option>
+              <option value="instagram">Instagram</option>
+              <option value="tráfego pago — meta">Tráfego pago — Meta (Facebook/Instagram Ads)</option>
+              <option value="tráfego pago — google">Tráfego pago — Google</option>
+              <option value="grupo de whatsapp">Grupo de WhatsApp</option>
+              <option value="parceria">Parceria</option>
+              <option value="tiktok">TikTok</option>
+              <option value="outro">Outro</option>
             </select>
+            <input type="text" id="fl-origem-outro" class="form-input" placeholder="Descreva a origem…"
+              style="margin-top:6px;display:none" />
           </div>
           <div class="form-group">
             <label class="form-label">Valor estimado (R$)</label>
@@ -986,6 +990,11 @@
   // PWA service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  }
+
+  // ── Origem "Outro" toggle (funil SDR)
+  function toggleOutroFunil(val) {
+    document.getElementById('fl-origem-outro').style.display = val === 'outro' ? 'block' : 'none';
   }
 </script>
 </body>

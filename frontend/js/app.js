@@ -1884,7 +1884,9 @@ const funil = (() => {
         empresa_lead:    document.getElementById('fl-empresa').value.trim() || null,
         contexto:        document.getElementById('fl-contexto').value.trim(),
         objecao_inicial: document.getElementById('fl-objecao').value.trim() || null,
-        origem:          document.getElementById('fl-origem').value,
+        origem:          document.getElementById('fl-origem').value === 'outro'
+                           ? (document.getElementById('fl-origem-outro').value.trim() || 'outro')
+                           : document.getElementById('fl-origem').value,
         valor_estimado:  document.getElementById('fl-valor').value || null,
         closer_id:       document.getElementById('fl-closer')?.value || null,
       };
