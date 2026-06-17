@@ -1461,7 +1461,12 @@ function mostrarHomeDashboard() {
   if (wrapper) wrapper.style.display = 'none';
 
   const user  = estado.user;
-  const diag  = user?.diagnostico || {};
+  // Os campos do diagnóstico ficam diretamente em user, não em user.diagnostico
+  const diag  = {
+    experiencia:  user?.tempo_experiencia,
+    contr:        user?.contratos_mes,
+    dificuldades: user?.maior_dificuldade ? [user.maior_dificuldade] : [],
+  };
   const nivel = calcularNivel(diag);
   const meta  = metaDaSemana(diag);
   const streak = estado.streak?.dias_seguidos || 0;
