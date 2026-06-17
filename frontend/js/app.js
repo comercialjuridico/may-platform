@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   verificarQueryParams();
   if (!estado.conversaAtiva) mostrarHomeDashboard();
   inicializarPushNotificacoes();
+  carregarTrilhaDoServidor(); // sincroniza progresso da trilha com o banco
 });
 
 async function carregarDadosIniciais() {
@@ -1561,10 +1562,23 @@ function metaDaSemana(diag) {
 }
 
 function getTrilhaProgress() {
+  // Usa cache local para leitura síncrona; sincroniza com banco em background
   try { return JSON.parse(localStorage.getItem('may_trilha') || '{}'); } catch { return {}; }
 }
 function setTrilhaProgress(p) {
   localStorage.setItem('may_trilha', JSON.stringify(p));
+  // Persiste no banco de forma assíncrona (silenciosa)
+  api.post('/trilha', { progresso: p }).catch(() => {});
+}
+async function carregarTrilhaDoServidor() {
+  try {
+    const res = await api.get('/trilha');
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    if (data.progresso && Object.keys(data.progresso).length > 0) {
+      localStorage.setItem('may_trilha', JSON.stringify(data.progresso));
+    }
+  } catch { /* silencioso — usa localStorage como fallback */ }
 }
 
 function proximosExercicios() {
