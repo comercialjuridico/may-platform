@@ -1624,7 +1624,7 @@ function mostrarHomeDashboard() {
           <div class="hd-card-label" style="margin-bottom:0">📅 Próximas reuniões & follow-ups</div>
           <div style="display:flex;gap:8px">
             <button onclick="abrirModalFollowup()" style="font-size:0.72rem;padding:4px 10px;background:rgba(167,139,250,0.15);color:#A78BFA;border:1px solid rgba(167,139,250,0.3);border-radius:6px;cursor:pointer">+ Follow-up</button>
-            <a href="/agenda.html" style="font-size:0.72rem;padding:4px 10px;background:rgba(52,211,153,0.1);color:#34D399;border:1px solid rgba(52,211,153,0.25);border-radius:6px;text-decoration:none">Ver agenda →</a>
+            <a href="/agenda" style="font-size:0.72rem;padding:4px 10px;background:rgba(52,211,153,0.1);color:#34D399;border:1px solid rgba(52,211,153,0.25);border-radius:6px;text-decoration:none">Ver agenda →</a>
           </div>
         </div>
         <div id="hd-agenda-list"><div style="color:var(--text-muted);font-size:0.82rem">Carregando…</div></div>
@@ -1706,7 +1706,7 @@ async function carregarAgendaHome() {
     ].sort((a, b) => a.data - b.data).slice(0, 6);
 
     if (!itens.length) {
-      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem">Nenhum compromisso próximo. <a href="/agenda.html" style="color:var(--accent-light)">Ver agenda completa →</a></div>';
+      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem">Nenhum compromisso próximo. <a href="/agenda" style="color:var(--accent-light)">Ver agenda completa →</a></div>';
       return;
     }
 

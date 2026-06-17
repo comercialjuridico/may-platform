@@ -53,6 +53,18 @@ app.get('/', (req, res) => {
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+app.get('/agenda', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
+});
+app.get('/agenda.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
+});
+app.get('/leads', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/leads.html'));
+});
+app.get('/leads.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/leads.html'));
+});
 
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
 // Cache longo para assets imutáveis (js/css/imgs com hash no nome)
