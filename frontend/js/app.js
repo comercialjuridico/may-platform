@@ -1617,8 +1617,158 @@ function mostrarHomeDashboard() {
         <button class="hd-btn" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
         ${user?.empresa_id ? `<button class="hd-btn" onclick="abrirModalVenda()">💰 Registrar venda</button>` : ''}
       </div>
+
+      ${user?.empresa_id ? `
+      <div class="hd-card" style="margin-top:16px" id="hd-agenda-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="hd-card-label" style="margin-bottom:0">📅 Próximas reuniões & follow-ups</div>
+          <div style="display:flex;gap:8px">
+            <button onclick="abrirModalFollowup()" style="font-size:0.72rem;padding:4px 10px;background:rgba(167,139,250,0.15);color:#A78BFA;border:1px solid rgba(167,139,250,0.3);border-radius:6px;cursor:pointer">+ Follow-up</button>
+            <a href="/agenda.html" style="font-size:0.72rem;padding:4px 10px;background:rgba(52,211,153,0.1);color:#34D399;border:1px solid rgba(52,211,153,0.25);border-radius:6px;text-decoration:none">Ver agenda →</a>
+          </div>
+        </div>
+        <div id="hd-agenda-list"><div style="color:var(--text-muted);font-size:0.82rem">Carregando…</div></div>
+      </div>` : ''}
+    </div>
+
+    <!-- Modal Follow-up rápido -->
+    <div class="modal-overlay" id="modal-followup-rapido" style="z-index:9999">
+      <div class="modal" style="max-width:400px">
+        <div class="modal-header">
+          <span class="modal-title">📞 Agendar Follow-up</span>
+          <button class="modal-close" onclick="document.getElementById('modal-followup-rapido').classList.remove('active')">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select id="fu-tipo" class="form-input">
+              <option value="ligação">📞 Ligação</option>
+              <option value="mensagem">💬 Mensagem (WhatsApp)</option>
+              <option value="email">📧 E-mail</option>
+              <option value="reunião">📅 Reunião</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lead / Contato</label>
+            <input type="text" id="fu-nome" class="form-input" placeholder="Nome do lead (opcional)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data e hora *</label>
+            <input type="datetime-local" id="fu-data" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observação</label>
+            <input type="text" id="fu-desc" class="form-input" placeholder="Ex: Retornar proposta enviada" />
+          </div>
+          <button class="btn btn-primary btn-full" onclick="salvarFollowup()">Agendar follow-up</button>
+        </div>
+      </div>
     </div>
   `;
+
+  // Carrega agenda após render
+  if (user?.empresa_id) carregarAgendaHome();
+}
+
+async function carregarAgendaHome() {
+  const el = document.getElementById('hd-agenda-list');
+  if (!el) return;
+
+  try {
+    const [resAgenda, resFollowups] = await Promise.all([
+      api.get('/leads/agenda'),
+      api.get('/followups/proximos'),
+    ]);
+
+    const agenda    = resAgenda?.ok    ? (await resAgenda.json()).reunioes     : [];
+    const followups = resFollowups?.ok ? (await resFollowups.json()).followups : [];
+
+    // Mescla e ordena por data
+    const tiposIcon = { 'ligação':'📞', 'mensagem':'💬', 'email':'📧', 'reunião':'📅' };
+    const itens = [
+      ...agenda.map(r => ({
+        tipo: 'reuniao',
+        data: new Date(r.data_reuniao),
+        label: r.nome_lead + (r.empresa_lead ? ` · ${r.empresa_lead}` : ''),
+        sub: r.local_reuniao || 'Reunião',
+        icon: '📅',
+        id: r.id,
+      })),
+      ...followups.map(f => ({
+        tipo: 'followup',
+        data: new Date(f.data_hora),
+        label: f.nome_lead || 'Follow-up',
+        sub: f.descricao || f.tipo,
+        icon: tiposIcon[f.tipo] || '📌',
+        id: f.id,
+        concluido: f.concluido,
+      })),
+    ].sort((a, b) => a.data - b.data).slice(0, 6);
+
+    if (!itens.length) {
+      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem">Nenhum compromisso próximo. <a href="/agenda.html" style="color:var(--accent-light)">Ver agenda completa →</a></div>';
+      return;
+    }
+
+    const agora = new Date();
+    el.innerHTML = itens.map(item => {
+      const diff = item.data - agora;
+      const emBreve = diff > 0 && diff < 2 * 60 * 60 * 1000;
+      const hora = item.data.toLocaleString('pt-BR', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+      const badge = emBreve ? '<span style="font-size:0.65rem;background:#EF4444;color:#fff;padding:2px 6px;border-radius:99px;margin-left:6px">EM BREVE</span>' : '';
+      const check = item.tipo === 'followup'
+        ? `<button onclick="concluirFollowup('${item.id}')" title="Marcar concluído" style="margin-left:auto;background:transparent;border:1px solid rgba(52,211,153,0.3);color:#34D399;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem">✓</button>`
+        : '';
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:1.1rem;margin-top:2px">${item.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.85rem;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.label)}${badge}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">${hora} · ${escapeHtml(item.sub)}</div>
+        </div>
+        ${check}
+      </div>`;
+    }).join('');
+
+  } catch (e) {
+    if (el) el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem">Não foi possível carregar a agenda.</div>';
+  }
+}
+
+function abrirModalFollowup() {
+  // Preenche data mínima = agora
+  const input = document.getElementById('fu-data');
+  if (input) {
+    const agora = new Date();
+    agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+    input.min = agora.toISOString().slice(0,16);
+  }
+  document.getElementById('modal-followup-rapido').classList.add('active');
+}
+
+async function salvarFollowup() {
+  const tipo    = document.getElementById('fu-tipo').value;
+  const nome    = document.getElementById('fu-nome').value.trim();
+  const data    = document.getElementById('fu-data').value;
+  const desc    = document.getElementById('fu-desc').value.trim();
+
+  if (!data) { mostrarToast('Informe a data e hora.', 'aviso'); return; }
+
+  const res = await api.post('/followups', { tipo, nome_lead: nome || null, data_hora: data, descricao: desc || null });
+  if (!res?.ok) { mostrarToast('Erro ao agendar follow-up.', 'erro'); return; }
+
+  document.getElementById('modal-followup-rapido').classList.remove('active');
+  mostrarToast('Follow-up agendado! 📞', 'sucesso');
+
+  // Limpa form
+  ['fu-nome','fu-data','fu-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  carregarAgendaHome();
+}
+
+async function concluirFollowup(id) {
+  await api.patch(`/followups/${id}`, { concluido: true });
+  mostrarToast('Follow-up concluído! ✓', 'sucesso');
+  carregarAgendaHome();
 }
 
 function mostrarInputChat() {

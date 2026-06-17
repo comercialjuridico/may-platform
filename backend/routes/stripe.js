@@ -53,6 +53,24 @@ router.post('/checkout', authMiddleware, async (req, res) => {
   }
 });
 
+// ─── GET /api/stripe/precos ─────────────────────────────────────────────────
+// Retorna preços atuais dos planos (sem autenticação)
+router.get('/precos', async (req, res) => {
+  try {
+    const [mensal, anual] = await Promise.all([
+      stripe.prices.retrieve(process.env.STRIPE_PRICE_MENSAL),
+      stripe.prices.retrieve(process.env.STRIPE_PRICE_ANUAL),
+    ]);
+    res.json({
+      mensal: (mensal.unit_amount / 100).toFixed(2),
+      anual:  (anual.unit_amount  / 100).toFixed(2),
+    });
+  } catch {
+    // Fallback com preços hardcoded se Stripe falhar
+    res.json({ mensal: '97.00', anual: '797.00' });
+  }
+});
+
 // ─── POST /api/stripe/portal ────────────────────────────────────────────────
 // Portal do cliente para gerenciar assinatura
 router.post('/portal', authMiddleware, async (req, res) => {

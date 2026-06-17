@@ -147,6 +147,41 @@
     <div class="semana-label" id="semana-label">Carregando…</div>
     <button class="btn-hoje" onclick="irParaHoje()">Hoje</button>
     <button class="btn-nav" onclick="navegarSemana(1)">Próxima semana →</button>
+    <button class="btn-hoje" onclick="abrirModalFollowupAgenda()" style="background:linear-gradient(135deg,#6D28D9,#A78BFA)">+ Follow-up</button>
+  </div>
+
+  <!-- Modal Follow-up -->
+  <div id="modal-followup-agenda" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center">
+    <div style="background:#1A1A2E;border:1px solid rgba(167,139,250,0.3);border-radius:16px;padding:24px;width:360px;max-width:95vw">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <span style="font-weight:700;font-size:1rem;color:#fff">📌 Agendar Follow-up</span>
+        <button onclick="fecharModalFollowupAgenda()" style="background:transparent;border:none;color:#888;font-size:1.2rem;cursor:pointer">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label style="font-size:0.78rem;color:#888;display:block;margin-bottom:4px">Tipo</label>
+          <select id="ag-fu-tipo" style="width:100%;background:#0D0D1A;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:8px 10px;font-size:0.85rem">
+            <option value="ligação">📞 Ligação</option>
+            <option value="mensagem">💬 Mensagem (WhatsApp)</option>
+            <option value="email">📧 E-mail</option>
+            <option value="reunião">📅 Reunião</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.78rem;color:#888;display:block;margin-bottom:4px">Lead / Contato</label>
+          <input type="text" id="ag-fu-nome" placeholder="Nome (opcional)" style="width:100%;background:#0D0D1A;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:8px 10px;font-size:0.85rem;box-sizing:border-box" />
+        </div>
+        <div>
+          <label style="font-size:0.78rem;color:#888;display:block;margin-bottom:4px">Data e hora *</label>
+          <input type="datetime-local" id="ag-fu-data" style="width:100%;background:#0D0D1A;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:8px 10px;font-size:0.85rem;box-sizing:border-box" />
+        </div>
+        <div>
+          <label style="font-size:0.78rem;color:#888;display:block;margin-bottom:4px">Observação</label>
+          <input type="text" id="ag-fu-desc" placeholder="Ex: Retornar proposta enviada" style="width:100%;background:#0D0D1A;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:8px 10px;font-size:0.85rem;box-sizing:border-box" />
+        </div>
+        <button onclick="salvarFollowupAgenda()" style="margin-top:4px;padding:10px;background:linear-gradient(135deg,#6D28D9,#A78BFA);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.9rem">Agendar</button>
+      </div>
+    </div>
   </div>
 
   <!-- Grade semanal -->
@@ -203,6 +238,9 @@ function getToken() { return localStorage.getItem('may_token'); }
 // ── Estado ────────────────────────────────────────────────────────────────────
 let _semanaRef  = new Date();
 let _reunioes   = [];
+let _followups  = [];
+let _inicioRef  = null;
+let _fimRef     = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -225,12 +263,19 @@ async function carregarSemana() {
   document.getElementById('proximas-lista').innerHTML  = '<div class="loading">Carregando…</div>';
 
   try {
-    const res  = await api.get(`/leads/agenda?semana=${qs}`);
-    if (!res?.ok) throw new Error();
-    const data = await res.json();
+    const [resReun, resFollow] = await Promise.all([
+      api.get(`/leads/agenda?semana=${qs}`),
+      api.get(`/followups/agenda?semana=${qs}`),
+    ]);
+    if (!resReun?.ok) throw new Error();
+    const data = await resReun.json();
 
-    _reunioes = data.reunioes || [];
-    renderGrade(new Date(data.semana_inicio), new Date(data.semana_fim));
+    _reunioes  = data.reunioes || [];
+    _followups = resFollow?.ok ? (await resFollow.json()).followups || [] : [];
+    _inicioRef = new Date(data.semana_inicio);
+    _fimRef    = new Date(data.semana_fim);
+
+    renderGrade(_inicioRef, _fimRef);
     renderProximas();
   } catch {
     document.getElementById('proximas-lista').innerHTML =
@@ -258,11 +303,14 @@ function renderGrade(inicio, fim) {
     const isHoje = dia.toDateString() === hoje;
 
     const reunioesDia = _reunioes.filter(r => {
-      const rd = new Date(r.data_reuniao);
-      return rd.toDateString() === dia.toDateString();
+      return new Date(r.data_reuniao).toDateString() === dia.toDateString();
+    });
+    const followupsDia = _followups.filter(f => {
+      return new Date(f.data_hora).toDateString() === dia.toDateString();
     });
 
-    const cards = reunioesDia.map(r => {
+    const tipoIcon = { 'ligação':'📞','mensagem':'💬','email':'📧','reunião':'📅' };
+    const cardsReun = reunioesDia.map(r => {
       const rd      = new Date(r.data_reuniao);
       const hora    = rd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       const urgente = (rd - agora) < 2 * 60 * 60 * 1000 && rd > agora;
@@ -274,6 +322,19 @@ function renderGrade(inicio, fim) {
           ${r.local_reuniao ? `<div class="reuniao-local">📍 ${esc(r.local_reuniao)}</div>` : ''}
         </div>`;
     }).join('');
+    const cardsFollow = followupsDia.map(f => {
+      const fd   = new Date(f.data_hora);
+      const hora = fd.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+      const icon = tipoIcon[f.tipo] || '📌';
+      return `
+        <div class="reuniao-card" style="border-left-color:#A78BFA;opacity:${f.concluido?'0.5':'1'}" onclick="toggleFollowup('${f.id}', ${f.concluido})">
+          <div class="reuniao-hora">${icon} ${hora}</div>
+          <div class="reuniao-nome">${esc(f.nome_lead || f.tipo)}</div>
+          ${f.descricao ? `<div class="reuniao-local" style="color:#A78BFA">${esc(f.descricao)}</div>` : ''}
+          ${f.concluido ? '<div style="font-size:0.65rem;color:#34D399">✓ Concluído</div>' : '<div style="font-size:0.65rem;color:var(--text-muted)">Clique para concluir</div>'}
+        </div>`;
+    }).join('');
+    const cards = cardsReun + cardsFollow;
 
     grade.innerHTML += `
       <div class="dia-col ${isHoje ? 'hoje' : ''}">
@@ -289,14 +350,23 @@ function renderGrade(inicio, fim) {
 // ── Render lista de próximas ──────────────────────────────────────────────────
 function renderProximas() {
   const agora    = new Date();
-  const proximas = _reunioes
+  const tipoIcon = { 'ligação':'📞','mensagem':'💬','email':'📧','reunião':'📅' };
+
+  const reunioesFut = _reunioes
     .filter(r => new Date(r.data_reuniao) >= agora)
-    .sort((a, b) => new Date(a.data_reuniao) - new Date(b.data_reuniao));
+    .map(r => ({ _tipo:'reuniao', data: new Date(r.data_reuniao), r }));
+
+  const followupsFut = _followups
+    .filter(f => new Date(f.data_hora) >= agora && !f.concluido)
+    .map(f => ({ _tipo:'followup', data: new Date(f.data_hora), f }));
+
+  const proximas = [...reunioesFut, ...followupsFut]
+    .sort((a, b) => a.data - b.data);
 
   const titulo = document.getElementById('proximas-titulo');
   const lista  = document.getElementById('proximas-lista');
 
-  titulo.textContent = `⚡ Próximas reuniões (${proximas.length})`;
+  titulo.textContent = `⚡ Próximas reuniões & follow-ups (${proximas.length})`;
 
   if (!proximas.length) {
     lista.innerHTML = `
@@ -308,29 +378,91 @@ function renderProximas() {
     return;
   }
 
-  lista.innerHTML = proximas.map(r => {
-    const rd      = new Date(r.data_reuniao);
-    const urgente = (rd - agora) < 2 * 60 * 60 * 1000;
-    const hora    = rd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const data    = rd.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
-    const tempoStr = urgente ? '⚠️ Em breve' : formatarDistancia(rd, agora);
-
-    return `
-      <div class="proxima-item ${urgente ? 'urgente' : ''}" onclick="abrirBriefing('${r.id}')">
-        <div class="proxima-horario">
-          <div class="hora">${hora}</div>
-          <div class="data">${data}</div>
-        </div>
-        <div class="proxima-info">
-          <div class="proxima-nome">${esc(r.nome_lead)}${r.empresa_lead ? ` · ${esc(r.empresa_lead)}` : ''}</div>
-          <div class="proxima-sub">
-            ${r.closer?.name ? `👤 ${esc(r.closer.name)}` : ''}
-            ${r.local_reuniao ? ` · 📍 ${esc(r.local_reuniao)}` : ''}
+  lista.innerHTML = proximas.map(item => {
+    if (item._tipo === 'reuniao') {
+      const r       = item.r;
+      const rd      = item.data;
+      const urgente = (rd - agora) < 2 * 60 * 60 * 1000;
+      const hora    = rd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const data    = rd.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const tempoStr = urgente ? '⚠️ Em breve' : formatarDistancia(rd, agora);
+      return `
+        <div class="proxima-item ${urgente ? 'urgente' : ''}" onclick="abrirBriefing('${r.id}')">
+          <div class="proxima-horario">
+            <div class="hora">📅 ${hora}</div>
+            <div class="data">${data}</div>
           </div>
-        </div>
-        <span class="proxima-status ${urgente ? 'urgente' : 'normal'}">${tempoStr}</span>
-      </div>`;
+          <div class="proxima-info">
+            <div class="proxima-nome">${esc(r.nome_lead)}${r.empresa_lead ? ` · ${esc(r.empresa_lead)}` : ''}</div>
+            <div class="proxima-sub">
+              ${r.closer?.name ? `👤 ${esc(r.closer.name)}` : ''}
+              ${r.local_reuniao ? ` · 📍 ${esc(r.local_reuniao)}` : ''}
+            </div>
+          </div>
+          <span class="proxima-status ${urgente ? 'urgente' : 'normal'}">${tempoStr}</span>
+        </div>`;
+    } else {
+      const f    = item.f;
+      const fd   = item.data;
+      const hora = fd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const data = fd.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const icon = tipoIcon[f.tipo] || '📌';
+      return `
+        <div class="proxima-item" style="border-left:3px solid #A78BFA" onclick="toggleFollowup('${f.id}', false)">
+          <div class="proxima-horario">
+            <div class="hora">${icon} ${hora}</div>
+            <div class="data">${data}</div>
+          </div>
+          <div class="proxima-info">
+            <div class="proxima-nome">${esc(f.nome_lead || 'Follow-up')}</div>
+            <div class="proxima-sub" style="color:#A78BFA">${esc(f.descricao || f.tipo)}</div>
+          </div>
+          <span class="proxima-status normal" style="color:#A78BFA">Concluir ✓</span>
+        </div>`;
+    }
   }).join('');
+}
+
+async function toggleFollowup(id, jaConcluido) {
+  if (jaConcluido) return;
+  try {
+    const res = await api.patch(`/followups/${id}`, { concluido: true });
+    if (!res?.ok) throw new Error();
+    mostrarToast('Follow-up concluído! ✓');
+    // Atualiza localmente
+    const f = _followups.find(x => x.id === id);
+    if (f) f.concluido = true;
+    renderGrade(_inicioRef, _fimRef);
+    renderProximas();
+  } catch {
+    mostrarToast('Erro ao atualizar follow-up.', true);
+  }
+}
+
+function abrirModalFollowupAgenda() {
+  const el = document.getElementById('modal-followup-agenda');
+  el.style.display = 'flex';
+}
+function fecharModalFollowupAgenda() {
+  document.getElementById('modal-followup-agenda').style.display = 'none';
+}
+async function salvarFollowupAgenda() {
+  const tipo  = document.getElementById('ag-fu-tipo').value;
+  const nome  = document.getElementById('ag-fu-nome').value.trim();
+  const data  = document.getElementById('ag-fu-data').value;
+  const desc  = document.getElementById('ag-fu-desc').value.trim();
+  if (!data) { mostrarToast('Informe a data e hora.', true); return; }
+
+  const res = await api.post('/followups', { tipo, nome_lead: nome || null, data_hora: data, descricao: desc || null });
+  if (!res?.ok) { mostrarToast('Erro ao agendar.', true); return; }
+
+  const newFu = (await res.json()).followup;
+  if (newFu) _followups.push(newFu);
+  fecharModalFollowupAgenda();
+  mostrarToast('Follow-up agendado! 📌');
+  ['ag-fu-nome','ag-fu-data','ag-fu-desc'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  renderGrade(_inicioRef, _fimRef);
+  renderProximas();
 }
 
 function formatarDistancia(futuro, agora) {

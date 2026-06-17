@@ -131,10 +131,9 @@ router.post('/', authMiddleware, async (req, res) => {
         data_reuniao:      data_reuniao || null,
         local_reuniao:     local_reuniao || null,
         participou_reuniao: participou_reuniao !== undefined ? participou_reuniao : null,
-        status:            status || 'briefing_gerado',
+        status:            'briefing_gerado',
         fechado_em:        fechado_em || null,
         briefing,
-        status:         'briefing_gerado',
       })
       .select()
       .single();

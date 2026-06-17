@@ -86,6 +86,7 @@ app.use('/api/2fa',          require('./routes/twofa'));
 app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/trilha',      require('./routes/trilha'));
 app.use('/api/leads',       require('./routes/leads'));
+app.use('/api/followups',   require('./routes/followups'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
