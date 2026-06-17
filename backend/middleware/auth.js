@@ -25,6 +25,11 @@ async function authMiddleware(req, res, next) {
       return res.status(401).json({ erro: 'Token inválido.' });
     }
 
+    // Bloqueia temp_token (2FA pendente) de acessar rotas protegidas
+    if (payload.tipo === '2fa_pendente') {
+      return res.status(401).json({ erro: 'Autenticação incompleta. Complete o 2FA.' });
+    }
+
     // Busca dados atualizados do usuário (plano pode ter mudado)
     const { data: user, error } = await supabase
       .from('users')

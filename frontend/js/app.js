@@ -1207,8 +1207,11 @@ async function registrarVenda() {
 }
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
-function logout() {
+async function logout() {
   if (!confirm('Sair da plataforma?')) return;
+  try {
+    await api.post('/auth/logout', { refreshToken: localStorage.getItem('may_refresh') });
+  } catch { /* segue mesmo se falhar */ }
   limparTokens();
   window.location.href = '/auth.html';
 }
