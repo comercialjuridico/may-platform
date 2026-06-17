@@ -142,8 +142,8 @@ router.post('/', authMiddleware, async (req, res) => {
 
     res.json({ ok: true, lead });
   } catch (err) {
-    console.error('Erro ao criar lead:', err.message);
-    res.status(500).json({ erro: 'Erro ao registrar lead.' });
+    console.error('Erro ao criar lead:', err.message, err.details, err.hint);
+    res.status(500).json({ erro: `Erro ao registrar lead: ${err.message || err}` });
   }
 });
 
