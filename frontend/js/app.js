@@ -237,8 +237,15 @@ function renderizarSidebar() {
   }
   const btnFunil = document.getElementById('btn-funil');
   if (btnFunil) {
-    // Mostra para membros de empresa (SDR e closers também)
     btnFunil.style.display = user?.empresa_id ? 'block' : 'none';
+  }
+  const linkAgenda = document.getElementById('link-agenda');
+  if (linkAgenda) {
+    linkAgenda.style.display = user?.empresa_id ? 'block' : 'none';
+  }
+  const linkLeads = document.getElementById('link-leads');
+  if (linkLeads) {
+    linkLeads.style.display = user?.empresa_id ? 'block' : 'none';
   }
 }
 
@@ -1929,27 +1936,49 @@ const funil = (() => {
     const status = btn.dataset.status;
     if (!id) return;
 
+    // Reunião marcada: mostra campos de data/hora
+    if (status === 'reuniao_agendada') {
+      const ag = document.getElementById('briefing-agenda-group');
+      if (ag) { ag.style.display = 'flex'; }
+      document.getElementById('briefing-valor-group').style.display = 'none';
+      return; // aguarda confirmarAgendamento()
+    }
+
     const ganhando = status === 'ganhou';
-    document.getElementById('briefing-valor-group').style.display = ganhando ? 'block' : 'none';
+    document.getElementById('briefing-valor-group').style.display  = ganhando ? 'block' : 'none';
+    document.getElementById('briefing-agenda-group').style.display = 'none';
     if (!ganhando) _confirmarStatus(id, status);
   }
 
-  async function _confirmarStatus(id, status) {
-    const resultado    = document.getElementById('briefing-resultado')?.value;
+  async function confirmarAgendamento() {
+    const id           = document.getElementById('briefing-lead-id')?.value;
+    const data_reuniao = document.getElementById('briefing-data-reuniao')?.value;
+    const local        = document.getElementById('briefing-local-reuniao')?.value || null;
+
+    if (!data_reuniao) { mostrarToast('Informe a data e hora da reunião.', 'erro'); return; }
+
+    await _confirmarStatus(id, 'reuniao_agendada', { data_reuniao: new Date(data_reuniao).toISOString(), local_reuniao: local });
+    mostrarToast('📅 Reunião agendada! Aparecerá na Agenda Comercial.', 'sucesso');
+  }
+
+  async function _confirmarStatus(id, status, extra = {}) {
+    const resultado     = document.getElementById('briefing-resultado')?.value;
     const valor_fechado = document.getElementById('briefing-valor-fechado')?.value || null;
 
     try {
-      const res = await api.patch(`/leads/${id}/status`, { status, resultado, valor_fechado });
+      const body = { status, resultado, valor_fechado, ...extra };
+      const res  = await api.patch(`/leads/${id}/status`, body);
       if (!res?.ok) throw new Error();
-      mostrarToast('Status atualizado!', 'sucesso');
+      if (status !== 'reuniao_agendada') mostrarToast('Status atualizado!', 'sucesso');
       document.getElementById('modal-briefing').classList.remove('active');
+      document.getElementById('briefing-agenda-group').style.display = 'none';
       listar();
     } catch {
       mostrarToast('Erro ao atualizar status.', 'erro');
     }
   }
 
-  return { aba, listar, registrar, abrirBriefing, atualizarStatus };
+  return { aba, listar, registrar, abrirBriefing, atualizarStatus, confirmarAgendamento };
 })();
 
 function abrirModalFunil() {

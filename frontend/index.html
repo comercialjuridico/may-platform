@@ -68,6 +68,12 @@
       <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;margin-bottom:4px;color:#60A5FA;border-color:rgba(96,165,250,0.3)">
         🎯 Funil SDR/Closer
       </button>
+      <a id="link-agenda" href="/agenda.html" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px;color:#34D399;border-color:rgba(52,211,153,0.3)">
+        📅 Agenda Comercial
+      </a>
+      <a id="link-leads" href="/leads.html" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px;color:#60A5FA;border-color:rgba(96,165,250,0.3)">
+        📋 Controle de Leads
+      </a>
       <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px">
         ⚖️ Áreas de trabalho <span id="areas-badge" style="font-size:0.7rem;color:var(--text-muted)"></span>
       </button>
@@ -742,6 +748,23 @@
         <button class="btn-status" data-status="negociando" onclick="funil.atualizarStatus(this)">🤝 Negociando</button>
         <button class="btn-status btn-ganhou" data-status="ganhou" onclick="funil.atualizarStatus(this)">✅ Ganhou</button>
         <button class="btn-status btn-perdeu" data-status="perdeu" onclick="funil.atualizarStatus(this)">❌ Perdeu</button>
+      </div>
+      <!-- Campos de agendamento (aparecem ao marcar Reunião marcada) -->
+      <div id="briefing-agenda-group" style="display:none;margin-bottom:12px;display:none;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:12px 14px;gap:8px;flex-direction:column">
+        <div style="font-size:11px;font-weight:700;color:#34D399;margin-bottom:4px">📅 Dados da reunião</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Data e hora *</label>
+            <input type="datetime-local" id="briefing-data-reuniao" class="form-input" />
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Local / Link</label>
+            <input type="text" id="briefing-local-reuniao" class="form-input" placeholder="Meet, Zoom, Escritório…" />
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:4px" onclick="funil.confirmarAgendamento()">
+          Confirmar agendamento
+        </button>
       </div>
       <textarea id="briefing-resultado" class="form-input" rows="2" style="resize:vertical"
         placeholder="Anotações pós-reunião (opcional)..."></textarea>

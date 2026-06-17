@@ -124,6 +124,48 @@ function iniciarCronPush() {
     const hora     = agora.getUTCHours(); // UTC — ajuste para BRT (UTC-3): hora 12 UTC = 9h BRT
     const diaSem   = agora.getUTCDay();   // 0=dom, 1=seg
 
+    // Lembretes de reunião: toda hora, verifica reuniões na próxima 1h
+    try {
+      const { supabase } = require('./services/supabase');
+      const agora   = new Date();
+      const em1h    = new Date(agora.getTime() + 60 * 60 * 1000);
+      const { data: reunioes } = await supabase
+        .from('leads')
+        .select('id, nome_lead, closer_id, data_reuniao, local_reuniao')
+        .eq('status', 'reuniao_agendada')
+        .eq('lembrete_enviado', false)
+        .gte('data_reuniao', agora.toISOString())
+        .lte('data_reuniao', em1h.toISOString());
+
+      for (const r of (reunioes || [])) {
+        if (!r.closer_id) continue;
+        const { data: sub } = await supabase
+          .from('push_subscriptions')
+          .select('subscription')
+          .eq('user_id', r.closer_id)
+          .limit(1)
+          .single();
+
+        if (sub?.subscription) {
+          const horario = new Date(r.data_reuniao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          await fetch(`http://localhost:${PORT}/api/notificacoes/enviar-direto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-cron-secret': process.env.CRON_SECRET },
+            body: JSON.stringify({
+              user_id: r.closer_id,
+              titulo:  `🎯 Reunião em breve — ${r.nome_lead}`,
+              corpo:   `Sua reunião está marcada para ${horario}${r.local_reuniao ? ` · ${r.local_reuniao}` : ''}. Abra o briefing agora.`,
+            }),
+          }).catch(() => {});
+        }
+
+        // Marca como lembrete enviado para não duplicar
+        await supabase.from('leads').update({ lembrete_enviado: true }).eq('id', r.id);
+      }
+    } catch (e) {
+      console.error('Cron lembretes reunião:', e.message);
+    }
+
     // Push diário: 12h UTC (9h BRT), todos os dias
     if (hora === 12) {
       try {

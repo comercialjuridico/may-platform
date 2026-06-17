@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda Comercial — May</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:#7C3AED; --brand-light:rgba(124,58,237,.15); --brand-glow:rgba(124,58,237,.4);
+      --gold:#F59E0B; --green:#10B981; --red:#EF4444; --blue:#60A5FA;
+      --surface:rgba(255,255,255,.05); --border:rgba(255,255,255,.09);
+      --text:#E8E4FF; --sub:rgba(200,190,255,.5); --radius:14px;
+    }
+    html, body { min-height:100vh; font-family:'Inter',sans-serif; background:#080B1A; color:var(--text); overflow-x:hidden; }
+    h1,h2,h3 { font-family:'Syne',sans-serif; }
+    #canvas-bg { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.35; }
+
+    .page { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:24px 16px 80px; }
+
+    /* ── Header ── */
+    .header { display:flex; align-items:center; gap:14px; margin-bottom:28px; flex-wrap:wrap; }
+    .back-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:8px 14px; font-size:13px; font-weight:600; color:#C4B5FD;
+      text-decoration:none; display:flex; align-items:center; gap:6px; transition:background .2s; }
+    .back-btn:hover { background:var(--brand-light); }
+    .header-title { flex:1; }
+    .header-title h1 { font-size:22px; font-weight:800; letter-spacing:-.02em;
+      background:linear-gradient(135deg,#fff 30%,#A78BFA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .header-title p { font-size:12px; color:var(--sub); margin-top:3px; }
+
+    /* ── Navegação semana ── */
+    .nav-semana { display:flex; align-items:center; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+    .btn-nav { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:8px 16px; font-size:13px; font-weight:600; color:var(--text); cursor:pointer;
+      transition:all .2s; }
+    .btn-nav:hover { background:var(--brand-light); border-color:rgba(124,58,237,.4); }
+    .semana-label { font-size:14px; font-weight:700; color:#fff; flex:1; text-align:center; }
+    .btn-hoje { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:8px 18px; font-size:13px; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); }
+
+    /* ── Grade semanal ── */
+    .grade { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:28px; }
+    @media(max-width:700px) { .grade { grid-template-columns:repeat(7,1fr); gap:4px; } }
+    .dia-col { display:flex; flex-direction:column; gap:6px; min-height:300px; }
+    .dia-header { text-align:center; padding:10px 4px 8px;
+      background:var(--surface); border:1px solid var(--border); border-radius:10px; }
+    .dia-nome { font-size:10px; font-weight:700; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; }
+    .dia-num  { font-size:18px; font-weight:800; font-family:'Syne',sans-serif; margin-top:2px; color:#fff; }
+    .dia-col.hoje .dia-header { background:var(--brand-light); border-color:rgba(124,58,237,.4); }
+    .dia-col.hoje .dia-num    { color:#A78BFA; }
+
+    /* ── Cards de reunião ── */
+    .reuniao-card { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:10px 10px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
+    .reuniao-card:hover { transform:translateY(-2px); border-color:rgba(124,58,237,.4);
+      background:var(--brand-light); box-shadow:0 6px 20px rgba(124,58,237,.2); }
+    .reuniao-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--brand); }
+    .reuniao-card.urgente::before { background:var(--red); }
+    .reuniao-card.urgente { border-color:rgba(239,68,68,.3); }
+    .reuniao-hora { font-size:11px; font-weight:700; color:#A78BFA; margin-bottom:4px; }
+    .reuniao-nome { font-size:12px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .reuniao-closer { font-size:10px; color:var(--sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .reuniao-local { font-size:10px; color:var(--sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .reuniao-card.urgente .reuniao-hora { color:#FCA5A5; }
+    .urgente-badge { display:inline-block; background:rgba(239,68,68,.2); color:#FCA5A5;
+      font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; margin-left:4px; }
+
+    /* ── Sem reuniões no dia ── */
+    .dia-vazio { text-align:center; padding:16px 4px; font-size:10px; color:var(--sub); opacity:.5; }
+
+    /* ── Próximas reuniões (lista) ── */
+    .sec-title { font-size:11px; font-weight:700; color:var(--sub); text-transform:uppercase;
+      letter-spacing:.08em; margin-bottom:12px; margin-top:28px; }
+    .proximas-lista { display:flex; flex-direction:column; gap:10px; }
+    .proxima-item { background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      padding:14px 16px; display:flex; align-items:center; gap:14px; cursor:pointer;
+      transition:all .2s; }
+    .proxima-item:hover { border-color:rgba(124,58,237,.4); background:var(--brand-light); }
+    .proxima-item.urgente { border-color:rgba(239,68,68,.3); }
+    .proxima-horario { min-width:80px; text-align:center; }
+    .proxima-horario .hora { font-size:18px; font-weight:800; font-family:'Syne',sans-serif; color:#A78BFA; }
+    .proxima-horario .data { font-size:10px; color:var(--sub); margin-top:1px; }
+    .proxima-item.urgente .hora { color:#FCA5A5; }
+    .proxima-info { flex:1; }
+    .proxima-nome { font-size:14px; font-weight:700; color:#fff; margin-bottom:2px; }
+    .proxima-sub  { font-size:12px; color:var(--sub); }
+    .proxima-status { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+    .proxima-status.urgente { background:rgba(239,68,68,.15); color:#FCA5A5; }
+    .proxima-status.normal  { background:var(--brand-light); color:#A78BFA; }
+    .empty-state { text-align:center; padding:48px 24px; color:var(--sub); }
+    .empty-state .icon { font-size:40px; margin-bottom:12px; }
+    .empty-state p { font-size:14px; line-height:1.6; }
+
+    /* ── Modal Briefing (reutilizado) ── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(6px);
+      display:flex; align-items:center; justify-content:center; z-index:100;
+      opacity:0; pointer-events:none; transition:opacity .2s; padding:16px; }
+    .modal-overlay.active { opacity:1; pointer-events:all; }
+    .modal { background:#0F1225; border:1px solid var(--border); border-radius:18px;
+      padding:24px; width:100%; max-width:540px; max-height:88vh; overflow-y:auto; }
+    .modal-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:20px; }
+    .modal-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; }
+    .modal-close { background:none; border:none; color:var(--sub); font-size:18px; cursor:pointer;
+      padding:2px 6px; border-radius:6px; transition:color .2s; flex-shrink:0; }
+    .modal-close:hover { color:var(--text); }
+    .form-input { width:100%; background:rgba(255,255,255,.06); border:1px solid var(--border);
+      border-radius:10px; padding:10px 14px; font-size:13px; color:var(--text);
+      font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+    .form-input:focus { border-color:rgba(124,58,237,.5); }
+    .btn { padding:10px 20px; border-radius:10px; font-size:13px; font-weight:700;
+      cursor:pointer; border:none; transition:all .2s; }
+    .btn-primary { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      box-shadow:0 4px 14px var(--brand-glow); }
+    .btn-primary:hover { opacity:.9; transform:translateY(-1px); }
+    .btn-status { background:var(--surface);border:1px solid var(--border);border-radius:8px;
+      padding:6px 12px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .2s; }
+    .btn-status:hover { border-color:rgba(167,139,250,.4); }
+    .btn-ganhou { color:#6EE7B7;border-color:rgba(16,185,129,.3); }
+    .btn-ganhou:hover { background:rgba(16,185,129,.1); }
+    .btn-perdeu { color:#FCA5A5;border-color:rgba(239,68,68,.3); }
+    .btn-perdeu:hover { background:rgba(239,68,68,.1); }
+    .loading { text-align:center; color:var(--sub); padding:32px; }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<div class="page">
+  <!-- Header -->
+  <div class="header">
+    <a href="/app" class="back-btn">← Voltar</a>
+    <div class="header-title">
+      <h1>📅 Agenda Comercial</h1>
+      <p>Reuniões da equipe — gerencie sem perder oportunidades</p>
+    </div>
+  </div>
+
+  <!-- Navegação semana -->
+  <div class="nav-semana">
+    <button class="btn-nav" onclick="navegarSemana(-1)">← Semana anterior</button>
+    <div class="semana-label" id="semana-label">Carregando…</div>
+    <button class="btn-hoje" onclick="irParaHoje()">Hoje</button>
+    <button class="btn-nav" onclick="navegarSemana(1)">Próxima semana →</button>
+  </div>
+
+  <!-- Grade semanal -->
+  <div class="grade" id="grade-semana"></div>
+
+  <!-- Próximas reuniões (lista detalhada) -->
+  <p class="sec-title" id="proximas-titulo">⚡ Próximas reuniões desta semana</p>
+  <div class="proximas-lista" id="proximas-lista">
+    <div class="loading">Carregando…</div>
+  </div>
+</div>
+
+<!-- Modal Briefing -->
+<div class="modal-overlay" id="modal-briefing">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="briefing-titulo"></div>
+        <div style="font-size:11px;color:var(--sub);margin-top:3px" id="briefing-meta"></div>
+      </div>
+      <button class="modal-close" onclick="fecharBriefing()">✕</button>
+    </div>
+
+    <div id="briefing-conteudo" style="white-space:pre-wrap;font-size:13px;line-height:1.7;
+      background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);
+      border-radius:12px;padding:16px 18px;margin-bottom:16px"></div>
+
+    <!-- Atualizar status -->
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+        Atualizar após a reunião
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn-status" data-status="negociando" onclick="atualizarStatus(this)">🤝 Negociando</button>
+        <button class="btn-status btn-ganhou" data-status="ganhou" onclick="atualizarStatus(this)">✅ Ganhou</button>
+        <button class="btn-status btn-perdeu" data-status="perdeu" onclick="atualizarStatus(this)">❌ Perdeu</button>
+      </div>
+      <textarea id="briefing-resultado" class="form-input" rows="2" style="resize:vertical"
+        placeholder="Anotações pós-reunião…"></textarea>
+      <div id="valor-group" style="display:none;margin-top:8px">
+        <input type="number" id="briefing-valor" class="form-input" placeholder="Valor fechado (R$)" min="0" />
+      </div>
+    </div>
+
+    <input type="hidden" id="briefing-lead-id" />
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function getToken() { return localStorage.getItem('may_token'); }
+
+// ── Estado ────────────────────────────────────────────────────────────────────
+let _semanaRef  = new Date();
+let _reunioes   = [];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (!getToken()) { window.location.href = '/auth.html'; return; }
+  carregarSemana();
+  iniciarCanvas();
+});
+
+// ── Navegação ─────────────────────────────────────────────────────────────────
+function navegarSemana(delta) {
+  _semanaRef = new Date(_semanaRef.getTime() + delta * 7 * 24 * 60 * 60 * 1000);
+  carregarSemana();
+}
+function irParaHoje() { _semanaRef = new Date(); carregarSemana(); }
+
+// ── Carregar semana ───────────────────────────────────────────────────────────
+async function carregarSemana() {
+  const qs  = _semanaRef.toISOString().slice(0, 10);
+  document.getElementById('semana-label').textContent = 'Carregando…';
+  document.getElementById('proximas-lista').innerHTML  = '<div class="loading">Carregando…</div>';
+
+  try {
+    const res  = await api.get(`/leads/agenda?semana=${qs}`);
+    if (!res?.ok) throw new Error();
+    const data = await res.json();
+
+    _reunioes = data.reunioes || [];
+    renderGrade(new Date(data.semana_inicio), new Date(data.semana_fim));
+    renderProximas();
+  } catch {
+    document.getElementById('proximas-lista').innerHTML =
+      '<div class="loading">Erro ao carregar agenda.</div>';
+  }
+}
+
+// ── Render Grade ──────────────────────────────────────────────────────────────
+function renderGrade(inicio, fim) {
+  const DIAS_NOME = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const agora  = new Date();
+  const hoje   = agora.toDateString();
+
+  // Label da semana
+  const fmtLabel = d => d.toLocaleDateString('pt-BR', { day:'numeric', month:'short' });
+  document.getElementById('semana-label').textContent =
+    `${fmtLabel(inicio)} — ${fmtLabel(fim)}`;
+
+  const grade = document.getElementById('grade-semana');
+  grade.innerHTML = '';
+
+  for (let i = 0; i < 7; i++) {
+    const dia = new Date(inicio);
+    dia.setDate(inicio.getDate() + i);
+    const isHoje = dia.toDateString() === hoje;
+
+    const reunioesDia = _reunioes.filter(r => {
+      const rd = new Date(r.data_reuniao);
+      return rd.toDateString() === dia.toDateString();
+    });
+
+    const cards = reunioesDia.map(r => {
+      const rd      = new Date(r.data_reuniao);
+      const hora    = rd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const urgente = (rd - agora) < 2 * 60 * 60 * 1000 && rd > agora;
+      return `
+        <div class="reuniao-card ${urgente ? 'urgente' : ''}" onclick="abrirBriefing('${r.id}')">
+          <div class="reuniao-hora">${hora}${urgente ? '<span class="urgente-badge">EM BREVE</span>' : ''}</div>
+          <div class="reuniao-nome">${esc(r.nome_lead)}</div>
+          ${r.closer?.name ? `<div class="reuniao-closer">👤 ${esc(r.closer.name)}</div>` : ''}
+          ${r.local_reuniao ? `<div class="reuniao-local">📍 ${esc(r.local_reuniao)}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    grade.innerHTML += `
+      <div class="dia-col ${isHoje ? 'hoje' : ''}">
+        <div class="dia-header">
+          <div class="dia-nome">${DIAS_NOME[dia.getDay()]}</div>
+          <div class="dia-num">${dia.getDate()}</div>
+        </div>
+        ${cards || `<div class="dia-vazio">—</div>`}
+      </div>`;
+  }
+}
+
+// ── Render lista de próximas ──────────────────────────────────────────────────
+function renderProximas() {
+  const agora    = new Date();
+  const proximas = _reunioes
+    .filter(r => new Date(r.data_reuniao) >= agora)
+    .sort((a, b) => new Date(a.data_reuniao) - new Date(b.data_reuniao));
+
+  const titulo = document.getElementById('proximas-titulo');
+  const lista  = document.getElementById('proximas-lista');
+
+  titulo.textContent = `⚡ Próximas reuniões (${proximas.length})`;
+
+  if (!proximas.length) {
+    lista.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📅</div>
+        <p>Nenhuma reunião pendente nesta semana.<br>
+        Use o Funil SDR/Closer para agendar reuniões.</p>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = proximas.map(r => {
+    const rd      = new Date(r.data_reuniao);
+    const urgente = (rd - agora) < 2 * 60 * 60 * 1000;
+    const hora    = rd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const data    = rd.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const tempoStr = urgente ? '⚠️ Em breve' : formatarDistancia(rd, agora);
+
+    return `
+      <div class="proxima-item ${urgente ? 'urgente' : ''}" onclick="abrirBriefing('${r.id}')">
+        <div class="proxima-horario">
+          <div class="hora">${hora}</div>
+          <div class="data">${data}</div>
+        </div>
+        <div class="proxima-info">
+          <div class="proxima-nome">${esc(r.nome_lead)}${r.empresa_lead ? ` · ${esc(r.empresa_lead)}` : ''}</div>
+          <div class="proxima-sub">
+            ${r.closer?.name ? `👤 ${esc(r.closer.name)}` : ''}
+            ${r.local_reuniao ? ` · 📍 ${esc(r.local_reuniao)}` : ''}
+          </div>
+        </div>
+        <span class="proxima-status ${urgente ? 'urgente' : 'normal'}">${tempoStr}</span>
+      </div>`;
+  }).join('');
+}
+
+function formatarDistancia(futuro, agora) {
+  const diff = futuro - agora;
+  const h    = Math.floor(diff / (1000 * 60 * 60));
+  const m    = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (h > 0) return `em ${h}h${m > 0 ? ` ${m}min` : ''}`;
+  return `em ${m} min`;
+}
+
+// ── Modal Briefing ────────────────────────────────────────────────────────────
+function abrirBriefing(id) {
+  const r = _reunioes.find(l => l.id === id);
+  if (!r) return;
+
+  const rd   = new Date(r.data_reuniao);
+  const hora = rd.toLocaleString('pt-BR', { weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+
+  document.getElementById('briefing-titulo').textContent   = `🎯 ${r.nome_lead}`;
+  document.getElementById('briefing-meta').textContent     = `${hora}${r.local_reuniao ? ` · ${r.local_reuniao}` : ''}`;
+  document.getElementById('briefing-conteudo').textContent = r.briefing || 'Briefing não disponível.';
+  document.getElementById('briefing-lead-id').value        = r.id;
+  document.getElementById('briefing-resultado').value      = '';
+  document.getElementById('valor-group').style.display     = 'none';
+
+  document.getElementById('modal-briefing').classList.add('active');
+}
+
+function fecharBriefing() {
+  document.getElementById('modal-briefing').classList.remove('active');
+}
+
+async function atualizarStatus(btn) {
+  const id     = document.getElementById('briefing-lead-id').value;
+  const status = btn.dataset.status;
+  document.getElementById('valor-group').style.display = status === 'ganhou' ? 'block' : 'none';
+
+  if (status !== 'ganhou') await _salvarStatus(id, status);
+}
+
+async function _salvarStatus(id, status) {
+  const resultado    = document.getElementById('briefing-resultado').value;
+  const valor_fechado = document.getElementById('briefing-valor').value || null;
+
+  try {
+    const res = await api.patch(`/leads/${id}/status`, { status, resultado, valor_fechado });
+    if (!res?.ok) throw new Error();
+
+    // Remove da lista local
+    _reunioes = _reunioes.filter(r => r.id !== id);
+    fecharBriefing();
+    renderGrade(obterInicioDaSemana(), obterFimDaSemana());
+    renderProximas();
+    mostrarToast('✅ Atualizado com sucesso!');
+  } catch {
+    mostrarToast('Erro ao atualizar.', true);
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function obterInicioDaSemana() {
+  const d   = new Date(_semanaRef);
+  const dow = d.getDay();
+  d.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
+  d.setHours(0,0,0,0);
+  return d;
+}
+function obterFimDaSemana() {
+  const d = obterInicioDaSemana();
+  d.setDate(d.getDate() + 6);
+  d.setHours(23,59,59,999);
+  return d;
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function mostrarToast(msg, erro = false) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:${erro ? '#7f1d1d' : '#1a1040'};color:#fff;padding:10px 20px;border-radius:10px;
+    font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.5);
+    border:1px solid ${erro ? 'rgba(239,68,68,.4)' : 'rgba(124,58,237,.4)'};`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// Fecha modal ao clicar fora
+document.getElementById('modal-briefing').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-briefing')) fecharBriefing();
+});
+
+// Atualiza a cada 5 minutos (mantém "em breve" atualizado)
+setInterval(() => { renderGrade(obterInicioDaSemana(), obterFimDaSemana()); renderProximas(); }, 5 * 60 * 1000);
+
+// ── Canvas partículas ─────────────────────────────────────────────────────────
+function iniciarCanvas() {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx    = canvas.getContext('2d');
+  let W, H, pts = [];
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    pts = Array.from({length:50}, () => ({
+      x: Math.random()*W, y: Math.random()*H,
+      vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+      r: Math.random()*1.5+.5,
+    }));
+  }
+  function draw() {
+    if (document.hidden) { requestAnimationFrame(draw); return; }
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x<0||p.x>W) p.vx*=-1;
+      if (p.y<0||p.y>H) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(124,58,237,.4)'; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize(); draw();
+}
+</script>
+</body>
+</html>
