@@ -11,19 +11,28 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // Reuniões da semana (ou semana específica)
 router.get('/agenda', authMiddleware, async (req, res) => {
   try {
-    const semana = req.query.semana; // YYYY-MM-DD (qualquer dia da semana)
+    const semana = req.query.semana; // YYYY-MM-DD (qualquer dia da semana ou primeiro dia do mês)
+    const fimQs  = req.query.fim;    // YYYY-MM-DD opcional (para vista mensal)
     const ref    = semana ? new Date(semana) : new Date();
 
-    // Início da semana (segunda-feira)
-    const dow    = ref.getDay(); // 0=dom
-    const diff   = (dow === 0 ? -6 : 1 - dow);
-    const inicio = new Date(ref);
-    inicio.setDate(ref.getDate() + diff);
-    inicio.setHours(0, 0, 0, 0);
-
-    const fim = new Date(inicio);
-    fim.setDate(inicio.getDate() + 6);
-    fim.setHours(23, 59, 59, 999);
+    let inicio, fim;
+    if (fimQs) {
+      // Vista mensal: inicio e fim passados diretamente
+      inicio = new Date(semana);
+      inicio.setHours(0, 0, 0, 0);
+      fim = new Date(fimQs);
+      fim.setHours(23, 59, 59, 999);
+    } else {
+      // Vista semanal: calcular seg-dom
+      const dow  = ref.getDay();
+      const diff = (dow === 0 ? -6 : 1 - dow);
+      inicio = new Date(ref);
+      inicio.setDate(ref.getDate() + diff);
+      inicio.setHours(0, 0, 0, 0);
+      fim = new Date(inicio);
+      fim.setDate(inicio.getDate() + 6);
+      fim.setHours(23, 59, 59, 999);
+    }
 
     const { data, error } = await supabase
       .from('leads')

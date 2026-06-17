@@ -141,13 +141,17 @@
     </div>
   </div>
 
-  <!-- Navegação semana -->
-  <div class="nav-semana">
-    <button class="btn-nav" onclick="navegarSemana(-1)">← Semana anterior</button>
+  <!-- Navegação -->
+  <div class="nav-semana" style="flex-wrap:wrap;gap:8px">
+    <button class="btn-nav" id="btn-nav-ant" onclick="navAnterior()">← Anterior</button>
     <div class="semana-label" id="semana-label">Carregando…</div>
     <button class="btn-hoje" onclick="irParaHoje()">Hoje</button>
-    <button class="btn-nav" onclick="navegarSemana(1)">Próxima semana →</button>
-    <button class="btn-hoje" onclick="abrirModalFollowupAgenda()" style="background:linear-gradient(135deg,#6D28D9,#A78BFA)">+ Follow-up</button>
+    <button class="btn-nav" id="btn-nav-prox" onclick="navProximo()">Próximo →</button>
+    <div style="display:flex;gap:6px;margin-left:auto">
+      <button id="btn-vista-semana" onclick="setVista('semana')" style="padding:6px 14px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600">Semana</button>
+      <button id="btn-vista-mes" onclick="setVista('mes')" style="padding:6px 14px;background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600">Mês</button>
+      <button onclick="abrirModalFollowupAgenda()" style="padding:6px 14px;background:linear-gradient(135deg,#6D28D9,#A78BFA);color:#fff;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600">+ Follow-up</button>
+    </div>
   </div>
 
   <!-- Modal Follow-up -->
@@ -187,8 +191,11 @@
   <!-- Grade semanal -->
   <div class="grade" id="grade-semana"></div>
 
+  <!-- Grade mensal -->
+  <div id="grade-mes" style="display:none;padding:0 20px 20px"></div>
+
   <!-- Próximas reuniões (lista detalhada) -->
-  <p class="sec-title" id="proximas-titulo">⚡ Próximas reuniões desta semana</p>
+  <p class="sec-title" id="proximas-titulo">⚡ Próximas reuniões & follow-ups</p>
   <div class="proximas-lista" id="proximas-lista">
     <div class="loading">Carregando…</div>
   </div>
@@ -233,10 +240,12 @@
 <script src="/js/api.js"></script>
 <script>
 // ── Auth ──────────────────────────────────────────────────────────────────────
-function getToken() { return localStorage.getItem('may_token'); }
+function getToken() { return localStorage.getItem('may_access'); }
 
 // ── Estado ────────────────────────────────────────────────────────────────────
 let _semanaRef  = new Date();
+let _mesRef     = new Date();
+let _vista      = 'semana'; // 'semana' | 'mes'
 let _reunioes   = [];
 let _followups  = [];
 let _inicioRef  = null;
@@ -249,12 +258,45 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarCanvas();
 });
 
+// ── Vista ─────────────────────────────────────────────────────────────────────
+function setVista(v) {
+  _vista = v;
+  document.getElementById('grade-semana').style.display = v === 'semana' ? '' : 'none';
+  document.getElementById('grade-mes').style.display    = v === 'mes' ? '' : 'none';
+  document.getElementById('proximas-titulo').style.display = v === 'semana' ? '' : 'none';
+  document.getElementById('proximas-lista').style.display  = v === 'semana' ? '' : 'none';
+  // Estilo botões
+  document.getElementById('btn-vista-semana').style.cssText =
+    v === 'semana'
+      ? 'padding:6px 14px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600'
+      : 'padding:6px 14px;background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600';
+  document.getElementById('btn-vista-mes').style.cssText =
+    v === 'mes'
+      ? 'padding:6px 14px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600'
+      : 'padding:6px 14px;background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600';
+  if (v === 'mes') { _mesRef = _semanaRef; carregarMes(); }
+  else carregarSemana();
+}
+
 // ── Navegação ─────────────────────────────────────────────────────────────────
+function navAnterior() {
+  if (_vista === 'semana') { _semanaRef = new Date(_semanaRef.getTime() - 7 * 86400000); carregarSemana(); }
+  else { _mesRef = new Date(_mesRef.getFullYear(), _mesRef.getMonth() - 1, 1); carregarMes(); }
+}
+function navProximo() {
+  if (_vista === 'semana') { _semanaRef = new Date(_semanaRef.getTime() + 7 * 86400000); carregarSemana(); }
+  else { _mesRef = new Date(_mesRef.getFullYear(), _mesRef.getMonth() + 1, 1); carregarMes(); }
+}
 function navegarSemana(delta) {
-  _semanaRef = new Date(_semanaRef.getTime() + delta * 7 * 24 * 60 * 60 * 1000);
+  _semanaRef = new Date(_semanaRef.getTime() + delta * 7 * 86400000);
   carregarSemana();
 }
-function irParaHoje() { _semanaRef = new Date(); carregarSemana(); }
+function irParaHoje() {
+  _semanaRef = new Date();
+  _mesRef = new Date();
+  if (_vista === 'semana') carregarSemana();
+  else carregarMes();
+}
 
 // ── Carregar semana ───────────────────────────────────────────────────────────
 async function carregarSemana() {
@@ -556,7 +598,103 @@ document.getElementById('modal-briefing').addEventListener('click', e => {
 });
 
 // Atualiza a cada 5 minutos (mantém "em breve" atualizado)
-setInterval(() => { renderGrade(obterInicioDaSemana(), obterFimDaSemana()); renderProximas(); }, 5 * 60 * 1000);
+setInterval(() => { if (_vista === 'semana') { renderGrade(obterInicioDaSemana(), obterFimDaSemana()); renderProximas(); } }, 5 * 60 * 1000);
+
+// ── Vista Mensal ──────────────────────────────────────────────────────────────
+async function carregarMes() {
+  const ano = _mesRef.getFullYear();
+  const mes = _mesRef.getMonth(); // 0-indexed
+
+  // Label
+  const nomeMes = _mesRef.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  document.getElementById('semana-label').textContent = nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1);
+
+  // Buscar todos os followups do mês + reuniões
+  const primeiroDia = new Date(ano, mes, 1).toISOString().slice(0, 10);
+  const ultimoDia   = new Date(ano, mes + 1, 0).toISOString().slice(0, 10);
+
+  try {
+    const [resReun, resFollow] = await Promise.all([
+      api.get(`/leads/agenda?semana=${primeiroDia}&fim=${ultimoDia}`),
+      api.get(`/followups/agenda?semana=${primeiroDia}&fim=${ultimoDia}`),
+    ]);
+    const reunioes  = resReun?.ok ? ((await resReun.json()).reunioes || []) : [];
+    const followups = resFollow?.ok ? ((await resFollow.json()).followups || []) : [];
+    renderGradeMes(ano, mes, reunioes, followups);
+  } catch {
+    renderGradeMes(ano, mes, [], []);
+  }
+}
+
+function renderGradeMes(ano, mes, reunioes, followups) {
+  const el = document.getElementById('grade-mes');
+
+  const primeiroDia = new Date(ano, mes, 1);
+  const ultimoDia   = new Date(ano, mes + 1, 0).getDate();
+  const hoje        = new Date();
+  const hojeStr     = hoje.toISOString().slice(0, 10);
+
+  // Indexar eventos por dia
+  const eventosPorDia = {};
+  reunioes.forEach(r => {
+    const d = (r.data_reuniao || '').slice(0, 10);
+    if (!eventosPorDia[d]) eventosPorDia[d] = [];
+    eventosPorDia[d].push({ tipo: 'reuniao', nome: r.nome_lead || r.empresa || '—', hora: (r.data_reuniao || '').slice(11, 16) });
+  });
+  followups.forEach(f => {
+    const d = (f.data_hora || '').slice(0, 10);
+    if (!eventosPorDia[d]) eventosPorDia[d] = [];
+    eventosPorDia[d].push({ tipo: 'followup', nome: f.nome_lead || f.descricao || '—', hora: (f.data_hora || '').slice(11, 16), concluido: f.concluido });
+  });
+
+  // Dia da semana em que começa o mês (0=dom)
+  const offset = primeiroDia.getDay(); // 0=Sun
+
+  const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  let html = `
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px">
+      ${diasSemana.map(d => `<div style="text-align:center;font-size:0.7rem;color:#888;font-weight:600;padding:6px 0">${d}</div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+  `;
+
+  // Células vazias antes do dia 1
+  for (let i = 0; i < offset; i++) {
+    html += `<div style="min-height:80px;border-radius:8px;background:rgba(255,255,255,0.02)"></div>`;
+  }
+
+  for (let dia = 1; dia <= ultimoDia; dia++) {
+    const dataStr = `${ano}-${String(mes + 1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+    const isHoje  = dataStr === hojeStr;
+    const eventos = eventosPorDia[dataStr] || [];
+    const maxShow = 3;
+
+    html += `
+      <div style="min-height:80px;border-radius:8px;background:${isHoje ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)'};border:1px solid ${isHoje ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'};padding:6px;position:relative">
+        <div style="font-size:0.75rem;font-weight:${isHoje ? '700' : '500'};color:${isHoje ? '#A78BFA' : '#ccc'};margin-bottom:4px">${dia}</div>
+        ${eventos.slice(0, maxShow).map(ev => `
+          <div style="font-size:0.65rem;padding:2px 5px;border-radius:4px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+            background:${ev.tipo === 'reuniao' ? 'rgba(59,130,246,0.2)' : ev.concluido ? 'rgba(34,197,94,0.15)' : 'rgba(109,40,217,0.25)'};
+            color:${ev.tipo === 'reuniao' ? '#93C5FD' : ev.concluido ? '#86EFAC' : '#C4B5FD'};
+            border-left:2px solid ${ev.tipo === 'reuniao' ? '#3B82F6' : ev.concluido ? '#22C55E' : '#6D28D9'}">
+            ${ev.hora} ${ev.nome}
+          </div>
+        `).join('')}
+        ${eventos.length > maxShow ? `<div style="font-size:0.6rem;color:#888">+${eventos.length - maxShow} mais</div>` : ''}
+      </div>
+    `;
+  }
+
+  // Completar última linha
+  const totalCelulas = offset + ultimoDia;
+  const resto = (7 - (totalCelulas % 7)) % 7;
+  for (let i = 0; i < resto; i++) {
+    html += `<div style="min-height:80px;border-radius:8px;background:rgba(255,255,255,0.02)"></div>`;
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
 
 // ── Canvas partículas ─────────────────────────────────────────────────────────
 function iniciarCanvas() {

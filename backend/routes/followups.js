@@ -5,19 +5,26 @@ const { supabase }       = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 
 // ─── GET /api/followups/agenda ────────────────────────────────────────────────
-// Follow-ups da semana (mesmo intervalo da agenda de reuniões)
+// Follow-ups da semana ou mês (aceita ?semana=YYYY-MM-DD&fim=YYYY-MM-DD para vista mensal)
 router.get('/agenda', authMiddleware, async (req, res) => {
   try {
     const semana = req.query.semana;
+    const fimQs  = req.query.fim;
     const ref    = semana ? new Date(semana) : new Date();
-    const dow    = ref.getDay();
-    const diff   = (dow === 0 ? -6 : 1 - dow);
-    const inicio = new Date(ref);
-    inicio.setDate(ref.getDate() + diff);
-    inicio.setHours(0, 0, 0, 0);
-    const fim = new Date(inicio);
-    fim.setDate(inicio.getDate() + 6);
-    fim.setHours(23, 59, 59, 999);
+    let inicio, fim;
+    if (fimQs) {
+      inicio = new Date(semana); inicio.setHours(0, 0, 0, 0);
+      fim    = new Date(fimQs);  fim.setHours(23, 59, 59, 999);
+    } else {
+      const dow  = ref.getDay();
+      const diff = (dow === 0 ? -6 : 1 - dow);
+      inicio = new Date(ref);
+      inicio.setDate(ref.getDate() + diff);
+      inicio.setHours(0, 0, 0, 0);
+      fim = new Date(inicio);
+      fim.setDate(inicio.getDate() + 6);
+      fim.setHours(23, 59, 59, 999);
+    }
 
     const { data, error } = await supabase
       .from('followups')
