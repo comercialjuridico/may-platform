@@ -573,18 +573,22 @@ async function enviarMensagem() {
         atualizarContadorUso();
         // Recarrega lista de conversas
         recarregarConversas();
+        // Reabilita botão apenas ao fim do streaming
+        estado.enviando = false;
+        document.getElementById('btn-send').disabled = false;
+        input.focus();
       }
     },
     // onError
     (msg) => {
       bolha.innerHTML = `<span style="color:var(--error)">${escapeHtml(msg)}</span>`;
       mostrarToast(msg, 'erro');
+      // Reabilita botão em caso de erro também
+      estado.enviando = false;
+      document.getElementById('btn-send').disabled = false;
+      input.focus();
     }
   );
-
-  estado.enviando = false;
-  document.getElementById('btn-send').disabled = false;
-  input.focus();
 }
 
 // ─── Adicionar mensagem ao DOM ────────────────────────────────────────────────

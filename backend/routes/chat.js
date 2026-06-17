@@ -92,11 +92,8 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
       content: mensagem,
     });
 
-    // Incrementa contador de mensagens do usuário
-    await supabase.from('users').update({
-      mensagens_mes: (req.user.mensagens_mes || 0) + 1,
-      mes_referencia: new Date().toISOString().slice(0, 7),
-    }).eq('id', req.user.id);
+    // Incrementa contador atomicamente via RPC para evitar race condition
+    await supabase.rpc('incrementar_mensagens_mes', { uid: req.user.id });
 
     // System prompt personalizado
     const systemPrompt = buildSystemPrompt(req.user, ferramenta, area_ativa);
