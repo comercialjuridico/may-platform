@@ -235,6 +235,11 @@ function renderizarSidebar() {
   if (linkRanking) {
     linkRanking.style.display = user?.empresa_id ? 'block' : 'none';
   }
+  const btnFunil = document.getElementById('btn-funil');
+  if (btnFunil) {
+    // Mostra para membros de empresa (SDR e closers também)
+    btnFunil.style.display = user?.empresa_id ? 'block' : 'none';
+  }
 }
 
 // ─── Seletor de Área Ativa ───────────────────────────────────────────────────
@@ -1116,20 +1121,100 @@ async function salvarPerfil() {
   renderizarSidebar();
 }
 
-// ─── Planos / Checkout ───────────────────────────────────────────────────────
-async function iniciarCheckout(plano) {
-  mostrarToast('Redirecionando...', 'aviso');
-  const res = await api.post('/stripe/checkout', { plano });
-  if (!res?.ok) { mostrarToast('Erro ao iniciar pagamento', 'erro'); return; }
-  const data = await res.json();
-  window.location.href = data.url;
+// ─── Planos / Checkout Cielo ─────────────────────────────────────────────────
+let _planoSelecionado = 'mensal';
+
+function iniciarCheckout(plano) {
+  _planoSelecionado = plano;
+  const label = plano === 'mensal' ? 'Mensal' : 'Anual';
+  document.getElementById('cartao-titulo').textContent = `Assinar — Plano ${label}`;
+  document.getElementById('cartao-erro').style.display = 'none';
+  document.getElementById('modal-planos').classList.remove('active');
+  document.getElementById('modal-cartao').classList.add('active');
 }
 
-async function abrirPortalStripe() {
-  const res = await api.post('/stripe/portal', {});
-  if (!res?.ok) { mostrarToast('Erro ao abrir portal', 'erro'); return; }
-  const data = await res.json();
-  window.open(data.url, '_blank');
+async function submeterCartao(e) {
+  e.preventDefault();
+  const btn  = document.getElementById('btn-pagar');
+  const erro = document.getElementById('cartao-erro');
+  erro.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Processando...';
+
+  try {
+    const res = await api.post('/cielo/checkout', {
+      plano: _planoSelecionado,
+      cpf:   document.getElementById('cartao-cpf').value,
+      cartao: {
+        numero:   document.getElementById('cartao-numero').value.replace(/\D/g, ''),
+        titular:  document.getElementById('cartao-titular').value,
+        validade: document.getElementById('cartao-validade').value, // MM/AAAA
+        cvv:      document.getElementById('cartao-cvv').value,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      erro.textContent = data.erro || 'Pagamento recusado. Verifique os dados e tente novamente.';
+      erro.style.display = 'block';
+      return;
+    }
+
+    // Sucesso — fecha modal, atualiza estado, exibe confirmação
+    document.getElementById('modal-cartao').classList.remove('active');
+    estado.user.plano = _planoSelecionado;
+    estado.user.plano_status = 'ativo';
+    renderizarSidebar();
+    mostrarToast(`🎉 Plano ${_planoSelecionado} ativado com sucesso!`, 'sucesso');
+
+  } catch {
+    erro.textContent = 'Erro de conexão. Tente novamente.';
+    erro.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar assinatura';
+  }
+}
+
+async function cancelarAssinatura() {
+  if (!confirm('Tem certeza que deseja cancelar sua assinatura? Você perderá o acesso ao plano.')) return;
+  const res = await api.post('/cielo/cancelar', {});
+  if (!res?.ok) { mostrarToast('Erro ao cancelar assinatura', 'erro'); return; }
+  estado.user.plano = 'free';
+  estado.user.plano_status = 'cancelado';
+  renderizarSidebar();
+  mostrarToast('Assinatura cancelada.', 'aviso');
+}
+
+// Helpers para formatação do formulário de cartão
+function formatarNumeroCartao(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 16);
+  input.value = v.replace(/(.{4})/g, '$1 ').trim();
+  const { detectarBandeira } = window;
+  // Detecta bandeira client-side
+  const n = v;
+  let marca = '';
+  if (/^4/.test(n))                          marca = '💳 Visa';
+  else if (/^5[1-5]/.test(n))               marca = '💳 Mastercard';
+  else if (/^3[47]/.test(n))                marca = '💳 Amex';
+  else if (/^(?:506699|5067|4576)/.test(n)) marca = '💳 Elo';
+  else if (n.length >= 4)                   marca = '💳 Cartão';
+  document.getElementById('cartao-bandeira').textContent = marca;
+}
+
+function formatarValidade(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 6);
+  if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+  input.value = v;
+}
+
+function formatarCPF(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  input.value = v;
 }
 
 // ─── Modal: Registrar Venda ───────────────────────────────────────────────────
@@ -1712,6 +1797,174 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// ─── Funil SDR / Closer ──────────────────────────────────────────────────────
+const funil = (() => {
+  let _leads = [];
+  let _leadAtivo = null;
+
+  function aba(nome) {
+    ['novo', 'lista'].forEach(n => {
+      const el = document.getElementById(`funil-aba-${n}`);
+      if (el) el.style.display = n === nome ? 'block' : 'none';
+      const tab = document.getElementById(`tab-${n === 'novo' ? 'novo-lead' : 'leads'}`);
+      if (tab) tab.classList.toggle('active', n === nome);
+    });
+    if (nome === 'lista') listar();
+  }
+
+  async function listar() {
+    const container = document.getElementById('funil-leads-lista');
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">Carregando…</div>';
+
+    const status = document.getElementById('funil-filtro-status')?.value || '';
+    const url    = '/leads' + (status ? `?status=${encodeURIComponent(status)}` : '');
+
+    try {
+      const res  = await api.get(url);
+      if (!res?.ok) throw new Error();
+      const data = await res.json();
+      _leads = data.leads || [];
+
+      if (!_leads.length) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:32px">Nenhum lead encontrado.</div>';
+        return;
+      }
+
+      const statusLabel = {
+        novo: 'Novo',
+        briefing_gerado: 'Briefing pronto',
+        reuniao_agendada: 'Reunião marcada',
+        negociando: 'Negociando',
+        ganhou: 'Ganhou ✅',
+        perdeu: 'Perdeu ❌',
+      };
+
+      container.innerHTML = _leads.map(l => `
+        <div class="lead-card" onclick="funil.abrirBriefing('${l.id}')">
+          <div style="display:flex;align-items:flex-start;gap:10px;justify-content:space-between">
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:14px;margin-bottom:2px">${esc(l.nome_lead)}</div>
+              ${l.empresa_lead ? `<div style="font-size:12px;color:var(--text-muted)">${esc(l.empresa_lead)}</div>` : ''}
+            </div>
+            <span class="lead-status-pill status-${l.status || 'novo'}">${statusLabel[l.status] || l.status}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.4">
+            ${esc(l.contexto?.slice(0, 100))}${(l.contexto?.length || 0) > 100 ? '…' : ''}
+          </div>
+          <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--text-muted)">
+            <span>SDR: ${l.sdr?.name || '—'}</span>
+            ${l.closer?.name ? `<span>Closer: ${l.closer.name}</span>` : ''}
+            <span>Origem: ${esc(l.origem || '—')}</span>
+            ${l.valor_estimado ? `<span style="color:#10B981">R$ ${Number(l.valor_estimado).toLocaleString('pt-BR')}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:32px">Erro ao carregar leads.</div>';
+    }
+  }
+
+  async function registrar(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-registrar-lead');
+    btn.disabled = true;
+    btn.textContent = '⏳ Gerando briefing com May…';
+
+    try {
+      const body = {
+        nome_lead:       document.getElementById('fl-nome').value.trim(),
+        empresa_lead:    document.getElementById('fl-empresa').value.trim() || null,
+        contexto:        document.getElementById('fl-contexto').value.trim(),
+        objecao_inicial: document.getElementById('fl-objecao').value.trim() || null,
+        origem:          document.getElementById('fl-origem').value,
+        valor_estimado:  document.getElementById('fl-valor').value || null,
+        closer_id:       document.getElementById('fl-closer')?.value || null,
+      };
+
+      const res  = await api.post('/leads', body);
+      const data = await res?.json();
+
+      if (!res?.ok) throw new Error(data?.erro || 'Erro ao registrar lead.');
+
+      // Limpa form
+      ['fl-nome','fl-empresa','fl-contexto','fl-objecao','fl-valor'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      mostrarToast('✅ Lead registrado! Briefing gerado pela May.', 'sucesso');
+
+      // Exibe briefing imediatamente
+      _leadAtivo = data.lead;
+      mostrarBriefing(data.lead);
+
+    } catch (err) {
+      mostrarToast(err.message || 'Erro ao registrar lead.', 'erro');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🎯 Registrar Lead e Gerar Briefing';
+    }
+  }
+
+  function abrirBriefing(id) {
+    const lead = _leads.find(l => l.id === id);
+    if (!lead) return;
+    _leadAtivo = lead;
+    mostrarBriefing(lead);
+  }
+
+  function mostrarBriefing(lead) {
+    document.getElementById('briefing-titulo').textContent   = `🎯 ${lead.nome_lead}`;
+    document.getElementById('briefing-origem').textContent   = `Origem: ${lead.origem || '—'} · ${lead.empresa_lead || ''}`;
+    document.getElementById('briefing-conteudo').textContent = lead.briefing || 'Briefing não disponível.';
+    document.getElementById('briefing-lead-id').value        = lead.id;
+    document.getElementById('briefing-resultado').value      = lead.resultado || '';
+    document.getElementById('briefing-valor-group').style.display = 'none';
+    document.getElementById('modal-briefing').classList.add('active');
+  }
+
+  async function atualizarStatus(btn) {
+    const id     = document.getElementById('briefing-lead-id')?.value;
+    const status = btn.dataset.status;
+    if (!id) return;
+
+    const ganhando = status === 'ganhou';
+    document.getElementById('briefing-valor-group').style.display = ganhando ? 'block' : 'none';
+    if (!ganhando) _confirmarStatus(id, status);
+  }
+
+  async function _confirmarStatus(id, status) {
+    const resultado    = document.getElementById('briefing-resultado')?.value;
+    const valor_fechado = document.getElementById('briefing-valor-fechado')?.value || null;
+
+    try {
+      const res = await api.patch(`/leads/${id}/status`, { status, resultado, valor_fechado });
+      if (!res?.ok) throw new Error();
+      mostrarToast('Status atualizado!', 'sucesso');
+      document.getElementById('modal-briefing').classList.remove('active');
+      listar();
+    } catch {
+      mostrarToast('Erro ao atualizar status.', 'erro');
+    }
+  }
+
+  return { aba, listar, registrar, abrirBriefing, atualizarStatus };
+})();
+
+function abrirModalFunil() {
+  document.getElementById('modal-funil').classList.add('active');
+  funil.aba('novo');
+}
+
+function fecharModalFunil() {
+  document.getElementById('modal-funil').classList.remove('active');
+}
+
+function fecharModalBriefing() {
+  document.getElementById('modal-briefing').classList.remove('active');
+}
+
 // Expõe funções necessárias para o HTML
 Object.assign(window, {
   enviarMensagem, novaConversa, carregarConversa, excluirConversa,
@@ -1728,4 +1981,6 @@ Object.assign(window, {
   testarNotificacao,
   instalarPWA, fecharBannerPWA,
   toggleTema,
+  abrirModalFunil, fecharModalFunil, fecharModalBriefing,
+  funil,
 });

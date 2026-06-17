@@ -165,6 +165,31 @@
     .badge-warn { display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,.15);
       color:#FCA5A5; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
 
+    /* ── Funil ─── */
+    .funil-steps { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:16px; }
+    @media(max-width:700px){ .funil-steps { grid-template-columns:1fr 1fr; } }
+    .funil-step { background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      padding:14px 12px; text-align:center; position:relative; overflow:hidden; }
+    .funil-step::before { content:''; position:absolute; inset:0; opacity:.07; }
+    .funil-step.leads::before  { background:#60A5FA; }
+    .funil-step.reunioes::before { background:#A78BFA; }
+    .funil-step.negoc::before  { background:#F59E0B; }
+    .funil-step.ganhos::before { background:#10B981; }
+    .funil-step.perdas::before { background:#EF4444; }
+    .funil-step-val { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
+    .funil-step.leads .funil-step-val  { color:#60A5FA; }
+    .funil-step.reunioes .funil-step-val { color:#A78BFA; }
+    .funil-step.negoc .funil-step-val  { color:#F59E0B; }
+    .funil-step.ganhos .funil-step-val { color:#10B981; }
+    .funil-step.perdas .funil-step-val { color:#EF4444; }
+    .funil-step-lbl { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; margin-top:3px; }
+    .funil-step-taxa { font-size:11px; font-weight:700; margin-top:6px; opacity:.8; }
+    .funil-taxas-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; }
+    .funil-taxa-card { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:12px 14px; text-align:center; }
+    .funil-taxa-val { font-size:18px; font-weight:800; font-family:'Syne',sans-serif; color:#A78BFA; }
+    .funil-taxa-lbl { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+
     /* ── Metas ─── */
     .metas-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; margin-top:28px; }
     .btn-nova-meta { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
@@ -271,6 +296,12 @@
     <button class="btn-nova-meta" onclick="abrirModalMeta()">+ Nova Meta</button>
   </div>
   <div id="metas-content"><div class="loading">Carregando metas</div></div>
+
+  <!-- Seção Funil -->
+  <div class="metas-header" style="margin-top:32px">
+    <p class="sec-title" style="margin:0">🎯 Funil SDR / Closer</p>
+  </div>
+  <div id="funil-content"><div class="loading">Carregando funil</div></div>
 
 </div>
 
@@ -407,6 +438,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
 
   await carregarDash();
   await carregarMetas();
+  await carregarFunil();
 });
 
 async function aplicarFiltros(){ await carregarDash(); }
@@ -726,6 +758,72 @@ function renderClientes(vendas){
     </tr></thead>
     <tbody>${linhas}</tbody>
   </table></div>`;
+}
+
+// ── Funil SDR / Closer ────────────────────────────────────────────────────────
+async function carregarFunil() {
+  const container = document.getElementById('funil-content');
+  if (!container) return;
+  try {
+    const res  = await fetch('/api/leads/funil', {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error();
+    const { funil, taxas } = await res.json();
+
+    const fmtBRL = v => v ? 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : 'R$ 0,00';
+
+    container.innerHTML = `
+      <div class="funil-steps">
+        <div class="funil-step leads">
+          <div class="funil-step-val">${funil.total}</div>
+          <div class="funil-step-lbl">Total Leads</div>
+        </div>
+        <div class="funil-step reunioes">
+          <div class="funil-step-val">${funil.reunioes}</div>
+          <div class="funil-step-lbl">Reuniões</div>
+          <div class="funil-step-taxa" style="color:#A78BFA">${taxas.taxaReuniao}% conversão</div>
+        </div>
+        <div class="funil-step negoc">
+          <div class="funil-step-val">${funil.negociando}</div>
+          <div class="funil-step-lbl">Negociando</div>
+        </div>
+        <div class="funil-step ganhos">
+          <div class="funil-step-val">${funil.ganhos}</div>
+          <div class="funil-step-lbl">Ganhos ✅</div>
+          <div class="funil-step-taxa" style="color:#10B981">${taxas.taxaFechamento}% fechamento</div>
+        </div>
+        <div class="funil-step perdas">
+          <div class="funil-step-val">${funil.perdidos}</div>
+          <div class="funil-step-lbl">Perdidos ❌</div>
+        </div>
+      </div>
+
+      <div class="funil-taxas-row">
+        <div class="funil-taxa-card">
+          <div class="funil-taxa-val">${taxas.taxaGeral}%</div>
+          <div class="funil-taxa-lbl">Taxa geral (lead → fechado)</div>
+        </div>
+        <div class="funil-taxa-card">
+          <div class="funil-taxa-val">${taxas.taxaReuniao}%</div>
+          <div class="funil-taxa-lbl">Lead → Reunião</div>
+        </div>
+        <div class="funil-taxa-card">
+          <div class="funil-taxa-val" style="color:#10B981">${fmtBRL(funil.valorTotal)}</div>
+          <div class="funil-taxa-lbl">Receita gerada pelo funil</div>
+        </div>
+      </div>
+
+      ${funil.total === 0 ? `
+        <div class="insight-item info">
+          <span class="icon">💡</span>
+          <span>Nenhum lead registrado ainda. O SDR pode registrar leads diretamente na plataforma May.</span>
+        </div>
+      ` : ''}
+    `;
+  } catch {
+    container.innerHTML = '<div class="insight-item warn"><span class="icon">⚠️</span><span>Erro ao carregar funil.</span></div>';
+  }
 }
 </script>
 </body>

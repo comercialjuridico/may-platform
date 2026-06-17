@@ -43,8 +43,6 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
 // ─── Body Parser ───────────────────────────────────────────────────────────
-// ATENÇÃO: o webhook do Stripe precisa do raw body — montamos antes do json()
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -76,7 +74,7 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
 app.use('/api/auth',   require('./routes/auth'));
 app.use('/api/chat',   require('./routes/chat'));
 app.use('/api/user',   require('./routes/user'));
-app.use('/api/stripe', require('./routes/stripe'));
+app.use('/api/cielo',  require('./routes/cielo'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/gestor', require('./routes/gestor'));
@@ -87,6 +85,7 @@ app.use('/api/metas',  require('./routes/metas'));
 app.use('/api/2fa',          require('./routes/twofa'));
 app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/trilha',      require('./routes/trilha'));
+app.use('/api/leads',       require('./routes/leads'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

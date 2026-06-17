@@ -65,6 +65,9 @@
       <button onclick="abrirModalTrilha()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px;color:#A78BFA;border-color:rgba(167,139,250,0.25)">
         📚 Minha Trilha
       </button>
+      <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;margin-bottom:4px;color:#60A5FA;border-color:rgba(96,165,250,0.3)">
+        🎯 Funil SDR/Closer
+      </button>
       <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px">
         ⚖️ Áreas de trabalho <span id="areas-badge" style="font-size:0.7rem;color:var(--text-muted)"></span>
       </button>
@@ -164,7 +167,7 @@
     <div class="modal-header">
       <div>
         <span class="modal-title" id="diag-titulo">Diagnóstico Comercial</span>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="diag-passo-label">Passo 1 de 5</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="diag-passo-label">Passo 1 de 6</div>
       </div>
       <button class="modal-close" onclick="document.getElementById('modal-diagnostico').classList.remove('active')">✕</button>
     </div>
@@ -438,7 +441,66 @@
     </div>
 
     <p class="text-xs text-muted" style="text-align:center; margin-top:16px;">
-      Pagamento seguro via Stripe · Cancele a qualquer momento
+      🔒 Pagamento seguro via Cielo · Cancele a qualquer momento
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL: CARTÃO CIELO ══════════════ -->
+<div class="modal-overlay" id="modal-cartao">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title" id="cartao-titulo">Assinar — Plano Mensal</span>
+      <button class="modal-close" onclick="document.getElementById('modal-cartao').classList.remove('active')">✕</button>
+    </div>
+
+    <form id="form-cartao" onsubmit="submeterCartao(event)" autocomplete="off">
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+
+        <div>
+          <label class="text-xs text-muted" style="display:block;margin-bottom:4px">Número do cartão</label>
+          <input id="cartao-numero" class="input" type="text" inputmode="numeric"
+            placeholder="0000 0000 0000 0000" maxlength="19" required
+            oninput="formatarNumeroCartao(this)">
+          <span id="cartao-bandeira" style="font-size:.75rem;color:var(--text-muted);margin-top:2px;display:block"></span>
+        </div>
+
+        <div>
+          <label class="text-xs text-muted" style="display:block;margin-bottom:4px">Nome no cartão</label>
+          <input id="cartao-titular" class="input" type="text" placeholder="NOME COMPLETO" required
+            oninput="this.value=this.value.toUpperCase()">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label class="text-xs text-muted" style="display:block;margin-bottom:4px">Validade</label>
+            <input id="cartao-validade" class="input" type="text" placeholder="MM/AAAA" maxlength="7" required
+              oninput="formatarValidade(this)">
+          </div>
+          <div>
+            <label class="text-xs text-muted" style="display:block;margin-bottom:4px">CVV</label>
+            <input id="cartao-cvv" class="input" type="text" inputmode="numeric"
+              placeholder="123" maxlength="4" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-muted" style="display:block;margin-bottom:4px">CPF do titular</label>
+          <input id="cartao-cpf" class="input" type="text" inputmode="numeric"
+            placeholder="000.000.000-00" maxlength="14" required
+            oninput="formatarCPF(this)">
+        </div>
+
+        <div id="cartao-erro" style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px;font-size:.82rem;color:#FCA5A5;"></div>
+
+        <button id="btn-pagar" type="submit" class="btn btn-primary btn-full" style="margin-top:4px">
+          Confirmar assinatura
+        </button>
+      </div>
+    </form>
+
+    <p class="text-xs text-muted" style="text-align:center; margin-top:12px;">
+      🔒 Dados transmitidos com criptografia SSL para a Cielo
     </p>
   </div>
 </div>
@@ -556,6 +618,165 @@
   </div>
 </div>
 
+<!-- ══════════════ MODAL: FUNIL SDR / CLOSER ══════════════ -->
+<div class="modal-overlay" id="modal-funil">
+  <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header">
+      <div>
+        <span class="modal-title">🎯 Funil SDR / Closer</span>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Gerencie leads e briefings automáticos</div>
+      </div>
+      <button class="modal-close" onclick="fecharModalFunil()">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px">
+      <button class="funil-tab active" id="tab-novo-lead" onclick="funil.aba('novo')">➕ Novo Lead</button>
+      <button class="funil-tab" id="tab-leads" onclick="funil.aba('lista')">📋 Leads</button>
+    </div>
+
+    <!-- ABA: NOVO LEAD (SDR) -->
+    <div id="funil-aba-novo">
+      <form onsubmit="funil.registrar(event)" style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Nome do Lead *</label>
+            <input type="text" id="fl-nome" class="form-input" placeholder="João Silva" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Empresa / Escritório</label>
+            <input type="text" id="fl-empresa" class="form-input" placeholder="Advocacia Oliveira" />
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Origem</label>
+            <select id="fl-origem" class="form-input">
+              <option value="referência">Referência</option>
+              <option value="site">Site</option>
+              <option value="evento">Evento</option>
+              <option value="outbound">Outbound</option>
+              <option value="redes sociais">Redes sociais</option>
+              <option value="não informada">Não informada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Valor estimado (R$)</label>
+            <input type="number" id="fl-valor" class="form-input" placeholder="5000" min="0" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contexto levantado *</label>
+          <textarea id="fl-contexto" class="form-input" rows="3" style="resize:vertical"
+            placeholder="O que você sabe sobre esse lead? Qual é a dor dele, o que ele mencionou, qual é a urgência..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Objeção inicial (se houver)</label>
+          <input type="text" id="fl-objecao" class="form-input" placeholder="É caro, precisa pensar, já tem advogado..." />
+        </div>
+
+        <div class="form-group" id="fl-closer-group" style="display:none">
+          <label class="form-label">Atribuir para Closer</label>
+          <select id="fl-closer" class="form-input">
+            <option value="">— Sem closer (eu mesmo farei) —</option>
+          </select>
+        </div>
+
+        <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text-muted)">
+          ✨ A May vai gerar automaticamente um <strong style="color:#A78BFA">briefing personalizado</strong> para o closer entrar na reunião preparado.
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btn-registrar-lead">
+          🎯 Registrar Lead e Gerar Briefing
+        </button>
+      </form>
+    </div>
+
+    <!-- ABA: LISTA DE LEADS -->
+    <div id="funil-aba-lista" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="funil-filtro-status" class="form-input" style="min-width:160px;flex:1"
+          onchange="funil.listar()">
+          <option value="">Todos os status</option>
+          <option value="briefing_gerado">Briefing gerado</option>
+          <option value="reuniao_agendada">Reunião agendada</option>
+          <option value="negociando">Negociando</option>
+          <option value="ganhou">Ganhou ✅</option>
+          <option value="perdeu">Perdeu ❌</option>
+        </select>
+      </div>
+      <div id="funil-leads-lista" style="display:flex;flex-direction:column;gap:12px">
+        <div style="text-align:center;color:var(--text-muted);padding:32px">Carregando leads…</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: BRIEFING DO LEAD -->
+<div class="modal-overlay" id="modal-briefing">
+  <div class="modal" style="max-width:560px;max-height:88vh;overflow-y:auto">
+    <div class="modal-header">
+      <div>
+        <span class="modal-title" id="briefing-titulo">Briefing do Lead</span>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="briefing-origem"></div>
+      </div>
+      <button class="modal-close" onclick="fecharModalBriefing()">✕</button>
+    </div>
+
+    <!-- Briefing IA -->
+    <div id="briefing-conteudo" style="white-space:pre-wrap;font-size:13px;line-height:1.7;
+      background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);
+      border-radius:12px;padding:16px 18px;margin-bottom:16px"></div>
+
+    <!-- Atualizar status -->
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+        Atualizar status do lead
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn-status" data-status="reuniao_agendada" onclick="funil.atualizarStatus(this)">📅 Reunião marcada</button>
+        <button class="btn-status" data-status="negociando" onclick="funil.atualizarStatus(this)">🤝 Negociando</button>
+        <button class="btn-status btn-ganhou" data-status="ganhou" onclick="funil.atualizarStatus(this)">✅ Ganhou</button>
+        <button class="btn-status btn-perdeu" data-status="perdeu" onclick="funil.atualizarStatus(this)">❌ Perdeu</button>
+      </div>
+      <textarea id="briefing-resultado" class="form-input" rows="2" style="resize:vertical"
+        placeholder="Anotações pós-reunião (opcional)..."></textarea>
+      <div id="briefing-valor-group" style="display:none;margin-top:8px">
+        <input type="number" id="briefing-valor-fechado" class="form-input" placeholder="Valor fechado (R$)" min="0" />
+      </div>
+    </div>
+
+    <input type="hidden" id="briefing-lead-id" />
+
+    <style>
+      .btn-status { background:var(--surface);border:1px solid var(--border);border-radius:8px;
+        padding:6px 12px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .2s; }
+      .btn-status:hover { border-color:rgba(167,139,250,.4); }
+      .btn-status.btn-ganhou { color:#6EE7B7;border-color:rgba(16,185,129,.3); }
+      .btn-status.btn-ganhou:hover { background:rgba(16,185,129,.1); }
+      .btn-status.btn-perdeu { color:#FCA5A5;border-color:rgba(239,68,68,.3); }
+      .btn-status.btn-perdeu:hover { background:rgba(239,68,68,.1); }
+      .funil-tab { background:transparent;border:none;padding:8px 14px;font-size:13px;
+        font-weight:600;color:var(--text-muted);cursor:pointer;border-radius:8px;transition:all .2s; }
+      .funil-tab.active { background:var(--brand-subtle);color:#A78BFA; }
+      .lead-card { background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:14px 16px;cursor:pointer;transition:all .2s; }
+      .lead-card:hover { border-color:rgba(124,58,237,.35);transform:translateY(-1px); }
+      .lead-status-pill { display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;
+        border-radius:20px;text-transform:uppercase;letter-spacing:.04em; }
+      .status-briefing_gerado { background:rgba(96,165,250,.15);color:#60A5FA; }
+      .status-reuniao_agendada { background:rgba(167,139,250,.15);color:#A78BFA; }
+      .status-negociando { background:rgba(245,158,11,.15);color:#F59E0B; }
+      .status-ganhou { background:rgba(16,185,129,.15);color:#10B981; }
+      .status-perdeu { background:rgba(239,68,68,.15);color:#EF4444; }
+    </style>
+  </div>
+</div>
+
 <script src="/js/api.js"></script>
 <script src="/js/markdown.js"></script>
 <script src="/js/app.js"></script>
@@ -592,9 +813,19 @@
     draw();
   })();
 
-  // Abre modal de planos
-  function abrirModalPlanos() {
+  // Abre modal de planos e carrega preços do Stripe
+  async function abrirModalPlanos() {
     document.getElementById('modal-planos').classList.add('active');
+    try {
+      const res = await fetch('/api/cielo/precos');
+      if (res.ok) {
+        const { mensal, anual } = await res.json();
+        const elM = document.getElementById('preco-mensal');
+        const elA = document.getElementById('preco-anual');
+        if (elM) elM.textContent = `R$ ${Number(mensal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        if (elA) elA.textContent = `R$ ${Number(anual).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      }
+    } catch { /* mantém R$ — se falhar */ }
   }
 
   // Fecha modal ao clicar fora
