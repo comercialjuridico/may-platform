@@ -10,7 +10,8 @@ const LIMITE_GRATUITO = 3;
 // Planos que têm áreas ilimitadas (ou limite maior)
 function limiteAreas(plano, plano_status) {
   const ativo = plano_status === 'ativo';
-  if (ativo && (plano === 'pro' || plano === 'team' || plano === 'team_pro')) {
+  const planospagos = ['mensal', 'anual', 'pro', 'team', 'team_pro'];
+  if (ativo && planospagos.includes(plano)) {
     return 99; // ilimitado na prática
   }
   return LIMITE_GRATUITO;
