@@ -185,20 +185,48 @@ function verificarDiagnostico() {
   }
 }
 
+// ─── Header user dropdown ────────────────────────────────────────────────────
+function toggleUserDropdown() {
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+function fecharUserDropdown() {
+  document.getElementById('user-dropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('header-user-wrap');
+  if (wrap && !wrap.contains(e.target)) fecharUserDropdown();
+});
+
+function _setAvatarEl(el, user) {
+  if (!el) return;
+  if (user?.avatar_url) {
+    el.innerHTML = `<img src="${user.avatar_url}" alt="" />`;
+  } else {
+    el.textContent = (user?.name || 'U').charAt(0).toUpperCase();
+  }
+}
+
 // ─── Render Sidebar ──────────────────────────────────────────────────────────
 function renderizarSidebar() {
   const user = estado.user;
 
-  // Avatar e nome
+  // Avatar no header (canto superior direito)
+  _setAvatarEl(document.getElementById('header-avatar'), user);
+
+  // Dropdown: avatar, nome, role, email
+  _setAvatarEl(document.getElementById('dd-avatar'), user);
+  document.getElementById('dd-name').textContent  = user?.name  || '—';
+  document.getElementById('dd-email').textContent = user?.email || '—';
+  const roleLabel = { admin: 'Administrador', gestor: 'Gestor', membro: 'Membro' };
+  document.getElementById('dd-role').textContent  = roleLabel[user?.role] || (user?.plano || 'free');
+
+  // Compat: elementos antigos podem não existir mais
   const avatarEl = document.getElementById('user-avatar-text');
-  if (user?.avatar_url) {
-    avatarEl.innerHTML = `<img src="${user.avatar_url}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-  } else {
-    avatarEl.textContent = (user?.name || 'U').charAt(0).toUpperCase();
-  }
-  document.getElementById('user-name-text').textContent = user?.name || '';
-  document.getElementById('user-plan-badge').innerHTML =
-    `<span class="badge badge-${user?.plano || 'free'}">${user?.plano || 'free'}</span>`;
+  if (avatarEl) _setAvatarEl(avatarEl, user);
+  const nameEl = document.getElementById('user-name-text');
+  if (nameEl) nameEl.textContent = user?.name || '';
+  const badgeEl = document.getElementById('user-plan-badge');
+  if (badgeEl) badgeEl.innerHTML = `<span class="badge badge-${user?.plano||'free'}">${user?.plano||'free'}</span>`;
 
   // Ferramentas
   const toolList = document.getElementById('tool-list');
@@ -2149,7 +2177,7 @@ Object.assign(window, {
   abrirModalDiagnostico, salvarDiagnostico,
   abrirModalPerfil, salvarPerfil, uploadFotoPerfil,
   iniciarCheckout, abrirPortalStripe, logout,
-  toggleMenuMobile, mostrarToast,
+  toggleMenuMobile, mostrarToast, toggleUserDropdown, fecharUserDropdown,
   copiarMensagem, exportarDocx, salvarTemplate,
   abrirArquivosArea, copiarArquivo, excluirArquivo,
   abrirModalVenda, fecharModalVenda, registrarVenda,

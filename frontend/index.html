@@ -44,53 +44,38 @@
     <div class="sidebar-section-title" style="margin-top:8px">Histórico</div>
     <div class="conv-list" id="conv-list"></div>
 
-    <!-- Footer com usuário — premium -->
+    <!-- Footer da sidebar -->
     <div class="sidebar-footer">
 
-      <!-- Card do usuário -->
-      <div class="user-info" onclick="abrirModalPerfil()">
-        <div class="user-avatar" id="user-avatar-text">U</div>
-        <div class="user-details">
-          <div class="user-name" id="user-name-text"></div>
-          <div class="user-plan-badge" id="user-plan-badge"></div>
-        </div>
-        <span style="font-size:10px;color:rgba(200,190,255,.3);flex-shrink:0">✏️</span>
-      </div>
-
-      <!-- Ações principais -->
-      <a id="link-gestor" href="/gestor.html" class="btn-ghost btn-full" style="display:none;color:#C4B5FD">
-        <span style="font-size:15px">👥</span> Painel da equipe
+      <!-- Ações principais (visíveis conforme role) -->
+      <a id="link-gestor" href="/gestor.html" class="btn-ghost btn-full" style="display:none">
+        <span class="nav-icon">👥</span> Painel da equipe
       </a>
-      <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="display:none;color:#6EE7B7;border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.06)">
-        <span style="font-size:15px">💰</span> Registrar venda
+      <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="display:none">
+        <span class="nav-icon">💰</span> Registrar venda
       </button>
-      <a id="link-ranking" href="/ranking.html" class="btn-ghost btn-full" style="display:none;color:#FCD34D;border-color:rgba(245,158,11,.2);background:rgba(245,158,11,.06)">
-        <span style="font-size:15px">🏆</span> Arena de Vendas
+      <a id="link-ranking" href="/ranking.html" class="btn-ghost btn-full" style="display:none">
+        <span class="nav-icon">🏆</span> Arena de Vendas
       </a>
 
       <div class="sidebar-nav-divider"></div>
 
       <!-- Ferramentas -->
-      <button onclick="abrirModalTrilha()" class="btn-ghost btn-full" style="color:rgba(167,139,250,.85)">
-        <span style="font-size:15px">📚</span> Minha Trilha
+      <button onclick="abrirModalTrilha()" class="btn-ghost btn-full">
+        <span class="nav-icon">📚</span> Minha Trilha
       </button>
-      <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="display:none;color:rgba(96,165,250,.85)">
-        <span style="font-size:15px">🎯</span> Cadastrar Cliente Potencial
+      <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="display:none">
+        <span class="nav-icon">🎯</span> Cadastrar Cliente Potencial
       </button>
-      <a id="link-agenda" href="/agenda" class="btn-ghost btn-full" style="display:none;color:rgba(52,211,153,.85)">
-        <span style="font-size:15px">📅</span> Agenda Comercial
+      <a id="link-agenda" href="/agenda" class="btn-ghost btn-full" style="display:none">
+        <span class="nav-icon">📅</span> Agenda Comercial
       </a>
-      <a id="link-leads" href="/leads" class="btn-ghost btn-full" style="display:none;color:rgba(96,165,250,.85)">
-        <span style="font-size:15px">📋</span> Controle de Leads
+      <a id="link-leads" href="/leads" class="btn-ghost btn-full" style="display:none">
+        <span class="nav-icon">📋</span> Controle de Leads
       </a>
-      <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="color:rgba(200,190,255,.55)">
-        <span style="font-size:15px">⚖️</span> Áreas de trabalho <span id="areas-badge" style="font-size:0.68rem;margin-left:auto;opacity:.6"></span>
-      </button>
-
-      <div class="sidebar-nav-divider"></div>
-
-      <button class="btn-ghost btn-full btn-logout" onclick="logout()">
-        Sair
+      <button onclick="abrirModalAreas()" class="btn-ghost btn-full">
+        <span class="nav-icon">⚖️</span> Áreas de trabalho
+        <span id="areas-badge" style="font-size:0.68rem;margin-left:auto;opacity:.45"></span>
       </button>
     </div>
   </aside>
@@ -118,6 +103,30 @@
         <button class="btn-ghost btn-sm" onclick="abrirModalDiagnostico()" title="Editar diagnóstico">
           ⚙️
         </button>
+
+        <!-- Avatar do usuário + dropdown -->
+        <div class="header-user-wrap" id="header-user-wrap">
+          <button class="header-user-btn" id="header-user-btn" onclick="toggleUserDropdown()" title="Minha conta">
+            <div class="header-user-avatar" id="header-avatar">U</div>
+          </button>
+          <div class="user-dropdown" id="user-dropdown">
+            <div class="user-dropdown-card">
+              <div class="user-dropdown-avatar" id="dd-avatar">U</div>
+              <div class="user-dropdown-info">
+                <div class="user-dropdown-name" id="dd-name">—</div>
+                <div class="user-dropdown-role" id="dd-role">—</div>
+                <div class="user-dropdown-email" id="dd-email">—</div>
+              </div>
+            </div>
+            <div class="user-dropdown-divider"></div>
+            <button class="user-dropdown-item" onclick="fecharUserDropdown(); abrirModalPerfil()">
+              <span>👤</span> Editar perfil
+            </button>
+            <button class="user-dropdown-item user-dropdown-logout" onclick="logout()">
+              <span>→</span> Sair
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
