@@ -1015,6 +1015,11 @@
 
   // Carrega áreas no badge ao iniciar
   document.addEventListener('DOMContentLoaded', () => {
+    // Auto-abre modal de planos se vier ?planos=1 (ex: redirecionado da Arena/Gestor)
+    if (new URLSearchParams(window.location.search).get('planos') === '1') {
+      setTimeout(() => abrirModalPlanos(), 600);
+    }
+
     setTimeout(async () => {
       try {
         const res = await apiFetch('/areas');

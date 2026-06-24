@@ -593,12 +593,12 @@
 
   <!-- Trial Banner -->
   <div class="trial-banner" id="trial-banner" style="display:none">
-    <span class="trial-icon">⚡</span>
+    <span class="trial-icon">⏳</span>
     <div>
-      <h3>Ranking ativo — Trial gratuito</h3>
+      <h3>Teste gratuito ativo — Arena de Vendas</h3>
       <p id="trial-dias-txt">Restam 7 dias para explorar o ranking completo</p>
     </div>
-    <button class="trial-cta" onclick="alert('Fale com a May para ativar o plano completo!')">Ativar agora</button>
+    <button class="trial-cta" onclick="abrirUpgrade()">Assinar agora</button>
   </div>
 
   <div id="main-content">
@@ -900,19 +900,47 @@ function handleTrialBanner(acesso) {
   } else { b.style.display = 'none'; }
 }
 
+function abrirUpgrade() {
+  // Vai para a tela principal e abre o modal de planos
+  window.location.href = 'index.html?planos=1';
+}
+
 function mostrarBloqueado(acesso) {
   document.getElementById('trial-banner').style.display = 'none';
+  const expirado = acesso?.motivo === 'trial_expirado';
   document.getElementById('main-content').innerHTML = `
     <div class="acesso-bloqueado">
       <div class="lock-icon">🔒</div>
       <h2>Arena de Vendas</h2>
-      <p>${acesso?.motivo === 'trial_expirado'
-        ? 'Seu período de teste encerrou. Ative o plano para continuar acompanhando o ranking da sua equipe.'
-        : 'Ative o ranking e transforme as vendas da sua equipe em uma competição saudável e motivadora.'}</p>
-      <button class="btn-activar" onclick="alert('Entre em contato com a May para ativar!')">
-        ${acesso?.motivo === 'trial_expirado' ? '🚀 Ativar Plano Completo' : '⚡ Testar Grátis por 7 dias'}
-      </button>
+      <p>${expirado
+        ? 'Seu período de teste de 7 dias encerrou. Assine para continuar acompanhando o ranking e motivando sua equipe.'
+        : 'Teste grátis por 7 dias e transforme as vendas da sua equipe em uma competição saudável e motivadora.'}</p>
+
+      ${expirado ? `
+        <div style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(167,139,250,.1));border:1px solid rgba(124,58,237,.4);border-radius:16px;padding:24px;max-width:360px;margin:0 auto 28px;">
+          <div style="font-size:11px;color:rgba(200,190,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Plano Pro</div>
+          <div style="font-size:32px;font-weight:800;color:#fff;font-family:'Syne',sans-serif">R$ 197<span style="font-size:13px;font-weight:400;color:rgba(200,190,255,.5)">/mês</span></div>
+          <div style="height:1px;background:rgba(255,255,255,.08);margin:14px 0"></div>
+          <div style="display:flex;flex-direction:column;gap:7px;text-align:left;font-size:13px;color:rgba(200,190,255,.8)">
+            <div>✓ Ranking e leaderboard da equipe</div>
+            <div>✓ Dashboard do gestor completo</div>
+            <div>✓ Metas e acompanhamento</div>
+            <div>✓ Mensagens ilimitadas</div>
+            <div>✓ Suporte prioritário</div>
+          </div>
+        </div>
+        <button class="btn-activar" onclick="abrirUpgrade()">🚀 Assinar agora — R$ 197/mês</button>
+        <p style="font-size:11px;color:rgba(200,190,255,.3);margin-top:14px">Cancele quando quiser. Pagamento seguro via Cielo.</p>
+      ` : `
+        <button class="btn-activar" onclick="iniciarTrial()">⚡ Começar teste gratuito de 7 dias</button>
+        <p style="font-size:11px;color:rgba(200,190,255,.3);margin-top:14px">Sem cartão de crédito. 7 dias grátis, depois R$ 197/mês.</p>
+      `}
     </div>`;
+}
+
+async function iniciarTrial() {
+  // Simplesmente carrega o leaderboard — o backend inicia o trial automaticamente
+  await carregarLeaderboard();
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────────
