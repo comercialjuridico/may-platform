@@ -226,6 +226,52 @@
     .membro-name { font-size:12px; font-weight:600; color:#fff; }
     .membro-prog { font-size:10px; color:var(--sub); }
 
+    /* ── Calculadora ─── */
+    .calc-section { margin-top:32px; }
+    .calc-tabs { display:flex; gap:8px; margin-bottom:16px; }
+    .calc-tab { padding:8px 18px; border-radius:10px; border:1px solid var(--border);
+      background:var(--surface); color:var(--sub); font-size:13px; font-weight:600;
+      cursor:pointer; transition:all .2s; }
+    .calc-tab.active { background:rgba(124,58,237,.2); border-color:rgba(124,58,237,.4); color:#C4B5FD; }
+    .calc-panel { display:none; }
+    .calc-panel.active { display:block; }
+    .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:640px){ .calc-grid { grid-template-columns:1fr; } }
+    .calc-field { display:flex; flex-direction:column; gap:5px; }
+    .calc-field label { font-size:10px; font-weight:600; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; }
+    .calc-field input { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:9px 12px; font-size:14px; color:var(--text); outline:none; font-family:'Inter',sans-serif; transition:border-color .2s; }
+    .calc-field input:focus { border-color:rgba(124,58,237,.5); }
+    .calc-prefix { position:relative; }
+    .calc-prefix span { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--sub); font-size:13px; pointer-events:none; }
+    .calc-prefix input { padding-left:28px; }
+    .btn-calcular { margin-top:14px; background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:10px 24px; font-size:13px; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); }
+    .calc-resultado { margin-top:16px; background:rgba(124,58,237,.08); border:1px solid rgba(124,58,237,.25);
+      border-radius:12px; padding:18px 20px; display:none; }
+    .calc-resultado.visible { display:block; }
+    .calc-res-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+    .calc-res-item { background:rgba(255,255,255,.04); border-radius:9px; padding:12px 14px; }
+    .calc-res-val { font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
+      background:linear-gradient(135deg,#A78BFA,#60A5FA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .calc-res-lbl { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:.05em; margin-top:3px; }
+    .calc-res-item.destaque { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.2); }
+    .calc-res-item.destaque .calc-res-val { background:linear-gradient(135deg,#10B981,#34D399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+    /* ── Cadastrar Cliente ─── */
+    .cad-header { display:flex; align-items:center; justify-content:space-between; margin-top:32px; margin-bottom:12px; }
+    .btn-cadastrar { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:9px 20px; font-size:13px; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); display:flex; align-items:center; gap:6px; }
+    .cad-action-tabs { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+    .cad-action-tab { flex:1; min-width:100px; padding:10px 12px; border-radius:10px;
+      border:1px solid var(--border); background:var(--surface); color:var(--sub);
+      font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:all .2s; }
+    .cad-action-tab.active { border-color:rgba(124,58,237,.4); background:rgba(124,58,237,.2); color:#C4B5FD; }
+    .cad-sub-panel { display:none; }
+    .cad-sub-panel.active { display:block; }
+
     /* ── Modal ─── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
       backdrop-filter:blur(4px); z-index:999; align-items:center; justify-content:center; }
@@ -297,9 +343,73 @@
   </div>
   <div id="metas-content"><div class="loading">Carregando metas</div></div>
 
-  <!-- Seção Funil -->
-  <div class="metas-header" style="margin-top:32px">
-    <p class="sec-title" style="margin:0">🎯 Funil SDR / Closer</p>
+  <!-- Calculadora de Contrato -->
+  <div class="calc-section">
+    <p class="sec-title">🧮 Calculadoras</p>
+    <div class="calc-tabs">
+      <button class="calc-tab active" onclick="switchCalcTab('remuneracao',this)">💰 Remuneração do Contrato</button>
+      <button class="calc-tab" onclick="switchCalcTab('comissao',this)">🤝 Comissão da Equipe</button>
+    </div>
+
+    <!-- Painel: Remuneração -->
+    <div class="calc-panel active" id="calc-remuneracao">
+      <div class="calc-grid">
+        <div class="calc-field">
+          <label>Valor Total do Contrato</label>
+          <div class="calc-prefix"><span>R$</span><input type="number" id="rem-total" placeholder="0,00" min="0" step="0.01" oninput="calcRemuneracao()" /></div>
+        </div>
+        <div class="calc-field">
+          <label>Honorários de Entrada</label>
+          <div class="calc-prefix"><span>R$</span><input type="number" id="rem-entrada" placeholder="0,00" min="0" step="0.01" oninput="calcRemuneracao()" /></div>
+        </div>
+        <div class="calc-field">
+          <label>Parcelas no Boleto (qtd)</label>
+          <input type="number" id="rem-parcelas" placeholder="Ex: 6" min="1" step="1" oninput="calcRemuneracao()" />
+        </div>
+        <div class="calc-field">
+          <label>Taxa Cielo/Gateway (%)</label>
+          <input type="number" id="rem-taxa" placeholder="Ex: 2.40" min="0" step="0.01" value="2.40" oninput="calcRemuneracao()" />
+        </div>
+      </div>
+      <div class="calc-resultado visible" id="res-remuneracao" style="display:none">
+        <div class="calc-res-grid" id="res-rem-grid"></div>
+      </div>
+    </div>
+
+    <!-- Painel: Comissão -->
+    <div class="calc-panel" id="calc-comissao">
+      <div class="calc-grid">
+        <div class="calc-field" style="grid-column:1/-1">
+          <label>Valor do Contrato</label>
+          <div class="calc-prefix"><span>R$</span><input type="number" id="com-valor" placeholder="0,00" min="0" step="0.01" oninput="calcComissao()" /></div>
+        </div>
+        <div class="calc-field">
+          <label>% SDR / Captador</label>
+          <input type="number" id="com-sdr" placeholder="Ex: 10" min="0" max="100" step="0.1" oninput="calcComissao()" />
+        </div>
+        <div class="calc-field">
+          <label>% Closer / Advogado</label>
+          <input type="number" id="com-closer" placeholder="Ex: 20" min="0" max="100" step="0.1" oninput="calcComissao()" />
+        </div>
+        <div class="calc-field">
+          <label>% Gestor</label>
+          <input type="number" id="com-gestor" placeholder="Ex: 5" min="0" max="100" step="0.1" oninput="calcComissao()" />
+        </div>
+        <div class="calc-field">
+          <label>% Escritório / Overhead</label>
+          <input type="number" id="com-escritorio" placeholder="Ex: 65" min="0" max="100" step="0.1" oninput="calcComissao()" />
+        </div>
+      </div>
+      <div class="calc-resultado" id="res-comissao" style="display:none">
+        <div class="calc-res-grid" id="res-com-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cadastrar Cliente + Funil -->
+  <div class="cad-header">
+    <p class="sec-title" style="margin:0">📊 Funil Comercial</p>
+    <button class="btn-cadastrar" onclick="abrirModalCadastro()">➕ Cadastrar Cliente</button>
   </div>
   <div id="funil-content"><div class="loading">Carregando funil</div></div>
 
@@ -310,6 +420,115 @@
   </div>
   <div id="reunioes-semana-content"><div class="loading">Carregando reuniões</div></div>
 
+</div>
+
+<!-- Modal: Cadastrar Cliente -->
+<div class="modal-overlay" id="modal-cadastro">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-title">➕ Cadastrar Cliente</div>
+
+    <!-- Dados básicos -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nome do cliente *</label>
+        <input type="text" id="cad-nome" placeholder="Ex: João Silva" />
+      </div>
+      <div class="form-group">
+        <label>WhatsApp / Telefone</label>
+        <input type="tel" id="cad-whatsapp" placeholder="(11) 99999-9999" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Produto / Área do caso *</label>
+        <input type="text" id="cad-produto" placeholder="Ex: Trabalhista, Revisional..." />
+      </div>
+      <div class="form-group">
+        <label>Origem</label>
+        <select id="cad-origem">
+          <option value="">Selecione...</option>
+          <option value="indicacao">Indicação</option>
+          <option value="instagram">Instagram</option>
+          <option value="trafego_meta">Meta Ads</option>
+          <option value="trafego_google">Google Ads</option>
+          <option value="grupo_whatsapp">WhatsApp</option>
+          <option value="parceria">Parceria</option>
+          <option value="tiktok">TikTok</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Contexto / Observações</label>
+      <textarea id="cad-contexto" rows="2" placeholder="Situação do cliente, necessidade, objeções iniciais..."></textarea>
+    </div>
+
+    <!-- Ação -->
+    <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">O que deseja fazer?</div>
+    <div class="cad-action-tabs">
+      <div class="cad-action-tab active" onclick="switchCadTab('reuniao',this)">📅 Agendar Reunião</div>
+      <div class="cad-action-tab" onclick="switchCadTab('followup',this)">🔁 Agendar Follow-up</div>
+      <div class="cad-action-tab" onclick="switchCadTab('venda',this)">💰 Registrar Venda</div>
+    </div>
+
+    <!-- Sub: Reunião -->
+    <div class="cad-sub-panel active" id="cad-sub-reuniao">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data e hora da reunião</label>
+          <input type="datetime-local" id="cad-data-reuniao" />
+        </div>
+        <div class="form-group">
+          <label>Local / Link</label>
+          <input type="text" id="cad-local" placeholder="Zoom, escritório, Google Meet..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Valor estimado (R$)</label>
+        <input type="number" id="cad-valor-estimado" placeholder="Estimativa dos honorários" min="0" step="0.01" />
+      </div>
+    </div>
+
+    <!-- Sub: Follow-up -->
+    <div class="cad-sub-panel" id="cad-sub-followup">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data do follow-up</label>
+          <input type="datetime-local" id="cad-data-followup" />
+        </div>
+        <div class="form-group">
+          <label>Canal</label>
+          <select id="cad-canal-followup">
+            <option value="whatsapp">WhatsApp</option>
+            <option value="ligacao">Ligação</option>
+            <option value="email">E-mail</option>
+            <option value="presencial">Presencial</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub: Venda -->
+    <div class="cad-sub-panel" id="cad-sub-venda">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valor do contrato (R$)</label>
+          <input type="number" id="cad-valor-venda" placeholder="0,00" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Data do fechamento</label>
+          <input type="date" id="cad-data-fechamento" />
+        </div>
+      </div>
+    </div>
+
+    <div id="cad-resultado" style="display:none;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:14px;margin:12px 0;font-size:13px;color:#6EE7B7"></div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalCadastro()">Cancelar</button>
+      <button class="btn-save" id="btn-salvar-cadastro" onclick="salvarCadastro()">Salvar</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal de Meta -->
@@ -807,6 +1026,208 @@ async function carregarReunioesSemana() {
       }).join('') + `</div>`;
   } catch {
     container.innerHTML = '<div class="insight-item warn"><span class="icon">⚠️</span><span>Erro ao carregar reuniões.</span></div>';
+  }
+}
+
+// ── Calculadoras ─────────────────────────────────────────────────────────────
+function switchCalcTab(id, btn) {
+  document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('calc-'+id).classList.add('active');
+}
+
+function fmtR(v) {
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calcRemuneracao() {
+  const total    = parseFloat(document.getElementById('rem-total').value)    || 0;
+  const entrada  = parseFloat(document.getElementById('rem-entrada').value)  || 0;
+  const parcelas = parseInt(document.getElementById('rem-parcelas').value)   || 0;
+  const taxa     = parseFloat(document.getElementById('rem-taxa').value)     || 0;
+
+  const res = document.getElementById('res-remuneracao');
+  const grid = document.getElementById('res-rem-grid');
+  if (!total) { res.style.display = 'none'; return; }
+
+  const restante      = Math.max(0, total - entrada);
+  const valorParcela  = parcelas > 0 ? restante / parcelas : 0;
+  const taxaEntrada   = entrada  * (taxa / 100);
+  const taxaParcelas  = restante * (taxa / 100);
+  const entradaLiq    = entrada  - taxaEntrada;
+  const parcelasLiq   = restante - taxaParcelas;
+  const totalLiq      = entradaLiq + parcelasLiq;
+
+  grid.innerHTML = `
+    <div class="calc-res-item destaque">
+      <div class="calc-res-val">${fmtR(entrada)}</div>
+      <div class="calc-res-lbl">Entrada bruta</div>
+    </div>
+    <div class="calc-res-item destaque">
+      <div class="calc-res-val">${fmtR(entradaLiq)}</div>
+      <div class="calc-res-lbl">Entrada líquida (após ${taxa}%)</div>
+    </div>
+    ${parcelas > 0 ? `
+    <div class="calc-res-item">
+      <div class="calc-res-val">${fmtR(valorParcela)}</div>
+      <div class="calc-res-lbl">Valor de cada parcela (${parcelas}x)</div>
+    </div>
+    <div class="calc-res-item">
+      <div class="calc-res-val">${fmtR(valorParcela * (1 - taxa/100))}</div>
+      <div class="calc-res-lbl">Parcela líquida estimada</div>
+    </div>
+    <div class="calc-res-item">
+      <div class="calc-res-val">${fmtR(parcelasLiq)}</div>
+      <div class="calc-res-lbl">Total parcelas líquido</div>
+    </div>` : ''}
+    <div class="calc-res-item">
+      <div class="calc-res-val">${fmtR(total)}</div>
+      <div class="calc-res-lbl">Total bruto do contrato</div>
+    </div>
+    <div class="calc-res-item destaque">
+      <div class="calc-res-val">${fmtR(totalLiq)}</div>
+      <div class="calc-res-lbl">Total líquido estimado</div>
+    </div>
+  `;
+  res.style.display = 'block';
+}
+
+function calcComissao() {
+  const valor     = parseFloat(document.getElementById('com-valor').value)     || 0;
+  const pctSdr    = parseFloat(document.getElementById('com-sdr').value)       || 0;
+  const pctCloser = parseFloat(document.getElementById('com-closer').value)    || 0;
+  const pctGestor = parseFloat(document.getElementById('com-gestor').value)    || 0;
+  const pctEscrit = parseFloat(document.getElementById('com-escritorio').value)|| 0;
+
+  const res  = document.getElementById('res-comissao');
+  const grid = document.getElementById('res-com-grid');
+  if (!valor) { res.style.display = 'none'; return; }
+
+  const vSdr    = valor * pctSdr    / 100;
+  const vCloser = valor * pctCloser / 100;
+  const vGestor = valor * pctGestor / 100;
+  const vEscrit = valor * pctEscrit / 100;
+  const total   = vSdr + vCloser + vGestor + vEscrit;
+
+  grid.innerHTML = `
+    ${pctSdr    ? `<div class="calc-res-item"><div class="calc-res-val">${fmtR(vSdr)}</div><div class="calc-res-lbl">SDR / Captador (${pctSdr}%)</div></div>` : ''}
+    ${pctCloser ? `<div class="calc-res-item destaque"><div class="calc-res-val">${fmtR(vCloser)}</div><div class="calc-res-lbl">Closer / Advogado (${pctCloser}%)</div></div>` : ''}
+    ${pctGestor ? `<div class="calc-res-item"><div class="calc-res-val">${fmtR(vGestor)}</div><div class="calc-res-lbl">Gestor (${pctGestor}%)</div></div>` : ''}
+    ${pctEscrit ? `<div class="calc-res-item"><div class="calc-res-val">${fmtR(vEscrit)}</div><div class="calc-res-lbl">Escritório / Overhead (${pctEscrit}%)</div></div>` : ''}
+    <div class="calc-res-item" style="border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.07)">
+      <div class="calc-res-val" style="background:linear-gradient(135deg,#F59E0B,#FDE68A);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${total.toFixed(1)}%</div>
+      <div class="calc-res-lbl">Total distribuído</div>
+    </div>
+  `;
+  res.style.display = 'block';
+}
+
+// ── Modal Cadastrar Cliente ───────────────────────────────────────────────────
+let cadTabAtiva = 'reuniao';
+
+function abrirModalCadastro() {
+  ['cad-nome','cad-whatsapp','cad-produto','cad-contexto','cad-local','cad-valor-estimado','cad-valor-venda'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('cad-origem').value = '';
+  document.getElementById('cad-data-fechamento').value = new Date().toISOString().slice(0,10);
+  document.getElementById('cad-resultado').style.display = 'none';
+  document.getElementById('btn-salvar-cadastro').disabled = false;
+  document.getElementById('btn-salvar-cadastro').textContent = 'Salvar';
+  switchCadTab('reuniao', document.querySelector('.cad-action-tab'));
+  document.getElementById('modal-cadastro').classList.add('open');
+}
+
+function fecharModalCadastro() {
+  document.getElementById('modal-cadastro').classList.remove('open');
+}
+
+function switchCadTab(id, btn) {
+  cadTabAtiva = id;
+  document.querySelectorAll('.cad-action-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cad-sub-panel').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('cad-sub-'+id).classList.add('active');
+}
+
+async function salvarCadastro() {
+  const nome    = document.getElementById('cad-nome').value.trim();
+  const produto = document.getElementById('cad-produto').value.trim();
+  if (!nome)    { alert('Informe o nome do cliente.'); return; }
+  if (!produto) { alert('Informe o produto/área do caso.'); return; }
+
+  const btn = document.getElementById('btn-salvar-cadastro');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  const base = {
+    nome_lead:    nome,
+    whatsapp:     document.getElementById('cad-whatsapp').value.trim() || null,
+    produto,
+    origem:       document.getElementById('cad-origem').value || null,
+    contexto:     document.getElementById('cad-contexto').value.trim() || null,
+    _sem_briefing: true,
+  };
+
+  try {
+    let res, data, mensagem;
+
+    if (cadTabAtiva === 'venda') {
+      // Registrar venda diretamente
+      const valor = parseFloat(document.getElementById('cad-valor-venda').value) || null;
+      res = await apiFetch('/api/vendas', {
+        method: 'POST',
+        body: JSON.stringify({
+          cliente:          nome,
+          telefone:         document.getElementById('cad-whatsapp').value.trim() || null,
+          origem:           document.getElementById('cad-origem').value || null,
+          descricao:        produto,
+          valor:            valor && valor > 0 ? valor : null,
+          data_fechamento:  document.getElementById('cad-data-fechamento').value || null,
+        }),
+      });
+      data = await res.json();
+      mensagem = `✅ Venda registrada! ${valor ? fmtBRL(valor) : 'Êxito'} — ${nome}`;
+    } else {
+      // Lead com reunião ou follow-up
+      const payload = { ...base };
+      if (cadTabAtiva === 'reuniao') {
+        payload.status        = 'reuniao_agendada';
+        payload.data_reuniao  = document.getElementById('cad-data-reuniao').value || null;
+        payload.local_reuniao = document.getElementById('cad-local').value.trim() || null;
+        payload.valor_estimado= parseFloat(document.getElementById('cad-valor-estimado').value) || null;
+        mensagem = `📅 Reunião agendada com ${nome}`;
+      } else {
+        payload.status       = 'novo';
+        payload.data_reuniao = document.getElementById('cad-data-followup').value || null;
+        mensagem = `🔁 Follow-up agendado com ${nome}`;
+      }
+      res = await apiFetch('/api/leads', { method: 'POST', body: JSON.stringify(payload) });
+      data = await res.json();
+    }
+
+    if (!res.ok) {
+      alert(data.erro || 'Erro ao salvar.');
+      btn.disabled = false;
+      btn.textContent = 'Salvar';
+      return;
+    }
+
+    const divRes = document.getElementById('cad-resultado');
+    divRes.textContent = mensagem;
+    divRes.style.display = 'block';
+    btn.style.display = 'none';
+
+    // Atualiza funil e reuniões
+    await carregarFunil();
+    await carregarReunioesSemana();
+    await carregarDash();
+  } catch(e) {
+    alert('Erro de conexão.');
+    btn.disabled = false;
+    btn.textContent = 'Salvar';
   }
 }
 

@@ -147,10 +147,7 @@ async function carregarDadosIniciais() {
     if (resAreas?.ok) {
       const d = await resAreas.json();
       estado.areas = d.areas || [];
-      // Ativa a primeira área por padrão se nenhuma estiver ativa
-      if (!estado.areaAtiva && estado.areas.length > 0) {
-        estado.areaAtiva = estado.areas[0];
-      }
+      // Área permanece nula (modo geral) — usuário escolhe manualmente se quiser
     }
     }
 
@@ -255,12 +252,11 @@ function renderizarSeletorArea() {
   let container = document.getElementById('area-ativa-container');
   if (!container) return; // será criado pelo HTML
 
-  if (!estado.areas.length) {
-    container.style.display = 'none';
-    return;
-  }
+  // Áreas ocultas por padrão — modo geral ativo
+  container.style.display = 'none';
+  return;
 
-  container.style.display = 'block';
+  container.style.display = 'block'; // eslint-disable-line no-unreachable
   const ativa = estado.areaAtiva;
 
   container.innerHTML = `
