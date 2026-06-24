@@ -226,39 +226,6 @@
     .membro-name { font-size:12px; font-weight:600; color:#fff; }
     .membro-prog { font-size:10px; color:var(--sub); }
 
-    /* ── Calculadora ─── */
-    .calc-section { margin-top:32px; }
-    .calc-tabs { display:flex; gap:8px; margin-bottom:16px; }
-    .calc-tab { padding:8px 18px; border-radius:10px; border:1px solid var(--border);
-      background:var(--surface); color:var(--sub); font-size:13px; font-weight:600;
-      cursor:pointer; transition:all .2s; }
-    .calc-tab.active { background:rgba(124,58,237,.2); border-color:rgba(124,58,237,.4); color:#C4B5FD; }
-    .calc-panel { display:none; }
-    .calc-panel.active { display:block; }
-    .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    @media(max-width:640px){ .calc-grid { grid-template-columns:1fr; } }
-    .calc-field { display:flex; flex-direction:column; gap:5px; }
-    .calc-field label { font-size:10px; font-weight:600; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; }
-    .calc-field input { background:var(--surface); border:1px solid var(--border); border-radius:10px;
-      padding:9px 12px; font-size:14px; color:var(--text); outline:none; font-family:'Inter',sans-serif; transition:border-color .2s; }
-    .calc-field input:focus { border-color:rgba(124,58,237,.5); }
-    .calc-prefix { position:relative; }
-    .calc-prefix span { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--sub); font-size:13px; pointer-events:none; }
-    .calc-prefix input { padding-left:28px; }
-    .btn-calcular { margin-top:14px; background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
-      border:none; border-radius:10px; padding:10px 24px; font-size:13px; font-weight:700;
-      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); }
-    .calc-resultado { margin-top:16px; background:rgba(124,58,237,.08); border:1px solid rgba(124,58,237,.25);
-      border-radius:12px; padding:18px 20px; display:none; }
-    .calc-resultado.visible { display:block; }
-    .calc-res-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
-    .calc-res-item { background:rgba(255,255,255,.04); border-radius:9px; padding:12px 14px; }
-    .calc-res-val { font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
-      background:linear-gradient(135deg,#A78BFA,#60A5FA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .calc-res-lbl { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:.05em; margin-top:3px; }
-    .calc-res-item.destaque { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.2); }
-    .calc-res-item.destaque .calc-res-val { background:linear-gradient(135deg,#10B981,#34D399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-
     /* ── Cadastrar Cliente ─── */
     .cad-header { display:flex; align-items:center; justify-content:space-between; margin-top:32px; margin-bottom:12px; }
     .btn-cadastrar { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
@@ -343,72 +310,9 @@
   </div>
   <div id="metas-content"><div class="loading">Carregando metas</div></div>
 
-  <!-- Calculadora de Contrato -->
-  <div class="calc-section">
-    <p class="sec-title">🧮 Calculadoras</p>
-    <div class="calc-tabs">
-      <button class="calc-tab active" onclick="switchCalcTab('remuneracao',this)">💰 Remuneração do Contrato</button>
-      <button class="calc-tab" onclick="switchCalcTab('comissao',this)">🤝 Comissão da Equipe</button>
-    </div>
-
-    <!-- Painel: Remuneração -->
-    <div class="calc-panel active" id="calc-remuneracao">
-      <div class="calc-grid">
-        <div class="calc-field">
-          <label>Valor Total do Contrato</label>
-          <div class="calc-prefix"><span>R$</span><input type="number" id="rem-total" placeholder="0,00" min="0" step="0.01" oninput="calcRemuneracao()" /></div>
-        </div>
-        <div class="calc-field">
-          <label>Honorários de Entrada</label>
-          <div class="calc-prefix"><span>R$</span><input type="number" id="rem-entrada" placeholder="0,00" min="0" step="0.01" oninput="calcRemuneracao()" /></div>
-        </div>
-        <div class="calc-field">
-          <label>Parcelas no Boleto (qtd)</label>
-          <input type="number" id="rem-parcelas" placeholder="Ex: 6" min="1" step="1" oninput="calcRemuneracao()" />
-        </div>
-        <div class="calc-field">
-          <label>Taxa Cielo/Gateway (%)</label>
-          <input type="number" id="rem-taxa" placeholder="Ex: 2.40" min="0" step="0.01" value="2.40" oninput="calcRemuneracao()" />
-        </div>
-      </div>
-      <div class="calc-resultado visible" id="res-remuneracao" style="display:none">
-        <div class="calc-res-grid" id="res-rem-grid"></div>
-      </div>
-    </div>
-
-    <!-- Painel: Comissão -->
-    <div class="calc-panel" id="calc-comissao">
-      <div class="calc-grid">
-        <div class="calc-field" style="grid-column:1/-1">
-          <label>Valor do Contrato</label>
-          <div class="calc-prefix"><span>R$</span><input type="number" id="com-valor" placeholder="0,00" min="0" step="0.01" oninput="calcComissao()" /></div>
-        </div>
-        <div class="calc-field">
-          <label>% SDR / Captador</label>
-          <input type="number" id="com-sdr" placeholder="Ex: 10" min="0" max="100" step="0.1" oninput="calcComissao()" />
-        </div>
-        <div class="calc-field">
-          <label>% Closer / Advogado</label>
-          <input type="number" id="com-closer" placeholder="Ex: 20" min="0" max="100" step="0.1" oninput="calcComissao()" />
-        </div>
-        <div class="calc-field">
-          <label>% Gestor</label>
-          <input type="number" id="com-gestor" placeholder="Ex: 5" min="0" max="100" step="0.1" oninput="calcComissao()" />
-        </div>
-        <div class="calc-field">
-          <label>% Escritório / Overhead</label>
-          <input type="number" id="com-escritorio" placeholder="Ex: 65" min="0" max="100" step="0.1" oninput="calcComissao()" />
-        </div>
-      </div>
-      <div class="calc-resultado" id="res-comissao" style="display:none">
-        <div class="calc-res-grid" id="res-com-grid"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Cadastrar Cliente + Funil -->
   <div class="cad-header">
-    <p class="sec-title" style="margin:0">📊 Funil Comercial</p>
+    <p class="sec-title" style="margin:0">➕ Cadastrar Cliente</p>
     <button class="btn-cadastrar" onclick="abrirModalCadastro()">➕ Cadastrar Cliente</button>
   </div>
   <div id="funil-content"><div class="loading">Carregando funil</div></div>
@@ -682,6 +586,39 @@ async function carregarDash(){
   try{
     const r = await apiFetch('/api/gestor/dashboard'+qs);
     if(r.status===403){
+      const err = await r.json().catch(()=>({}));
+      if(err.erro==='TRIAL_EXPIRADO'){
+        // Trial expirado — mostra paywall de upgrade
+        document.getElementById('dash-content').innerHTML = `
+          <div style="text-align:center;padding:72px 20px;max-width:460px;margin:0 auto;">
+            <div style="font-size:3.5rem;margin-bottom:20px">🔒</div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:10px">Seu teste gratuito encerrou</h2>
+            <p style="color:rgba(200,190,255,.6);font-size:14px;line-height:1.6;margin-bottom:28px">Você utilizou seus 7 dias de acesso gratuito ao painel de vendas e reuniões. Para continuar acompanhando sua equipe, assine o plano Gestor.</p>
+            <div style="background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(167,139,250,.1));border:1px solid rgba(124,58,237,.5);border-radius:16px;padding:28px;margin-bottom:28px">
+              <div style="font-size:13px;color:rgba(200,190,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Plano Gestor</div>
+              <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff">R$&nbsp;47,90<span style="font-size:14px;font-weight:400;color:rgba(200,190,255,.5)">/mês</span></div>
+              <div style="height:1px;background:rgba(255,255,255,.08);margin:18px 0"></div>
+              <div style="display:flex;flex-direction:column;gap:8px;text-align:left">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(200,190,255,.8)"><span style="color:#10B981;font-size:15px">✓</span>Dashboard completo da equipe</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(200,190,255,.8)"><span style="color:#10B981;font-size:15px">✓</span>KPIs de vendas e reuniões</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(200,190,255,.8)"><span style="color:#10B981;font-size:15px">✓</span>Insights automáticos por vendedor</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(200,190,255,.8)"><span style="color:#10B981;font-size:15px">✓</span>Metas e acompanhamento de equipe</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(200,190,255,.8)"><span style="color:#10B981;font-size:15px">✓</span>Cadastro de clientes e funil de vendas</div>
+              </div>
+            </div>
+            <a href="index.html#upgrade" style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;padding:14px 40px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 20px rgba(124,58,237,.5)">Assinar agora — R$ 47,90/mês</a>
+            <p style="font-size:11px;color:rgba(200,190,255,.35);margin-top:16px">Cancele quando quiser. Sem taxa de adesão.</p>
+          </div>`;
+        // Esconde partes do painel que não fazem sentido sem dados
+        ['metas-content','funil-content','reunioes-semana-content'].forEach(id=>{
+          const el = document.getElementById(id);
+          if(el) el.innerHTML = '';
+        });
+        document.querySelector('.filtros-bar').style.display='none';
+        document.querySelector('.metas-header').style.display='none';
+        document.querySelector('.cad-header').style.display='none';
+        return;
+      }
       document.getElementById('dash-content').innerHTML = `
         <div style="text-align:center;padding:80px 20px;">
           <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
@@ -706,6 +643,29 @@ async function carregarDash(){
       return;
     }
     dadosDash = body;
+
+    // ── Banner de trial ativo ─────────────────────────────────────────────────
+    let bannerEl = document.getElementById('trial-banner');
+    if(body.trial_info?.trial_ativo){
+      const dias = body.trial_info.dias_restantes;
+      if(!bannerEl){
+        bannerEl = document.createElement('div');
+        bannerEl.id = 'trial-banner';
+        bannerEl.style.cssText = 'background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(239,68,68,.12));border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;';
+        document.querySelector('.filtros-bar').insertAdjacentElement('beforebegin', bannerEl);
+      }
+      bannerEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.4rem">⏳</span>
+          <div>
+            <div style="font-weight:700;font-size:14px;color:#FDE68A">Teste gratuito — ${dias} dia${dias!==1?'s':''} restante${dias!==1?'s':''}</div>
+            <div style="font-size:12px;color:rgba(245,158,11,.7);margin-top:2px">Após o período de teste, será necessário assinar para continuar.</div>
+          </div>
+        </div>
+        <a href="index.html#upgrade" style="background:linear-gradient(135deg,#F59E0B,#FBBF24);color:#1A1040;padding:8px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;white-space:nowrap;flex-shrink:0">Assinar R$ 47,90/mês</a>`;
+    } else if(bannerEl){
+      bannerEl.remove();
+    }
 
     // Popula select de usuários (uma vez)
     if(todosUsers.length===0 && dadosDash.vendedores?.length){
@@ -1027,100 +987,6 @@ async function carregarReunioesSemana() {
   } catch {
     container.innerHTML = '<div class="insight-item warn"><span class="icon">⚠️</span><span>Erro ao carregar reuniões.</span></div>';
   }
-}
-
-// ── Calculadoras ─────────────────────────────────────────────────────────────
-function switchCalcTab(id, btn) {
-  document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('calc-'+id).classList.add('active');
-}
-
-function fmtR(v) {
-  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function calcRemuneracao() {
-  const total    = parseFloat(document.getElementById('rem-total').value)    || 0;
-  const entrada  = parseFloat(document.getElementById('rem-entrada').value)  || 0;
-  const parcelas = parseInt(document.getElementById('rem-parcelas').value)   || 0;
-  const taxa     = parseFloat(document.getElementById('rem-taxa').value)     || 0;
-
-  const res = document.getElementById('res-remuneracao');
-  const grid = document.getElementById('res-rem-grid');
-  if (!total) { res.style.display = 'none'; return; }
-
-  const restante      = Math.max(0, total - entrada);
-  const valorParcela  = parcelas > 0 ? restante / parcelas : 0;
-  const taxaEntrada   = entrada  * (taxa / 100);
-  const taxaParcelas  = restante * (taxa / 100);
-  const entradaLiq    = entrada  - taxaEntrada;
-  const parcelasLiq   = restante - taxaParcelas;
-  const totalLiq      = entradaLiq + parcelasLiq;
-
-  grid.innerHTML = `
-    <div class="calc-res-item destaque">
-      <div class="calc-res-val">${fmtR(entrada)}</div>
-      <div class="calc-res-lbl">Entrada bruta</div>
-    </div>
-    <div class="calc-res-item destaque">
-      <div class="calc-res-val">${fmtR(entradaLiq)}</div>
-      <div class="calc-res-lbl">Entrada líquida (após ${taxa}%)</div>
-    </div>
-    ${parcelas > 0 ? `
-    <div class="calc-res-item">
-      <div class="calc-res-val">${fmtR(valorParcela)}</div>
-      <div class="calc-res-lbl">Valor de cada parcela (${parcelas}x)</div>
-    </div>
-    <div class="calc-res-item">
-      <div class="calc-res-val">${fmtR(valorParcela * (1 - taxa/100))}</div>
-      <div class="calc-res-lbl">Parcela líquida estimada</div>
-    </div>
-    <div class="calc-res-item">
-      <div class="calc-res-val">${fmtR(parcelasLiq)}</div>
-      <div class="calc-res-lbl">Total parcelas líquido</div>
-    </div>` : ''}
-    <div class="calc-res-item">
-      <div class="calc-res-val">${fmtR(total)}</div>
-      <div class="calc-res-lbl">Total bruto do contrato</div>
-    </div>
-    <div class="calc-res-item destaque">
-      <div class="calc-res-val">${fmtR(totalLiq)}</div>
-      <div class="calc-res-lbl">Total líquido estimado</div>
-    </div>
-  `;
-  res.style.display = 'block';
-}
-
-function calcComissao() {
-  const valor     = parseFloat(document.getElementById('com-valor').value)     || 0;
-  const pctSdr    = parseFloat(document.getElementById('com-sdr').value)       || 0;
-  const pctCloser = parseFloat(document.getElementById('com-closer').value)    || 0;
-  const pctGestor = parseFloat(document.getElementById('com-gestor').value)    || 0;
-  const pctEscrit = parseFloat(document.getElementById('com-escritorio').value)|| 0;
-
-  const res  = document.getElementById('res-comissao');
-  const grid = document.getElementById('res-com-grid');
-  if (!valor) { res.style.display = 'none'; return; }
-
-  const vSdr    = valor * pctSdr    / 100;
-  const vCloser = valor * pctCloser / 100;
-  const vGestor = valor * pctGestor / 100;
-  const vEscrit = valor * pctEscrit / 100;
-  const total   = vSdr + vCloser + vGestor + vEscrit;
-
-  grid.innerHTML = `
-    ${pctSdr    ? `<div class="calc-res-item"><div class="calc-res-val">${fmtR(vSdr)}</div><div class="calc-res-lbl">SDR / Captador (${pctSdr}%)</div></div>` : ''}
-    ${pctCloser ? `<div class="calc-res-item destaque"><div class="calc-res-val">${fmtR(vCloser)}</div><div class="calc-res-lbl">Closer / Advogado (${pctCloser}%)</div></div>` : ''}
-    ${pctGestor ? `<div class="calc-res-item"><div class="calc-res-val">${fmtR(vGestor)}</div><div class="calc-res-lbl">Gestor (${pctGestor}%)</div></div>` : ''}
-    ${pctEscrit ? `<div class="calc-res-item"><div class="calc-res-val">${fmtR(vEscrit)}</div><div class="calc-res-lbl">Escritório / Overhead (${pctEscrit}%)</div></div>` : ''}
-    <div class="calc-res-item" style="border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.07)">
-      <div class="calc-res-val" style="background:linear-gradient(135deg,#F59E0B,#FDE68A);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${total.toFixed(1)}%</div>
-      <div class="calc-res-lbl">Total distribuído</div>
-    </div>
-  `;
-  res.style.display = 'block';
 }
 
 // ── Modal Cadastrar Cliente ───────────────────────────────────────────────────

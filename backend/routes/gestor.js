@@ -263,6 +263,45 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
     const agora = new Date();
 
+    // ── Trial check para plano FREE ──────────────────────────────────────────
+    // Admin nunca é bloqueado; planos pagos passam direto
+    if (req.user.role !== 'admin' && req.user.plano === 'free') {
+      const { data: empresaInfo } = await supabase
+        .from('empresas')
+        .select('created_at')
+        .eq('id', req.user.empresa_id)
+        .single();
+
+      const trialInicio = empresaInfo?.created_at ? new Date(empresaInfo.created_at) : agora;
+      const TRIAL_DIAS = 7;
+      const diasPassados = Math.floor((agora - trialInicio) / (1000 * 60 * 60 * 24));
+      const diasRestantes = Math.max(0, TRIAL_DIAS - diasPassados);
+      const trialAtivo = diasPassados < TRIAL_DIAS;
+
+      if (!trialAtivo) {
+        return res.status(403).json({
+          erro: 'TRIAL_EXPIRADO',
+          mensagem: 'Seu período de teste gratuito de 7 dias expirou.',
+          trial_expirado: true,
+          upgrade_url: '/upgrade',
+        });
+      }
+
+      // Trial ativo: retorna status junto com os dados
+      const { data: empresaInfoFull } = await supabase
+        .from('empresas')
+        .select('id, nome, max_membros')
+        .eq('id', req.user.empresa_id)
+        .single();
+
+      // Continua mas injeta trial_info na resposta — será adicionado ao final
+      req._trialInfo = {
+        trial_ativo: true,
+        dias_restantes: diasRestantes,
+        dias_usados: diasPassados,
+      };
+    }
+
     // ── Default date range: first day of current month → today ──────────────
     const primeiroDiaMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
     const dataInicioStr = req.query.data_inicio || primeiroDiaMes.toISOString().slice(0, 10);
@@ -603,6 +642,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
       origens,
       insights_gestor:  insightsGestor,
       sugestao_reuniao: sugestaoReuniao,
+      trial_info:       req._trialInfo || null,
     });
   } catch (err) {
     console.error('Erro ao buscar dashboard do gestor:', err.message);

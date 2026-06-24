@@ -405,19 +405,34 @@
 
 <!-- ══════════════ MODAL: PLANOS ══════════════ -->
 <div class="modal-overlay" id="modal-planos">
-  <div class="modal" style="max-width:540px">
+  <div class="modal" style="max-width:580px">
     <div class="modal-header">
       <span class="modal-title">Planos</span>
       <button class="modal-close" onclick="document.getElementById('modal-planos').classList.remove('active')">✕</button>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
+    <!-- Toggle Mensal / Anual -->
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; margin:16px 0 20px; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:12px; padding:4px; width:fit-content; margin-left:auto; margin-right:auto;">
+      <button id="toggle-mensal" onclick="trocarPeriodo('mensal')"
+        style="display:flex;align-items:center;gap:6px;padding:7px 20px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--accent);color:#fff;">
+        📅 Mensal
+      </button>
+      <button id="toggle-anual" onclick="trocarPeriodo('anual')"
+        style="display:flex;align-items:center;gap:6px;padding:7px 20px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:var(--text-muted);">
+        🗓️ Anual <span style="font-size:10px;background:rgba(16,185,129,.2);color:#34D399;padding:2px 6px;border-radius:99px;margin-left:2px">-2 meses</span>
+      </button>
+    </div>
 
-      <!-- Mensal -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+      <!-- Plano Essencial -->
       <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:20px;">
-        <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Mensal</div>
-        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;" id="preco-mensal">R$ —</div>
-        <div class="text-xs text-muted mb-16">por mês · cancele quando quiser</div>
+        <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Essencial</div>
+        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
+          <span id="preco-essencial">R$ 97</span>
+          <span id="periodo-essencial" style="font-size:0.75rem;font-weight:400;color:var(--text-muted)">/mês</span>
+        </div>
+        <div class="text-xs text-muted mb-16" id="sub-essencial">cancele quando quiser</div>
         <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:20px;">
           <li>✓ 500 mensagens/mês</li>
           <li>✓ Todas as ferramentas</li>
@@ -425,15 +440,18 @@
           <li>✓ Gravação de áudio</li>
           <li>✓ Exportação Word</li>
         </ul>
-        <button class="btn btn-secondary btn-full" onclick="iniciarCheckout('mensal')">Assinar mensal</button>
+        <button class="btn btn-secondary btn-full" id="btn-essencial" onclick="iniciarCheckout('mensal')">Assinar Essencial</button>
       </div>
 
-      <!-- Anual -->
+      <!-- Plano Pro -->
       <div style="background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:var(--radius); padding:20px; position:relative;">
         <div style="position:absolute; top:-10px; right:12px; background:var(--accent); color:var(--text-inverse); font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:99px;">MELHOR VALOR</div>
-        <div style="font-size:0.75rem; font-weight:600; color:var(--accent-light); text-transform:uppercase; margin-bottom:8px;">Anual</div>
-        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;" id="preco-anual">R$ —</div>
-        <div class="text-xs text-muted mb-16">por ano · equivale a X meses grátis</div>
+        <div style="font-size:0.75rem; font-weight:600; color:var(--accent-light); text-transform:uppercase; margin-bottom:8px;">Pro</div>
+        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
+          <span id="preco-pro">R$ 197</span>
+          <span id="periodo-pro" style="font-size:0.75rem;font-weight:400;color:var(--text-muted)">/mês</span>
+        </div>
+        <div class="text-xs text-muted mb-16" id="sub-pro">cancele quando quiser</div>
         <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:20px;">
           <li>✓ Mensagens ilimitadas</li>
           <li>✓ Todas as ferramentas</li>
@@ -442,7 +460,7 @@
           <li>✓ Exportação Word</li>
           <li>✓ Suporte prioritário</li>
         </ul>
-        <button class="btn btn-primary btn-full" onclick="iniciarCheckout('anual')">Assinar anual</button>
+        <button class="btn btn-primary btn-full" id="btn-pro" onclick="iniciarCheckout('anual')">Assinar Pro</button>
       </div>
     </div>
 
@@ -840,19 +858,40 @@
     draw();
   })();
 
-  // Abre modal de planos e carrega preços do Stripe
-  async function abrirModalPlanos() {
+  // ── Planos: toggle mensal / anual ────────────────────────────────────────────
+  const PRECOS = {
+    mensal:  { essencial: 'R$ 97',   pro: 'R$ 197',   periodo: '/mês',  sub: 'cancele quando quiser', checkoutEssencial: 'mensal',  checkoutPro: 'mensal_pro'  },
+    anual:   { essencial: 'R$ 997',  pro: 'R$ 1.997', periodo: '/ano',  sub: '2 meses grátis incluídos', checkoutEssencial: 'anual', checkoutPro: 'anual_pro'  },
+  };
+  let _periodoAtual = 'mensal';
+
+  function trocarPeriodo(periodo) {
+    _periodoAtual = periodo;
+    const p = PRECOS[periodo];
+    document.getElementById('preco-essencial').textContent  = p.essencial;
+    document.getElementById('periodo-essencial').textContent = p.periodo;
+    document.getElementById('sub-essencial').textContent    = p.sub;
+    document.getElementById('preco-pro').textContent        = p.pro;
+    document.getElementById('periodo-pro').textContent      = p.periodo;
+    document.getElementById('sub-pro').textContent          = p.sub;
+    document.getElementById('btn-essencial').onclick = () => iniciarCheckout(p.checkoutEssencial);
+    document.getElementById('btn-pro').onclick       = () => iniciarCheckout(p.checkoutPro);
+
+    // Estilo dos botões do toggle
+    const btnM = document.getElementById('toggle-mensal');
+    const btnA = document.getElementById('toggle-anual');
+    if (periodo === 'mensal') {
+      btnM.style.background = 'var(--accent)'; btnM.style.color = '#fff';
+      btnA.style.background = 'transparent';   btnA.style.color = 'var(--text-muted)';
+    } else {
+      btnA.style.background = 'var(--accent)'; btnA.style.color = '#fff';
+      btnM.style.background = 'transparent';   btnM.style.color = 'var(--text-muted)';
+    }
+  }
+
+  function abrirModalPlanos() {
     document.getElementById('modal-planos').classList.add('active');
-    try {
-      const res = await fetch('/api/cielo/precos');
-      if (res.ok) {
-        const { mensal, anual } = await res.json();
-        const elM = document.getElementById('preco-mensal');
-        const elA = document.getElementById('preco-anual');
-        if (elM) elM.textContent = `R$ ${Number(mensal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-        if (elA) elA.textContent = `R$ ${Number(anual).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-      }
-    } catch { /* mantém R$ — se falhar */ }
+    trocarPeriodo('mensal'); // sempre abre no mensal
   }
 
   // Fecha modal ao clicar fora
