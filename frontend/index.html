@@ -44,40 +44,52 @@
     <div class="sidebar-section-title" style="margin-top:8px">Histórico</div>
     <div class="conv-list" id="conv-list"></div>
 
-    <!-- Footer com usuário -->
+    <!-- Footer com usuário — premium -->
     <div class="sidebar-footer">
+
+      <!-- Card do usuário -->
       <div class="user-info" onclick="abrirModalPerfil()">
         <div class="user-avatar" id="user-avatar-text">U</div>
         <div class="user-details">
           <div class="user-name" id="user-name-text"></div>
           <div class="user-plan-badge" id="user-plan-badge"></div>
         </div>
+        <span style="font-size:10px;color:rgba(200,190,255,.3);flex-shrink:0">✏️</span>
       </div>
-      <a id="link-gestor" href="/gestor.html" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px">
-        👥 Painel da equipe
+
+      <!-- Ações principais -->
+      <a id="link-gestor" href="/gestor.html" class="btn-ghost btn-full" style="display:none;color:#C4B5FD">
+        <span style="font-size:15px">👥</span> Painel da equipe
       </a>
-      <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;margin-bottom:4px;color:#7dcf97;border-color:rgba(125,207,151,0.3)">
-        💰 Registrar venda
+      <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="display:none;color:#6EE7B7;border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.06)">
+        <span style="font-size:15px">💰</span> Registrar venda
       </button>
-      <a id="link-ranking" href="/ranking.html" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px;color:#F59E0B;border-color:rgba(245,158,11,0.3)">
-        🏆 Arena de Vendas
+      <a id="link-ranking" href="/ranking.html" class="btn-ghost btn-full" style="display:none;color:#FCD34D;border-color:rgba(245,158,11,.2);background:rgba(245,158,11,.06)">
+        <span style="font-size:15px">🏆</span> Arena de Vendas
       </a>
-      <button onclick="abrirModalTrilha()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px;color:#A78BFA;border-color:rgba(167,139,250,0.25)">
-        📚 Minha Trilha
+
+      <div class="sidebar-nav-divider"></div>
+
+      <!-- Ferramentas -->
+      <button onclick="abrirModalTrilha()" class="btn-ghost btn-full" style="color:rgba(167,139,250,.85)">
+        <span style="font-size:15px">📚</span> Minha Trilha
       </button>
-      <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;margin-bottom:4px;color:#60A5FA;border-color:rgba(96,165,250,0.3)">
-        🎯 Funil SDR/Closer
+      <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="display:none;color:rgba(96,165,250,.85)">
+        <span style="font-size:15px">🎯</span> Cadastrar Cliente Potencial
       </button>
-      <a id="link-agenda" href="/agenda" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px;color:#34D399;border-color:rgba(52,211,153,0.3)">
-        📅 Agenda Comercial
+      <a id="link-agenda" href="/agenda" class="btn-ghost btn-full" style="display:none;color:rgba(52,211,153,.85)">
+        <span style="font-size:15px">📅</span> Agenda Comercial
       </a>
-      <a id="link-leads" href="/leads" class="btn-ghost btn-full" style="font-size:0.8rem;display:none;text-align:center;text-decoration:none;margin-bottom:4px;color:#60A5FA;border-color:rgba(96,165,250,0.3)">
-        📋 Controle de Leads
+      <a id="link-leads" href="/leads" class="btn-ghost btn-full" style="display:none;color:rgba(96,165,250,.85)">
+        <span style="font-size:15px">📋</span> Controle de Leads
       </a>
-      <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="font-size:0.8rem;margin-bottom:4px">
-        ⚖️ Áreas de trabalho <span id="areas-badge" style="font-size:0.7rem;color:var(--text-muted)"></span>
+      <button onclick="abrirModalAreas()" class="btn-ghost btn-full" style="color:rgba(200,190,255,.55)">
+        <span style="font-size:15px">⚖️</span> Áreas de trabalho <span id="areas-badge" style="font-size:0.68rem;margin-left:auto;opacity:.6"></span>
       </button>
-      <button class="btn-ghost btn-full" onclick="logout()" style="font-size:0.8rem">
+
+      <div class="sidebar-nav-divider"></div>
+
+      <button class="btn-ghost btn-full btn-logout" onclick="logout()">
         Sair
       </button>
     </div>
@@ -647,7 +659,7 @@
   <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
     <div class="modal-header">
       <div>
-        <span class="modal-title">🎯 Funil SDR / Closer</span>
+        <span class="modal-title">🎯 Cadastrar Cliente Potencial</span>
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Gerencie leads e briefings automáticos</div>
       </div>
       <button class="modal-close" onclick="fecharModalFunil()">✕</button>
