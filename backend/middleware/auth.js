@@ -53,14 +53,16 @@ async function authMiddleware(req, res, next) {
 
     // Trial gratuito: 7 dias sem cartão para contas novas
     // Após 7 dias sem cartão cadastrado → bloqueia acesso ao chat
-    if (user.plano === 'free' && !user.cielo_recurrent_payment_id && !user.stripe_subscription_id) {
-      const criado   = new Date(user.created_at);
-      const diasDesde = (Date.now() - criado.getTime()) / (1000 * 60 * 60 * 24);
-      if (diasDesde > 7) {
-        user._trial_expirado = true; // sinaliza para rotas que precisam bloquear
-      } else {
-        user._trial_dias_restantes = Math.ceil(7 - diasDesde);
-      }
+    if (user.plano === 'free' && !user.cielo_recurrent_payment_id && !user.stripe_subscription_id && user.created_at) {
+      try {
+        const criado    = new Date(user.created_at);
+        const diasDesde = (Date.now() - criado.getTime()) / (1000 * 60 * 60 * 24);
+        if (diasDesde > 7) {
+          user._trial_expirado = true;
+        } else {
+          user._trial_dias_restantes = Math.ceil(7 - diasDesde);
+        }
+      } catch (_) { /* ignora erro de parsing de data */ }
     }
 
     req.user = user;
