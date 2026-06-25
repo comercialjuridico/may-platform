@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manual de Uso — May</title>
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #0D0D14;
+      --bg2:     #111118;
+      --glass:   rgba(255,255,255,.04);
+      --border:  rgba(255,255,255,.08);
+      --purple:  #7C3AED;
+      --plite:   #C4B5FD;
+      --fg:      #F0EDFF;
+      --muted:   rgba(200,190,255,.45);
+      --radius:  14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,13,20,.9); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 6vw; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(145deg,#9B6DFF,#6D28D9);
+      font-family: 'Syne', sans-serif; font-weight: 900; color: #fff;
+      font-size: 1rem; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px rgba(124,58,237,.45);
+    }
+    .logo-name {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.15rem;
+      background: linear-gradient(135deg,#fff 30%,#C4B5FD 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-back {
+      font-size: .82rem; color: var(--muted); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--fg); }
+
+    /* ── LAYOUT ── */
+    .page { display: flex; max-width: 1160px; margin: 0 auto; padding: 0 24px; gap: 40px; }
+
+    /* ── SIDEBAR NAV ── */
+    .doc-nav {
+      width: 220px; flex-shrink: 0;
+      position: sticky; top: 76px; height: fit-content;
+      padding: 28px 0;
+    }
+    .doc-nav-title {
+      font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); font-weight: 700; margin-bottom: 12px; padding-left: 4px;
+    }
+    .doc-nav a {
+      display: block; padding: 7px 10px; border-radius: 8px;
+      font-size: .82rem; color: var(--muted); text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .doc-nav a:hover, .doc-nav a.active { background: rgba(124,58,237,.12); color: var(--plite); }
+    .doc-nav .nav-badge {
+      font-size: .62rem; padding: 2px 6px; border-radius: 50px;
+      background: rgba(124,58,237,.2); color: var(--plite);
+      margin-left: 6px; vertical-align: middle;
+    }
+    @media(max-width: 760px) { .doc-nav { display: none; } }
+
+    /* ── CONTENT ── */
+    .doc-content { flex: 1; padding: 40px 0 80px; min-width: 0; }
+
+    /* ── VIDEO HERO ── */
+    .video-hero {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 20px; padding: 36px; margin-bottom: 56px;
+      text-align: center;
+    }
+    .video-hero h1 {
+      font-family: 'Syne', sans-serif; font-size: clamp(1.4rem,3vw,2rem);
+      font-weight: 800; margin-bottom: 10px;
+    }
+    .video-hero p { color: var(--muted); font-size: .9rem; margin-bottom: 28px; }
+    .video-wrap {
+      position: relative; padding-bottom: 56.25%; height: 0;
+      border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,.5); border: 1px solid var(--border);
+    }
+    .video-wrap iframe {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      border: none;
+    }
+    .video-placeholder {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; color: var(--muted);
+    }
+    .video-placeholder .play-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: rgba(124,58,237,.2); border: 2px solid rgba(124,58,237,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .video-placeholder p { font-size: .82rem; }
+
+    /* ── SECTIONS ── */
+    .doc-section { margin-bottom: 56px; scroll-margin-top: 80px; }
+    .section-label {
+      font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--purple); font-weight: 700; margin-bottom: 8px; display: block;
+    }
+    .doc-section h2 {
+      font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+      margin-bottom: 6px; line-height: 1.2;
+    }
+    .doc-section > p {
+      color: var(--muted); font-size: .88rem; margin-bottom: 24px; max-width: 640px;
+    }
+    .plan-tag {
+      display: inline-block; font-size: .65rem; padding: 2px 8px;
+      border-radius: 50px; font-weight: 700; letter-spacing: .04em;
+      background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3);
+      color: var(--plite); margin-left: 8px; vertical-align: middle;
+    }
+
+    /* ── STEPS ── */
+    .steps { display: flex; flex-direction: column; gap: 16px; }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+    }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3);
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: .82rem;
+      color: var(--plite); display: flex; align-items: center; justify-content: center;
+    }
+    .step-body strong { font-size: .9rem; display: block; margin-bottom: 4px; color: var(--fg); }
+    .step-body p { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── TIPS ── */
+    .tip {
+      background: rgba(124,58,237,.07); border: 1px solid rgba(124,58,237,.2);
+      border-left: 3px solid var(--purple); border-radius: var(--radius);
+      padding: 14px 18px; margin-top: 16px;
+      font-size: .82rem; color: rgba(196,181,253,.8); line-height: 1.6;
+    }
+    .tip strong { color: var(--plite); }
+
+    /* ── FEATURE GRID ── */
+    .feat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+    @media(max-width:580px){ .feat-grid { grid-template-columns: 1fr; } }
+    .feat-card {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .feat-card .icon { font-size: 1.3rem; margin-bottom: 8px; }
+    .feat-card strong { font-size: .88rem; display: block; margin-bottom: 4px; }
+    .feat-card p { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── DIVIDER ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+    /* ── FAQ ── */
+    .faq-item {
+      border-bottom: 1px solid var(--border); padding: 16px 0;
+    }
+    .faq-q { font-size: .88rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; }
+    .faq-a { font-size: .82rem; color: var(--muted); margin-top: 10px; line-height: 1.6; display: none; }
+    .faq-item.open .faq-a { display: block; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="logo-mark">M</div>
+    <div class="logo-name">May</div>
+  </a>
+  <a href="/app" class="nav-back">← Voltar para a plataforma</a>
+</nav>
+
+<div class="page">
+
+  <!-- SIDEBAR NAV -->
+  <nav class="doc-nav">
+    <div class="doc-nav-title">Conteúdo</div>
+    <a href="#visao-geral">Visão geral</a>
+    <a href="#chat">Chat com a May</a>
+    <a href="#scripts">Scripts e Playbooks</a>
+    <a href="#simuladores">Simuladores de Atendimento</a>
+    <a href="#followup">Follow-up e Objeções</a>
+    <a href="#proposta">Gerador de Proposta</a>
+    <a href="#trilha">Trilha de Capacitação</a>
+    <a href="#gestor">Painel do Gestor <span class="nav-badge">Plus+</span></a>
+    <a href="#ranking">Ranking de Vendas <span class="nav-badge">Plus+</span></a>
+    <a href="#agenda">Agenda Comercial <span class="nav-badge">Plus+</span></a>
+    <a href="#leads">Controle de Leads <span class="nav-badge">Plus+</span></a>
+    <a href="#notificacoes">Notificações <span class="nav-badge">Plus+</span></a>
+    <a href="#faq">Dúvidas frequentes</a>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="doc-content">
+
+    <!-- VIDEO HERO -->
+    <div class="video-hero" id="visao-geral">
+      <h1>Manual de Uso da May</h1>
+      <p>Assista ao vídeo completo ou navegue pelas seções abaixo para aprender a usar cada recurso da plataforma.</p>
+      <div class="video-wrap">
+        <!-- Substitua o src abaixo pelo link do seu vídeo do YouTube quando gravar -->
+        <!-- Exemplo: src="https://www.youtube.com/embed/SEU_ID_AQUI" -->
+        <div class="video-placeholder">
+          <div class="play-icon">▶</div>
+          <p>Vídeo de apresentação em breve</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISÃO GERAL -->
+    <div class="doc-section">
+      <span class="section-label">Começando</span>
+      <h2>O que é a May e como funciona</h2>
+      <p>A May é uma plataforma de apoio comercial para advogados e escritórios de advocacia. Ela não é um curso — você não assiste aulas. Você usa quando precisa: chega com uma situação real e sai com o que falar.</p>
+
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="icon">💬</div>
+          <strong>Chat em tempo real</strong>
+          <p>Pergunte sobre qualquer situação comercial e receba o script ou argumento na hora.</p>
+        </div>
+        <div class="feat-card">
+          <div class="icon">📋</div>
+          <strong>Scripts prontos</strong>
+          <p>Abordagem, proposta, quebra de objeções e fechamento organizados por etapa.</p>
+        </div>
+        <div class="feat-card">
+          <div class="icon">🎯</div>
+          <strong>Simuladores de atendimento</strong>
+          <p>Pratique situações reais com feedback da IA antes de encarar o cliente.</p>
+        </div>
+        <div class="feat-card">
+          <div class="icon">📄</div>
+          <strong>Gerador de proposta</strong>
+          <p>Monte propostas profissionais em PDF ou Word em minutos.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- CHAT -->
+    <div class="doc-section" id="chat">
+      <span class="section-label">Recurso principal</span>
+      <h2>Chat com a May</h2>
+      <p>O chat é o coração da plataforma. Use para tirar dúvidas comerciais, pedir scripts específicos ou preparar uma conversa que vai acontecer.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Selecione a área de trabalho</strong>
+            <p>Antes de iniciar, clique em "Áreas de trabalho" no menu lateral e selecione a área do direito em que você atua (ex: trabalhista, família, empresarial). Isso ajusta as respostas da May para o seu contexto.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Descreva a situação real</strong>
+            <p>Quanto mais contexto você der, melhor a resposta. Ex: "Tenho uma reunião com um empresário que quer assessoria trabalhista, ele mencionou que já tentou outros escritórios e achou caro. Como abordo o preço?"</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Use os scripts diretamente</strong>
+            <p>A May retorna o script pronto. Copie, adapte com o nome do cliente e use na conversa. Não precisa decorar — abra quando precisar.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Escolha ferramentas específicas</strong>
+            <p>No menu lateral em "Ferramentas" você acessa recursos focados: simulador, playbook de follow-up, argumentação de honorários. Use quando a situação for específica.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Dica:</strong> Use o chat como um co-piloto antes de reuniões. 5 minutos antes da conversa, escreva "vou ter uma reunião com [perfil do cliente] sobre [situação], me dá os pontos principais para conduzir" e entre preparado.
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- SCRIPTS -->
+    <div class="doc-section" id="scripts">
+      <span class="section-label">Ferramenta</span>
+      <h2>Scripts e Playbooks</h2>
+      <p>Scripts prontos para cada etapa do processo comercial, do primeiro contato ao fechamento.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse via chat ou ferramentas</strong>
+            <p>Você pode pedir um script diretamente no chat ("me dá um script de abordagem para lead frio por WhatsApp") ou selecionar a ferramenta "Scripts Comerciais" no menu lateral.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Escolha a etapa da venda</strong>
+            <p>Primeiro contato, qualificação, apresentação de honorários, resposta a objeções ou follow-up pós-reunião. Cada etapa tem playbooks específicos.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Personalize e aplique</strong>
+            <p>Substitua os campos indicados pelo nome do cliente, situação específica e detalhes do caso. O esqueleto está pronto — você só adapta.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Playbooks mais usados:</strong> Quebra de objeção de preço · Script de retomada de lead frio · Primeiro contato por indicação · Resposta para "vou pensar" · Follow-up pós-proposta enviada.
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- SIMULADORES -->
+    <div class="doc-section" id="simuladores">
+      <span class="section-label">Ferramenta</span>
+      <h2>Simuladores de Atendimento</h2>
+      <p>Treine situações reais antes de encarar o cliente. A IA assume o papel do lead e você pratica a condução da conversa com feedback ao final.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Selecione um cenário</strong>
+            <p>Escolha a situação que quer treinar: reunião de apresentação, cliente que diz "está caro", lead que some depois da proposta, negociação de honorários.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Conduza a conversa</strong>
+            <p>A May assume o perfil do cliente simulado. Responda como responderia na vida real. Não existe resposta certa ou errada — o objetivo é praticar.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Receba o feedback</strong>
+            <p>Ao finalizar, a plataforma aponta os momentos de força e os pontos de melhoria da sua condução: clareza na proposta, resposta às objeções, uso de urgência.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Recomendado para:</strong> Novos membros da equipe antes do primeiro atendimento real · Praticar antes de uma reunião importante · Treinar a resposta para objeções recorrentes.
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- FOLLOW-UP -->
+    <div class="doc-section" id="followup">
+      <span class="section-label">Ferramenta</span>
+      <h2>Follow-up e Quebra de Objeções</h2>
+      <p>Modelos de mensagem para retomar leads parados, responder objeções e avançar conversas que travaram.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Descreva onde o lead parou</strong>
+            <p>Ex: "Enviei a proposta há 3 dias e não tive resposta" ou "Cliente disse que ia conversar com o sócio e sumiu". A May identifica o tipo de follow-up ideal.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Receba a mensagem pronta</strong>
+            <p>O modelo já vem formatado para WhatsApp ou e-mail, com o tom certo — sem parecer desesperado, sem pressão excessiva, criando contexto para a retomada.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Para objeções específicas</strong>
+            <p>Peça diretamente: "o cliente disse que está caro, como respondo?" A May entrega o argumento estruturado em 2-3 etapas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- PROPOSTA -->
+    <div class="doc-section" id="proposta">
+      <span class="section-label">Ferramenta</span>
+      <h2>Gerador de Proposta</h2>
+      <p>Monte propostas comerciais profissionais em PDF ou Word. Estrutura pronta, você só preenche os dados do cliente e do serviço.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse o gerador</strong>
+            <p>No chat, use a ferramenta "Gerador de Proposta" no menu lateral ou peça diretamente à May: "preciso montar uma proposta para [tipo de serviço]".</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Preencha as informações</strong>
+            <p>Nome do cliente, tipo de serviço, honorários, prazo estimado e diferenciais do seu escritório. Quanto mais detalhe, mais personalizada fica a proposta.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Exporte em PDF ou Word</strong>
+            <p>Clique no botão de exportar no canto da conversa. O arquivo gerado já vem formatado e pronto para enviar ao cliente.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Dica:</strong> Use a proposta gerada como base e adicione o logo do escritório e dados de contato antes de enviar. Propostas personalizadas têm taxa de resposta significativamente maior.
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- TRILHA -->
+    <div class="doc-section" id="trilha">
+      <span class="section-label">Ferramenta</span>
+      <h2>Trilha de Capacitação</h2>
+      <p>Onboarding comercial completo para novos membros da equipe. A trilha ensina o básico do processo comercial jurídico sem precisar da sua presença.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse "Minha Trilha" no menu</strong>
+            <p>Disponível para todos os planos. Clique em "Minha Trilha" na barra lateral para ver o progresso e continuar de onde parou.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Siga as etapas em ordem</strong>
+            <p>A trilha cobre: posicionamento comercial do escritório, como qualificar um lead jurídico, condução de reunião, argumentação de honorários e follow-up estruturado.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Para novos membros da equipe</strong>
+            <p>Convide o membro via painel do gestor e peça que a primeira ação seja completar a trilha antes de atender clientes reais.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- GESTOR -->
+    <div class="doc-section" id="gestor">
+      <span class="section-label">Plano Plus ou superior</span>
+      <h2>Painel do Gestor <span class="plan-tag">Plus+</span></h2>
+      <p>Visão consolidada da sua equipe comercial — quem está atendendo, quem está vendendo e onde estão as oportunidades de melhoria.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse "Painel da equipe"</strong>
+            <p>Disponível no menu lateral se você for gestor. Clique em "Painel da equipe" para ver a visão consolidada.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Convide membros</strong>
+            <p>Na seção "Minha Equipe", clique em "Convidar membro" e insira o e-mail. A pessoa recebe um link de acesso e já entra na sua conta de equipe.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Acompanhe o desempenho</strong>
+            <p>Veja vendas registradas por membro, metas do período e uso da plataforma pela equipe. Use os dados para dar feedback específico, não genérico.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- RANKING -->
+    <div class="doc-section" id="ranking">
+      <span class="section-label">Plano Plus ou superior</span>
+      <h2>Ranking de Vendas <span class="plan-tag">Plus+</span></h2>
+      <p>Arena de vendas em tempo real com o desempenho de cada membro da equipe. Competição saudável que move sem precisar cobrar.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse "Arena de Vendas"</strong>
+            <p>Clique em "Arena de Vendas" no menu lateral. Você vê o ranking do período atual, metas e posição de cada membro.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Registre vendas</strong>
+            <p>Cada membro registra suas vendas clicando em "Registrar venda" no menu. O ranking atualiza em tempo real para toda a equipe.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Defina metas</strong>
+            <p>O gestor configura as metas mensais no painel. O ranking mostra o % de atingimento de cada membro ao lado do nome.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- AGENDA -->
+    <div class="doc-section" id="agenda">
+      <span class="section-label">Plano Plus ou superior</span>
+      <h2>Agenda Comercial <span class="plan-tag">Plus+</span></h2>
+      <p>Agende, registre e acompanhe reuniões com leads diretamente na plataforma. Pipeline sempre atualizado sem planilha paralela.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse "Agenda Comercial"</strong>
+            <p>Disponível no menu lateral para planos Plus ou superior. Clique para ver as reuniões do dia, semana ou mês.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Registre um novo lead</strong>
+            <p>Clique em "Cadastrar Cliente Potencial", preencha o nome, contato, área e estágio da conversa. Agende a próxima reunião direto nessa tela.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Atualize após cada contato</strong>
+            <p>Depois de cada conversa, registre o resultado e agende o próximo passo. A plataforma avisa quando um lead ficou muito tempo sem contato.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- LEADS -->
+    <div class="doc-section" id="leads">
+      <span class="section-label">Plano Plus ou superior</span>
+      <h2>Controle de Leads <span class="plan-tag">Plus+</span></h2>
+      <p>Visão kanban do pipeline comercial. Veja em que etapa está cada lead e identifique onde o processo está travando.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Acesse "Controle de Leads"</strong>
+            <p>Menu lateral → Controle de Leads. Você vê o board com colunas: Novo contato, Qualificado, Reunião agendada, Proposta enviada, Fechado, Perdido.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Mova os leads conforme avançam</strong>
+            <p>Arraste o card do lead entre colunas conforme a conversa avança. O histórico de movimentações fica registrado automaticamente.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Identifique gargalos</strong>
+            <p>Se muitos leads travam na coluna "Proposta enviada", o problema é no follow-up pós-proposta. Use a May para pedir o modelo de retomada específico para esse momento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- NOTIFICAÇÕES -->
+    <div class="doc-section" id="notificacoes">
+      <span class="section-label">Plano Plus ou superior</span>
+      <h2>Notificações de Follow-up <span class="plan-tag">Plus+</span></h2>
+      <p>A plataforma avisa quando um lead está esfriando. Nenhum contato some do radar por falta de atenção.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Ative as notificações no navegador</strong>
+            <p>Na primeira vez que acessar, o navegador vai pedir permissão para notificações. Clique em "Permitir" para receber avisos mesmo com a plataforma em segundo plano.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Receba lembretes automáticos</strong>
+            <p>A plataforma avisa 1 hora antes de cada reunião agendada e alerta quando um lead ficou mais de X dias sem contato, conforme configurado pelo gestor.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Resumo diário</strong>
+            <p>Todo dia pela manhã você recebe um resumo das prioridades do dia: reuniões, leads para retomar e tarefas em aberto.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- FAQ -->
+    <div class="doc-section" id="faq">
+      <span class="section-label">Dúvidas</span>
+      <h2>Perguntas frequentes</h2>
+
+      <div style="margin-top:20px">
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+            Preciso assistir algum curso ou treino antes de usar? <span>+</span>
+          </div>
+          <div class="faq-a">Não. A plataforma foi feita para ser usada na hora que você precisa, sem preparação prévia. Chegou com uma situação, abriu a May, encontrou o script ou o argumento e aplicou.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+            Posso usar no celular? <span>+</span>
+          </div>
+          <div class="faq-a">Sim. A plataforma funciona no navegador do celular. Você pode usar entre atendimentos ou consultar um script antes de entrar em uma reunião.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+            Como convido alguém da minha equipe? <span>+</span>
+          </div>
+          <div class="faq-a">Acesse o Painel da Equipe (disponível nos planos Plus ou superior), clique em "Convidar membro" e insira o e-mail. A pessoa recebe o link de acesso por e-mail e já entra na sua conta de equipe.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+            A May responde sobre qualquer área do direito? <span>+</span>
+          </div>
+          <div class="faq-a">A May está focada no comercial jurídico — como vender serviços jurídicos, conduzir reuniões, responder objeções e estruturar o processo comercial. Para questões técnicas de direito, consulte outras fontes especializadas.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+            Como cancelo a assinatura? <span>+</span>
+          </div>
+          <div class="faq-a">Dentro da plataforma, acesse seu perfil (ícone no canto superior direito) e clique em "Cancelar assinatura". O acesso continua até o fim do período já pago. Sem multa ou fidelidade.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+            Ainda preciso de ajuda — como falo com o suporte? <span>+</span>
+          </div>
+          <div class="faq-a">Envie um e-mail para <a href="mailto:contato@usemayapp.com" style="color:var(--plite)">contato@usemayapp.com</a>. Respondemos em até 24h úteis.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('.doc-section[id]');
+  const navLinks = document.querySelectorAll('.doc-nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>

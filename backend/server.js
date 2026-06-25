@@ -53,6 +53,9 @@ app.get('/', (req, res) => {
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+app.get('/manual', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/manual.html'));
+});
 app.get('/agenda', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
 });
