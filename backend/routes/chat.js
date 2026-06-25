@@ -35,6 +35,14 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     return res.status(400).json({ erro: 'Mensagem não pode estar vazia.' });
   }
 
+  // Trial expirado (7 dias sem cartão)
+  if (req.user._trial_expirado) {
+    return res.status(402).json({
+      erro: 'Seu período de teste expirou. Adicione um cartão para continuar usando a May.',
+      code: 'TRIAL_EXPIRADO',
+    });
+  }
+
   // Configura cabeçalhos para SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');

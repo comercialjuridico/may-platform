@@ -33,7 +33,7 @@ async function authMiddleware(req, res, next) {
     // Busca dados atualizados do usuário (plano pode ter mudado)
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, name, plano, plano_status, plano_fim, mensagens_mes, mes_referencia, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, role, empresa_id')
+      .select('id, email, name, plano, plano_status, plano_fim, mensagens_mes, mes_referencia, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, role, empresa_id, cielo_recurrent_payment_id, stripe_subscription_id, created_at')
       .eq('id', payload.id)
       .single();
 
@@ -45,13 +45,21 @@ async function authMiddleware(req, res, next) {
     if (user.plano !== 'free') {
       const agora = new Date();
       if (user.plano_fim && new Date(user.plano_fim) < agora) {
-        // Plano expirado — rebaixa para free
-        await supabase
-          .from('users')
-          .update({ plano: 'free', plano_status: 'expirado' })
-          .eq('id', user.id);
+        await supabase.from('users').update({ plano: 'free', plano_status: 'expirado' }).eq('id', user.id);
         user.plano = 'free';
         user.plano_status = 'expirado';
+      }
+    }
+
+    // Trial gratuito: 7 dias sem cartão para contas novas
+    // Após 7 dias sem cartão cadastrado → bloqueia acesso ao chat
+    if (user.plano === 'free' && !user.cielo_recurrent_payment_id && !user.stripe_subscription_id) {
+      const criado   = new Date(user.created_at);
+      const diasDesde = (Date.now() - criado.getTime()) / (1000 * 60 * 60 * 24);
+      if (diasDesde > 7) {
+        user._trial_expirado = true; // sinaliza para rotas que precisam bloquear
+      } else {
+        user._trial_dias_restantes = Math.ceil(7 - diasDesde);
       }
     }
 
