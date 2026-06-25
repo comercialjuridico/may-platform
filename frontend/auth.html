@@ -257,7 +257,8 @@ async function criarConta() {
   if (!res.ok) { mostrarErro(data.erro||'Erro ao criar conta.'); btn.disabled=false; btn.textContent='Criar conta grátis'; return; }
   salvarTokens(data.accessToken, data.refreshToken);
   salvarUser(data.user);
-  window.location.href = '/app';
+  // Novo usuário: vai escolher plano + adicionar cartão antes de entrar no app
+  window.location.href = '/index.html?novo-usuario=1';
 }
 
 async function enviarReset() {

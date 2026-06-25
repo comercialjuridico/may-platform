@@ -1278,13 +1278,29 @@ async function salvarPerfil() {
 }
 
 // ─── Planos / Checkout Cielo ─────────────────────────────────────────────────
-let _planoSelecionado = 'mensal';
+let _planoSelecionado = 'start_trimestral';
+
+const PLANO_LABELS = {
+  start_trimestral:  'Start — Trimestral',
+  start_anual:       'Start — Anual',
+  equipe_trimestral: 'Equipe — Trimestral',
+  equipe_anual:      'Equipe — Anual',
+  pro_trimestral:    'Pro — Trimestral',
+  pro_anual:         'Pro — Anual',
+  mensal:            'Mensal',
+  anual:             'Anual',
+};
 
 function iniciarCheckout(plano) {
   _planoSelecionado = plano;
-  const label = plano === 'mensal' ? 'Mensal' : 'Anual';
-  document.getElementById('cartao-titulo').textContent = `Assinar — Plano ${label}`;
+  const label = PLANO_LABELS[plano] || plano;
+  document.getElementById('cartao-titulo').textContent = `Assinar — ${label}`;
   document.getElementById('cartao-erro').style.display = 'none';
+
+  // Mostra aviso "7 dias por nossa conta" no modal do cartão
+  const trialAviso = document.getElementById('cartao-trial-aviso');
+  if (trialAviso) trialAviso.style.display = 'flex';
+
   document.getElementById('modal-planos').classList.remove('active');
   document.getElementById('modal-cartao').classList.add('active');
 }
@@ -1320,16 +1336,23 @@ async function submeterCartao(e) {
     // Sucesso — fecha modal, atualiza estado, exibe confirmação
     document.getElementById('modal-cartao').classList.remove('active');
     estado.user.plano = _planoSelecionado;
-    estado.user.plano_status = 'ativo';
+    estado.user.plano_status = data.periodo_gratis ? 'periodo_gratis' : 'ativo';
     renderizarSidebar();
-    mostrarToast(`🎉 Plano ${_planoSelecionado} ativado com sucesso!`, 'sucesso');
+
+    const label = PLANO_LABELS[_planoSelecionado] || _planoSelecionado;
+    if (data.periodo_gratis) {
+      const dataCobranca = new Date(data.inicio_cobranca).toLocaleDateString('pt-BR');
+      mostrarToast(`🎉 7 dias por nossa conta ativados — ${label}. Cobrança inicia em ${dataCobranca}.`, 'sucesso');
+    } else {
+      mostrarToast(`🎉 Plano ${label} ativado com sucesso!`, 'sucesso');
+    }
 
   } catch {
     erro.textContent = 'Erro de conexão. Tente novamente.';
     erro.style.display = 'block';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Confirmar assinatura';
+    btn.textContent = 'Começar 7 dias por nossa conta';
   }
 }
 

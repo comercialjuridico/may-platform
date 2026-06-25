@@ -432,61 +432,96 @@
       <button class="modal-close" onclick="document.getElementById('modal-planos').classList.remove('active')">✕</button>
     </div>
 
-    <!-- Toggle Mensal / Anual -->
-    <div style="display:flex; align-items:center; justify-content:center; gap:0; margin:16px 0 20px; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:12px; padding:4px; width:fit-content; margin-left:auto; margin-right:auto;">
+    <!-- Banner trial (aparece só para novo usuário) -->
+    <div id="trial-banner-modal" style="display:none; background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(52,211,153,.08)); border:1px solid rgba(16,185,129,.3); border-radius:12px; padding:14px 18px; margin-bottom:16px; text-align:center;">
+      <div style="font-size:1.3rem; margin-bottom:4px;">🎉</div>
+      <div style="font-size:14px; font-weight:700; color:#34D399; margin-bottom:2px;">7 dias grátis incluídos</div>
+      <div style="font-size:12px; color:rgba(200,255,220,.6); line-height:1.5;">Adicione seu cartão para começar. <strong style="color:#6EE7B7">Cancele antes do 8º dia e não paga nada.</strong></div>
+    </div>
+
+    <!-- Toggle Trimestral / Anual -->
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; margin:0 0 20px; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:12px; padding:4px; width:fit-content; margin-left:auto; margin-right:auto;">
       <button id="toggle-mensal" onclick="trocarPeriodo('mensal')"
         style="display:flex;align-items:center;gap:6px;padding:7px 20px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--accent);color:#fff;">
-        📅 Mensal
+        📅 Trimestral
       </button>
       <button id="toggle-anual" onclick="trocarPeriodo('anual')"
         style="display:flex;align-items:center;gap:6px;padding:7px 20px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:var(--text-muted);">
-        🗓️ Anual <span style="font-size:10px;background:rgba(16,185,129,.2);color:#34D399;padding:2px 6px;border-radius:99px;margin-left:2px">-2 meses</span>
+        🗓️ Anual <span style="font-size:10px;background:rgba(16,185,129,.2);color:#34D399;padding:2px 6px;border-radius:99px;margin-left:2px">2 meses grátis</span>
       </button>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
 
-      <!-- Plano Essencial -->
-      <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:20px;">
-        <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Essencial</div>
-        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
-          <span id="preco-essencial">R$ 97</span>
-          <span id="periodo-essencial" style="font-size:0.75rem;font-weight:400;color:var(--text-muted)">/mês</span>
+      <!-- Plano Start -->
+      <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column;">
+        <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Start</div>
+        <div style="margin-bottom:4px;">
+          <span id="preco-start" style="font-size:1.55rem; font-weight:700; color:var(--text-primary);">R$ 97</span>
+          <span id="periodo-start" style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">/mês</span>
         </div>
-        <div class="text-xs text-muted mb-16" id="sub-essencial">cancele quando quiser</div>
-        <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:20px;">
-          <li>✓ 500 mensagens/mês</li>
-          <li>✓ Todas as ferramentas</li>
-          <li>✓ Upload de documentos</li>
-          <li>✓ Gravação de áudio</li>
-          <li>✓ Exportação Word</li>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;" id="sub-start">1 usuário · cancele quando quiser</div>
+        <ul style="font-size:0.8rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:5px; margin-bottom:18px; flex:1;">
+          <li>✓ 1 usuário</li>
+          <li>✓ Chat com IA ilimitado</li>
+          <li>✓ 30 simulações/mês</li>
+          <li>✓ Trilhas de vendas</li>
+          <li>✓ Upload PDF, Word, áudio</li>
+          <li>✓ Gerador de propostas</li>
+          <li>✓ Export Word e PDF</li>
         </ul>
-        <button class="btn btn-secondary btn-full" id="btn-essencial" onclick="iniciarCheckout('mensal')">Assinar Essencial</button>
+        <button class="btn btn-secondary btn-full" id="btn-start" onclick="iniciarCheckout('start_mensal')">Assinar Start</button>
+      </div>
+
+      <!-- Plano Equipe -->
+      <div style="background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:var(--radius); padding:18px; position:relative; display:flex; flex-direction:column;">
+        <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; font-size:0.68rem; font-weight:700; padding:3px 12px; border-radius:99px; white-space:nowrap;">MAIS POPULAR</div>
+        <div style="font-size:0.72rem; font-weight:700; color:var(--accent-light); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Equipe</div>
+        <div style="margin-bottom:4px;">
+          <span id="preco-equipe" style="font-size:1.55rem; font-weight:700; color:var(--text-primary);">R$ 197</span>
+          <span id="periodo-equipe" style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">/mês</span>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;" id="sub-equipe">até 3 usuários · cancele quando quiser</div>
+        <ul style="font-size:0.8rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:5px; margin-bottom:18px; flex:1;">
+          <li>✓ Até 3 usuários</li>
+          <li>✓ Chat com IA ilimitado</li>
+          <li>✓ 25 simulações/usuário</li>
+          <li>✓ Trilhas de vendas</li>
+          <li>✓ Upload PDF, Word, áudio</li>
+          <li>✓ Gerador de propostas</li>
+          <li>✓ Export Word, PDF e imagem</li>
+          <li>✓ Painel do gestor</li>
+          <li>✓ Ranking da equipe</li>
+        </ul>
+        <button class="btn btn-primary btn-full" id="btn-equipe" onclick="iniciarCheckout('equipe_mensal')">Assinar Equipe</button>
       </div>
 
       <!-- Plano Pro -->
-      <div style="background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:var(--radius); padding:20px; position:relative;">
-        <div style="position:absolute; top:-10px; right:12px; background:var(--accent); color:var(--text-inverse); font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:99px;">MELHOR VALOR</div>
-        <div style="font-size:0.75rem; font-weight:600; color:var(--accent-light); text-transform:uppercase; margin-bottom:8px;">Pro</div>
-        <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
-          <span id="preco-pro">R$ 197</span>
-          <span id="periodo-pro" style="font-size:0.75rem;font-weight:400;color:var(--text-muted)">/mês</span>
+      <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column;">
+        <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Pro</div>
+        <div style="margin-bottom:4px;">
+          <span id="preco-pro" style="font-size:1.55rem; font-weight:700; color:var(--text-primary);">R$ 327</span>
+          <span id="periodo-pro" style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">/mês</span>
         </div>
-        <div class="text-xs text-muted mb-16" id="sub-pro">cancele quando quiser</div>
-        <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:20px;">
-          <li>✓ Mensagens ilimitadas</li>
-          <li>✓ Todas as ferramentas</li>
-          <li>✓ Upload de documentos</li>
-          <li>✓ Gravação de áudio</li>
-          <li>✓ Exportação Word</li>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;" id="sub-pro">até 5 usuários · cancele quando quiser</div>
+        <ul style="font-size:0.8rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:5px; margin-bottom:18px; flex:1;">
+          <li>✓ Até 5 usuários</li>
+          <li>✓ Chat com IA ilimitado</li>
+          <li>✓ 20 simulações/usuário</li>
+          <li>✓ Trilhas de vendas</li>
+          <li>✓ Upload PDF, Word, áudio</li>
+          <li>✓ Gerador de propostas</li>
+          <li>✓ Export Word, PDF e imagem</li>
+          <li>✓ Painel do gestor avançado</li>
+          <li>✓ Ranking + metas da equipe</li>
           <li>✓ Suporte prioritário</li>
         </ul>
-        <button class="btn btn-primary btn-full" id="btn-pro" onclick="iniciarCheckout('anual')">Assinar Pro</button>
+        <button class="btn btn-secondary btn-full" id="btn-pro" onclick="iniciarCheckout('pro_mensal')">Assinar Pro</button>
       </div>
     </div>
 
-    <p class="text-xs text-muted" style="text-align:center; margin-top:16px;">
-      🔒 Pagamento seguro via Cielo · Cancele a qualquer momento
+    <p style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:16px;">
+      🔒 Pagamento seguro · Cancele a qualquer momento
     </p>
   </div>
 </div>
@@ -497,6 +532,15 @@
     <div class="modal-header">
       <span class="modal-title" id="cartao-titulo">Assinar — Plano Mensal</span>
       <button class="modal-close" onclick="document.getElementById('modal-cartao').classList.remove('active')">✕</button>
+    </div>
+
+    <!-- Aviso de trial (oculto por padrão, revelado pelo iniciarCheckout) -->
+    <div id="cartao-trial-aviso" style="display:none;align-items:flex-start;gap:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px 14px;margin:0 20px 0;">
+      <span style="font-size:18px;line-height:1;flex-shrink:0">🔒</span>
+      <div>
+        <div style="font-size:.83rem;font-weight:700;color:#6EE7B7;margin-bottom:2px">7 dias por nossa conta — sem cobrança agora</div>
+        <div style="font-size:.78rem;color:rgba(110,231,183,.65);line-height:1.4">Seu cartão só será cobrado após os 7 dias. Cancele antes disso sem custo.</div>
+      </div>
     </div>
 
     <form id="form-cartao" onsubmit="submeterCartao(event)" autocomplete="off">
@@ -539,7 +583,7 @@
         <div id="cartao-erro" style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px;font-size:.82rem;color:#FCA5A5;"></div>
 
         <button id="btn-pagar" type="submit" class="btn btn-primary btn-full" style="margin-top:4px">
-          Confirmar assinatura
+          Começar 7 dias por nossa conta
         </button>
       </div>
     </form>
@@ -882,22 +926,32 @@
 
   // ── Planos: toggle mensal / anual ────────────────────────────────────────────
   const PRECOS = {
-    mensal:  { essencial: 'R$ 97',   pro: 'R$ 197',   periodo: '/mês',  sub: 'cancele quando quiser', checkoutEssencial: 'mensal',  checkoutPro: 'mensal_pro'  },
-    anual:   { essencial: 'R$ 997',  pro: 'R$ 1.997', periodo: '/ano',  sub: '2 meses grátis incluídos', checkoutEssencial: 'anual', checkoutPro: 'anual_pro'  },
+    mensal: {
+      start:  { preco: 'R$ 291',   sub: '1 usuário · cobrado a cada 3 meses',        checkout: 'start_trimestral'  },
+      equipe: { preco: 'R$ 591',   sub: 'até 3 usuários · cobrado a cada 3 meses',   checkout: 'equipe_trimestral' },
+      pro:    { preco: 'R$ 981',   sub: 'até 5 usuários · cobrado a cada 3 meses',   checkout: 'pro_trimestral'    },
+      periodo: '/trim',
+    },
+    anual: {
+      start:  { preco: 'R$ 970',   sub: '1 usuário · equivale a R$ 80/mês',          checkout: 'start_anual'   },
+      equipe: { preco: 'R$ 1.970', sub: 'até 3 usuários · equivale a R$ 164/mês',    checkout: 'equipe_anual'  },
+      pro:    { preco: 'R$ 3.270', sub: 'até 5 usuários · equivale a R$ 272/mês',    checkout: 'pro_anual'     },
+      periodo: '/ano',
+    },
   };
   let _periodoAtual = 'mensal';
 
   function trocarPeriodo(periodo) {
     _periodoAtual = periodo;
     const p = PRECOS[periodo];
-    document.getElementById('preco-essencial').textContent  = p.essencial;
-    document.getElementById('periodo-essencial').textContent = p.periodo;
-    document.getElementById('sub-essencial').textContent    = p.sub;
-    document.getElementById('preco-pro').textContent        = p.pro;
-    document.getElementById('periodo-pro').textContent      = p.periodo;
-    document.getElementById('sub-pro').textContent          = p.sub;
-    document.getElementById('btn-essencial').onclick = () => iniciarCheckout(p.checkoutEssencial);
-    document.getElementById('btn-pro').onclick       = () => iniciarCheckout(p.checkoutPro);
+
+    ['start', 'equipe', 'pro'].forEach(plano => {
+      const el = p[plano];
+      document.getElementById(`preco-${plano}`).textContent   = el.preco;
+      document.getElementById(`periodo-${plano}`).textContent = p.periodo;
+      document.getElementById(`sub-${plano}`).textContent     = el.sub;
+      document.getElementById(`btn-${plano}`).onclick         = () => iniciarCheckout(el.checkout);
+    });
 
     // Estilo dos botões do toggle
     const btnM = document.getElementById('toggle-mensal');
@@ -911,9 +965,18 @@
     }
   }
 
-  function abrirModalPlanos() {
+  function abrirModalPlanos(novoUsuario = false) {
     document.getElementById('modal-planos').classList.add('active');
-    trocarPeriodo('mensal'); // sempre abre no mensal
+    document.getElementById('trial-banner-modal').style.display = novoUsuario ? 'block' : 'none';
+    trocarPeriodo(novoUsuario ? 'anual' : 'mensal'); // novo usuário abre no anual (melhor oferta)
+  }
+
+  // Detecta novo usuário via URL
+  if (new URLSearchParams(window.location.search).get('novo-usuario') === '1') {
+    // Limpa URL sem reload
+    window.history.replaceState({}, '', '/index.html');
+    // Abre modal após carregar
+    setTimeout(() => abrirModalPlanos(true), 800);
   }
 
   // Fecha modal ao clicar fora

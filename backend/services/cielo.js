@@ -55,13 +55,31 @@ function detectarBandeira(numero) {
   return 'Visa'; // fallback
 }
 
-// Cria pagamento recorrente (primeira cobrança + configura recorrência automática)
-async function criarRecorrencia({ plano, cartao, cliente, userId }) {
-  const valores = {
-    mensal: parseInt(process.env.CIELO_VALOR_MENSAL) || 9700,  // em centavos
-    anual:  parseInt(process.env.CIELO_VALOR_ANUAL)  || 79700,
-  };
-  const intervalos = { mensal: 'Monthly', anual: 'Annual' };
+// Tabela de planos: valor (centavos) e intervalo Cielo
+const PLANOS = {
+  start_trimestral:  { valor: 29100,  intervalo: 'Quarterly' },
+  start_anual:       { valor: 97000,  intervalo: 'Annual'    },
+  equipe_trimestral: { valor: 59100,  intervalo: 'Quarterly' },
+  equipe_anual:      { valor: 197000, intervalo: 'Annual'    },
+  pro_trimestral:    { valor: 98100,  intervalo: 'Quarterly' },
+  pro_anual:         { valor: 327000, intervalo: 'Annual'    },
+  // legado
+  mensal: { valor: parseInt(process.env.CIELO_VALOR_MENSAL) || 9700,  intervalo: 'Monthly' },
+  anual:  { valor: parseInt(process.env.CIELO_VALOR_ANUAL)  || 79700, intervalo: 'Annual'  },
+};
+
+// Calcula data de início do trial (hoje + 7 dias) no formato YYYY-MM-DD
+function dataTrialFim() {
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  return d.toISOString().slice(0, 10);
+}
+
+// Cria recorrência COM 7 dias por nossa conta:
+// cartão cadastrado agora, primeira cobrança em D+7 (AuthorizeNow: false)
+async function criarRecorrencia({ plano, cartao, cliente, userId, comPeriodoGratis = true }) {
+  const cfg = PLANOS[plano];
+  if (!cfg) throw new Error(`Plano desconhecido: ${plano}`);
 
   const body = {
     MerchantOrderId: `MAY-${userId}-${Date.now()}`,
@@ -73,20 +91,21 @@ async function criarRecorrencia({ plano, cartao, cliente, userId }) {
     },
     Payment: {
       Type:         'CreditCard',
-      Amount:       valores[plano],
+      Amount:       cfg.valor,
       Currency:     'BRL',
       Country:      'BRA',
       Installments: 1,
       Capture:      true,
       RecurrentPayment: {
-        AuthorizeNow: true,
-        EndDate:      '2099-12-31',
-        Interval:     intervalos[plano],
+        AuthorizeNow:        !comPeriodoGratis,   // false = sem cobrança imediata
+        EndDate:             '2099-12-31',
+        Interval:            cfg.intervalo,
+        ...(comPeriodoGratis ? { StartRecurrentDate: dataTrialFim() } : {}),
       },
       CreditCard: {
         CardNumber:     cartao.numero.replace(/\D/g, ''),
         Holder:         cartao.titular,
-        ExpirationDate: cartao.validade, // MM/AAAA
+        ExpirationDate: cartao.validade,
         SecurityCode:   cartao.cvv,
         Brand:          detectarBandeira(cartao.numero),
         SaveCard:       false,

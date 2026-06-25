@@ -5,67 +5,109 @@ const { supabase }          = require('../services/supabase');
 const { authMiddleware }    = require('../middleware/auth');
 const { criarRecorrencia, consultarPagamento, cancelarRecorrencia } = require('../services/cielo');
 
-const VALORES = {
-  mensal: ((parseInt(process.env.CIELO_VALOR_MENSAL) || 9700) / 100).toFixed(2),
-  anual:  ((parseInt(process.env.CIELO_VALOR_ANUAL)  || 79700) / 100).toFixed(2),
+// Planos válidos e suas durações em meses (para calcular plano_fim depois do trial)
+const PLANOS_CONFIG = {
+  start_trimestral:  { meses: 3,  maxMembros: 1  },
+  start_anual:       { meses: 12, maxMembros: 1  },
+  equipe_trimestral: { meses: 3,  maxMembros: 3  },
+  equipe_anual:      { meses: 12, maxMembros: 3  },
+  pro_trimestral:    { meses: 3,  maxMembros: 5  },
+  pro_anual:         { meses: 12, maxMembros: 5  },
+  // legado
+  mensal: { meses: 1, maxMembros: 1 },
+  anual:  { meses: 12, maxMembros: 1 },
 };
 
 // ─── GET /api/cielo/precos ──────────────────────────────────────────────────
 router.get('/precos', (req, res) => {
-  res.json(VALORES);
+  res.json({
+    start_trimestral:  '291.00',
+    start_anual:       '970.00',
+    equipe_trimestral: '591.00',
+    equipe_anual:      '1970.00',
+    pro_trimestral:    '981.00',
+    pro_anual:         '3270.00',
+  });
 });
 
 // ─── POST /api/cielo/checkout ───────────────────────────────────────────────
-// Cria assinatura recorrente via Cielo (primeira cobrança + configura recorrência automática)
+// 7 dias GRÁTIS: cartão cadastrado agora, primeira cobrança em D+7 (AuthorizeNow: false)
 router.post('/checkout', authMiddleware, async (req, res) => {
   try {
     const { plano, cartao, cpf } = req.body;
 
-    if (!['mensal', 'anual'].includes(plano)) {
+    if (!PLANOS_CONFIG[plano]) {
       return res.status(400).json({ erro: 'Plano inválido.' });
     }
     if (!cartao?.numero || !cartao?.titular || !cartao?.validade || !cartao?.cvv) {
       return res.status(400).json({ erro: 'Dados do cartão incompletos.' });
     }
 
+    // Usuário já usou o período gratuito? Cobra imediatamente
+    const jaUsouPeriodoGratis = !!req.user.periodo_gratis_inicio;
+
     const resultado = await criarRecorrencia({
       plano,
       cartao,
       cliente: { nome: req.user.name, email: req.user.email, cpf },
       userId: req.user.id,
+      comPeriodoGratis: !jaUsouPeriodoGratis,
     });
 
     const pagamento = resultado.body?.Payment;
 
-    // Pagamento recusado
-    if (!pagamento || pagamento.Status !== 2) {
-      const motivo = pagamento?.ReturnMessage || 'Cartão não autorizado.';
+    // Com período grátis (AuthorizeNow: false): Cielo retorna Status 0 ou 1 (agendado)
+    // Sem período grátis (AuthorizeNow: true): Status 2 = aprovado
+    const statusOk = jaUsouPeriodoGratis
+      ? pagamento?.Status === 2
+      : [0, 1, 2].includes(pagamento?.Status);
+
+    if (!pagamento || !statusOk) {
+      const motivo = pagamento?.ReturnMessage || 'Cartão não autorizado. Verifique os dados.';
       return res.status(402).json({ erro: motivo, status: pagamento?.Status });
     }
 
-    // Ativa plano imediatamente
-    const agora = new Date();
-    const fim   = new Date(agora);
-    if (plano === 'mensal') fim.setMonth(fim.getMonth() + 1);
-    else                    fim.setFullYear(fim.getFullYear() + 1);
+    const cfg      = PLANOS_CONFIG[plano];
+    const agora    = new Date();
+
+    // plano_fim = D+7 (período grátis) + duração do plano
+    const inicioCobranca = new Date(agora);
+    if (!jaUsouPeriodoGratis) inicioCobranca.setDate(inicioCobranca.getDate() + 7);
+
+    const fimPlano = new Date(inicioCobranca);
+    fimPlano.setMonth(fimPlano.getMonth() + cfg.meses);
 
     await supabase.from('users').update({
       plano,
-      plano_status:               'ativo',
-      plano_inicio:               agora.toISOString(),
-      plano_fim:                  fim.toISOString(),
-      cielo_recurrent_payment_id: pagamento.RecurrentPayment?.RecurrentPaymentId,
+      plano_status:                   jaUsouPeriodoGratis ? 'ativo' : 'periodo_gratis',
+      plano_inicio:                   agora.toISOString(),
+      plano_fim:                      fimPlano.toISOString(),
+      periodo_gratis_inicio:          jaUsouPeriodoGratis ? req.user.periodo_gratis_inicio : agora.toISOString(),
+      periodo_gratis_fim:             jaUsouPeriodoGratis ? null : inicioCobranca.toISOString(),
+      cielo_recurrent_payment_id:     pagamento.RecurrentPayment?.RecurrentPaymentId,
     }).eq('id', req.user.id);
+
+    // Atualiza max_membros da empresa
+    const { data: userRow } = await supabase.from('users').select('empresa_id').eq('id', req.user.id).single();
+    if (userRow?.empresa_id) {
+      await supabase.from('empresas').update({ max_membros: cfg.maxMembros }).eq('id', userRow.empresa_id);
+    }
 
     // Registra no log
     await supabase.from('subscriptions_log').insert({
-      user_id:    req.user.id,
-      cielo_event: 'checkout.aprovado',
-      payload:    resultado.body,
-      processado: true,
+      user_id:     req.user.id,
+      cielo_event: jaUsouPeriodoGratis ? 'checkout.aprovado' : 'checkout.periodo_gratis_iniciado',
+      payload:     resultado.body,
+      processado:  true,
     }).catch(() => {});
 
-    res.json({ ok: true, plano, fim: fim.toISOString() });
+    res.json({
+      ok:                true,
+      plano,
+      periodo_gratis:    !jaUsouPeriodoGratis,
+      inicio_cobranca:   jaUsouPeriodoGratis ? null : inicioCobranca.toISOString(),
+      fim:               fimPlano.toISOString(),
+    });
 
   } catch (err) {
     console.error('Erro ao criar recorrência Cielo:', err.message);
@@ -139,12 +181,13 @@ router.post('/webhook', express.urlencoded({ extended: true }), async (req, res)
 
       if (pagamento.Status === 2) {
         // Pagamento confirmado — renova o plano
-        const novoFim = new Date(user.plano_fim || new Date());
-        if (user.plano === 'mensal') novoFim.setMonth(novoFim.getMonth() + 1);
-        else                         novoFim.setFullYear(novoFim.getFullYear() + 1);
+        const cfg      = PLANOS_CONFIG[user.plano] || { meses: 1 };
+        const novoFim  = new Date(user.plano_fim || new Date());
+        novoFim.setMonth(novoFim.getMonth() + cfg.meses);
 
         await supabase.from('users').update({
           plano_status: 'ativo',
+          trial_fim:    null,     // trial encerrou, agora é assinatura ativa
           plano_fim:    novoFim.toISOString(),
         }).eq('id', user.id);
 

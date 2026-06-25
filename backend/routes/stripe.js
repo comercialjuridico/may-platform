@@ -7,42 +7,57 @@ const { authMiddleware } = require('../middleware/auth');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Mapa de planos → price IDs do Stripe (configurar no .env)
+const PRICE_IDS = {
+  start_trimestral:  process.env.STRIPE_PRICE_START_TRIM,
+  start_anual:       process.env.STRIPE_PRICE_START_ANUAL,
+  equipe_trimestral: process.env.STRIPE_PRICE_EQUIPE_TRIM,
+  equipe_anual:      process.env.STRIPE_PRICE_EQUIPE_ANUAL,
+  pro_trimestral:    process.env.STRIPE_PRICE_PRO_TRIM,
+  pro_anual:         process.env.STRIPE_PRICE_PRO_ANUAL,
+  // legado
+  mensal:            process.env.STRIPE_PRICE_MENSAL,
+  anual:             process.env.STRIPE_PRICE_ANUAL,
+};
+
 // ─── POST /api/stripe/checkout ──────────────────────────────────────────────
-// Cria sessão de checkout do Stripe
+// Cria sessão de checkout do Stripe com trial de 7 dias
 router.post('/checkout', authMiddleware, async (req, res) => {
   try {
-    const { plano } = req.body; // 'mensal' ou 'anual'
+    const { plano } = req.body;
 
-    if (!['mensal', 'anual'].includes(plano)) {
+    const priceId = PRICE_IDS[plano];
+    if (!priceId) {
       return res.status(400).json({ erro: 'Plano inválido.' });
     }
-
-    const priceId = plano === 'mensal'
-      ? process.env.STRIPE_PRICE_MENSAL
-      : process.env.STRIPE_PRICE_ANUAL;
 
     // Cria ou reutiliza customer no Stripe
     let customerId = req.user.stripe_customer_id;
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: req.user.email,
-        name: req.user.name,
+        name:  req.user.name,
         metadata: { user_id: req.user.id },
       });
       customerId = customer.id;
       await supabase.from('users').update({ stripe_customer_id: customerId }).eq('id', req.user.id);
     }
 
+    // Usuário já tem assinatura ativa? Não aplica trial novamente
+    const jaAssinou = !!req.user.stripe_subscription_id;
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.APP_URL}/index.html?pagamento=sucesso`,
-      cancel_url: `${process.env.APP_URL}/index.html?pagamento=cancelado`,
+      success_url: `${process.env.APP_URL}/app?pagamento=sucesso`,
+      cancel_url:  `${process.env.APP_URL}/index.html?pagamento=cancelado&novo-usuario=1`,
       metadata: { user_id: req.user.id, plano },
       subscription_data: {
         metadata: { user_id: req.user.id, plano },
+        // Trial de 7 dias apenas para novos assinantes
+        ...(jaAssinou ? {} : { trial_period_days: 7 }),
       },
     });
 
@@ -113,23 +128,37 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   try {
     switch (event.type) {
 
+      // Trial iniciado — cartão cadastrado, cobrança futura
+      case 'customer.subscription.trial_will_end':
+        // Stripe envia 3 dias antes do trial acabar — pode usar para enviar e-mail
+        break;
+
       // Assinatura criada ou renovada com sucesso
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
         const subscriptionId = invoice.subscription;
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const userId = subscription.metadata.user_id;
-        const plano = subscription.metadata.plano || 'mensal';
+        const plano = subscription.metadata.plano || 'start_trimestral';
 
         if (!userId) break;
+
+        // Deriva tipo de conta pelo plano
+        const maxMembros = plano.startsWith('pro') ? 5 : plano.startsWith('equipe') ? 3 : 1;
 
         await supabase.from('users').update({
           plano,
           plano_status: 'ativo',
           plano_inicio: new Date(subscription.current_period_start * 1000).toISOString(),
-          plano_fim: new Date(subscription.current_period_end * 1000).toISOString(),
+          plano_fim:    new Date(subscription.current_period_end   * 1000).toISOString(),
           stripe_subscription_id: subscriptionId,
         }).eq('id', userId);
+
+        // Atualiza max_membros da empresa se tiver
+        const { data: userRow } = await supabase.from('users').select('empresa_id').eq('id', userId).single();
+        if (userRow?.empresa_id) {
+          await supabase.from('empresas').update({ max_membros: maxMembros }).eq('id', userRow.empresa_id);
+        }
 
         await supabase.from('subscriptions_log')
           .update({ processado: true })
