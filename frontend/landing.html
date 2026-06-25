@@ -422,16 +422,32 @@
     .origem-label { font-size: .78rem; color: var(--muted); max-width: 120px; line-height: 1.4; margin: 0 auto; }
     .origem-divider { width: 1px; height: 48px; background: rgba(255,255,255,.08); flex-shrink: 0; }
     .origem-quote {
-      max-width: 600px; margin: 0 auto;
-      font-size: .92rem; line-height: 1.7; color: var(--muted);
-      font-style: italic;
-      border-left: 2px solid rgba(124,58,237,.4);
-      padding: 16px 20px; text-align: left;
-      background: rgba(124,58,237,.04); border-radius: 0 8px 8px 0;
+      max-width: 580px; margin: 0 auto;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 20px 22px;
+      text-align: left;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .origem-quote-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      object-fit: cover; object-position: center top;
+      flex-shrink: 0;
+      border: 2px solid rgba(124,58,237,.5);
+    }
+    .origem-quote-body { flex: 1; }
+    .origem-quote-text {
+      font-size: .88rem; line-height: 1.65; color: rgba(234,230,255,.75);
+      font-style: italic; margin-bottom: 10px;
     }
     .origem-quote-autor {
-      margin-top: 10px; font-size: .78rem; color: rgba(255,255,255,.35);
-      font-style: normal; font-weight: 600; letter-spacing: .03em;
+      display: flex; align-items: center; gap: 8px;
+      font-size: .75rem; color: rgba(255,255,255,.4);
+      font-style: normal; font-weight: 600;
+    }
+    .origem-quote-autor::before {
+      content: ''; width: 20px; height: 1px; background: rgba(124,58,237,.5);
     }
     @media(max-width:600px) {
       .origem-divider { display: none; }
@@ -589,8 +605,11 @@
     </div>
 
     <div class="origem-quote">
-      "Não foi uma aposta. Foi uma resposta a uma demanda real — e funcionou. Agora esse mesmo método está disponível como plataforma de treinamento para o seu escritório."
-      <div class="origem-quote-autor">— Mayra Alves, fundadora do Comercial Jurídico</div>
+      <img class="origem-quote-avatar" src="/assets/mayra-avatar.png" alt="Mayra Alves" />
+      <div class="origem-quote-body">
+        <div class="origem-quote-text">"Não foi uma aposta. Foi uma resposta a uma demanda real — e funcionou. Agora esse mesmo método está disponível como plataforma de treinamento para o seu escritório."</div>
+        <div class="origem-quote-autor">Mayra Alves, fundadora do Comercial Jurídico</div>
+      </div>
     </div>
   </div>
 </section>
