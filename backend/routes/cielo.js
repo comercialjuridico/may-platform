@@ -34,6 +34,94 @@ router.get('/precos', (req, res) => {
   });
 });
 
+// ─── POST /api/cielo/pre-validar ────────────────────────────────────────────
+// Valida cartão SEM criar conta — chamado antes do registro
+// Cria recorrência com AuthorizeNow:false (trial 7 dias), retorna orderId temporário
+router.post('/pre-validar', async (req, res) => {
+  try {
+    const { plano, cartao, cpf } = req.body;
+    if (!PLANOS_CONFIG[plano]) return res.status(400).json({ erro: 'Plano inválido.' });
+    if (!cartao?.numero || !cartao?.titular || !cartao?.validade || !cartao?.cvv) {
+      return res.status(400).json({ erro: 'Dados do cartão incompletos.' });
+    }
+
+    const orderId = `PRE-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    const resultado = await criarRecorrencia({
+      plano,
+      cartao,
+      cliente: { nome: 'Pendente', email: 'pendente@usemayapp.com', cpf },
+      userId: orderId,
+      comPeriodoGratis: true,
+    });
+
+    const pagamento = resultado.body?.Payment;
+    const statusOk  = [0, 1, 2].includes(pagamento?.Status);
+    if (!pagamento || !statusOk) {
+      const motivo = pagamento?.ReturnMessage || 'Cartão não autorizado. Verifique os dados.';
+      return res.status(402).json({ erro: motivo });
+    }
+
+    // Salva temporariamente no banco para vincular após registro
+    await supabase.from('pre_checkouts').insert({
+      order_id:             orderId,
+      plano,
+      cielo_recurrent_id:   pagamento.RecurrentPayment?.RecurrentPaymentId,
+      expires_at:           new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min
+    }).catch(() => {});
+
+    res.json({ ok: true, orderId });
+  } catch (err) {
+    console.error('Erro pre-validar Cielo:', err.message);
+    res.status(500).json({ erro: 'Erro ao validar cartão. Tente novamente.' });
+  }
+});
+
+// ─── POST /api/cielo/ativar ──────────────────────────────────────────────────
+// Vincula o pre-checkout ao usuário recém-criado
+router.post('/ativar', authMiddleware, async (req, res) => {
+  try {
+    const { orderId, plano } = req.body;
+
+    const { data: pre } = await supabase
+      .from('pre_checkouts')
+      .select('*')
+      .eq('order_id', orderId)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (!pre) return res.status(400).json({ erro: 'Sessão de pagamento expirada. Tente novamente.' });
+
+    const cfg   = PLANOS_CONFIG[plano] || PLANOS_CONFIG[pre.plano];
+    const agora = new Date();
+    const inicioCobranca = new Date(agora);
+    inicioCobranca.setDate(inicioCobranca.getDate() + 7);
+    const fimPlano = new Date(inicioCobranca);
+    fimPlano.setMonth(fimPlano.getMonth() + cfg.meses);
+
+    await supabase.from('users').update({
+      plano:                      pre.plano,
+      plano_status:               'periodo_gratis',
+      plano_inicio:               agora.toISOString(),
+      plano_fim:                  fimPlano.toISOString(),
+      periodo_gratis_inicio:      agora.toISOString(),
+      periodo_gratis_fim:         inicioCobranca.toISOString(),
+      cielo_recurrent_payment_id: pre.cielo_recurrent_id,
+    }).eq('id', req.user.id);
+
+    const { data: userRow } = await supabase.from('users').select('empresa_id').eq('id', req.user.id).single();
+    if (userRow?.empresa_id) {
+      await supabase.from('empresas').update({ max_membros: cfg.maxMembros }).eq('id', userRow.empresa_id);
+    }
+
+    await supabase.from('pre_checkouts').delete().eq('order_id', orderId).catch(() => {});
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Erro ativar Cielo:', err.message);
+    res.status(500).json({ erro: 'Erro ao ativar assinatura.' });
+  }
+});
+
 // ─── POST /api/cielo/checkout ───────────────────────────────────────────────
 // 7 dias GRÁTIS: cartão cadastrado agora, primeira cobrança em D+7 (AuthorizeNow: false)
 router.post('/checkout', authMiddleware, async (req, res) => {
