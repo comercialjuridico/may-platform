@@ -360,6 +360,15 @@
       border: 1px solid var(--border);
       box-shadow: 0 8px 32px rgba(0,0,0,.4);
       image-rendering: auto;
+      cursor: zoom-in;
+      transition: transform .35s ease, box-shadow .35s ease;
+      transform-origin: left center;
+    }
+    .origem-gpt-img:hover {
+      transform: scale(2.2);
+      box-shadow: 0 20px 60px rgba(0,0,0,.7);
+      z-index: 10;
+      position: relative;
     }
     .origem-gpt-text { flex: 1; }
     .origem-gpt-text h3 {
