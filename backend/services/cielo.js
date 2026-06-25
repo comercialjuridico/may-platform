@@ -57,15 +57,17 @@ function detectarBandeira(numero) {
 
 // Tabela de planos: valor (centavos) e intervalo Cielo
 const PLANOS = {
-  start_trimestral:  { valor: 29100,  intervalo: 'Quarterly' },
-  start_anual:       { valor: 97000,  intervalo: 'Annual'    },
-  equipe_trimestral: { valor: 59100,  intervalo: 'Quarterly' },
-  equipe_anual:      { valor: 197000, intervalo: 'Annual'    },
-  pro_trimestral:    { valor: 98100,  intervalo: 'Quarterly' },
-  pro_anual:         { valor: 327000, intervalo: 'Annual'    },
+  start_mensal:  { valor:  9700,  intervalo: 'Monthly' },
+  start_anual:   { valor: 93600,  intervalo: 'Annual'  }, // R$78 × 12
+  equipe_mensal: { valor: 22700,  intervalo: 'Monthly' },
+  equipe_anual:  { valor: 218400, intervalo: 'Annual'  }, // R$182 × 12
+  pro_mensal:    { valor: 39700,  intervalo: 'Monthly' },
+  pro_anual:     { valor: 381600, intervalo: 'Annual'  }, // R$318 × 12
+  prof_mensal:   { valor: 89700,  intervalo: 'Monthly' },
+  prof_anual:    { valor: 861600, intervalo: 'Annual'  }, // R$718 × 12
   // legado
-  mensal: { valor: parseInt(process.env.CIELO_VALOR_MENSAL) || 9700,  intervalo: 'Monthly' },
-  anual:  { valor: parseInt(process.env.CIELO_VALOR_ANUAL)  || 79700, intervalo: 'Annual'  },
+  mensal: { valor: 9700,  intervalo: 'Monthly' },
+  anual:  { valor: 93600, intervalo: 'Annual'  },
 };
 
 // Calcula data de início do trial (hoje + 7 dias) no formato YYYY-MM-DD

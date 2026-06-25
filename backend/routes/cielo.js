@@ -7,26 +7,30 @@ const { criarRecorrencia, consultarPagamento, cancelarRecorrencia } = require('.
 
 // Planos válidos e suas durações em meses (para calcular plano_fim depois do trial)
 const PLANOS_CONFIG = {
-  start_trimestral:  { meses: 3,  maxMembros: 1  },
-  start_anual:       { meses: 12, maxMembros: 1  },
-  equipe_trimestral: { meses: 3,  maxMembros: 3  },
-  equipe_anual:      { meses: 12, maxMembros: 3  },
-  pro_trimestral:    { meses: 3,  maxMembros: 5  },
-  pro_anual:         { meses: 12, maxMembros: 5  },
+  start_mensal:  { meses: 1,  maxMembros: 1  },
+  start_anual:   { meses: 12, maxMembros: 1  },
+  equipe_mensal: { meses: 1,  maxMembros: 3  },
+  equipe_anual:  { meses: 12, maxMembros: 3  },
+  pro_mensal:    { meses: 1,  maxMembros: 5  },
+  pro_anual:     { meses: 12, maxMembros: 5  },
+  prof_mensal:   { meses: 1,  maxMembros: 10 },
+  prof_anual:    { meses: 12, maxMembros: 10 },
   // legado
-  mensal: { meses: 1, maxMembros: 1 },
+  mensal: { meses: 1,  maxMembros: 1 },
   anual:  { meses: 12, maxMembros: 1 },
 };
 
 // ─── GET /api/cielo/precos ──────────────────────────────────────────────────
 router.get('/precos', (req, res) => {
   res.json({
-    start_trimestral:  '291.00',
-    start_anual:       '970.00',
-    equipe_trimestral: '591.00',
-    equipe_anual:      '1970.00',
-    pro_trimestral:    '981.00',
-    pro_anual:         '3270.00',
+    start_mensal:  '97.00',
+    start_anual:   '936.00',
+    equipe_mensal: '227.00',
+    equipe_anual:  '2184.00',
+    pro_mensal:    '397.00',
+    pro_anual:     '3816.00',
+    prof_mensal:   '897.00',
+    prof_anual:    '8616.00',
   });
 });
 
