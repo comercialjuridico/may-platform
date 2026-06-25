@@ -112,7 +112,10 @@ function iniciarDiagnostico() {
   localStorage.setItem('onboarding_shown', '1');
   const wall = document.getElementById('onboarding-wall');
   if (wall) wall.style.display = 'none';
-  selecionarFerramenta('diagnostico');
+  // Esconde o X — diagnóstico é obrigatório no onboarding
+  const btnClose = document.querySelector('#modal-diagnostico .modal-close');
+  if (btnClose) btnClose.style.display = 'none';
+  abrirModalDiagnostico();
 }
 
 // ── Payment wall ──────────────────────────────────────────────────────────────
@@ -430,6 +433,10 @@ function verificarQueryParams() {
 
 // ─── Diagnóstico inicial ─────────────────────────────────────────────────────
 function verificarDiagnostico() {
+  // Se a onboarding wall está visível, não abre o modal agora —
+  // o usuário vai clicar "Começar diagnóstico" que chama iniciarDiagnostico()
+  const wall = document.getElementById('onboarding-wall');
+  if (wall && wall.style.display === 'flex') return;
   if (!estado.user?.diagnostico_completo) {
     abrirModalDiagnostico();
   }
@@ -1451,6 +1458,10 @@ async function salvarDiagnostico() {
   }
 
   document.getElementById('diag-resultado').style.display = 'block';
+
+  // Restaura o X para que o usuário possa fechar após ver o resultado
+  const btnClose = document.querySelector('#modal-diagnostico .modal-close');
+  if (btnClose) btnClose.style.display = '';
 }
 
 // ─── Modal de perfil ─────────────────────────────────────────────────────────
