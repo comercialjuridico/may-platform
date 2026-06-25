@@ -140,14 +140,14 @@
     <!-- Footer da sidebar -->
     <div class="sidebar-footer">
 
-      <!-- Ações principais (visíveis conforme role) -->
-      <a id="link-gestor" href="/gestor.html" class="btn-ghost btn-full" style="display:none">
+      <!-- Ações principais (sempre visíveis; bloqueadas se sem acesso) -->
+      <a id="link-gestor" href="/gestor.html" onclick="return navegarPremium(event,'gestor')" class="btn-ghost btn-full">
         <span class="nav-icon">👥</span> Painel da equipe
       </a>
-      <button id="btn-registrar-venda" onclick="abrirModalVenda()" class="btn-ghost btn-full" style="display:none">
+      <button id="btn-registrar-venda" onclick="abrirModalVendaPremium()" class="btn-ghost btn-full">
         <span class="nav-icon">💰</span> Registrar venda
       </button>
-      <a id="link-ranking" href="/ranking.html" class="btn-ghost btn-full" style="display:none">
+      <a id="link-ranking" href="/ranking.html" onclick="return navegarPremium(event,'ranking')" class="btn-ghost btn-full">
         <span class="nav-icon">🏆</span> Arena de Vendas
       </a>
 
@@ -157,13 +157,13 @@
       <button onclick="abrirModalTrilha()" class="btn-ghost btn-full">
         <span class="nav-icon">📚</span> Minha Trilha
       </button>
-      <button id="btn-funil" onclick="abrirModalFunil()" class="btn-ghost btn-full" style="display:none">
+      <button id="btn-funil" onclick="abrirFunilPremium()" class="btn-ghost btn-full">
         <span class="nav-icon">🎯</span> Cadastrar Cliente Potencial
       </button>
-      <a id="link-agenda" href="/agenda" class="btn-ghost btn-full" style="display:none">
+      <a id="link-agenda" href="/agenda" onclick="return navegarPremium(event,'agenda')" class="btn-ghost btn-full">
         <span class="nav-icon">📅</span> Agenda Comercial
       </a>
-      <a id="link-leads" href="/leads" class="btn-ghost btn-full" style="display:none">
+      <a id="link-leads" href="/leads" onclick="return navegarPremium(event,'leads')" class="btn-ghost btn-full">
         <span class="nav-icon">📋</span> Controle de Leads
       </a>
       <a href="/manual" class="btn-ghost btn-full">

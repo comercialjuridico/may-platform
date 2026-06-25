@@ -507,31 +507,22 @@ function renderizarSidebar() {
   // Contador de uso
   atualizarContadorUso();
 
-  // Botões contextuais — sempre re-avaliados com base no estado atual do usuário
-  const linkGestor = document.getElementById('link-gestor');
-  if (linkGestor) {
-    linkGestor.style.display = (user?.role === 'gestor' || user?.role === 'admin') ? 'block' : 'none';
-  }
-  const btnVenda = document.getElementById('btn-registrar-venda');
-  if (btnVenda) {
-    btnVenda.style.display = user?.empresa_id ? 'block' : 'none';
-  }
-  const linkRanking = document.getElementById('link-ranking');
-  if (linkRanking) {
-    linkRanking.style.display = user?.empresa_id ? 'block' : 'none';
-  }
-  const btnFunil = document.getElementById('btn-funil');
-  if (btnFunil) {
-    btnFunil.style.display = user?.empresa_id ? 'block' : 'none';
-  }
-  const linkAgenda = document.getElementById('link-agenda');
-  if (linkAgenda) {
-    linkAgenda.style.display = user?.empresa_id ? 'block' : 'none';
-  }
-  const linkLeads = document.getElementById('link-leads');
-  if (linkLeads) {
-    linkLeads.style.display = user?.empresa_id ? 'block' : 'none';
-  }
+  // Botões contextuais — sempre visíveis; cadeado aplicado via classe
+  const temEquipe    = !!user?.empresa_id;
+  const temGestor    = user?.role === 'gestor' || user?.role === 'admin';
+
+  const _navLock = (id, temAcessoLocal) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('nav-item-locked', !temAcessoLocal);
+  };
+
+  _navLock('link-gestor',        temGestor);
+  _navLock('btn-registrar-venda', temEquipe);
+  _navLock('link-ranking',        temEquipe);
+  _navLock('btn-funil',           temEquipe);
+  _navLock('link-agenda',         temEquipe);
+  _navLock('link-leads',          temEquipe);
 }
 
 // ─── Seletor de Área Ativa ───────────────────────────────────────────────────
@@ -634,6 +625,136 @@ function selecionarFerramenta(id) {
   }
   renderizarSidebar();
   fecharMenuMobile();
+}
+
+// ─── Navegação premium com preview bloqueado ─────────────────────────────────
+
+const AREAS_PREMIUM = {
+  gestor:  { nome: 'Painel da Equipe',        icon: '👥', desc: 'Gerencie sua equipe, metas e desempenho individual de cada vendedor.' },
+  ranking: { nome: 'Arena de Vendas',          icon: '🏆', desc: 'Ranking em tempo real, metas coletivas e gamificação para seu time.' },
+  agenda:  { nome: 'Agenda Comercial',         icon: '📅', desc: 'Organize reuniões, follow-ups e atividades comerciais em um só lugar.' },
+  leads:   { nome: 'Controle de Leads',        icon: '📋', desc: 'Pipeline completo de clientes potenciais com status e histórico.' },
+  funil:   { nome: 'Cadastrar Cliente',        icon: '🎯', desc: 'Cadastre leads e acompanhe o progresso de cada oportunidade.' },
+  venda:   { nome: 'Registrar Venda',          icon: '💰', desc: 'Registre vendas para o ranking da equipe e métricas coletivas.' },
+};
+
+function navegarPremium(event, area) {
+  const temEquipe = !!estado.user?.empresa_id;
+  const temGestor = estado.user?.role === 'gestor' || estado.user?.role === 'admin';
+  const acesso = area === 'gestor' ? temGestor : temEquipe;
+  if (acesso) return true; // navega normalmente
+  event.preventDefault();
+  mostrarAreaBloqueada(area);
+  fecharMenuMobile();
+  return false;
+}
+
+function abrirModalVendaPremium() {
+  if (estado.user?.empresa_id) { abrirModalVenda(); return; }
+  mostrarAreaBloqueada('venda');
+}
+
+function abrirFunilPremium() {
+  if (estado.user?.empresa_id) { abrirModalFunil(); return; }
+  mostrarAreaBloqueada('funil');
+}
+
+function mostrarAreaBloqueada(area) {
+  const info = AREAS_PREMIUM[area] || { nome: area, icon: '🔒', desc: '' };
+
+  // Esconde input de chat, limpa header
+  const wrapper = document.getElementById('chat-input-wrapper');
+  if (wrapper) wrapper.style.display = 'none';
+  const titleEl = document.getElementById('chat-title');
+  const labelEl = document.getElementById('chat-tool-label');
+  if (titleEl) titleEl.textContent = info.nome;
+  if (labelEl) labelEl.textContent = 'Disponível no MAY IA EQUIPE';
+
+  const container = document.getElementById('messages-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="area-bloqueada-wrap">
+      <!-- Preview desfocado atrás do overlay -->
+      <div class="area-preview-blur" aria-hidden="true">
+        ${_mockupArea(area)}
+      </div>
+      <!-- Overlay com cadeado -->
+      <div class="area-lock-overlay">
+        <div class="area-lock-box">
+          <div class="area-lock-icone">🔒</div>
+          <div style="font-size:2rem;margin-bottom:8px">${info.icon}</div>
+          <h2 class="area-lock-titulo">${info.nome}</h2>
+          <p class="area-lock-desc">${info.desc}</p>
+          <div class="area-lock-plano">MAY IA EQUIPE</div>
+          <div class="area-lock-preco">R$ 227<span style="font-size:.85rem;opacity:.7">/mês</span></div>
+          <a href="https://usemayapp.com/#planos" target="_blank" class="upsell-btn" style="margin-top:20px">
+            Fazer upgrade → Acesso imediato
+          </a>
+          <p class="upsell-fine" style="margin-top:12px">✓ Sem fidelidade &nbsp;·&nbsp; ✓ Cancele quando quiser</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function _mockupArea(area) {
+  const rows = (n, w1, w2) => Array.from({length:n}, (_, i) => `
+    <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);gap:12px">
+      <div style="width:32px;height:32px;border-radius:50%;background:rgba(164,132,255,.25);flex-shrink:0"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+        <div style="height:9px;background:rgba(255,255,255,.18);border-radius:4px;width:${w1[i%w1.length]}px"></div>
+        <div style="height:7px;background:rgba(255,255,255,.09);border-radius:4px;width:${w2[i%w2.length]}px"></div>
+      </div>
+    </div>`).join('');
+
+  const cards = (n) => Array.from({length:n}, (_, i) => `
+    <div style="flex:1;background:rgba(255,255,255,.06);border-radius:10px;padding:16px;min-width:0">
+      <div style="height:8px;background:rgba(255,255,255,.12);border-radius:4px;width:55%;margin-bottom:10px"></div>
+      <div style="height:22px;background:rgba(164,132,255,.3);border-radius:6px;width:45%"></div>
+    </div>`).join('');
+
+  if (area === 'ranking') return `
+    <div style="padding:24px 20px">
+      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">🏆 Arena de Vendas — Esta semana</div>
+      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
+        ${['🥇','🥈','🥉','4️⃣','5️⃣'].map((m,i) => `
+          <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);gap:12px">
+            <span style="font-size:1.2rem;width:28px">${m}</span>
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(164,132,255,.25)"></div>
+            <div style="flex:1;height:9px;background:rgba(255,255,255,.15);border-radius:4px;width:${[140,120,100,85,70][i]}px"></div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.4)">${[24,19,15,11,8][i]} vendas</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  if (area === 'agenda') return `
+    <div style="padding:24px 20px">
+      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">📅 Agenda Comercial — Junho 2026</div>
+      <div style="display:flex;gap:16px;margin-bottom:16px">${cards(3)}</div>
+      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
+        ${rows(4, [160,130,110,145], [90,70,85,60])}
+      </div>
+    </div>`;
+
+  if (area === 'gestor') return `
+    <div style="padding:24px 20px">
+      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">👥 Painel da Equipe</div>
+      <div style="display:flex;gap:16px;margin-bottom:16px">${cards(3)}</div>
+      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
+        ${rows(5, [130,110,150,100,120], [80,65,90,55,75])}
+      </div>
+    </div>`;
+
+  // leads, funil, venda — mockup genérico
+  return `
+    <div style="padding:24px 20px">
+      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">${AREAS_PREMIUM[area]?.icon} ${AREAS_PREMIUM[area]?.nome}</div>
+      <div style="display:flex;gap:16px;margin-bottom:16px">${cards(3)}</div>
+      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
+        ${rows(5, [140,110,160,90,130], [85,65,95,55,80])}
+      </div>
+    </div>`;
 }
 
 // ─── Upsell wall (área bloqueada) ────────────────────────────────────────────
