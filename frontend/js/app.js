@@ -123,7 +123,16 @@ function abrirPaymentWall(bloqueante) {
   const wall = document.getElementById('payment-wall');
   if (!wall) return;
   wall.style.display = 'flex';
-  // Se bloqueante (dia 8), não permite fechar clicando fora
+
+  // Mensagem contextual conforme o modo
+  const subtitulo = wall.querySelector('#pw-subtitulo');
+  if (subtitulo) {
+    subtitulo.textContent = bloqueante
+      ? 'Seu período gratuito terminou. Escolha um plano para continuar.'
+      : 'Acesso imediato após a confirmação';
+  }
+
+  // Bloqueante = dia 8: não permite fechar clicando fora nem ESC
   if (!bloqueante) {
     wall.onclick = e => { if (e.target === wall) fecharPaymentWall(); };
   } else {
@@ -249,15 +258,22 @@ async function pwSubmit(e) {
     const ativarData = await ativarRes.json();
     if (!ativarRes.ok) throw new Error(ativarData.erro || 'Erro ao ativar assinatura.');
 
-    // 3. Sucesso
+    // 3. Sucesso — atualiza localmente e recarrega dados do servidor
     estado.user.plano = _pwPlano;
     estado.user.plano_status = 'ativo';
+    estado.user.cielo_recurrent_payment_id = preData.orderId || 'ativo';
     salvarUser(estado.user);
     fecharPaymentWall();
     const barTop = document.getElementById('trial-top-bar');
     if (barTop) barTop.style.display = 'none';
+
+    const nomeDoPlano = { start:'MAY IA START', equipe:'MAY IA PLUS', pro:'MAY IA PRO', prof:'MAY IA ULTRA' }[_pwPlano];
+    mostrarToast(`✅ Assinatura confirmada! Bem-vindo(a) ao ${nomeDoPlano}`);
+
+    // Recarrega dados do servidor para refletir empresa_id e permissões atualizadas
+    await carregarDadosIniciais();
     renderizarSidebar();
-    mostrarToast('✅ Assinatura confirmada! Bem-vindo(a) ao ' + { start:'MAY IA START', equipe:'MAY IA PLUS', pro:'MAY IA PRO', prof:'MAY IA ULTRA' }[_pwPlano]);
+    mostrarHomeDashboard();
 
   } catch (err) {
     erro.textContent   = err.message;
@@ -688,9 +704,9 @@ function mostrarAreaBloqueada(area) {
           <p class="area-lock-desc">${info.desc}</p>
           <div class="area-lock-plano">MAY IA EQUIPE</div>
           <div class="area-lock-preco">R$ 227<span style="font-size:.85rem;opacity:.7">/mês</span></div>
-          <a href="https://usemayapp.com/#planos" target="_blank" class="upsell-btn" style="margin-top:20px">
-            Fazer upgrade → Acesso imediato
-          </a>
+          <button onclick="abrirPaymentWall(false)" class="upsell-btn" style="margin-top:20px;border:none;cursor:pointer;width:100%">
+            Ver planos → Acesso imediato
+          </button>
           <p class="upsell-fine" style="margin-top:12px">✓ Sem fidelidade &nbsp;·&nbsp; ✓ Cancele quando quiser</p>
         </div>
       </div>
@@ -828,9 +844,9 @@ function mostrarUpsell(ferramentaId) {
         <span class="upsell-preco">${preco}</span>
         <span class="upsell-preco-fine">· cancele quando quiser</span>
       </div>
-      <a href="https://usemayapp.com/#planos" target="_blank" class="upsell-btn">
-        Fazer upgrade para ${nome} →
-      </a>
+      <button onclick="abrirPaymentWall(false)" class="upsell-btn" style="border:none;cursor:pointer;width:100%">
+        Ver planos → Acesso imediato
+      </button>
       <p class="upsell-fine">✓ Acesso imediato &nbsp;·&nbsp; ✓ Sem fidelidade</p>
     </div>
   `;
