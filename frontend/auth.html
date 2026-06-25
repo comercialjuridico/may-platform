@@ -57,6 +57,12 @@
 
     <!-- CADASTRO -->
     <div class="auth-panel" id="panel-register">
+      <!-- Banner de convite (aparece quando vem por link) -->
+      <div id="convite-banner" style="display:none; background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(167,139,250,.1)); border:1px solid rgba(124,58,237,.4); border-radius:12px; padding:12px 16px; margin-bottom:18px; text-align:center;">
+        <div style="font-size:18px; margin-bottom:4px">🎉</div>
+        <div style="font-size:13px; font-weight:700; color:#C4B5FD; margin-bottom:2px" id="convite-empresa-nome">Você foi convidado!</div>
+        <div style="font-size:12px; color:rgba(200,190,255,.6)">Crie sua conta para entrar na equipe</div>
+      </div>
       <div class="form-group">
         <label class="form-label">Nome completo</label>
         <input type="text" id="reg-nome" placeholder="Seu nome" autocomplete="name" />
@@ -156,6 +162,40 @@ if (params.get('verificado')) { aviso.style.display='block'; aviso.textContent='
 if (params.get('erro')==='token_invalido') mostrarErro('Link inválido ou expirado.');
 
 let _tempToken = null;
+let _conviteToken = null;
+
+// ── Convite via link ──────────────────────────────────────────
+(async () => {
+  const conviteParam = params.get('convite');
+  if (!conviteParam) return;
+
+  try {
+    const r = await fetch(`/api/auth/convite/${conviteParam}`);
+    const d = await r.json();
+
+    if (!r.ok || !d.valido) {
+      mostrarErro(d.erro || 'Convite inválido ou já utilizado.');
+      return;
+    }
+
+    _conviteToken = conviteParam;
+
+    // Mostra aba de cadastro
+    mostrarTab('register');
+
+    // Pré-preenche e-mail e mostra banner
+    document.getElementById('reg-email').value = d.email || '';
+    document.getElementById('reg-email').readOnly = !!d.email;
+
+    const banner = document.getElementById('convite-banner');
+    banner.style.display = 'block';
+    document.getElementById('convite-empresa-nome').textContent =
+      `Você foi convidado para a equipe "${d.empresa_nome}"`;
+
+  } catch(_) {
+    mostrarErro('Erro ao validar convite.');
+  }
+})();
 
 function mostrarTab(tab) {
   ['login','register','forgot','2fa'].forEach(t => {
@@ -210,7 +250,9 @@ async function criarConta() {
   if (senha.length<8) { mostrarErro('Senha deve ter no mínimo 8 caracteres.'); return; }
   const btn = document.getElementById('btn-register');
   btn.disabled=true; btn.textContent='Criando conta...';
-  const res  = await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nome,email,password:senha})});
+  const payload = { name: nome, email, password: senha };
+  if (_conviteToken) payload.convite_token = _conviteToken;
+  const res  = await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const data = await res.json();
   if (!res.ok) { mostrarErro(data.erro||'Erro ao criar conta.'); btn.disabled=false; btn.textContent='Criar conta grátis'; return; }
   salvarTokens(data.accessToken, data.refreshToken);

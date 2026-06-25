@@ -31,7 +31,7 @@ function gerarRefreshToken(user) {
 // ─── POST /api/auth/register ────────────────────────────────────────────────
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, convite_token } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ erro: 'Nome, e-mail e senha são obrigatórios.' });
@@ -51,22 +51,51 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ erro: 'Este e-mail já está cadastrado.' });
     }
 
+    // Valida convite (se fornecido)
+    let conviteData = null;
+    if (convite_token) {
+      const { data: convite } = await supabase
+        .from('convites')
+        .select('id, empresa_id, email, aceito')
+        .eq('token', convite_token)
+        .single();
+
+      if (convite && !convite.aceito) {
+        conviteData = convite;
+      }
+    }
+
     const password_hash = await bcrypt.hash(password, 12);
     const verify_token = uuidv4();
 
+    const novoUsuario = {
+      name,
+      email: email.toLowerCase(),
+      password_hash,
+      verify_token,
+      plano: 'free',
+    };
+
+    // Vincula à empresa do convite
+    if (conviteData) {
+      novoUsuario.empresa_id = conviteData.empresa_id;
+      novoUsuario.role = 'membro';
+    }
+
     const { data: user, error } = await supabase
       .from('users')
-      .insert({
-        name,
-        email: email.toLowerCase(),
-        password_hash,
-        verify_token,
-        plano: 'free',
-      })
-      .select('id, email, name, plano')
+      .insert(novoUsuario)
+      .select('id, email, name, plano, role, empresa_id')
       .single();
 
     if (error) throw error;
+
+    // Marca convite como aceito
+    if (conviteData) {
+      await supabase.from('convites')
+        .update({ aceito: true })
+        .eq('id', conviteData.id);
+    }
 
     // Cria registro de streak inicial
     await supabase.from('streak').insert({ user_id: user.id });
@@ -257,6 +286,34 @@ router.post('/reset-password', async (req, res) => {
   } catch (err) {
     console.error('Erro no reset-password:', err.message);
     res.status(500).json({ erro: 'Erro ao redefinir senha.' });
+  }
+});
+
+// ─── GET /api/auth/convite/:token ───────────────────────────────────────────
+// Valida token de convite e retorna info da empresa (público, sem auth)
+router.get('/convite/:token', async (req, res) => {
+  try {
+    const { data: convite, error } = await supabase
+      .from('convites')
+      .select('email, aceito, empresa_id, empresas(nome)')
+      .eq('token', req.params.token)
+      .single();
+
+    if (error || !convite) {
+      return res.status(404).json({ erro: 'Convite não encontrado ou expirado.' });
+    }
+    if (convite.aceito) {
+      return res.status(410).json({ erro: 'Este convite já foi utilizado.' });
+    }
+
+    res.json({
+      valido: true,
+      email: convite.email,
+      empresa_nome: convite.empresas?.nome || 'May',
+    });
+  } catch (err) {
+    console.error('Erro ao validar convite:', err.message);
+    res.status(500).json({ erro: 'Erro ao validar convite.' });
   }
 });
 

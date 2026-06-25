@@ -239,6 +239,52 @@
     .cad-sub-panel { display:none; }
     .cad-sub-panel.active { display:block; }
 
+    /* ── Minha Equipe ─── */
+    .equipe-header { display:flex; align-items:center; justify-content:space-between; margin-top:32px; margin-bottom:12px; }
+    .equipe-vagas { font-size:12px; color:var(--sub); background:rgba(255,255,255,.05);
+      border:1px solid var(--border); border-radius:20px; padding:4px 12px; }
+    .equipe-vagas span { color:#A78BFA; font-weight:700; }
+    .btn-convidar { background:linear-gradient(135deg,#7C3AED,#A78BFA); color:#fff;
+      border:none; border-radius:10px; padding:8px 18px; font-size:13px; font-weight:700;
+      cursor:pointer; box-shadow:0 4px 14px var(--brand-glow); }
+    .equipe-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; margin-bottom:16px; }
+    .equipe-card { background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      padding:14px; display:flex; align-items:center; gap:12px; position:relative; }
+    .equipe-av { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#6D28D9,#8B5CF6);
+      display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;
+      color:#fff; flex-shrink:0; }
+    .equipe-av img { width:38px; height:38px; border-radius:50%; object-fit:cover; }
+    .equipe-info { flex:1; min-width:0; }
+    .equipe-name { font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .equipe-email { font-size:11px; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .equipe-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; margin-top:3px; display:inline-block; }
+    .equipe-badge.gestor { background:rgba(245,158,11,.15); color:#F59E0B; border:1px solid rgba(245,158,11,.3); }
+    .equipe-badge.membro { background:rgba(124,58,237,.12); color:#A78BFA; border:1px solid rgba(124,58,237,.25); }
+    .btn-remover-membro { position:absolute; top:8px; right:8px; background:none; border:none;
+      color:rgba(252,165,165,.5); font-size:14px; cursor:pointer; line-height:1; padding:2px;
+      border-radius:4px; transition:color .2s; }
+    .btn-remover-membro:hover { color:#FCA5A5; }
+    .convites-pendentes { margin-top:12px; }
+    .convite-row { display:flex; align-items:center; gap:10px; padding:10px 14px;
+      background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
+    .convite-email { flex:1; font-size:13px; color:var(--sub); }
+    .convite-status { font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; }
+    .convite-status.pendente { background:rgba(245,158,11,.12); color:#F59E0B; }
+    .convite-status.aceito  { background:rgba(16,185,129,.12); color:#34D399; }
+    .btn-copiar-link { background:rgba(124,58,237,.15); border:1px solid rgba(124,58,237,.3);
+      color:#A78BFA; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:600;
+      cursor:pointer; transition:background .2s; white-space:nowrap; }
+    .btn-copiar-link:hover { background:rgba(124,58,237,.3); }
+
+    /* ── Modal Convite ─── */
+    .convite-link-box { background:rgba(255,255,255,.04); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; font-size:12px; color:#A78BFA;
+      word-break:break-all; margin:12px 0; line-height:1.5; }
+    .btn-copiar-grande { width:100%; background:rgba(124,58,237,.2); border:1px solid rgba(124,58,237,.4);
+      color:#C4B5FD; border-radius:10px; padding:11px; font-size:13px; font-weight:700;
+      cursor:pointer; transition:background .2s; margin-top:4px; }
+    .btn-copiar-grande:hover { background:rgba(124,58,237,.35); }
+
     /* ── Modal ─── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
       backdrop-filter:blur(4px); z-index:999; align-items:center; justify-content:center; }
@@ -309,6 +355,16 @@
     <button class="btn-nova-meta" onclick="abrirModalMeta()">+ Nova Meta</button>
   </div>
   <div id="metas-content"><div class="loading">Carregando metas</div></div>
+
+  <!-- Minha Equipe -->
+  <div class="equipe-header" id="equipe-header">
+    <p class="sec-title" style="margin:0">👥 Minha Equipe</p>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="equipe-vagas" id="equipe-vagas"><span id="equipe-count">—</span>/<span id="equipe-max">5</span> membros</div>
+      <button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button>
+    </div>
+  </div>
+  <div id="equipe-content"><div class="loading">Carregando equipe</div></div>
 
   <!-- Cadastrar Cliente + Funil -->
   <div class="cad-header">
@@ -435,6 +491,39 @@
   </div>
 </div>
 
+<!-- Modal: Convidar Colaborador -->
+<div class="modal-overlay" id="modal-convite">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-title">👥 Convidar Colaborador</div>
+
+    <!-- Step 1: digitar email -->
+    <div id="convite-step-1">
+      <div class="form-group">
+        <label>E-mail do colaborador</label>
+        <input type="email" id="convite-email" placeholder="nome@empresa.com" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="fecharModalConvite()">Cancelar</button>
+        <button class="btn-save" onclick="gerarConvite()">Gerar link</button>
+      </div>
+    </div>
+
+    <!-- Step 2: link gerado -->
+    <div id="convite-step-2" style="display:none">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:6px">Link de convite gerado para:</p>
+      <p style="font-size:14px;font-weight:600;color:#fff;margin-bottom:12px" id="convite-dest-email">—</p>
+      <p style="font-size:12px;color:var(--sub);margin-bottom:4px">Copie e envie pelo WhatsApp ou e-mail:</p>
+      <div class="convite-link-box" id="convite-link-text">—</div>
+      <button class="btn-copiar-grande" onclick="copiarLinkConvite()">📋 Copiar link</button>
+      <p style="font-size:11px;color:rgba(200,190,255,.4);text-align:center;margin-top:12px">O link expira quando o colaborador criar a conta.</p>
+      <div class="modal-footer" style="margin-top:12px">
+        <button class="btn-cancel" onclick="novoConvite()">+ Novo convite</button>
+        <button class="btn-save" onclick="fecharModalConvite()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal de Meta -->
 <div class="modal-overlay" id="modal-meta">
   <div class="modal-box">
@@ -543,6 +632,139 @@ function fmtBRL(v){ if(!v&&v!==0)return'—'; return'R$ '+Number(v).toLocaleStri
 function inicial(n){ return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 function fmtData(d){ if(!d)return'—'; return d.slice(0,10).split('-').reverse().join('/'); }
 
+// ── Equipe & Convites ─────────────────────────────────────────────────────────
+let _linkConviteAtual = '';
+let _usuarioGestor = null;
+
+async function carregarUsuarioGestor() {
+  try {
+    const r = await apiFetch('/api/gestor/info');
+    if (r.ok) { const d = await r.json(); _usuarioGestor = d.user || null; }
+  } catch(_) {}
+}
+
+async function carregarEquipe() {
+  try {
+    const [rMembros, rConvites] = await Promise.all([
+      apiFetch('/api/gestor/equipe'),
+      apiFetch('/api/gestor/convites'),
+    ]);
+    const dMembros  = await rMembros.json();
+    const dConvites = rConvites.ok ? await rConvites.json() : { convites:[], total_membros:0, max_membros:5 };
+
+    // Atualiza contador
+    document.getElementById('equipe-count').textContent = dConvites.total_membros || 0;
+    document.getElementById('equipe-max').textContent   = dConvites.max_membros   || 5;
+
+    const membros = dMembros.membros || [];
+    const convitesPendentes = (dConvites.convites || []).filter(c => !c.aceito);
+
+    let html = '';
+
+    // Grid de membros ativos
+    if (membros.length) {
+      html += `<div class="equipe-grid">`;
+      // Inclui o próprio gestor (eu)
+      const g = _usuarioGestor;
+      html += `<div class="equipe-card">
+        ${g?.avatar_url ? `<div class="equipe-av"><img src="${g.avatar_url}" /></div>` : `<div class="equipe-av">${inicial(g?.name||'G')}</div>`}
+        <div class="equipe-info">
+          <div class="equipe-name">${escHtml(g?.name||'Você')}</div>
+          <div class="equipe-email">${escHtml(g?.email||'')}</div>
+          <span class="equipe-badge gestor">Gestor</span>
+        </div>
+      </div>`;
+      membros.forEach(m => {
+        html += `<div class="equipe-card">
+          ${m.avatar_url
+            ? `<div class="equipe-av"><img src="${m.avatar_url}" /></div>`
+            : `<div class="equipe-av">${inicial(m.name)}</div>`}
+          <div class="equipe-info">
+            <div class="equipe-name">${escHtml(m.name)}</div>
+            <div class="equipe-email">${escHtml(m.email)}</div>
+            <span class="equipe-badge membro">Membro</span>
+          </div>
+          <button class="btn-remover-membro" onclick="removerMembro('${m.id}','${escHtml(m.name)}')" title="Remover">✕</button>
+        </div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<p style="font-size:13px;color:var(--sub);margin-bottom:14px">Nenhum colaborador ainda. Convide alguém para começar!</p>`;
+    }
+
+    // Convites pendentes
+    if (convitesPendentes.length) {
+      html += `<p class="sec-title" style="margin-top:18px;margin-bottom:8px">Convites enviados</p>
+               <div class="convites-pendentes">`;
+      convitesPendentes.forEach(c => {
+        const link = `${window.location.origin}/auth.html?convite=${c.token}`;
+        html += `<div class="convite-row">
+          <div class="convite-email">✉️ ${escHtml(c.email)}</div>
+          <span class="convite-status pendente">Pendente</span>
+          <button class="btn-copiar-link" onclick="copiarTexto('${link}', this)">Copiar link</button>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    document.getElementById('equipe-content').innerHTML = html || '<p style="font-size:13px;color:var(--sub)">Nenhum dado.</p>';
+  } catch(e) {
+    document.getElementById('equipe-content').innerHTML = '<p style="font-size:13px;color:var(--sub)">Erro ao carregar equipe.</p>';
+  }
+}
+
+function abrirModalConvite() {
+  novoConvite();
+  document.getElementById('modal-convite').classList.add('open');
+}
+function fecharModalConvite() {
+  document.getElementById('modal-convite').classList.remove('open');
+  carregarEquipe();
+}
+function novoConvite() {
+  document.getElementById('convite-step-1').style.display = 'block';
+  document.getElementById('convite-step-2').style.display = 'none';
+  document.getElementById('convite-email').value = '';
+  _linkConviteAtual = '';
+}
+
+async function gerarConvite() {
+  const email = document.getElementById('convite-email').value.trim();
+  if (!email) { alert('Informe o e-mail do colaborador.'); return; }
+
+  const r = await apiFetch('/api/gestor/convidar', { method:'POST', body: JSON.stringify({ email }) });
+  const d = await r.json();
+
+  if (!r.ok) { alert(d.erro || 'Erro ao gerar convite.'); return; }
+
+  _linkConviteAtual = d.link;
+  document.getElementById('convite-dest-email').textContent = d.email;
+  document.getElementById('convite-link-text').textContent  = d.link;
+  document.getElementById('convite-step-1').style.display = 'none';
+  document.getElementById('convite-step-2').style.display = 'block';
+}
+
+function copiarLinkConvite() {
+  if (!_linkConviteAtual) return;
+  copiarTexto(_linkConviteAtual, document.querySelector('.btn-copiar-grande'));
+}
+
+function copiarTexto(texto, btn) {
+  navigator.clipboard.writeText(texto).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = original, 2000);
+  });
+}
+
+async function removerMembro(id, nome) {
+  if (!confirm(`Remover ${nome} da equipe?`)) return;
+  const r = await apiFetch(`/api/gestor/membro/${id}`, { method:'DELETE' });
+  if (r.ok) { carregarEquipe(); } else { alert('Erro ao remover membro.'); }
+}
+
+function escHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
 // ── Criar empresa / equipe ────────────────────────────────────────────────────
 async function criarEmpresa(){
   const nome = document.getElementById('input-empresa')?.value?.trim();
@@ -566,10 +788,9 @@ window.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('f-inicio').value = inicio.toISOString().slice(0,10);
   document.getElementById('f-fim').value    = hoje.toISOString().slice(0,10);
 
+  await carregarUsuarioGestor();
   await carregarDash();
-  await carregarMetas();
-  await carregarFunil();
-  await carregarReunioesSemana();
+  await Promise.all([carregarMetas(), carregarFunil(), carregarReunioesSemana(), carregarEquipe()]);
 });
 
 async function aplicarFiltros(){ await carregarDash(); }

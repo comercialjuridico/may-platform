@@ -186,6 +186,42 @@ router.post('/convidar', authMiddleware, gestorMiddleware, async (req, res) => {
   }
 });
 
+// ─── GET /api/gestor/convites ───────────────────────────────────────────────
+// Lista convites enviados pela empresa (aceitos e pendentes)
+router.get('/convites', authMiddleware, gestorMiddleware, async (req, res) => {
+  try {
+    const { data: convites, error } = await supabase
+      .from('convites')
+      .select('id, email, aceito, created_at, token')
+      .eq('empresa_id', req.user.empresa_id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Conta membros atuais da empresa
+    const { count: totalMembros } = await supabase
+      .from('users')
+      .select('id', { count: 'exact', head: true })
+      .eq('empresa_id', req.user.empresa_id);
+
+    const { data: empresa } = await supabase
+      .from('empresas')
+      .select('max_membros, nome')
+      .eq('id', req.user.empresa_id)
+      .single();
+
+    res.json({
+      convites: convites || [],
+      total_membros: totalMembros || 0,
+      max_membros: empresa?.max_membros || 5,
+      empresa_nome: empresa?.nome || '',
+    });
+  } catch (err) {
+    console.error('Erro ao listar convites:', err.message);
+    res.status(500).json({ erro: 'Erro ao buscar convites.' });
+  }
+});
+
 // ─── GET /api/gestor/membro/:id ─────────────────────────────────────────────
 // Detalhe de um membro específico
 router.get('/membro/:id', authMiddleware, gestorMiddleware, async (req, res) => {
@@ -234,8 +270,14 @@ router.delete('/membro/:id', authMiddleware, gestorMiddleware, async (req, res) 
 // ─── GET /api/gestor/info ────────────────────────────────────────────────────
 router.get('/info', authMiddleware, async (req, res) => {
   try {
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('id, name, email, avatar_url, role')
+      .eq('id', req.user.id)
+      .single();
+
     if (!req.user.empresa_id) {
-      return res.json({ tem_empresa: false });
+      return res.json({ tem_empresa: false, user: userRow });
     }
     const { data: empresa } = await supabase
       .from('empresas')
@@ -243,7 +285,7 @@ router.get('/info', authMiddleware, async (req, res) => {
       .eq('id', req.user.empresa_id)
       .single();
 
-    res.json({ tem_empresa: true, empresa, role: req.user.role });
+    res.json({ tem_empresa: true, empresa, role: req.user.role, user: userRow });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao buscar info.' });
   }
