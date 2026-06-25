@@ -4,6 +4,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
+const { enviarRelatorioEmpresa } = require('../services/relatorio-semanal');
 
 // Middleware: verifica se usuário é gestor ou admin
 async function gestorMiddleware(req, res, next) {
@@ -689,6 +690,66 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Erro ao buscar dashboard do gestor:', err.message);
     res.status(500).json({ erro: 'Erro ao carregar dashboard.' });
+  }
+});
+
+// ─── GET /api/gestor/relatorio/config ────────────────────────────────────────
+router.get('/relatorio/config', authMiddleware, gestorMiddleware, async (req, res) => {
+  try {
+    const { data: empresa } = await supabase
+      .from('empresas')
+      .select('relatorio_semanal_ativo, relatorio_ultimo_envio')
+      .eq('id', req.user.empresa_id)
+      .single();
+
+    res.json({
+      ativo:        empresa?.relatorio_semanal_ativo ?? false,
+      ultimo_envio: empresa?.relatorio_ultimo_envio  ?? null,
+    });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar configuração.' });
+  }
+});
+
+// ─── PUT /api/gestor/relatorio/config ────────────────────────────────────────
+router.put('/relatorio/config', authMiddleware, gestorMiddleware, async (req, res) => {
+  const { ativo } = req.body;
+  if (typeof ativo !== 'boolean') return res.status(400).json({ erro: 'Campo "ativo" (boolean) obrigatório.' });
+
+  // Verifica plano ULTRA
+  const plano = (req.user.plano || '').toLowerCase();
+  const isUltra = plano.startsWith('prof') || plano === 'ultra';
+  if (!isUltra) {
+    return res.status(403).json({ erro: 'Recurso exclusivo do plano MAY IA ULTRA.' });
+  }
+
+  try {
+    await supabase
+      .from('empresas')
+      .update({ relatorio_semanal_ativo: ativo })
+      .eq('id', req.user.empresa_id);
+
+    res.json({ mensagem: ativo ? 'Relatório semanal ativado.' : 'Relatório semanal desativado.', ativo });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao salvar configuração.' });
+  }
+});
+
+// ─── POST /api/gestor/relatorio/enviar-agora ─────────────────────────────────
+// Envia o relatório imediatamente (teste ou envio manual)
+router.post('/relatorio/enviar-agora', authMiddleware, gestorMiddleware, async (req, res) => {
+  const plano = (req.user.plano || '').toLowerCase();
+  const isUltra = plano.startsWith('prof') || plano === 'ultra';
+  if (!isUltra) {
+    return res.status(403).json({ erro: 'Recurso exclusivo do plano MAY IA ULTRA.' });
+  }
+
+  try {
+    const resultado = await enviarRelatorioEmpresa(req.user.empresa_id);
+    res.json({ mensagem: 'Relatório enviado com sucesso!', destinatario: resultado?.destinatario });
+  } catch (err) {
+    console.error('[Relatório manual] Erro:', err.message);
+    res.status(500).json({ erro: 'Erro ao gerar relatório: ' + err.message });
   }
 });
 

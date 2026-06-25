@@ -356,6 +356,36 @@
   </div>
   <div id="metas-content"><div class="loading">Carregando metas</div></div>
 
+  <!-- Relatório Semanal IA (MAY IA ULTRA) -->
+  <div id="relatorio-semanal-card" style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(79,38,180,.08));border:1px solid rgba(124,58,237,.3);border-radius:14px;padding:20px 22px;margin-bottom:24px;display:none">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:1.1rem">📊</span>
+          <span style="font-size:.95rem;font-weight:700;color:var(--text-primary,#eae6ff)">Relatório Semanal IA</span>
+          <span style="font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:2px 8px;border-radius:99px">ULTRA</span>
+        </div>
+        <p style="font-size:.8rem;color:var(--text-secondary,rgba(200,190,255,.6));margin:0 0 6px;max-width:420px;line-height:1.5">Toda sexta às 17h você recebe por email: diagnóstico individual de cada vendedor, pauta de reunião e sugestão de treinamento — tudo gerado pela May com base na Metodologia Comercial Jurídico.</p>
+        <p id="relatorio-ultimo-envio" style="font-size:.75rem;color:rgba(164,132,255,.6);margin:0"></p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0">
+        <!-- Toggle -->
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <span style="font-size:.8rem;color:var(--text-secondary,rgba(200,190,255,.6))" id="relatorio-toggle-label">Desativado</span>
+          <div style="position:relative;width:42px;height:24px" onclick="toggleRelatorio()">
+            <input type="checkbox" id="relatorio-toggle" style="opacity:0;width:0;height:0;position:absolute">
+            <div id="relatorio-toggle-track" style="position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:99px;transition:background .2s;cursor:pointer"></div>
+            <div id="relatorio-toggle-thumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>
+          </div>
+        </label>
+        <!-- Botão enviar agora -->
+        <button onclick="enviarRelatorioAgora()" id="btn-enviar-relatorio" style="background:rgba(124,58,237,.25);border:1px solid rgba(124,58,237,.4);color:#c4b5fd;font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap">
+          ✉️ Enviar agora
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Minha Equipe -->
   <div class="equipe-header" id="equipe-header">
     <p class="sec-title" style="margin:0">👥 Minha Equipe</p>
@@ -791,6 +821,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
   await carregarUsuarioGestor();
   await carregarDash();
   await Promise.all([carregarMetas(), carregarFunil(), carregarReunioesSemana(), carregarEquipe()]);
+  // Relatório semanal — carrega config (exibe card automaticamente se for ULTRA)
+  carregarConfigRelatorio();
 });
 
 async function aplicarFiltros(){ await carregarDash(); }
@@ -1381,6 +1413,91 @@ async function carregarFunil() {
     `;
   } catch {
     container.innerHTML = '<div class="insight-item warn"><span class="icon">⚠️</span><span>Erro ao carregar funil.</span></div>';
+  }
+}
+
+// ─── Relatório Semanal IA ─────────────────────────────────────────────────────
+let _relatorioAtivo = false;
+
+async function carregarConfigRelatorio() {
+  try {
+    const r = await apiFetch('/api/gestor/relatorio/config');
+    if (!r.ok) return;
+    const d = await r.json();
+    _relatorioAtivo = d.ativo;
+
+    // Mostra o card (plano ULTRA)
+    const card = document.getElementById('relatorio-semanal-card');
+    if (card) card.style.display = 'block';
+
+    // Atualiza toggle
+    _atualizarToggleRelatorio(_relatorioAtivo);
+
+    // Último envio
+    if (d.ultimo_envio) {
+      const data = new Date(d.ultimo_envio).toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+      const el = document.getElementById('relatorio-ultimo-envio');
+      if (el) el.textContent = `Último envio: ${data}`;
+    }
+  } catch (_) {}
+}
+
+function _atualizarToggleRelatorio(ativo) {
+  const track = document.getElementById('relatorio-toggle-track');
+  const thumb = document.getElementById('relatorio-toggle-thumb');
+  const label = document.getElementById('relatorio-toggle-label');
+  if (track) track.style.background = ativo ? '#7c3aed' : 'rgba(255,255,255,.1)';
+  if (thumb) thumb.style.left       = ativo ? '21px'   : '3px';
+  if (label) label.textContent      = ativo ? 'Ativado' : 'Desativado';
+}
+
+async function toggleRelatorio() {
+  const novoEstado = !_relatorioAtivo;
+  try {
+    const r = await apiFetch('/api/gestor/relatorio/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativo: novoEstado }),
+    });
+    if (r.ok) {
+      _relatorioAtivo = novoEstado;
+      _atualizarToggleRelatorio(novoEstado);
+      mostrarToast(novoEstado
+        ? '✅ Relatório semanal ativado — você receberá toda sexta às 17h'
+        : 'Relatório semanal desativado');
+    } else {
+      const err = await r.json();
+      mostrarToast('Erro: ' + (err.erro || 'Não foi possível salvar'), 'erro');
+    }
+  } catch (_) {
+    mostrarToast('Erro de conexão', 'erro');
+  }
+}
+
+async function enviarRelatorioAgora() {
+  const btn = document.getElementById('btn-enviar-relatorio');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando relatório...';
+  try {
+    const r = await apiFetch('/api/gestor/relatorio/enviar-agora', { method: 'POST' });
+    const d = await r.json();
+    if (r.ok) {
+      mostrarToast(`✅ Relatório enviado para ${d.destinatario}!`);
+      // Atualiza último envio
+      const el = document.getElementById('relatorio-ultimo-envio');
+      if (el) el.textContent = 'Último envio: agora';
+    } else {
+      mostrarToast('Erro: ' + (d.erro || 'Falha ao enviar'), 'erro');
+    }
+  } catch (_) {
+    mostrarToast('Erro de conexão ao enviar relatório', 'erro');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✉️ Enviar agora';
   }
 }
 </script>

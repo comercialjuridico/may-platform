@@ -126,10 +126,13 @@ app.use((err, req, res, next) => {
 
 // ─── Inicialização ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
+const { registrarCronRelatorio } = require('./jobs/relatorio-semanal');
+
 app.listen(PORT, () => {
   console.log(`✓ May rodando na porta ${PORT}`);
   console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
   iniciarCronPush();
+  registrarCronRelatorio();
 });
 
 // ─── Cron de notificações push ───────────────────────────────────────────────
