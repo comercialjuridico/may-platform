@@ -699,62 +699,93 @@ function mostrarAreaBloqueada(area) {
 }
 
 function _mockupArea(area) {
-  const rows = (n, w1, w2) => Array.from({length:n}, (_, i) => `
-    <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);gap:12px">
-      <div style="width:32px;height:32px;border-radius:50%;background:rgba(164,132,255,.25);flex-shrink:0"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px">
-        <div style="height:9px;background:rgba(255,255,255,.18);border-radius:4px;width:${w1[i%w1.length]}px"></div>
-        <div style="height:7px;background:rgba(255,255,255,.09);border-radius:4px;width:${w2[i%w2.length]}px"></div>
+  // Cores vivas para ficarem visíveis mesmo com filtro de escurecimento
+  const ROW_BG   = 'rgba(30,24,60,0.9)';
+  const ROW_LINE = '1px solid rgba(120,100,200,.2)';
+  const CARD_BG  = 'rgba(35,25,70,0.95)';
+  const BAR_DARK = 'rgba(160,130,255,.55)';
+  const BAR_MID  = 'rgba(200,180,255,.35)';
+  const AVATAR   = 'rgba(140,100,255,.6)';
+  const TEXT_C   = 'rgba(230,220,255,.9)';
+  const TEXT_M   = 'rgba(180,160,255,.6)';
+
+  const rows = (n, w1, w2) => Array.from({length:n}, (_,i) => `
+    <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:${ROW_LINE};gap:12px;background:${i%2===0?ROW_BG:'transparent'}">
+      <div style="width:34px;height:34px;border-radius:50%;background:${AVATAR};flex-shrink:0"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <div style="height:10px;background:${BAR_DARK};border-radius:4px;width:${w1[i%w1.length]}px"></div>
+        <div style="height:7px;background:${BAR_MID};border-radius:4px;width:${w2[i%w2.length]}px"></div>
       </div>
     </div>`).join('');
 
-  const cards = (n) => Array.from({length:n}, (_, i) => `
-    <div style="flex:1;background:rgba(255,255,255,.06);border-radius:10px;padding:16px;min-width:0">
-      <div style="height:8px;background:rgba(255,255,255,.12);border-radius:4px;width:55%;margin-bottom:10px"></div>
-      <div style="height:22px;background:rgba(164,132,255,.3);border-radius:6px;width:45%"></div>
+  const cards = (labels, values, colors) => labels.map((l,i) => `
+    <div style="flex:1;background:${CARD_BG};border-radius:12px;padding:18px;min-width:0;border:1px solid rgba(120,100,200,.25)">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:${TEXT_M};margin-bottom:8px">${l}</div>
+      <div style="font-size:1.5rem;font-weight:800;color:${colors[i]||TEXT_C}">${values[i]}</div>
     </div>`).join('');
 
-  if (area === 'ranking') return `
-    <div style="padding:24px 20px">
-      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">🏆 Arena de Vendas — Esta semana</div>
-      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
-        ${['🥇','🥈','🥉','4️⃣','5️⃣'].map((m,i) => `
-          <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);gap:12px">
-            <span style="font-size:1.2rem;width:28px">${m}</span>
-            <div style="width:32px;height:32px;border-radius:50%;background:rgba(164,132,255,.25)"></div>
-            <div style="flex:1;height:9px;background:rgba(255,255,255,.15);border-radius:4px;width:${[140,120,100,85,70][i]}px"></div>
-            <div style="font-size:.8rem;color:rgba(255,255,255,.4)">${[24,19,15,11,8][i]} vendas</div>
-          </div>`).join('')}
-      </div>
+  const header = (icon, title) => `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <span style="font-size:1.3rem">${icon}</span>
+      <span style="font-size:1rem;font-weight:700;color:${TEXT_C}">${title}</span>
     </div>`;
 
-  if (area === 'agenda') return `
-    <div style="padding:24px 20px">
-      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">📅 Agenda Comercial — Junho 2026</div>
-      <div style="display:flex;gap:16px;margin-bottom:16px">${cards(3)}</div>
-      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
-        ${rows(4, [160,130,110,145], [90,70,85,60])}
-      </div>
+  const wrap = (content) => `
+    <div style="padding:28px 24px;background:rgba(10,8,25,0.95);min-height:100%;font-family:sans-serif">
+      ${content}
     </div>`;
 
-  if (area === 'gestor') return `
-    <div style="padding:24px 20px">
-      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">👥 Painel da Equipe</div>
-      <div style="display:flex;gap:16px;margin-bottom:16px">${cards(3)}</div>
-      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
-        ${rows(5, [130,110,150,100,120], [80,65,90,55,75])}
-      </div>
-    </div>`;
+  if (area === 'ranking') return wrap(`
+    ${header('🏆','Arena de Vendas — Esta semana')}
+    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
+      ${['🥇','🥈','🥉','4️⃣','5️⃣'].map((m,i) => `
+        <div style="display:flex;align-items:center;padding:14px 18px;border-bottom:${ROW_LINE};gap:14px">
+          <span style="font-size:1.3rem;width:30px">${m}</span>
+          <div style="width:36px;height:36px;border-radius:50%;background:${AVATAR}"></div>
+          <div style="flex:1">
+            <div style="height:10px;background:${BAR_DARK};border-radius:4px;width:${[180,150,120,95,70][i]}px;margin-bottom:5px"></div>
+            <div style="height:7px;background:${BAR_MID};border-radius:4px;width:${[100,80,65,50,40][i]}px"></div>
+          </div>
+          <div style="font-size:.85rem;font-weight:700;color:${['#a78bfa','#8b5cf6','#7c3aed','#6d28d9','#5b21b6'][i]}">${[24,19,15,11,8][i]} vendas</div>
+        </div>`).join('')}
+    </div>`);
 
-  // leads, funil, venda — mockup genérico
-  return `
-    <div style="padding:24px 20px">
-      <div style="font-size:1.1rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:16px">${AREAS_PREMIUM[area]?.icon} ${AREAS_PREMIUM[area]?.nome}</div>
-      <div style="display:flex;gap:16px;margin-bottom:16px">${cards(3)}</div>
-      <div style="background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden">
-        ${rows(5, [140,110,160,90,130], [85,65,95,55,80])}
-      </div>
-    </div>`;
+  if (area === 'gestor') return wrap(`
+    ${header('👥','Painel da Equipe')}
+    <div style="display:flex;gap:14px;margin-bottom:20px">
+      ${cards(['Membros ativos','Meta do mês','Conversões'],['5','R$ 50k','68%'],['#a78bfa','#34d399','#60a5fa'])}
+    </div>
+    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
+      ${rows(5,[170,140,160,120,150],[90,70,80,60,85])}
+    </div>`);
+
+  if (area === 'agenda') return wrap(`
+    ${header('📅','Agenda Comercial — Junho 2026')}
+    <div style="display:flex;gap:14px;margin-bottom:20px">
+      ${cards(['Reuniões hoje','Follow-ups','Propostas'],['3','7','2'],['#60a5fa','#f59e0b','#34d399'])}
+    </div>
+    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
+      ${rows(5,[160,130,150,110,140],[80,65,90,55,75])}
+    </div>`);
+
+  if (area === 'leads') return wrap(`
+    ${header('📋','Controle de Leads')}
+    <div style="display:flex;gap:14px;margin-bottom:20px">
+      ${cards(['Total de leads','Em negociação','Taxa de conversão'],['42','18','31%'],['#a78bfa','#f59e0b','#34d399'])}
+    </div>
+    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
+      ${rows(6,[150,120,165,100,140,125],[80,60,90,50,75,65])}
+    </div>`);
+
+  // funil, venda
+  return wrap(`
+    ${header(AREAS_PREMIUM[area]?.icon||'🔒', AREAS_PREMIUM[area]?.nome||area)}
+    <div style="display:flex;gap:14px;margin-bottom:20px">
+      ${cards(['Clientes','Oportunidades','Fechamentos'],['28','12','5'],['#a78bfa','#60a5fa','#34d399'])}
+    </div>
+    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
+      ${rows(5,[155,125,160,105,145],[85,65,90,55,80])}
+    </div>`);
 }
 
 // ─── Upsell wall (área bloqueada) ────────────────────────────────────────────
