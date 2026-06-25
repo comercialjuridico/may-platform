@@ -15,6 +15,42 @@ const estado = {
   uso: { mensagens_usadas: 0, limite: 20, restantes: 20 },
 };
 
+// ─── Controle de acesso por plano ─────────────────────────────────────────────
+const PLANO_NIVEL = { free: 0, start: 1, equipe: 2, pro: 3, prof: 4 };
+
+// Normaliza plano do usuário (ex: "start_mensal" → "start")
+function planoBase(user) {
+  const p = (user?.plano || 'free').toLowerCase();
+  if (p.startsWith('prof')) return 'prof';
+  if (p.startsWith('pro'))  return 'pro';
+  if (p.startsWith('equipe') || p === 'mensal' || p === 'anual') return 'equipe';
+  if (p.startsWith('start')) return 'start';
+  return 'free';
+}
+
+// Plano mínimo exigido por ferramenta
+const FERRAMENTA_PLANO_MIN = {
+  'chat':               'start',
+  'follow_up':          'start',
+  'negociacao':         'start',
+  'diagnostico':        'start',
+  'spin':               'start',
+  'simular_reuniao':    'start',
+  'simulador_objecoes': 'start',
+  'gerador_proposta':   'start',
+  'criador_prompt':     'equipe',   // MAY IA PLUS+
+  'simulador_vendas':   'equipe',   // MAY IA PLUS+
+};
+
+const PLANO_NOME  = { start: 'MAY IA PLUS', equipe: 'MAY IA PLUS', pro: 'MAY IA PRO', prof: 'MAY IA ULTRA' };
+const PLANO_PRECO = { start: 'R$ 227/mês',  equipe: 'R$ 227/mês',  pro: 'R$ 397/mês', prof: 'R$ 897/mês'  };
+
+function temAcesso(ferramentaId, user) {
+  const min  = FERRAMENTA_PLANO_MIN[ferramentaId] || 'start';
+  const base = planoBase(user);
+  return PLANO_NIVEL[base] >= PLANO_NIVEL[min];
+}
+
 // ─── Ferramentas disponíveis ─────────────────────────────────────────────────
 const FERRAMENTAS = [
   { id: 'chat',               nome: 'Chat livre',                  icon: '💬' },
@@ -230,13 +266,16 @@ function renderizarSidebar() {
 
   // Ferramentas
   const toolList = document.getElementById('tool-list');
-  toolList.innerHTML = FERRAMENTAS.map(f => `
-    <div class="tool-item ${estado.ferramentaAtiva === f.id ? 'active' : ''}"
+  toolList.innerHTML = FERRAMENTAS.map(f => {
+    const bloqueado = !temAcesso(f.id, user);
+    return `
+    <div class="tool-item ${estado.ferramentaAtiva === f.id ? 'active' : ''} ${bloqueado ? 'tool-locked' : ''}"
          onclick="selecionarFerramenta('${f.id}')">
       <span class="tool-icon">${f.icon}</span>
       <span>${f.nome}</span>
-    </div>
-  `).join('');
+      ${bloqueado ? '<span class="tool-lock-icon">🔒</span>' : ''}
+    </div>`;
+  }).join('');
 
   // Seletor de Área Ativa
   renderizarSeletorArea();
@@ -352,6 +391,12 @@ function atualizarContadorUso() {
 
 // ─── Selecionar ferramenta ───────────────────────────────────────────────────
 function selecionarFerramenta(id) {
+  // Bloquear ferramenta se plano insuficiente
+  if (!temAcesso(id, estado.user)) {
+    mostrarUpsell(id);
+    return;
+  }
+
   estado.ferramentaAtiva = id;
   estado.conversaAtiva   = null;
 
@@ -367,6 +412,55 @@ function selecionarFerramenta(id) {
     mostrarTelaVazia(id);
   }
   renderizarSidebar();
+  fecharMenuMobile();
+}
+
+// ─── Upsell wall (área bloqueada) ────────────────────────────────────────────
+function mostrarUpsell(ferramentaId) {
+  const ferr    = FERRAMENTAS.find(f => f.id === ferramentaId);
+  const minBase = FERRAMENTA_PLANO_MIN[ferramentaId] || 'equipe';
+  const nome    = PLANO_NOME[minBase]  || 'MAY IA PLUS';
+  const preco   = PLANO_PRECO[minBase] || 'R$ 227/mês';
+  const userBase = planoBase(estado.user);
+  const planoAtualNome = {
+    free: 'Período de teste', start: 'MAY IA START',
+    equipe: 'MAY IA PLUS', pro: 'MAY IA PRO', prof: 'MAY IA ULTRA',
+  }[userBase] || 'seu plano atual';
+
+  // Atualiza header
+  document.getElementById('chat-title').textContent = ferr?.nome || 'Área bloqueada';
+  document.getElementById('chat-tool-label').textContent = `Disponível no ${nome}`;
+
+  // Esconde input de chat
+  const wrapper = document.getElementById('chat-input-wrapper');
+  if (wrapper) wrapper.style.display = 'none';
+
+  // Marca como ativa na sidebar (sem abrir de verdade)
+  estado.ferramentaAtiva = ferramentaId;
+  renderizarSidebar();
+
+  // Renderiza wall de upsell
+  const container = document.getElementById('messages-container');
+  container.innerHTML = `
+    <div class="upsell-wall">
+      <div class="upsell-overlay-icon">🔒</div>
+      <div class="upsell-icon">${ferr?.icon || '🔒'}</div>
+      <h3 class="upsell-titulo">${ferr?.nome || 'Esta área'}</h3>
+      <p class="upsell-plano-atual">Você está no plano <strong>${planoAtualNome}</strong></p>
+      <p class="upsell-desc">
+        Faça upgrade para o <strong>${nome}</strong> e tenha acesso imediato e ilimitado
+        a esta ferramenta.
+      </p>
+      <div class="upsell-preco-box">
+        <span class="upsell-preco">${preco}</span>
+        <span class="upsell-preco-fine">· cancele quando quiser</span>
+      </div>
+      <a href="https://usemayapp.com/#planos" target="_blank" class="upsell-btn">
+        Fazer upgrade para ${nome} →
+      </a>
+      <p class="upsell-fine">✓ Acesso imediato &nbsp;·&nbsp; ✓ Sem fidelidade</p>
+    </div>
+  `;
   fecharMenuMobile();
 }
 
