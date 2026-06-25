@@ -1475,14 +1475,23 @@
     <p class="co-sub">Nenhuma cobrança agora. O cartão garante o início — você decide continuar depois.</p>
 
     <form id="co-form" onsubmit="submitCheckout(event)">
-      <input class="co-field" type="text"  id="co-nome"  placeholder="Nome completo"   required style="margin-bottom:10px">
-      <input class="co-field" type="text"  id="co-cpf"   placeholder="CPF ou CNPJ"     required maxlength="18" style="margin-bottom:10px">
-      <input class="co-field" type="email" id="co-email" placeholder="E-mail"           required>
+      <input class="co-field" type="text"  id="co-nome"  placeholder="Nome completo" required style="margin-bottom:10px">
+      <input class="co-field" type="text"  id="co-cpf"   placeholder="CPF ou CNPJ"   required maxlength="18" style="margin-bottom:10px">
+      <input class="co-field" type="email" id="co-email" placeholder="E-mail"         required style="margin-bottom:18px">
+
+      <div class="co-label">Cartão de crédito</div>
+      <input class="co-field" type="text" id="co-numero"  placeholder="Número do cartão"    required maxlength="19" style="margin-bottom:10px">
+      <input class="co-field" type="text" id="co-titular" placeholder="Nome igual ao cartão" required style="margin-bottom:10px">
+      <div class="co-row2">
+        <input class="co-field" type="text" id="co-validade" placeholder="MM/AA" required maxlength="5">
+        <input class="co-field" type="text" id="co-cvv"      placeholder="CVV"   required maxlength="4">
+      </div>
 
       <div id="co-erro"></div>
 
-      <button type="submit" id="co-submit">Começar 7 dias grátis →</button>
+      <button type="submit" id="co-submit">🔒 Cadastrar cartão e começar 7 dias →</button>
       <p class="co-fine">Sem cobrança nos 7 dias. Cancele antes do 8º dia sem nenhum custo.</p>
+      <div class="co-lock">🔒 Pagamento processado com segurança pela Cielo</div>
       <p class="co-login">Já tem conta? <a href="/auth.html">Faça login</a></p>
     </form>
   </div>
@@ -1638,7 +1647,7 @@ function fecharCheckout() {
   document.body.style.overflow = '';
 }
 
-// Máscara CPF/CNPJ
+// Máscaras
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('co-cpf').addEventListener('input', e => {
     const d = e.target.value.replace(/\D/g,'').slice(0,14);
@@ -1647,6 +1656,15 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       e.target.value = d.replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{4})(\d{1,2})$/,'$1/$2');
     }
+  });
+  document.getElementById('co-numero').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
+  });
+  document.getElementById('co-validade').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4).replace(/^(\d{2})(\d)/,'$1/$2');
+  });
+  document.getElementById('co-cvv').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4);
   });
   document.addEventListener('keydown', e => { if(e.key==='Escape') fecharCheckout(); });
 });
@@ -1664,8 +1682,9 @@ async function submitCheckout(e) {
   btn.textContent = 'Criando sua conta…';
 
   try {
+    // 1. Criar conta (senha gerada automaticamente)
     const senha = gerarSenha();
-    const res = await fetch('/api/auth/register', {
+    const regRes = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1676,19 +1695,43 @@ async function submitCheckout(e) {
         plano:    _coPlano,
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.erro || 'Erro ao criar conta.');
+    const regData = await regRes.json();
+    if (!regRes.ok) throw new Error(regData.erro || 'Erro ao criar conta.');
 
-    localStorage.setItem('token', data.token);
+    const token = regData.token;
+
+    // 2. Registrar cartão na Cielo
+    btn.textContent = 'Validando cartão…';
+    const validade = document.getElementById('co-validade').value.trim();
+    const [mm, aa] = validade.split('/');
+    const cieloRes = await fetch('/api/cielo/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({
+        plano: _coPlano,
+        cpf:   document.getElementById('co-cpf').value,
+        cartao: {
+          numero:   document.getElementById('co-numero').value.replace(/\D/g,''),
+          titular:  document.getElementById('co-titular').value.trim(),
+          validade: `${mm}/${aa && aa.length===2 ? '20'+aa : aa}`,
+          cvv:      document.getElementById('co-cvv').value,
+        },
+      }),
+    });
+    const cieloData = await cieloRes.json();
+    if (!cieloRes.ok) throw new Error(cieloData.erro || 'Cartão não autorizado. Verifique os dados.');
+
+    // 3. Redirecionar pro app
+    localStorage.setItem('token', token);
     localStorage.setItem('tmpSenha', senha);
-    if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
-    window.location.href = '/app?novo=1&plano=' + _coPlano;
+    if (regData.user) localStorage.setItem('user', JSON.stringify(regData.user));
+    window.location.href = '/app?trial=1';
 
   } catch (err) {
     erro.textContent   = err.message;
     erro.style.display = 'block';
     btn.disabled       = false;
-    btn.textContent    = 'Começar 7 dias grátis →';
+    btn.textContent    = '🔒 Cadastrar cartão e começar 7 dias →';
   }
 }
 
