@@ -1698,7 +1698,7 @@ async function submitCheckout(e) {
     const regData = await regRes.json();
     if (!regRes.ok) throw new Error(regData.erro || 'Erro ao criar conta.');
 
-    const token = regData.token;
+    const token = regData.accessToken;
 
     // 2. Registrar cartão na Cielo
     btn.textContent = 'Validando cartão…';
@@ -1723,7 +1723,7 @@ async function submitCheckout(e) {
 
     // 3. Redirecionar pro app
     localStorage.setItem('token', token);
-    localStorage.setItem('tmpSenha', senha);
+    localStorage.setItem('refreshToken', regData.refreshToken);
     if (regData.user) localStorage.setItem('user', JSON.stringify(regData.user));
     window.location.href = '/app?trial=1';
 
