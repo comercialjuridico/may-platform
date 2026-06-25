@@ -643,6 +643,14 @@ function msgActionButtons(msgId) {
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
       Word
     </button>
+    <button class="msg-action-btn" onclick="exportarPdf('${msgId}')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h6M9 17h4"/></svg>
+      PDF
+    </button>
+    <button class="msg-action-btn" onclick="exportarImagem('${msgId}')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Imagem
+    </button>
   </div>`;
 }
 
@@ -755,15 +763,133 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ─── Export PDF ──────────────────────────────────────────────────────────────
+async function exportarPdf(msgId) {
+  const bolha = document.querySelector(`#${msgId} .msg-bubble`);
+  if (!bolha) return;
+  const conteudo = bolha.innerText || bolha.textContent;
+
+  mostrarToast('Gerando PDF...', 'aviso');
+  const res = await api.post('/export/pdf', {
+    conteudo,
+    titulo: `May — ${new Date().toLocaleDateString('pt-BR')}`,
+  });
+
+  if (res?.ok) {
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `may_${Date.now()}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('PDF exportado!', 'sucesso');
+  } else {
+    mostrarToast('Erro ao gerar PDF', 'erro');
+  }
+}
+
+// ─── Export Imagem (html2canvas) ─────────────────────────────────────────────
+async function exportarImagem(msgId) {
+  const bolha = document.querySelector(`#${msgId} .msg-bubble`);
+  if (!bolha) { mostrarToast('Mensagem não encontrada', 'erro'); return; }
+
+  if (typeof html2canvas === 'undefined') {
+    mostrarToast('html2canvas não carregado', 'erro'); return;
+  }
+
+  mostrarToast('Gerando imagem...', 'aviso');
+  try {
+    const canvas = await html2canvas(bolha, {
+      backgroundColor: '#1e1640',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    const url = canvas.toDataURL('image/png');
+    const a   = document.createElement('a');
+    a.href = url;
+    a.download = `may_${Date.now()}.png`;
+    a.click();
+    mostrarToast('Imagem exportada!', 'sucesso');
+  } catch (err) {
+    console.error('Erro ao exportar imagem:', err);
+    mostrarToast('Erro ao gerar imagem', 'erro');
+  }
+}
+
 // ─── Upload de arquivo ───────────────────────────────────────────────────────
 async function uploadArquivo() {
   const input = document.createElement('input');
   input.type  = 'file';
-  input.accept = '.pdf,.docx,.txt';
+  // Aceita documentos, imagens e áudio
+  input.accept = '.pdf,.docx,.doc,.txt,image/jpeg,image/png,image/webp,audio/webm,audio/mp4,audio/mpeg,audio/wav,audio/ogg,audio/x-m4a';
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
 
+    const tipo = file.type;
+
+    // ── Imagem ────────────────────────────────────────────────────────────
+    if (tipo.startsWith('image/')) {
+      mostrarToast('Analisando imagem...', 'aviso');
+      const form = new FormData();
+      form.append('imagem', file);
+      form.append('instrucao', 'Descreva detalhadamente o conteúdo desta imagem. Se houver texto, transcreva-o.');
+
+      const res = await api.upload('/upload/imagem-chat', form);
+      if (!res?.ok) { mostrarToast('Erro ao processar imagem', 'erro'); return; }
+
+      const data = await res.json();
+
+      // Mostra miniatura no histórico
+      const container = document.getElementById('messages-container');
+      const inicial = (estado.user?.name || 'V').charAt(0).toUpperCase();
+      const imgId = 'msg-img-' + Date.now();
+      container.insertAdjacentHTML('beforeend', `
+        <div class="message user" id="${imgId}">
+          <div class="msg-avatar user-av">${inicial}</div>
+          <div class="msg-content">
+            <div class="msg-name">Você</div>
+            <div class="msg-bubble">
+              <img src="${data.dataUrl}" alt="${file.name}" style="max-width:220px;border-radius:8px;display:block;margin-bottom:6px" />
+              <span style="font-size:11px;opacity:.6">${file.name}</span>
+            </div>
+          </div>
+        </div>
+      `);
+      container.scrollTop = container.scrollHeight;
+
+      // Injeta análise no input
+      const msgInput = document.getElementById('message-input');
+      msgInput.value = `[Imagem enviada: ${file.name}]\n\nAnálise da imagem:\n${data.analise}\n\nCom base nesta imagem, `;
+      msgInput.dispatchEvent(new Event('input'));
+      mostrarToast('Imagem analisada!', 'sucesso');
+      return;
+    }
+
+    // ── Áudio ─────────────────────────────────────────────────────────────
+    if (tipo.startsWith('audio/')) {
+      if (estado.user?.plano === 'free') {
+        mostrarToast('Transcrição de áudio disponível nos planos pagos.', 'aviso');
+        return;
+      }
+      mostrarToast('Transcrevendo áudio...', 'aviso');
+      const form = new FormData();
+      form.append('audio', file, file.name);
+
+      const res = await api.upload('/upload/audio', form);
+      if (!res?.ok) { mostrarToast('Erro ao transcrever áudio', 'erro'); return; }
+
+      const data = await res.json();
+      const msgInput = document.getElementById('message-input');
+      msgInput.value = `[Áudio transcrito: ${file.name}]\n\n${data.transcricao}`;
+      msgInput.dispatchEvent(new Event('input'));
+      mostrarToast('Áudio transcrito!', 'sucesso');
+      return;
+    }
+
+    // ── Documento (PDF, DOCX, TXT) ────────────────────────────────────────
     mostrarToast('Processando arquivo...', 'aviso');
     const form = new FormData();
     form.append('arquivo', file);
@@ -774,7 +900,6 @@ async function uploadArquivo() {
     const data = await res.json();
     mostrarToast(`"${file.name}" processado!`, 'sucesso');
 
-    // Injeta o texto extraído na caixa de mensagem
     const msgInput = document.getElementById('message-input');
     msgInput.value = `Analise este documento:\n\n${data.texto_preview}\n\n[Arquivo: ${file.name}]`;
     msgInput.dispatchEvent(new Event('input'));
@@ -2178,7 +2303,7 @@ Object.assign(window, {
   abrirModalPerfil, salvarPerfil, uploadFotoPerfil,
   iniciarCheckout, abrirPortalStripe, logout,
   toggleMenuMobile, mostrarToast, toggleUserDropdown, fecharUserDropdown,
-  copiarMensagem, exportarDocx, salvarTemplate,
+  copiarMensagem, exportarDocx, exportarPdf, exportarImagem, salvarTemplate,
   abrirArquivosArea, copiarArquivo, excluirArquivo,
   abrirModalVenda, fecharModalVenda, registrarVenda,
   toggle2FA, confirmar2FAAtivacao, confirmar2FADesativacao,

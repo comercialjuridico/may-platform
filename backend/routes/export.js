@@ -1,10 +1,11 @@
-// ─── Rota de exportação para Word (.docx) ──────────────────────────────────────
+// ─── Rotas de exportação (Word, PDF) ──────────────────────────────────────────
 const express = require('express');
 const router = express.Router();
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel,
   AlignmentType, BorderStyle
 } = require('docx');
+const PDFDocument = require('pdfkit');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 
@@ -128,6 +129,75 @@ router.post('/docx', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Erro na exportação:', err.message);
     res.status(500).json({ erro: 'Erro ao exportar documento.' });
+  }
+});
+
+// ─── POST /api/export/pdf ───────────────────────────────────────────────────
+router.post('/pdf', authMiddleware, async (req, res) => {
+  try {
+    const { conteudo, titulo } = req.body;
+    if (!conteudo) return res.status(400).json({ erro: 'Conteúdo obrigatório.' });
+
+    const tituloFinal = titulo || 'Proposta — May';
+    const nomeArquivo = tituloFinal.replace(/[^a-zA-Z0-9À-ÿ\s]/g, '').replace(/\s+/g, '_').slice(0, 60);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}.pdf"`);
+
+    const doc = new PDFDocument({ margin: 60, size: 'A4' });
+    doc.pipe(res);
+
+    // ── Cabeçalho roxo ──────────────────────────────────────────────────────
+    doc.rect(0, 0, doc.page.width, 90).fill('#1a0a3c');
+    doc.fillColor('#ffffff')
+       .font('Helvetica-Bold').fontSize(22)
+       .text(tituloFinal, 60, 28, { width: doc.page.width - 120 });
+    doc.fillColor('rgba(200,180,255,0.7)')
+       .font('Helvetica').fontSize(10)
+       .text(`Gerado pela May · ${new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })}`, 60, 58);
+
+    doc.moveDown(3);
+
+    // ── Conteúdo — parsing linha a linha ───────────────────────────────────
+    const linhas = conteudo.split('\n');
+    for (const linha of linhas) {
+      if (linha.startsWith('# ')) {
+        doc.moveDown(0.5)
+           .fillColor('#1a0a3c').font('Helvetica-Bold').fontSize(16)
+           .text(linha.replace(/^# /, ''), { paragraphGap: 4 });
+        doc.moveDown(0.2);
+      } else if (linha.startsWith('## ')) {
+        doc.moveDown(0.3)
+           .fillColor('#3b1fa8').font('Helvetica-Bold').fontSize(13)
+           .text(linha.replace(/^## /, ''), { paragraphGap: 3 });
+      } else if (linha.startsWith('---')) {
+        doc.moveDown(0.4)
+           .moveTo(60, doc.y).lineTo(doc.page.width - 60, doc.y)
+           .strokeColor('#e0d8ff').lineWidth(0.8).stroke();
+        doc.moveDown(0.4);
+      } else if (linha.startsWith('- ') || linha.startsWith('• ')) {
+        doc.fillColor('#2d2d2d').font('Helvetica').fontSize(11)
+           .text('• ' + linha.replace(/^[-•] /, ''), { indent: 16, paragraphGap: 2 });
+      } else if (linha.trim() === '') {
+        doc.moveDown(0.35);
+      } else {
+        // Remove markdown inline bold (**texto**)
+        const semBold = linha.replace(/\*\*(.*?)\*\*/g, '$1');
+        doc.fillColor('#1a1a1a').font('Helvetica').fontSize(11)
+           .text(semBold, { lineGap: 3, paragraphGap: 2 });
+      }
+    }
+
+    // ── Rodapé ──────────────────────────────────────────────────────────────
+    const rodapeY = doc.page.height - 40;
+    doc.rect(0, rodapeY - 10, doc.page.width, 50).fill('#f5f2ff');
+    doc.fillColor('#888').font('Helvetica').fontSize(9)
+       .text('Documento gerado pela plataforma May · may.com.br', 60, rodapeY, { align: 'center', width: doc.page.width - 120 });
+
+    doc.end();
+  } catch (err) {
+    console.error('Erro ao exportar PDF:', err.message);
+    if (!res.headersSent) res.status(500).json({ erro: 'Erro ao gerar PDF.' });
   }
 });
 
