@@ -118,6 +118,25 @@
 .upsell-btn:hover { box-shadow: 0 6px 24px rgba(124,58,237,.5); transform: translateY(-1px); }
 .upsell-fine { font-size: 0.73rem; color: var(--text-muted); }
 
+/* ═══ Payment wall plan cards ═══ */
+.pw-plan-card {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px; padding: 14px; cursor: pointer; transition: all .18s;
+  position: relative;
+}
+.pw-plan-card:hover { border-color: rgba(124,58,237,.4); background: rgba(124,58,237,.07); }
+.pw-popular { border-color: rgba(124,58,237,.35); background: rgba(124,58,237,.06); }
+.pw-plan-badge {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg,#7C3AED,#6D28D9); color: #fff;
+  font-size: .62rem; font-weight: 700; padding: 2px 10px; border-radius: 50px;
+  white-space: nowrap; letter-spacing: .04em;
+}
+.pw-plan-name { font-size: 0.72rem; font-weight: 700; color: #C4B5FD; margin-bottom: 2px; }
+.pw-plan-sub  { font-size: 0.68rem; color: rgba(200,190,255,.45); margin-bottom: 6px; }
+.pw-plan-price { font-size: 1.1rem; font-weight: 700; color: #EAE6FF; }
+.pw-plan-price span { font-size: 0.68rem; color: rgba(200,190,255,.5); font-weight: 400; }
+
 /* Área ativa */
 #area-ativa-container { padding: 0 8px; }
 .area-ativa-chip {

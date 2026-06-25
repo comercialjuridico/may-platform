@@ -51,6 +51,217 @@ function temAcesso(ferramentaId, user) {
   return PLANO_NIVEL[base] >= PLANO_NIVEL[min];
 }
 
+// ─── Onboarding + Trial + Payment Wall ───────────────────────────────────────
+
+// Preços do payment wall
+const PW_PRECOS = {
+  mensal: { start: 'R$ 97',  equipe: 'R$ 227',  pro: 'R$ 397',  prof: 'R$ 897'  },
+  anual:  { start: 'R$ 78',  equipe: 'R$ 182',  pro: 'R$ 318',  prof: 'R$ 718'  },
+};
+let _pwPeriodo = 'mensal';
+let _pwPlano   = null;
+
+function verificarFluxoOnboarding(user) {
+  // Calcula dias desde criação
+  const criado     = new Date(user.created_at || Date.now());
+  const diasDesde  = (Date.now() - criado.getTime()) / (1000 * 60 * 60 * 24);
+  const emTrial    = (user.plano === 'free' || !user.plano) &&
+                     !user.cielo_recurrent_payment_id && !user.stripe_subscription_id;
+
+  // Dia 8+: bloqueia com payment wall
+  if (emTrial && diasDesde >= 7) {
+    abrirPaymentWall(true); // true = bloqueante (sem X)
+    return;
+  }
+
+  // Banner verde de trial
+  if (emTrial) {
+    const diasRestantes = Math.ceil(7 - diasDesde);
+    mostrarBannerTrial(diasRestantes);
+  }
+
+  // Onboarding obrigatório: diagnóstico
+  const params = new URLSearchParams(window.location.search);
+  const oShown = localStorage.getItem('onboarding_shown');
+  if (!user.diagnostico_completo && !oShown && params.get('novo') === '1') {
+    mostrarOnboardingWall();
+  }
+}
+
+function mostrarBannerTrial(diasRestantes) {
+  const bar = document.getElementById('trial-top-bar');
+  if (!bar) return;
+  bar.style.display = 'flex';
+  document.getElementById('trial-bar-text').textContent =
+    diasRestantes <= 1
+      ? '⚠️ Último dia de teste — assine hoje para não perder o acesso'
+      : `🎁 ${diasRestantes} dias de teste grátis restantes`;
+  // Empurra o app para baixo
+  const app = document.getElementById('app');
+  if (app) app.style.paddingTop = '36px';
+}
+
+function mostrarOnboardingWall() {
+  const wall = document.getElementById('onboarding-wall');
+  if (wall) wall.style.display = 'flex';
+}
+
+function iniciarDiagnostico() {
+  localStorage.setItem('onboarding_shown', '1');
+  const wall = document.getElementById('onboarding-wall');
+  if (wall) wall.style.display = 'none';
+  selecionarFerramenta('diagnostico');
+}
+
+// ── Payment wall ──────────────────────────────────────────────────────────────
+function abrirPaymentWall(bloqueante) {
+  const wall = document.getElementById('payment-wall');
+  if (!wall) return;
+  wall.style.display = 'flex';
+  // Se bloqueante (dia 8), não permite fechar clicando fora
+  if (!bloqueante) {
+    wall.onclick = e => { if (e.target === wall) fecharPaymentWall(); };
+  } else {
+    wall.onclick = null;
+  }
+  pwPeriodo('mensal');
+  pwAtualizarPrecos();
+}
+
+function fecharPaymentWall() {
+  const wall = document.getElementById('payment-wall');
+  if (wall) wall.style.display = 'none';
+}
+
+function pwPeriodo(p) {
+  _pwPeriodo = p;
+  const bM = document.getElementById('pw-btn-mensal');
+  const bA = document.getElementById('pw-btn-anual');
+  if (bM) bM.style.cssText = p === 'mensal'
+    ? 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:rgba(124,58,237,.8);color:#fff;'
+    : 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(200,190,255,.5);';
+  if (bA) bA.style.cssText = p === 'anual'
+    ? 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:rgba(124,58,237,.8);color:#fff;'
+    : 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(200,190,255,.5);';
+  pwAtualizarPrecos();
+}
+
+function pwAtualizarPrecos() {
+  const p = PW_PRECOS[_pwPeriodo];
+  ['start','equipe','pro','prof'].forEach(k => {
+    const el = document.getElementById(`pw-price-${k}`);
+    if (el) el.innerHTML = `${p[k]}<span>/mês</span>`;
+  });
+}
+
+function pwSelecionarPlano(plano) {
+  _pwPlano = plano;
+  ['start','equipe','pro','prof'].forEach(k => {
+    const card = document.getElementById(`pw-card-${k}`);
+    if (!card) return;
+    const isSelected = k === plano;
+    card.style.borderColor = isSelected ? '#7C3AED' : '';
+    card.style.background  = isSelected ? 'rgba(124,58,237,.15)' : '';
+  });
+  const btn = document.getElementById('pw-btn-avancar');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+}
+
+function pwAvancarPagamento() {
+  if (!_pwPlano) return;
+  document.getElementById('pw-pane1').style.display = 'none';
+  document.getElementById('pw-pane2').style.display = 'block';
+  document.getElementById('pw-step1-label').style.color = 'rgba(200,190,255,.4)';
+  document.getElementById('pw-step2-label').style.cssText = 'font-weight:700;color:#A78BFA;';
+  const preco = PW_PRECOS[_pwPeriodo][_pwPlano];
+  const nomes = { start:'MAY IA START', equipe:'MAY IA PLUS', pro:'MAY IA PRO', prof:'MAY IA ULTRA' };
+  document.getElementById('pw-resumo-plano').textContent = nomes[_pwPlano];
+  document.getElementById('pw-resumo-preco').textContent = `${preco}/mês`;
+
+  // Máscaras
+  document.getElementById('pw-numero')?.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
+  });
+  document.getElementById('pw-validade')?.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4).replace(/^(\d{2})(\d)/,'$1/$2');
+  });
+  document.getElementById('pw-cvv')?.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4);
+  });
+  document.getElementById('pw-cpf')?.addEventListener('input', e => {
+    const d = e.target.value.replace(/\D/g,'').slice(0,14);
+    e.target.value = d.length <= 11
+      ? d.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')
+      : d.replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{4})(\d{1,2})$/,'$1/$2');
+  });
+}
+
+function pwVoltarPlanos() {
+  document.getElementById('pw-pane1').style.display = 'block';
+  document.getElementById('pw-pane2').style.display = 'none';
+  document.getElementById('pw-step1-label').style.color = '#A78BFA';
+  document.getElementById('pw-step2-label').style.cssText = '';
+}
+
+async function pwSubmit(e) {
+  e.preventDefault();
+  const btn  = document.getElementById('pw-submit');
+  const erro = document.getElementById('pw-erro');
+  erro.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Validando cartão…';
+
+  try {
+    const validade = document.getElementById('pw-validade').value.trim();
+    const [mm, aa] = validade.split('/');
+    const planoKey = `${_pwPlano}_${_pwPeriodo}`;
+
+    // 1. Pré-validar cartão
+    const preRes = await fetch('/api/cielo/pre-validar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plano: planoKey,
+        cpf:   document.getElementById('pw-cpf').value,
+        cartao: {
+          numero:   document.getElementById('pw-numero').value.replace(/\D/g,''),
+          titular:  document.getElementById('pw-titular').value.trim(),
+          validade: `${mm}/20${aa}`,
+          cvv:      document.getElementById('pw-cvv').value,
+        },
+      }),
+    });
+    const preData = await preRes.json();
+    if (!preRes.ok) throw new Error(preData.erro || 'Cartão não autorizado.');
+
+    // 2. Ativar plano (usuário já logado)
+    const token = getAccessToken();
+    const ativarRes = await fetch('/api/cielo/ativar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ orderId: preData.orderId }),
+    });
+    const ativarData = await ativarRes.json();
+    if (!ativarRes.ok) throw new Error(ativarData.erro || 'Erro ao ativar assinatura.');
+
+    // 3. Sucesso
+    estado.user.plano = _pwPlano;
+    estado.user.plano_status = 'ativo';
+    salvarUser(estado.user);
+    fecharPaymentWall();
+    const barTop = document.getElementById('trial-top-bar');
+    if (barTop) barTop.style.display = 'none';
+    renderizarSidebar();
+    mostrarToast('✅ Assinatura confirmada! Bem-vindo(a) ao ' + { start:'MAY IA START', equipe:'MAY IA PLUS', pro:'MAY IA PRO', prof:'MAY IA ULTRA' }[_pwPlano]);
+
+  } catch (err) {
+    erro.textContent   = err.message;
+    erro.style.display = 'block';
+    btn.disabled       = false;
+    btn.textContent    = '🔒 Confirmar assinatura →';
+  }
+}
+
 // ─── Ferramentas disponíveis ─────────────────────────────────────────────────
 const FERRAMENTAS = [
   { id: 'chat',               nome: 'Chat livre',                  icon: '💬' },
@@ -156,6 +367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   estado.user = user;
   await carregarDadosIniciais();
   renderizarSidebar();
+  verificarFluxoOnboarding(estado.user);
   verificarDiagnostico();
   verificarQueryParams();
   if (!estado.conversaAtiva) mostrarHomeDashboard();

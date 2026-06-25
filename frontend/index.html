@@ -15,6 +15,99 @@
 </head>
 <body>
 
+<!-- ═══ TRIAL BANNER ═══ -->
+<div id="trial-top-bar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:5000; background:linear-gradient(90deg,#059669,#10B981); color:#fff; font-size:0.8rem; font-weight:600; padding:8px 20px; display:none; align-items:center; justify-content:center; gap:16px; text-align:center;">
+  <span id="trial-bar-text">🎁 7 dias de teste grátis</span>
+  <button onclick="abrirPaymentWall()" style="background:rgba(255,255,255,.25); border:none; color:#fff; font-weight:700; font-size:0.75rem; padding:4px 12px; border-radius:20px; cursor:pointer;">Assinar agora →</button>
+</div>
+
+<!-- ═══ ONBOARDING WALL (diagnóstico obrigatório) ═══ -->
+<div id="onboarding-wall" style="display:none; position:fixed; inset:0; z-index:6000; background:linear-gradient(135deg,#050510 0%,#0d0920 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
+  <div style="font-size:2.5rem; margin-bottom:12px; font-family:'Syne',sans-serif; font-weight:800; letter-spacing:-.02em; background:linear-gradient(135deg,#C4B5FD,#A78BFA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">May</div>
+  <h2 style="font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; color:#EAE6FF; margin-bottom:10px; max-width:460px; line-height:1.3;">Vamos personalizar a May<br>para o seu perfil</h2>
+  <p style="font-size:0.9rem; color:rgba(200,190,255,.65); max-width:400px; line-height:1.65; margin-bottom:32px;">A May aprende com seu diagnóstico para adaptar respostas, scripts e simulações ao seu nicho, cliente e momento de venda. Leva menos de 3 minutos.</p>
+  <button onclick="iniciarDiagnostico()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:1rem; font-weight:700; padding:15px 36px; border-radius:12px; cursor:pointer; box-shadow:0 4px 20px rgba(124,58,237,.4); font-family:'Inter',sans-serif;">Começar diagnóstico →</button>
+  <p style="font-size:0.74rem; color:rgba(200,190,255,.35); margin-top:16px;">Você precisa completar o diagnóstico para usar a plataforma</p>
+</div>
+
+<!-- ═══ PAYMENT WALL (dia 8 / upgrade) ═══ -->
+<div id="payment-wall" style="display:none; position:fixed; inset:0; z-index:7000; background:rgba(5,5,15,.88); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px; overflow-y:auto;">
+  <div style="background:#0e1426; border:1px solid rgba(124,58,237,.3); border-radius:20px; width:100%; max-width:520px; padding:32px; position:relative; margin:auto;">
+
+    <!-- Step indicator -->
+    <div id="pw-steps" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:28px; font-size:0.78rem; color:rgba(200,190,255,.5);">
+      <span id="pw-step1-label" style="font-weight:700; color:#A78BFA;">1 Selecionar plano</span>
+      <span>›</span>
+      <span id="pw-step2-label">2 Pagar</span>
+    </div>
+
+    <!-- PANE 1: Escolher plano -->
+    <div id="pw-pane1">
+      <h3 style="font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; color:#EAE6FF; margin-bottom:6px; text-align:center;">Escolha seu plano</h3>
+      <p style="font-size:0.8rem; color:rgba(200,190,255,.5); text-align:center; margin-bottom:20px;">Acesso imediato após a confirmação</p>
+
+      <!-- Toggle mensal/anual -->
+      <div style="display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:3px; width:fit-content; margin-left:auto; margin-right:auto;">
+        <button id="pw-btn-mensal" onclick="pwPeriodo('mensal')" style="padding:6px 18px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:rgba(124,58,237,.8); color:#fff;">Mensal</button>
+        <button id="pw-btn-anual"  onclick="pwPeriodo('anual')"  style="padding:6px 18px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:transparent; color:rgba(200,190,255,.5);">Anual <span style="font-size:0.68rem; color:#34D399;">-20%</span></button>
+      </div>
+
+      <!-- Planos -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+        <div class="pw-plan-card" onclick="pwSelecionarPlano('start')" id="pw-card-start">
+          <div class="pw-plan-name">MAY IA START</div>
+          <div class="pw-plan-sub">1 usuário · solo</div>
+          <div class="pw-plan-price" id="pw-price-start">R$ 97<span>/mês</span></div>
+        </div>
+        <div class="pw-plan-card pw-popular" onclick="pwSelecionarPlano('equipe')" id="pw-card-equipe">
+          <div class="pw-plan-badge">Mais popular</div>
+          <div class="pw-plan-name">MAY IA PLUS</div>
+          <div class="pw-plan-sub">até 3 usuários</div>
+          <div class="pw-plan-price" id="pw-price-equipe">R$ 227<span>/mês</span></div>
+        </div>
+        <div class="pw-plan-card" onclick="pwSelecionarPlano('pro')" id="pw-card-pro">
+          <div class="pw-plan-name">MAY IA PRO</div>
+          <div class="pw-plan-sub">até 5 usuários</div>
+          <div class="pw-plan-price" id="pw-price-pro">R$ 397<span>/mês</span></div>
+        </div>
+        <div class="pw-plan-card" onclick="pwSelecionarPlano('prof')" id="pw-card-prof">
+          <div class="pw-plan-name">MAY IA ULTRA</div>
+          <div class="pw-plan-sub">até 10 usuários</div>
+          <div class="pw-plan-price" id="pw-price-prof">R$ 897<span>/mês</span></div>
+        </div>
+      </div>
+
+      <button onclick="pwAvancarPagamento()" style="width:100%; background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:13px; border-radius:10px; cursor:pointer; opacity:.4;" id="pw-btn-avancar" disabled>Continuar →</button>
+    </div>
+
+    <!-- PANE 2: Pagamento -->
+    <div id="pw-pane2" style="display:none;">
+      <button onclick="pwVoltarPlanos()" style="background:none; border:none; color:rgba(200,190,255,.5); font-size:0.8rem; cursor:pointer; margin-bottom:16px; padding:0;">← Voltar</button>
+
+      <div id="pw-resumo" style="background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:0.85rem;">
+        <strong id="pw-resumo-plano" style="color:#C4B5FD;"></strong>
+        <span id="pw-resumo-preco" style="color:rgba(200,190,255,.6); float:right;"></span>
+      </div>
+
+      <form id="pw-form" onsubmit="pwSubmit(event)" style="display:flex; flex-direction:column; gap:10px;">
+        <input class="co-field" type="text"  id="pw-nome"     placeholder="Nome completo"       required>
+        <input class="co-field" type="text"  id="pw-cpf"      placeholder="CPF ou CNPJ"         required maxlength="18">
+        <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:rgba(200,190,255,.45); margin-top:4px;">Cartão de crédito</div>
+        <input class="co-field" type="text"  id="pw-numero"   placeholder="Número do cartão"    required maxlength="19">
+        <input class="co-field" type="text"  id="pw-titular"  placeholder="Nome igual ao cartão" required>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <input class="co-field" type="text" id="pw-validade" placeholder="MM/AA" required maxlength="5">
+          <input class="co-field" type="text" id="pw-cvv"      placeholder="CVV"   required maxlength="4">
+        </div>
+        <div id="pw-erro" style="color:#f87171; font-size:0.8rem; display:none;"></div>
+        <button type="submit" id="pw-submit" style="background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:14px; border-radius:10px; cursor:pointer; margin-top:4px;">🔒 Confirmar assinatura →</button>
+        <p style="text-align:center; font-size:0.73rem; color:rgba(200,190,255,.35); margin:0;">Sem cobrança hoje. Acesso imediato. Cancele quando quiser.</p>
+      </form>
+    </div>
+
+  </div>
+</div>
+
 <canvas id="canvas-app"></canvas>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenuMobile()"></div>
 
