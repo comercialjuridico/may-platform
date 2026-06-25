@@ -46,8 +46,10 @@ const PLANO_NOME  = { start: 'MAY IA PLUS', equipe: 'MAY IA PLUS', pro: 'MAY IA 
 const PLANO_PRECO = { start: 'R$ 227/mês',  equipe: 'R$ 227/mês',  pro: 'R$ 397/mês', prof: 'R$ 897/mês'  };
 
 function temAcesso(ferramentaId, user) {
-  const min  = FERRAMENTA_PLANO_MIN[ferramentaId] || 'start';
   const base = planoBase(user);
+  // Usuários free = trial ativo → acesso total para conhecer a plataforma
+  if (base === 'free') return true;
+  const min = FERRAMENTA_PLANO_MIN[ferramentaId] || 'start';
   return PLANO_NIVEL[base] >= PLANO_NIVEL[min];
 }
 
