@@ -31,11 +31,11 @@
 </div>
 
 <!-- ═══ PAYMENT WALL (dia 8 / upgrade) ═══ -->
-<div id="payment-wall" style="display:none; position:fixed; inset:0; z-index:7000; background:rgba(5,5,15,.88); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px; overflow-y:auto;">
-  <div style="background:#0e1426; border:1px solid rgba(124,58,237,.3); border-radius:20px; width:100%; max-width:520px; padding:32px; position:relative; margin:auto;">
+<div id="payment-wall" style="display:none; position:fixed; inset:0; z-index:7000; background:rgba(5,5,15,.92); backdrop-filter:blur(8px); align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto;">
+  <div style="background:#0d0f1e; border:1px solid rgba(124,58,237,.3); border-radius:20px; width:100%; max-width:680px; padding:32px 28px; position:relative; margin:auto;">
 
     <!-- Step indicator -->
-    <div id="pw-steps" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:28px; font-size:0.78rem; color:rgba(200,190,255,.5);">
+    <div id="pw-steps" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:24px; font-size:0.78rem; color:rgba(200,190,255,.5);">
       <span id="pw-step1-label" style="font-weight:700; color:#A78BFA;">1 Selecionar plano</span>
       <span>›</span>
       <span id="pw-step2-label">2 Pagar</span>
@@ -43,41 +43,82 @@
 
     <!-- PANE 1: Escolher plano -->
     <div id="pw-pane1">
-      <h3 style="font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; color:#EAE6FF; margin-bottom:6px; text-align:center;">Escolha seu plano</h3>
-      <p style="font-size:0.8rem; color:rgba(200,190,255,.5); text-align:center; margin-bottom:20px;">Acesso imediato após a confirmação</p>
+      <h3 style="font-family:'Syne',sans-serif; font-size:1.25rem; font-weight:700; color:#EAE6FF; margin-bottom:4px; text-align:center;">Escolha seu plano</h3>
+      <p style="font-size:0.8rem; color:rgba(200,190,255,.5); text-align:center; margin-bottom:18px;">Acesso imediato após a confirmação</p>
 
       <!-- Toggle mensal/anual -->
-      <div style="display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:3px; width:fit-content; margin-left:auto; margin-right:auto;">
-        <button id="pw-btn-mensal" onclick="pwPeriodo('mensal')" style="padding:6px 18px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:rgba(124,58,237,.8); color:#fff;">Mensal</button>
-        <button id="pw-btn-anual"  onclick="pwPeriodo('anual')"  style="padding:6px 18px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:transparent; color:rgba(200,190,255,.5);">Anual <span style="font-size:0.68rem; color:#34D399;">-20%</span></button>
+      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:3px; width:fit-content; margin-left:auto; margin-right:auto;">
+        <button id="pw-btn-mensal" onclick="pwPeriodo('mensal')" style="padding:6px 20px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:rgba(124,58,237,.8); color:#fff;">Mensal</button>
+        <button id="pw-btn-anual"  onclick="pwPeriodo('anual')"  style="padding:6px 20px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:transparent; color:rgba(200,190,255,.5);">Anual <span style="font-size:0.68rem; color:#34D399;">-20%</span></button>
       </div>
 
-      <!-- Planos -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+      <!-- Planos 2x2 com features -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
+
+        <!-- START -->
         <div class="pw-plan-card" onclick="pwSelecionarPlano('start')" id="pw-card-start">
           <div class="pw-plan-name">MAY IA START</div>
           <div class="pw-plan-sub">1 usuário · solo</div>
           <div class="pw-plan-price" id="pw-price-start">R$ 97<span>/mês</span></div>
+          <ul class="pw-features">
+            <li>✓ Chat com IA ilimitado</li>
+            <li>✓ Script de follow-up</li>
+            <li>✓ Simulador de objeções</li>
+            <li>✓ Gerador de proposta</li>
+            <li>✓ Simulador de reunião</li>
+            <li>✓ Diagnóstico de atendimento</li>
+            <li>✓ Treino SPIN Selling</li>
+          </ul>
         </div>
+
+        <!-- PLUS -->
         <div class="pw-plan-card pw-popular" onclick="pwSelecionarPlano('equipe')" id="pw-card-equipe">
           <div class="pw-plan-badge">Mais popular</div>
           <div class="pw-plan-name">MAY IA PLUS</div>
           <div class="pw-plan-sub">até 3 usuários</div>
           <div class="pw-plan-price" id="pw-price-equipe">R$ 227<span>/mês</span></div>
+          <ul class="pw-features">
+            <li>✓ Tudo do START</li>
+            <li>✓ Simulador de vendas</li>
+            <li>✓ Criador de prompt de IA</li>
+            <li>✓ Painel da equipe</li>
+            <li>✓ Arena de Vendas</li>
+            <li>✓ Agenda Comercial</li>
+            <li>✓ Controle de Leads</li>
+          </ul>
         </div>
+
+        <!-- PRO -->
         <div class="pw-plan-card" onclick="pwSelecionarPlano('pro')" id="pw-card-pro">
           <div class="pw-plan-name">MAY IA PRO</div>
           <div class="pw-plan-sub">até 5 usuários</div>
           <div class="pw-plan-price" id="pw-price-pro">R$ 397<span>/mês</span></div>
+          <ul class="pw-features">
+            <li>✓ Tudo do PLUS</li>
+            <li>✓ Relatórios de desempenho</li>
+            <li>✓ Metas por vendedor</li>
+            <li>✓ Histórico estendido</li>
+            <li>✓ Suporte prioritário</li>
+          </ul>
         </div>
+
+        <!-- ULTRA -->
         <div class="pw-plan-card" onclick="pwSelecionarPlano('prof')" id="pw-card-prof">
           <div class="pw-plan-name">MAY IA ULTRA</div>
           <div class="pw-plan-sub">até 10 usuários</div>
           <div class="pw-plan-price" id="pw-price-prof">R$ 897<span>/mês</span></div>
+          <ul class="pw-features">
+            <li>✓ Tudo do PRO</li>
+            <li>✓ Onboarding personalizado</li>
+            <li>✓ Gestor de conta dedicado</li>
+            <li>✓ Mensagens ilimitadas</li>
+            <li>✓ Acesso API</li>
+          </ul>
         </div>
+
       </div>
 
-      <button onclick="pwAvancarPagamento()" style="width:100%; background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:13px; border-radius:10px; cursor:pointer; opacity:.4;" id="pw-btn-avancar" disabled>Continuar →</button>
+      <button onclick="pwAvancarPagamento()" style="width:100%; background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:14px; border-radius:10px; cursor:pointer; opacity:.4;" id="pw-btn-avancar" disabled>Continuar →</button>
     </div>
 
     <!-- PANE 2: Pagamento -->
