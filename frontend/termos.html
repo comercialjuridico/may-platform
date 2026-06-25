@@ -3,118 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Termos de Uso — May App</title>
+  <title>Termos de Uso — May · Comercial Jurídico</title>
   <link rel="icon" href="/assets/favicon.ico" />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #080B1A; color: #E8E4FF; font-family: 'Inter', sans-serif; line-height: 1.7; }
-    nav { position: sticky; top: 0; z-index: 10; background: rgba(8,11,26,.92); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 14px 6vw; display: flex; align-items: center; gap: 14px; }
-    .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
-    .logo-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg,#7C3AED,#5B21B6); display: flex; align-items: center; justify-content: center; font-family:'Syne',sans-serif; font-weight:800; color:#fff; font-size:.85rem; }
-    .logo-name { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:#E8E4FF; }
-    nav span { font-size:.82rem; color:rgba(200,190,255,.4); }
-    .container { max-width: 760px; margin: 0 auto; padding: 60px 6vw 100px; }
-    h1 { font-family:'Syne',sans-serif; font-weight:800; font-size:2rem; margin-bottom:8px; }
-    .meta { font-size:.82rem; color:rgba(200,190,255,.45); margin-bottom:48px; }
-    h2 { font-family:'Syne',sans-serif; font-weight:700; font-size:1.15rem; color:#E8E4FF; margin: 36px 0 12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.07); }
-    p { font-size:.92rem; color:rgba(200,190,255,.7); margin-bottom:14px; }
-    ul { margin: 0 0 14px 20px; }
-    ul li { font-size:.92rem; color:rgba(200,190,255,.7); margin-bottom:6px; }
-    strong { color:#E8E4FF; }
-    a { color:#A78BFA; }
-    .highlight { background:rgba(124,58,237,.08); border:1px solid rgba(124,58,237,.2); border-radius:10px; padding:16px 20px; margin:20px 0; }
-    .highlight p { margin-bottom:0; }
-    footer { border-top:1px solid rgba(255,255,255,.07); padding:24px 6vw; text-align:center; font-size:.78rem; color:rgba(200,190,255,.3); }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#060912;--bg2:#0B0F20;--purple:#7C3AED;--plite:#A78BFA;--text:#EAE6FF;--muted:rgba(200,190,255,.5);--border:rgba(255,255,255,.07)}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.75}
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6vw;background:rgba(6,9,18,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#9B6DFF,#6D28D9);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:900;color:#fff;font-size:1rem}
+    .logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;background:linear-gradient(135deg,#fff 30%,#C4B5FD 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .logo-sub{font-size:.62rem;color:var(--muted)}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .back-btn{font-size:.83rem;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:7px 16px;border-radius:8px}
+    main{max-width:780px;margin:0 auto;padding:60px 6vw 100px}
+    .doc-header{text-align:center;margin-bottom:56px;padding-bottom:40px;border-bottom:1px solid var(--border)}
+    .doc-header h1{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:12px}
+    .doc-header p{color:var(--muted);font-size:.9rem}
+    h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin:40px 0 14px;color:var(--text)}
+    p,li{font-size:.9rem;color:rgba(200,190,255,.75);margin-bottom:10px}
+    ul{padding-left:20px;margin-bottom:16px}
+    strong{color:var(--text)}
+    .highlight{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.18);border-radius:12px;padding:18px 22px;margin:20px 0}
+    footer{text-align:center;padding:28px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border)}
+    footer a{color:var(--plite);text-decoration:none}
   </style>
 </head>
 <body>
-
 <nav>
-  <a href="/" class="logo">
+  <a href="/" class="nav-logo">
     <div class="logo-mark">M</div>
-    <span class="logo-name">May</span>
+    <div><div class="logo-name">May</div><div class="logo-sub">Uma plataforma Comercial Jurídico</div></div>
   </a>
-  <span>/ Termos de Uso</span>
+  <a href="/" class="back-btn">← Voltar</a>
 </nav>
-
-<div class="container">
-  <h1>Termos de Uso</h1>
-  <p class="meta">Última atualização: junho de 2025 · Comercial Jurídico Consultoria e Treinamento — CNPJ 50.418.067/0001-19</p>
-
-  <div class="highlight">
-    <p>Ao criar uma conta na plataforma May App, você declara que leu, compreendeu e concorda com os presentes Termos de Uso. Caso não concorde com qualquer disposição, não utilize a plataforma.</p>
+<main>
+  <div class="doc-header">
+    <h1>Termos de Uso</h1>
+    <p>Última atualização: junho de 2026 &nbsp;·&nbsp; Leia com atenção antes de usar a plataforma.</p>
   </div>
+  <div class="highlight"><p>Ao criar uma conta ou usar a plataforma May, você concorda com estes Termos de Uso.</p></div>
 
-  <h2>1. Sobre a Plataforma</h2>
-  <p>May App é uma plataforma digital de desenvolvimento comercial para profissionais e escritórios jurídicos, desenvolvida e operada por <strong>Comercial Jurídico Consultoria e Treinamento</strong> (CNPJ 50.418.067/0001-19), com sede em Colatina, Espírito Santo, Brasil.</p>
-  <p>A plataforma oferece ferramentas de treinamento com inteligência artificial para auxiliar advogados e equipes jurídicas no desenvolvimento de habilidades comerciais, incluindo simulação de objeções, geração de propostas, estratégias de follow-up e acompanhamento de metas.</p>
+  <h2>1. Quem somos</h2>
+  <p>A plataforma <strong>May</strong> é operada pela <strong>Comercial Jurídico</strong>, empresa dedicada à estruturação comercial de escritórios de advocacia. Contato: contato@usemayapp.com</p>
 
-  <h2>2. Cadastro e Conta</h2>
-  <p>Para utilizar a May App, é necessário criar uma conta com informações verdadeiras, completas e atualizadas. Você é responsável pela confidencialidade da sua senha e por todas as atividades realizadas sob sua conta.</p>
-  <p>Reservamo-nos o direito de suspender ou encerrar contas que:</p>
+  <h2>2. O que é a plataforma</h2>
+  <p>A May é uma plataforma de treinamento e suporte comercial jurídico, oferecendo:</p>
   <ul>
-    <li>Forneçam informações falsas ou enganosas;</li>
-    <li>Utilizem a plataforma de forma inadequada ou contrária a estes Termos;</li>
-    <li>Violem direitos de terceiros ou a legislação vigente.</li>
+    <li>Chat com IA treinada com metodologia comercial jurídica</li>
+    <li>Scripts, playbooks e modelos de atendimento</li>
+    <li>Simuladores de venda jurídica</li>
+    <li>Ranking de equipe, agendamento e notificações de follow-up</li>
+    <li>Painel de gestão comercial</li>
   </ul>
+  <p><strong>Não substitui aconselhamento jurídico ou de negócios.</strong></p>
 
-  <h2>3. Período de Trial e Cobrança</h2>
-  <p>A May App oferece um <strong>período de teste gratuito de 7 (sete) dias</strong> para novos usuários, sem necessidade de informar cartão de crédito no momento do cadastro.</p>
-  <p>Após o término do período de trial, o acesso às funcionalidades da plataforma fica condicionado à contratação de um dos planos pagos disponíveis:</p>
+  <h2>3. Cadastro e conta</h2>
+  <p>Para usar a plataforma você deve ter ao menos 18 anos, fornecer informações verdadeiras e manter a confidencialidade da sua senha. Você é responsável por todas as atividades da sua conta.</p>
+
+  <h2>4. Planos e pagamento</h2>
+  <p>A May oferece 7 dias gratuitos de acesso completo. A cobrança começa no 8º dia, salvo cancelamento anterior.</p>
   <ul>
-    <li><strong>Plano Mensal:</strong> R$ 97,00 (noventa e sete reais) por mês;</li>
-    <li><strong>Plano Gestor:</strong> R$ 297,00 (duzentos e noventa e sete reais) por mês.</li>
+    <li><strong>Plano Mensal:</strong> cobrança mensal, cancele quando quiser, sem multa</li>
+    <li><strong>Plano Anual:</strong> cobrança anual com 20% de desconto</li>
+    <li>Em caso de cancelamento, o acesso é mantido até o fim do período pago</li>
+    <li>Não realizamos reembolsos proporcionais de períodos não utilizados</li>
   </ul>
-  <p>Os valores são cobrados mensalmente, com renovação automática na data de aniversário da assinatura. A cobrança é realizada por meio dos gateways de pagamento disponíveis na plataforma.</p>
+  <p>Pagamentos processados pelo <strong>Stripe</strong> (certificado PCI DSS).</p>
 
-  <h2>4. Cancelamento e Reembolso</h2>
-  <p>O usuário pode cancelar sua assinatura a qualquer momento, sem multa ou penalidade. O cancelamento pode ser feito diretamente pela plataforma ou mediante solicitação ao suporte.</p>
-  <p>Após o cancelamento, o acesso permanece ativo até o fim do período já pago. Não há reembolso proporcional por dias não utilizados dentro do período vigente.</p>
-  <p>Em caso de cobrança indevida ou erro de pagamento, entre em contato com <a href="mailto:contato@usemayapp.com">contato@usemayapp.com</a> em até 7 dias da data da cobrança para análise e resolução.</p>
+  <h2>5. Cancelamento</h2>
+  <p>Você pode cancelar a qualquer momento diretamente no seu perfil dentro da plataforma, sem precisar contatar o suporte. O acesso é mantido até o fim do período já pago.</p>
 
-  <h2>5. Uso Adequado da Plataforma</h2>
-  <p>A May App destina-se exclusivamente ao uso profissional por advogados, estagiários jurídicos e gestores de escritórios de advocacia. É vedado:</p>
-  <ul>
-    <li>Compartilhar credenciais de acesso com terceiros não autorizados;</li>
-    <li>Utilizar a plataforma para fins ilegais, antiéticos ou contrários às normas da OAB;</li>
-    <li>Reproduzir, copiar, vender ou explorar comercialmente qualquer parte da plataforma sem autorização prévia;</li>
-    <li>Tentar acessar sistemas, dados ou conteúdos não destinados ao seu perfil de usuário;</li>
-    <li>Realizar engenharia reversa ou tentativas de extração do código ou modelos da plataforma.</li>
-  </ul>
+  <h2>6. Uso aceitável</h2>
+  <p>É proibido usar a plataforma para atividades ilegais, compartilhar credenciais, tentar acessar contas alheias, fazer scraping de conteúdo ou redistribuir o material da plataforma sem autorização.</p>
 
-  <h2>6. Propriedade Intelectual</h2>
-  <p>Todo o conteúdo da plataforma, incluindo textos, interfaces, metodologias, prompts, fluxos de treinamento e identidade visual, é de propriedade exclusiva da Comercial Jurídico Consultoria e Treinamento, protegido pela legislação brasileira de propriedade intelectual.</p>
-  <p>Os conteúdos gerados pela IA a pedido do usuário dentro da plataforma podem ser utilizados livremente pelo usuário para fins profissionais, sendo vedada sua revenda ou redistribuição como produto independente.</p>
+  <h2>7. Propriedade intelectual</h2>
+  <p>Todo o conteúdo da plataforma é propriedade da Comercial Jurídico. A assinatura concede uma licença pessoal, intransferível e não exclusiva de uso durante o período ativo.</p>
 
-  <h2>7. Disponibilidade e Limitação de Responsabilidade</h2>
-  <p>A May App se esforça para manter a plataforma disponível 24 horas por dia, 7 dias por semana, mas não garante disponibilidade ininterrupta. Podem ocorrer indisponibilidades por manutenção, atualização ou fatores externos.</p>
-  <p>A plataforma é uma ferramenta de auxílio ao desenvolvimento comercial e não substitui a orientação de consultores especializados. As respostas geradas pela IA têm caráter educativo e de treinamento — a decisão final sobre qualquer ação comercial é sempre do usuário.</p>
-  <p>Não nos responsabilizamos por resultados comerciais específicos decorrentes do uso da plataforma.</p>
+  <h2>8. Limitação de responsabilidade</h2>
+  <p>A Comercial Jurídico não garante resultados comerciais específicos. Os resultados dependem da execução e do contexto de cada escritório. Nossa responsabilidade limita-se ao valor pago nos últimos 3 meses de assinatura.</p>
 
-  <h2>8. Privacidade e Proteção de Dados</h2>
-  <p>O tratamento de dados pessoais dos usuários é regido pela nossa <a href="/privacidade">Política de Privacidade</a>, elaborada em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).</p>
+  <h2>9. Alterações nos termos</h2>
+  <p>Podemos atualizar estes termos a qualquer momento, com notificação por e-mail em caso de mudanças relevantes. O uso continuado implica aceitação dos novos termos.</p>
 
-  <h2>9. Alterações nos Termos</h2>
-  <p>Podemos atualizar estes Termos de Uso periodicamente. Em caso de alterações relevantes, notificaremos os usuários por e-mail ou mediante aviso na plataforma. O uso continuado após a notificação implica aceitação dos novos termos.</p>
+  <h2>10. Lei aplicável e foro</h2>
+  <p>Estes termos são regidos pela legislação brasileira. Fica eleito o foro do domicílio do usuário para resolução de conflitos, conforme o Código de Defesa do Consumidor.</p>
 
-  <h2>10. Foro e Legislação Aplicável</h2>
-  <p>Estes Termos são regidos pela legislação brasileira. Eventuais disputas serão submetidas ao foro da Comarca de Colatina, Espírito Santo, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
-
-  <h2>Contato</h2>
-  <p>Em caso de dúvidas sobre estes Termos, entre em contato:</p>
-  <ul>
-    <li><strong>E-mail:</strong> <a href="mailto:contato@usemayapp.com">contato@usemayapp.com</a></li>
-    <li><strong>Empresa:</strong> Comercial Jurídico Consultoria e Treinamento</li>
-    <li><strong>CNPJ:</strong> 50.418.067/0001-19</li>
-    <li><strong>Endereço:</strong> Colatina, Espírito Santo, Brasil</li>
-  </ul>
-</div>
-
+  <h2>11. Contato</h2>
+  <p>E-mail: <strong>contato@usemayapp.com</strong></p>
+</main>
 <footer>
-  © 2025 May App — Comercial Jurídico Consultoria e Treinamento · CNPJ 50.418.067/0001-19 ·
-  <a href="/">Voltar ao site</a>
+  <p>© 2026 Comercial Jurídico &nbsp;·&nbsp; <a href="/privacidade.html">Política de Privacidade</a> &nbsp;·&nbsp; <a href="/">Voltar</a></p>
 </footer>
-
 </body>
 </html>

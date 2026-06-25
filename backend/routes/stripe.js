@@ -9,15 +9,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Mapa de planos → price IDs do Stripe (configurar no .env)
 const PRICE_IDS = {
-  start_trimestral:  process.env.STRIPE_PRICE_START_TRIM,
-  start_anual:       process.env.STRIPE_PRICE_START_ANUAL,
-  equipe_trimestral: process.env.STRIPE_PRICE_EQUIPE_TRIM,
-  equipe_anual:      process.env.STRIPE_PRICE_EQUIPE_ANUAL,
-  pro_trimestral:    process.env.STRIPE_PRICE_PRO_TRIM,
-  pro_anual:         process.env.STRIPE_PRICE_PRO_ANUAL,
+  start_mensal:  process.env.STRIPE_PRICE_START_MENSAL,
+  start_anual:   process.env.STRIPE_PRICE_START_ANUAL,
+  equipe_mensal: process.env.STRIPE_PRICE_EQUIPE_MENSAL,
+  equipe_anual:  process.env.STRIPE_PRICE_EQUIPE_ANUAL,
+  pro_mensal:    process.env.STRIPE_PRICE_PRO_MENSAL,
+  pro_anual:     process.env.STRIPE_PRICE_PRO_ANUAL,
+  prof_mensal:   process.env.STRIPE_PRICE_PROF_MENSAL,
+  prof_anual:    process.env.STRIPE_PRICE_PROF_ANUAL,
   // legado
-  mensal:            process.env.STRIPE_PRICE_MENSAL,
-  anual:             process.env.STRIPE_PRICE_ANUAL,
+  mensal:        process.env.STRIPE_PRICE_MENSAL,
+  anual:         process.env.STRIPE_PRICE_ANUAL,
 };
 
 // ─── POST /api/stripe/checkout ──────────────────────────────────────────────
@@ -144,7 +146,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         if (!userId) break;
 
         // Deriva tipo de conta pelo plano
-        const maxMembros = plano.startsWith('pro') ? 5 : plano.startsWith('equipe') ? 3 : 1;
+        const maxMembros = plano.startsWith('prof') ? 10 : plano.startsWith('pro') ? 5 : plano.startsWith('equipe') ? 3 : 1;
 
         await supabase.from('users').update({
           plano,
@@ -221,6 +223,41 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   } catch (err) {
     console.error('Erro ao processar webhook:', err.message);
     res.status(500).json({ erro: 'Erro ao processar evento.' });
+  }
+});
+
+// ─── POST /api/stripe/cancel ────────────────────────────────────────────────
+// Cancela assinatura ao fim do período + salva motivo do cancelamento
+router.post('/cancel', authMiddleware, async (req, res) => {
+  try {
+    const { motivo, detalhes } = req.body;
+
+    if (!req.user.stripe_subscription_id) {
+      return res.status(400).json({ erro: 'Nenhuma assinatura ativa encontrada.' });
+    }
+
+    // Salva feedback antes de cancelar
+    await supabase.from('cancelamentos_feedback').insert({
+      user_id:   req.user.id,
+      email:     req.user.email,
+      plano:     req.user.plano,
+      motivo:    motivo || 'Não informado',
+      detalhes:  detalhes || null,
+      criado_em: new Date().toISOString(),
+    }).select(); // ignora erro se tabela não existir ainda
+
+    // Cancela no Stripe ao fim do período (não imediatamente)
+    await stripe.subscriptions.update(req.user.stripe_subscription_id, {
+      cancel_at_period_end: true,
+    });
+
+    // Marca status no banco
+    await supabase.from('users').update({ plano_status: 'cancelando' }).eq('id', req.user.id);
+
+    res.json({ ok: true, mensagem: 'Assinatura cancelada. Você mantém acesso até o fim do período atual.' });
+  } catch (err) {
+    console.error('Erro ao cancelar:', err.message);
+    res.status(500).json({ erro: 'Erro ao processar cancelamento. Tente novamente.' });
   }
 });
 

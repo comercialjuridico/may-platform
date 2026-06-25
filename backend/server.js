@@ -99,6 +99,8 @@ app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/trilha',      require('./routes/trilha'));
 app.use('/api/leads',       require('./routes/leads'));
 app.use('/api/followups',   require('./routes/followups'));
+app.use('/api/public',      require('./routes/public'));
+app.use('/api/stripe',      require('./routes/stripe'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

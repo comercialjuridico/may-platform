@@ -419,7 +419,47 @@
       <button class="btn btn-secondary btn-full mb-8" onclick="abrirPortalStripe()">
         Gerenciar assinatura
       </button>
+      <button class="btn btn-full mb-8" style="background:transparent;border:1px solid rgba(239,68,68,.25);color:rgba(239,68,68,.7);font-size:.82rem;padding:9px;" onclick="abrirModalCancelamento()">
+        Cancelar assinatura
+      </button>
       <button class="btn btn-danger btn-full" onclick="logout()">Sair</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL: CANCELAMENTO ══════════════ -->
+<div class="modal-overlay" id="modal-cancelamento" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0e1426;border:1px solid rgba(239,68,68,.2);border-radius:20px;padding:32px 28px;max-width:480px;width:100%;position:relative">
+    <button onclick="fecharModalCancelamento()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:rgba(200,190,255,.4);font-size:1.3rem;cursor:pointer">✕</button>
+
+    <div style="font-size:1.5rem;margin-bottom:8px">😔</div>
+    <h3 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:8px;color:#EAE6FF">Cancelar assinatura</h3>
+    <p style="font-size:.84rem;color:rgba(200,190,255,.6);margin-bottom:24px;line-height:1.6">Você manterá o acesso até o fim do período já pago. Antes de cancelar, nos conta o motivo para podermos melhorar.</p>
+
+    <p style="font-size:.83rem;font-weight:600;color:#EAE6FF;margin-bottom:12px">Por que você está cancelando?</p>
+    <div id="cancel-motivos" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      <label style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:.85rem;color:rgba(200,190,255,.8)">
+        <input type="radio" name="cancel-motivo" value="preco" style="accent-color:#7C3AED"> Preço não cabe no orçamento agora
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:.85rem;color:rgba(200,190,255,.8)">
+        <input type="radio" name="cancel-motivo" value="nao_usa" style="accent-color:#7C3AED"> Não estou usando com frequência
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:.85rem;color:rgba(200,190,255,.8)">
+        <input type="radio" name="cancel-motivo" value="resultado" style="accent-color:#7C3AED"> Não obtive o resultado que esperava
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:.85rem;color:rgba(200,190,255,.8)">
+        <input type="radio" name="cancel-motivo" value="recurso" style="accent-color:#7C3AED"> Faltou algum recurso que eu precisava
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:.85rem;color:rgba(200,190,255,.8)">
+        <input type="radio" name="cancel-motivo" value="outro" style="accent-color:#7C3AED"> Outro motivo
+      </label>
+    </div>
+
+    <textarea id="cancel-detalhes" placeholder="Quer acrescentar algo? (opcional)" maxlength="500" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;color:#EAE6FF;font-size:.83rem;font-family:'Inter',sans-serif;resize:vertical;min-height:72px;outline:none;margin-bottom:20px"></textarea>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="fecharModalCancelamento()" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(200,190,255,.7);font-size:.86rem;font-weight:600;cursor:pointer">Manter assinatura</button>
+      <button id="btn-confirmar-cancel" onclick="confirmarCancelamento()" style="flex:1;padding:12px;background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.08));border:1px solid rgba(239,68,68,.3);border-radius:10px;color:#fca5a5;font-size:.86rem;font-weight:600;cursor:pointer">Confirmar cancelamento</button>
     </div>
   </div>
 </div>

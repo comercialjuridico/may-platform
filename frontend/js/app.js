@@ -2318,6 +2318,38 @@ function fecharModalBriefing() {
   document.getElementById('modal-briefing').classList.remove('active');
 }
 
+// ─── Cancelamento de assinatura com feedback ──────────────────────────────────
+function abrirModalCancelamento() {
+  const modal = document.getElementById('modal-cancelamento');
+  if (modal) { modal.style.display = 'flex'; }
+}
+
+function fecharModalCancelamento() {
+  const modal = document.getElementById('modal-cancelamento');
+  if (modal) { modal.style.display = 'none'; }
+}
+
+async function confirmarCancelamento() {
+  const motivo = document.querySelector('input[name="cancel-motivo"]:checked')?.value;
+  if (!motivo) {
+    mostrarToast('Selecione o motivo do cancelamento antes de confirmar.', 'erro');
+    return;
+  }
+
+  const detalhes = document.getElementById('cancel-detalhes')?.value?.trim() || '';
+  const btn = document.getElementById('btn-confirmar-cancel');
+  if (btn) { btn.textContent = 'Cancelando...'; btn.disabled = true; }
+
+  try {
+    const res = await api.post('/stripe/cancel', { motivo, detalhes });
+    fecharModalCancelamento();
+    mostrarToast('Assinatura cancelada. Você mantém o acesso até o fim do período atual.', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro ao cancelar. Tente novamente ou entre em contato pelo suporte.', 'erro');
+    if (btn) { btn.textContent = 'Confirmar cancelamento'; btn.disabled = false; }
+  }
+}
+
 // Expõe funções necessárias para o HTML
 Object.assign(window, {
   enviarMensagem, novaConversa, carregarConversa, excluirConversa,
@@ -2336,4 +2368,5 @@ Object.assign(window, {
   toggleTema,
   abrirModalFunil, fecharModalFunil, fecharModalBriefing,
   funil,
+  abrirModalCancelamento, fecharModalCancelamento, confirmarCancelamento,
 });
