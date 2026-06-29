@@ -88,11 +88,48 @@ router.post('/avatar', authMiddleware, uploadImagem.single('foto'), async (req, 
   }
 });
 
+// ─── Limite de uploads por plano ─────────────────────────────────────────────
+const LIMITE_UPLOADS = { free: 5, start: 5, equipe: 20, pro: 50, prof: null }; // null = ilimitado
+
+function planoBaseUpload(plano) {
+  const p = (plano || 'free').toLowerCase();
+  if (p.startsWith('prof'))   return 'prof';
+  if (p.startsWith('pro'))    return 'pro';
+  if (p.startsWith('equipe') || p === 'mensal' || p === 'anual') return 'equipe';
+  if (p.startsWith('start'))  return 'start';
+  return 'free';
+}
+
 // ─── POST /api/upload/documento ─────────────────────────────────────────────
 // Recebe PDF ou DOCX, extrai texto e salva no banco
 router.post('/documento', authMiddleware, upload.single('arquivo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado.' });
+
+    // Verifica limite de uploads do mês
+    const base   = planoBaseUpload(req.user.plano);
+    const limite = LIMITE_UPLOADS[base];
+    if (limite !== null) {
+      const inicioMes = new Date();
+      inicioMes.setDate(1);
+      inicioMes.setHours(0, 0, 0, 0);
+
+      const { count } = await supabase
+        .from('uploads')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', req.user.id)
+        .neq('texto_extraido', '[imagem]')
+        .gte('created_at', inicioMes.toISOString());
+
+      if (count >= limite) {
+        return res.status(403).json({
+          erro: `Você atingiu o limite de ${limite} documentos por mês do seu plano. Faça upgrade para enviar mais.`,
+          code: 'LIMITE_UPLOADS',
+          limite,
+          usado: count,
+        });
+      }
+    }
 
     let textoExtraido = '';
 

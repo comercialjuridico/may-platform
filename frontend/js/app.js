@@ -1408,7 +1408,16 @@ async function uploadArquivo() {
     form.append('arquivo', file);
 
     const res = await api.upload('/upload/documento', form);
-    if (!res?.ok) { mostrarToast('Erro ao processar arquivo', 'erro'); return; }
+    if (!res?.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 403 && err.code === 'LIMITE_UPLOADS') {
+        mostrarToast(`Limite de ${err.limite} documentos/mês atingido. Faça upgrade para continuar.`, 'erro');
+        abrirPaymentWall(false);
+      } else {
+        mostrarToast(err.erro || 'Erro ao processar arquivo', 'erro');
+      }
+      return;
+    }
 
     const data = await res.json();
 
