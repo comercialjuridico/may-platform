@@ -13,6 +13,7 @@ const estado = {
   enviando: false,
   conversas: [],
   uso: { mensagens_usadas: 0, limite: 20, restantes: 20 },
+  documentoAnexado: null, // { upload_id, filename } — documento pendente de envio
 };
 
 // ─── Controle de acesso por plano ─────────────────────────────────────────────
@@ -1040,6 +1041,34 @@ async function enviarMensagem() {
 
   adicionarMensagem('user', texto);
 
+  // Se há documento anexado, mostra indicador no chat e inclui no payload
+  let uploadId = null;
+  if (estado.documentoAnexado) {
+    const { upload_id, filename } = estado.documentoAnexado;
+    uploadId = upload_id;
+
+    // Mostra bolha de anexo logo acima da mensagem do usuário
+    const container2 = document.getElementById('messages-container');
+    const mensagens = container2.querySelectorAll('.message.user');
+    const ultimaMensagem = mensagens[mensagens.length - 1];
+    if (ultimaMensagem) {
+      const bubble = ultimaMensagem.querySelector('.msg-bubble');
+      if (bubble) {
+        bubble.insertAdjacentHTML('afterbegin', `
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:6px;padding:5px 10px;margin-bottom:8px;font-size:0.8rem;color:#C4B5FD;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${escapeHtml(filename)}</span>
+          </div>
+        `);
+      }
+    }
+
+    // Limpa o estado de anexo
+    estado.documentoAnexado = null;
+    removerAnexoBadge();
+    document.getElementById('message-input').placeholder = 'Pergunte algo para a May...';
+  }
+
   // Placeholder de streaming
   const msgId = 'msg-streaming-' + Date.now();
   container.innerHTML += `
@@ -1069,6 +1098,7 @@ async function enviarMensagem() {
       conversa_id: estado.conversaAtiva,
       ferramenta: estado.ferramentaAtiva,
       area_ativa: estado.areaAtiva ? { nome: estado.areaAtiva.nome, icone: estado.areaAtiva.icone } : null,
+      ...(uploadId ? { upload_id: uploadId } : {}),
     },
     // onChunk — recebe texto em streaming
     (chunk) => {
@@ -1381,13 +1411,48 @@ async function uploadArquivo() {
     if (!res?.ok) { mostrarToast('Erro ao processar arquivo', 'erro'); return; }
 
     const data = await res.json();
-    mostrarToast(`"${file.name}" processado!`, 'sucesso');
 
+    // Armazena como anexo — o texto vai pro backend, não pro input
+    estado.documentoAnexado = { upload_id: data.upload_id, filename: file.name };
+    mostrarAnexoBadge(file.name);
+    mostrarToast(`"${file.name}" anexado! Faça sua pergunta.`, 'sucesso');
+
+    // Foca no input para o usuário digitar a pergunta
     const msgInput = document.getElementById('message-input');
-    msgInput.value = `Analise este documento:\n\n${data.texto_preview}\n\n[Arquivo: ${file.name}]`;
-    msgInput.dispatchEvent(new Event('input'));
+    if (msgInput.value.trim() === '') {
+      msgInput.placeholder = 'Pergunte algo sobre o documento...';
+    }
+    msgInput.focus();
   };
   input.click();
+}
+
+// ─── Badge de anexo de documento ─────────────────────────────────────────────
+function mostrarAnexoBadge(filename) {
+  removerAnexoBadge(); // Remove anterior se houver
+  const inputArea = document.getElementById('message-input')?.closest('.input-area, .chat-input-wrap, form') || document.getElementById('message-input')?.parentElement;
+  if (!inputArea) return;
+
+  const badge = document.createElement('div');
+  badge.id = 'anexo-badge';
+  badge.style.cssText = 'display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:8px;padding:6px 12px;margin-bottom:6px;font-size:0.82rem;color:#C4B5FD;max-width:fit-content;';
+  badge.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(filename)}</span>
+    <button onclick="removerAnexo()" style="background:transparent;border:none;color:rgba(196,181,253,.5);cursor:pointer;padding:0 2px;font-size:16px;line-height:1;" title="Remover anexo">✕</button>
+  `;
+  inputArea.insertAdjacentElement('beforebegin', badge);
+}
+
+function removerAnexoBadge() {
+  document.getElementById('anexo-badge')?.remove();
+}
+
+function removerAnexo() {
+  estado.documentoAnexado = null;
+  removerAnexoBadge();
+  const msgInput = document.getElementById('message-input');
+  if (msgInput) msgInput.placeholder = 'Pergunte algo para a May...';
 }
 
 // ─── Gravação de áudio ───────────────────────────────────────────────────────
@@ -2840,7 +2905,7 @@ async function confirmarCancelamento() {
 // Expõe funções necessárias para o HTML
 Object.assign(window, {
   enviarMensagem, novaConversa, carregarConversa, excluirConversa,
-  selecionarFerramenta, uploadArquivo, toggleGravacao,
+  selecionarFerramenta, uploadArquivo, toggleGravacao, removerAnexo,
   abrirModalDiagnostico, salvarDiagnostico,
   abrirModalPerfil, salvarPerfil, uploadFotoPerfil,
   iniciarCheckout, abrirPortalStripe, logout,
