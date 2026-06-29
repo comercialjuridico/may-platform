@@ -13,7 +13,7 @@ const estado = {
   enviando: false,
   conversas: [],
   uso: { mensagens_usadas: 0, limite: 20, restantes: 20 },
-  documentoAnexado: null, // { upload_id, filename } — documento pendente de envio
+  documentosAnexados: [], // [{ upload_id, filename }] — documentos pendentes de envio
 };
 
 // ─── Controle de acesso por plano ─────────────────────────────────────────────
@@ -44,6 +44,12 @@ const FERRAMENTA_PLANO_MIN = {
 };
 
 const PLANO_NOME  = { start: 'MAY IA PLUS', equipe: 'MAY IA PLUS', pro: 'MAY IA PRO', prof: 'MAY IA ULTRA' };
+
+// Limite de arquivos por mensagem
+const LIMITE_ANEXOS_MSG = { free: 1, start: 1, equipe: 2, pro: 3, prof: 5 };
+function limiteAnexosMensagem() {
+  return LIMITE_ANEXOS_MSG[planoBase(estado.user)] || 1;
+}
 const PLANO_PRECO = { start: 'R$ 227/mês',  equipe: 'R$ 227/mês',  pro: 'R$ 397/mês', prof: 'R$ 897/mês'  };
 
 function temAcesso(ferramentaId, user) {
@@ -1041,30 +1047,30 @@ async function enviarMensagem() {
 
   adicionarMensagem('user', texto);
 
-  // Se há documento anexado, mostra indicador no chat e inclui no payload
-  let uploadId = null;
-  if (estado.documentoAnexado) {
-    const { upload_id, filename } = estado.documentoAnexado;
-    uploadId = upload_id;
+  // Se há documentos anexados, mostra chips no chat e inclui no payload
+  let uploadIds = [];
+  if (estado.documentosAnexados.length > 0) {
+    uploadIds = estado.documentosAnexados.map(d => d.upload_id);
 
-    // Mostra bolha de anexo logo acima da mensagem do usuário
+    // Mostra chips de anexo na bolha do usuário
     const container2 = document.getElementById('messages-container');
     const mensagens = container2.querySelectorAll('.message.user');
     const ultimaMensagem = mensagens[mensagens.length - 1];
     if (ultimaMensagem) {
       const bubble = ultimaMensagem.querySelector('.msg-bubble');
       if (bubble) {
-        bubble.insertAdjacentHTML('afterbegin', `
-          <div style="display:flex;align-items:center;gap:6px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:6px;padding:5px 10px;margin-bottom:8px;font-size:0.8rem;color:#C4B5FD;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${escapeHtml(filename)}</span>
+        const chipsHtml = estado.documentosAnexados.map(d => `
+          <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:6px;padding:4px 8px;font-size:0.78rem;color:#C4B5FD;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(d.filename)}</span>
           </div>
-        `);
+        `).join('');
+        bubble.insertAdjacentHTML('afterbegin', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${chipsHtml}</div>`);
       }
     }
 
-    // Limpa o estado de anexo
-    estado.documentoAnexado = null;
+    // Limpa o estado de anexos
+    estado.documentosAnexados = [];
     removerAnexoBadge();
     document.getElementById('message-input').placeholder = 'Pergunte algo para a May...';
   }
@@ -1098,7 +1104,7 @@ async function enviarMensagem() {
       conversa_id: estado.conversaAtiva,
       ferramenta: estado.ferramentaAtiva,
       area_ativa: estado.areaAtiva ? { nome: estado.areaAtiva.nome, icone: estado.areaAtiva.icone } : null,
-      ...(uploadId ? { upload_id: uploadId } : {}),
+      ...(uploadIds.length ? { upload_ids: uploadIds } : {}),
     },
     // onChunk — recebe texto em streaming
     (chunk) => {
@@ -1421,47 +1427,70 @@ async function uploadArquivo() {
 
     const data = await res.json();
 
-    // Armazena como anexo — o texto vai pro backend, não pro input
-    estado.documentoAnexado = { upload_id: data.upload_id, filename: file.name };
-    mostrarAnexoBadge(file.name);
-    mostrarToast(`"${file.name}" anexado! Faça sua pergunta.`, 'sucesso');
+    // Verifica limite de anexos por mensagem do plano
+    const limiteMsg = limiteAnexosMensagem();
+    if (estado.documentosAnexados.length >= limiteMsg) {
+      mostrarToast(`Seu plano permite até ${limiteMsg} arquivo(s) por mensagem.`, 'aviso');
+      return;
+    }
+
+    // Adiciona ao array de anexos
+    estado.documentosAnexados.push({ upload_id: data.upload_id, filename: file.name });
+    renderAnexosBadges();
+    mostrarToast(`"${file.name}" anexado!`, 'sucesso');
 
     // Foca no input para o usuário digitar a pergunta
     const msgInput = document.getElementById('message-input');
     if (msgInput.value.trim() === '') {
-      msgInput.placeholder = 'Pergunte algo sobre o documento...';
+      msgInput.placeholder = 'Pergunte algo sobre o(s) documento(s)...';
     }
     msgInput.focus();
   };
   input.click();
 }
 
-// ─── Badge de anexo de documento ─────────────────────────────────────────────
-function mostrarAnexoBadge(filename) {
-  removerAnexoBadge(); // Remove anterior se houver
-  const inputArea = document.getElementById('message-input')?.closest('.input-area, .chat-input-wrap, form') || document.getElementById('message-input')?.parentElement;
-  if (!inputArea) return;
+// ─── Badges de anexos de documentos ──────────────────────────────────────────
+function renderAnexosBadges() {
+  document.getElementById('anexos-wrap')?.remove();
+  if (!estado.documentosAnexados.length) return;
 
-  const badge = document.createElement('div');
-  badge.id = 'anexo-badge';
-  badge.style.cssText = 'display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:8px;padding:6px 12px;margin-bottom:6px;font-size:0.82rem;color:#C4B5FD;max-width:fit-content;';
-  badge.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    <span style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(filename)}</span>
-    <button onclick="removerAnexo()" style="background:transparent;border:none;color:rgba(196,181,253,.5);cursor:pointer;padding:0 2px;font-size:16px;line-height:1;" title="Remover anexo">✕</button>
-  `;
-  inputArea.insertAdjacentElement('beforebegin', badge);
+  const inputEl  = document.getElementById('message-input');
+  const parentEl = inputEl?.parentElement;
+  if (!parentEl) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'anexos-wrap';
+  wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;';
+
+  estado.documentosAnexados.forEach((doc, idx) => {
+    const badge = document.createElement('div');
+    badge.style.cssText = 'display:flex;align-items:center;gap:6px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:8px;padding:5px 10px;font-size:0.8rem;color:#C4B5FD;';
+    badge.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(doc.filename)}</span>
+      <button onclick="removerAnexo(${idx})" style="background:transparent;border:none;color:rgba(196,181,253,.5);cursor:pointer;padding:0 2px;font-size:14px;line-height:1;" title="Remover">✕</button>
+    `;
+    wrap.appendChild(badge);
+  });
+
+  parentEl.insertAdjacentElement('beforebegin', wrap);
 }
 
 function removerAnexoBadge() {
-  document.getElementById('anexo-badge')?.remove();
+  document.getElementById('anexos-wrap')?.remove();
 }
 
-function removerAnexo() {
-  estado.documentoAnexado = null;
-  removerAnexoBadge();
-  const msgInput = document.getElementById('message-input');
-  if (msgInput) msgInput.placeholder = 'Pergunte algo para a May...';
+function removerAnexo(idx) {
+  if (idx === undefined) {
+    estado.documentosAnexados = [];
+  } else {
+    estado.documentosAnexados.splice(idx, 1);
+  }
+  renderAnexosBadges();
+  if (!estado.documentosAnexados.length) {
+    const msgInput = document.getElementById('message-input');
+    if (msgInput) msgInput.placeholder = 'Pergunte algo para a May...';
+  }
 }
 
 // ─── Gravação de áudio ───────────────────────────────────────────────────────

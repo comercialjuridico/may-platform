@@ -29,7 +29,7 @@ function getModelo(ferramenta) {
 // ─── POST /api/chat/stream ──────────────────────────────────────────────────
 // Envia uma mensagem e recebe resposta via Server-Sent Events (streaming)
 router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
-  const { mensagem, conversa_id, ferramenta = 'chat', area_ativa = null, upload_id = null } = req.body;
+  const { mensagem, conversa_id, ferramenta = 'chat', area_ativa = null, upload_id = null, upload_ids = null } = req.body;
 
   if (!mensagem || mensagem.trim() === '') {
     return res.status(400).json({ erro: 'Mensagem não pode estar vazia.' });
@@ -89,27 +89,31 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
       content: m.content,
     }));
 
-    // Busca contexto do documento anexado (se houver)
-    let contextoDocumento = null;
-    let nomeArquivo = null;
-    if (upload_id) {
+    // Busca contexto dos documentos anexados (suporta um ou múltiplos)
+    const ids = Array.isArray(upload_ids) && upload_ids.length
+      ? upload_ids
+      : upload_id ? [upload_id] : [];
+
+    let contextoDocumento = '';
+    if (ids.length > 0) {
       try {
-        const { data: uploadData } = await supabase
+        const { data: uploads } = await supabase
           .from('uploads')
           .select('texto_extraido, filename')
-          .eq('id', upload_id)
-          .eq('user_id', req.user.id)
-          .single();
-        if (uploadData?.texto_extraido) {
-          contextoDocumento = uploadData.texto_extraido;
-          nomeArquivo = uploadData.filename;
+          .in('id', ids)
+          .eq('user_id', req.user.id);
+
+        if (uploads?.length) {
+          contextoDocumento = uploads
+            .map(u => `📄 Documento: "${u.filename}"\n\n${u.texto_extraido}`)
+            .join('\n\n---\n\n');
         }
       } catch (_) { /* sem documento */ }
     }
 
-    // Adiciona mensagem atual do usuário (para OpenAI — com contexto do doc se houver)
+    // Adiciona mensagem atual do usuário (para OpenAI — com contexto dos docs se houver)
     const mensagemParaIA = contextoDocumento
-      ? `📄 Documento anexado: "${nomeArquivo}"\n\n${contextoDocumento}\n\n---\n\n${mensagem}`
+      ? `${contextoDocumento}\n\n---\n\n${mensagem}`
       : mensagem;
 
     mensagensAnteriores.push({ role: 'user', content: mensagemParaIA });
