@@ -41,90 +41,62 @@
       <span id="pw-step2-label">2 Pagar</span>
     </div>
 
-    <!-- PANE 1: Escolher plano -->
+    <!-- PANE 1: Plano único -->
     <div id="pw-pane1">
-      <h3 style="font-family:'Syne',sans-serif; font-size:1.25rem; font-weight:700; color:#EAE6FF; margin-bottom:4px; text-align:center;">Escolha seu plano</h3>
-      <p id="pw-subtitulo" style="font-size:0.8rem; color:rgba(200,190,255,.5); text-align:center; margin-bottom:18px;">Acesso imediato após a confirmação</p>
+      <h3 style="font-family:'Syne',sans-serif; font-size:1.35rem; font-weight:700; color:#EAE6FF; margin-bottom:4px; text-align:center;">May IA — Prática de Vendas Jurídicas</h3>
+      <p id="pw-subtitulo" style="font-size:0.82rem; color:rgba(200,190,255,.55); text-align:center; margin-bottom:20px;">Acesso imediato a todas as ferramentas após a confirmação</p>
 
       <!-- Toggle mensal/anual -->
-      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:3px; width:fit-content; margin-left:auto; margin-right:auto;">
-        <button id="pw-btn-mensal" onclick="pwPeriodo('mensal')" style="padding:6px 20px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:rgba(124,58,237,.8); color:#fff;">Mensal</button>
-        <button id="pw-btn-anual"  onclick="pwPeriodo('anual')"  style="padding:6px 20px; border-radius:8px; border:none; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; background:transparent; color:rgba(200,190,255,.5);">Anual <span style="font-size:0.68rem; color:#34D399;">-20%</span></button>
+      <div style="display:flex; align-items:center; justify-content:center; margin-bottom:20px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:3px; width:fit-content; margin-left:auto; margin-right:auto;">
+        <button id="pw-btn-mensal" onclick="pwPeriodo('mensal')" style="padding:7px 22px; border-radius:8px; border:none; font-size:0.8rem; font-weight:600; cursor:pointer; transition:all .2s; background:rgba(124,58,237,.8); color:#fff;">Mensal</button>
+        <button id="pw-btn-anual"  onclick="pwPeriodo('anual')"  style="padding:7px 22px; border-radius:8px; border:none; font-size:0.8rem; font-weight:600; cursor:pointer; transition:all .2s; background:transparent; color:rgba(200,190,255,.5);">Anual <span style="font-size:0.7rem; color:#34D399; font-weight:700;">2 meses grátis</span></button>
       </div>
 
-      <!-- Planos 2x2 com features -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
-
-        <!-- START -->
-        <div class="pw-plan-card" onclick="pwSelecionarPlano('start')" id="pw-card-start">
-          <div class="pw-plan-name">MAY IA START</div>
-          <div class="pw-plan-sub">1 usuário · solo</div>
-          <div class="pw-plan-price" id="pw-price-start">R$ 97<span>/mês</span></div>
-          <ul class="pw-features">
-            <li>✓ Chat com IA ilimitado</li>
-            <li>✓ Script de follow-up</li>
-            <li>✓ Simulador de objeções</li>
-            <li>✓ Gerador de proposta</li>
-            <li>✓ Simulador de reunião</li>
-            <li>✓ Diagnóstico de atendimento</li>
-            <li>✓ Treino SPIN Selling</li>
-            <li>✓ Upload PDF, Word e áudio (5/mês)</li>
-            <li>✓ Export Word e PDF</li>
-          </ul>
+      <!-- Card único -->
+      <div style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(109,40,217,.06)); border:1px solid rgba(124,58,237,.4); border-radius:16px; padding:24px; margin-bottom:20px; text-align:center;">
+        <div style="font-size:0.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#A78BFA; margin-bottom:12px;">Plano completo</div>
+        <div style="display:flex; align-items:baseline; justify-content:center; gap:4px; margin-bottom:4px;">
+          <span style="font-size:2.6rem; font-weight:800; color:#EAE6FF; font-family:'Syne',sans-serif;" id="pw-price-main">R$ 97</span>
+          <span style="font-size:0.9rem; color:rgba(200,190,255,.5);" id="pw-period-label">/mês</span>
         </div>
+        <div style="font-size:0.78rem; color:rgba(200,190,255,.4); margin-bottom:20px;" id="pw-price-sub">cobrado mensalmente · cancele quando quiser</div>
 
-        <!-- PLUS -->
-        <div class="pw-plan-card pw-popular" onclick="pwSelecionarPlano('equipe')" id="pw-card-equipe">
-          <div class="pw-plan-badge">Mais popular</div>
-          <div class="pw-plan-name">MAY IA PLUS</div>
-          <div class="pw-plan-sub">até 3 usuários</div>
-          <div class="pw-plan-price" id="pw-price-equipe">R$ 227<span>/mês</span></div>
-          <ul class="pw-features">
-            <li>✓ Tudo do START</li>
-            <li>✓ Upload documentos (20/mês)</li>
-            <li>✓ Simulador de vendas avançado</li>
-            <li>✓ Criador de prompt de IA</li>
-            <li>✓ Painel da equipe</li>
-            <li>✓ Arena de Vendas</li>
-            <li>✓ Agenda Comercial</li>
-            <li>✓ Controle de Leads</li>
-            <li>✓ Cadastro de clientes</li>
-          </ul>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:left; margin-bottom:0;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Chat com IA ilimitado
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Simular reunião
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Simulador de objeções
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Gerador de proposta PDF
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Script de follow-up
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Diagnóstico de atendimento
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Treino SPIN Selling
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Simulador de vendas
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Upload PDF, Word, áudio
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Trilha de aprendizagem
+          </div>
         </div>
-
-        <!-- PRO -->
-        <div class="pw-plan-card" onclick="pwSelecionarPlano('pro')" id="pw-card-pro">
-          <div class="pw-plan-name">MAY IA PRO</div>
-          <div class="pw-plan-sub">até 5 usuários</div>
-          <div class="pw-plan-price" id="pw-price-pro">R$ 397<span>/mês</span></div>
-          <ul class="pw-features">
-            <li>✓ Tudo do PLUS</li>
-            <li>✓ Upload documentos (50/mês)</li>
-            <li>✓ Metas por vendedor</li>
-            <li>✓ Relatório de desempenho da equipe</li>
-            <li>✓ Ranking avançado com metas</li>
-            <li>✓ Suporte prioritário</li>
-          </ul>
-        </div>
-
-        <!-- ULTRA -->
-        <div class="pw-plan-card" onclick="pwSelecionarPlano('prof')" id="pw-card-prof">
-          <div class="pw-plan-name">MAY IA ULTRA</div>
-          <div class="pw-plan-sub">até 10 usuários</div>
-          <div class="pw-plan-price" id="pw-price-prof">R$ 897<span>/mês</span></div>
-          <ul class="pw-features">
-            <li>✓ Tudo do PRO</li>
-            <li>✓ Upload documentos ilimitado</li>
-            <li>✓ Relatório Semanal IA por e-mail</li>
-            <li>✓ Diagnóstico semanal por vendedor</li>
-            <li>✓ Pauta de reunião automática</li>
-            <li>✓ Onboarding personalizado</li>
-          </ul>
-        </div>
-
       </div>
 
-      <button onclick="pwAvancarPagamento()" style="width:100%; background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:14px; border-radius:10px; cursor:pointer; opacity:.4;" id="pw-btn-avancar" disabled>Continuar →</button>
+      <button onclick="pwAvancarPagamento()" style="width:100%; background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:1rem; font-weight:700; padding:15px; border-radius:12px; cursor:pointer; box-shadow:0 4px 20px rgba(124,58,237,.35);">Assinar agora →</button>
+      <p style="text-align:center; font-size:0.72rem; color:rgba(200,190,255,.3); margin-top:12px;">🔒 Pagamento seguro · Cancele quando quiser</p>
     </div>
 
     <!-- PANE 2: Pagamento -->
@@ -187,32 +159,10 @@
     <!-- Footer da sidebar -->
     <div class="sidebar-footer">
 
-      <!-- Ações principais (sempre visíveis; bloqueadas se sem acesso) -->
-      <a id="link-gestor" href="/gestor.html" onclick="return navegarPremium(event,'gestor')" class="btn-ghost btn-full">
-        <span class="nav-icon">👥</span> Painel da equipe
-      </a>
-      <button id="btn-registrar-venda" onclick="abrirModalVendaPremium()" class="btn-ghost btn-full">
-        <span class="nav-icon">💰</span> Registrar venda
-      </button>
-      <a id="link-ranking" href="/ranking.html" onclick="return navegarPremium(event,'ranking')" class="btn-ghost btn-full">
-        <span class="nav-icon">🏆</span> Arena de Vendas
-      </a>
-
-      <div class="sidebar-nav-divider"></div>
-
       <!-- Ferramentas -->
       <button onclick="abrirModalTrilha()" class="btn-ghost btn-full">
         <span class="nav-icon">📚</span> Minha Trilha
       </button>
-      <button id="btn-funil" onclick="abrirFunilPremium()" class="btn-ghost btn-full">
-        <span class="nav-icon">🎯</span> Cadastrar Cliente Potencial
-      </button>
-      <a id="link-agenda" href="/agenda" onclick="return navegarPremium(event,'agenda')" class="btn-ghost btn-full">
-        <span class="nav-icon">📅</span> Agenda Comercial
-      </a>
-      <a id="link-leads" href="/leads" onclick="return navegarPremium(event,'leads')" class="btn-ghost btn-full">
-        <span class="nav-icon">📋</span> Controle de Leads
-      </a>
       <a href="/manual" class="btn-ghost btn-full">
         <span class="nav-icon">📖</span> Manual de uso
       </a>
@@ -521,7 +471,47 @@
       <input id="perfil-nome" type="text" />
     </div>
 
-    <div style="display:flex; gap:8px; margin-top:16px;">
+    <!-- Identidade do Escritório -->
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">
+        Identidade do Escritório — Proposta PDF
+      </div>
+
+      <!-- Logo -->
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Logo do escritório</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="logo-escritorio-preview"
+            style="width:64px;height:48px;border-radius:8px;background:var(--bg-tertiary);border:1px dashed var(--border);
+                   display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer"
+            onclick="document.getElementById('logo-escritorio-input').click()">
+            <img id="logo-escritorio-img" src="" alt="" style="display:none;max-width:100%;max-height:100%;object-fit:contain" />
+            <span id="logo-escritorio-placeholder" style="font-size:1.5rem">🏛️</span>
+          </div>
+          <div>
+            <button class="btn btn-secondary" style="font-size:.8rem;padding:6px 12px" onclick="document.getElementById('logo-escritorio-input').click()">
+              Enviar logo
+            </button>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">PNG, JPG ou WebP · máx 5 MB</div>
+          </div>
+          <input id="logo-escritorio-input" type="file" accept="image/*" style="display:none" onchange="uploadLogoEscritorio(this)" />
+        </div>
+      </div>
+
+      <!-- Cor principal -->
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Cor principal do escritório</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input id="perfil-cor-escritorio" type="color" value="#7C3AED"
+            style="width:44px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:none;padding:2px" />
+          <div style="font-size:.82rem;color:var(--text-muted)">
+            Usada no cabeçalho e nos títulos da proposta PDF
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:20px;">
       <button class="btn btn-primary" style="flex:1" onclick="salvarPerfil()">Salvar</button>
       <button class="btn btn-secondary" onclick="abrirModalDiagnostico()">Editar diagnóstico</button>
     </div>
@@ -634,67 +624,28 @@
       </button>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-
-      <!-- Plano Start -->
-      <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column;">
-        <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Start</div>
+    <!-- Plano único -->
+    <div style="max-width:400px; margin:0 auto;">
+      <div style="background:var(--accent-dim); border:2px solid var(--accent-border); border-radius:var(--radius); padding:24px; display:flex; flex-direction:column; text-align:center;">
+        <div style="font-size:0.7rem; font-weight:700; color:var(--accent-light); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px;">Plano completo</div>
         <div style="margin-bottom:4px;">
-          <span id="preco-start" style="font-size:1.55rem; font-weight:700; color:var(--text-primary);">R$ 97</span>
-          <span id="periodo-start" style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">/mês</span>
+          <span id="preco-start" style="font-size:2rem; font-weight:800; color:var(--text-primary); font-family:'Syne',sans-serif;">R$ 97</span>
+          <span id="periodo-start" style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">/mês</span>
         </div>
-        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;" id="sub-start">1 usuário · cancele quando quiser</div>
-        <ul style="font-size:0.8rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:5px; margin-bottom:18px; flex:1;">
-          <li>✓ 1 usuário</li>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:20px;" id="sub-start">cobrado mensalmente · cancele quando quiser</div>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px; text-align:left;">
           <li>✓ Chat com IA ilimitado</li>
-          <li>✓ Todas as ferramentas de IA</li>
-          <li>✓ Trilha de aprendizagem</li>
+          <li>✓ Simular reunião</li>
+          <li>✓ Simulador de objeções</li>
+          <li>✓ Gerador de proposta PDF</li>
+          <li>✓ Script de follow-up</li>
+          <li>✓ Diagnóstico de atendimento</li>
+          <li>✓ Treino SPIN Selling</li>
+          <li>✓ Simulador de vendas</li>
           <li>✓ Upload PDF, Word, áudio</li>
-          <li>✓ Gerador de propostas</li>
-          <li>✓ Export Word e PDF</li>
+          <li>✓ Trilha de aprendizagem</li>
         </ul>
-        <button class="btn btn-secondary btn-full" id="btn-start" onclick="iniciarCheckout('start_mensal')">Assinar Start</button>
-      </div>
-
-      <!-- Plano Equipe -->
-      <div style="background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:var(--radius); padding:18px; position:relative; display:flex; flex-direction:column;">
-        <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; font-size:0.68rem; font-weight:700; padding:3px 12px; border-radius:99px; white-space:nowrap;">MAIS POPULAR</div>
-        <div style="font-size:0.72rem; font-weight:700; color:var(--accent-light); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Equipe</div>
-        <div style="margin-bottom:4px;">
-          <span id="preco-equipe" style="font-size:1.55rem; font-weight:700; color:var(--text-primary);">R$ 197</span>
-          <span id="periodo-equipe" style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">/mês</span>
-        </div>
-        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;" id="sub-equipe">até 3 usuários · cancele quando quiser</div>
-        <ul style="font-size:0.8rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:5px; margin-bottom:18px; flex:1;">
-          <li>✓ Até 3 usuários</li>
-          <li>✓ Tudo do START</li>
-          <li>✓ Painel da equipe</li>
-          <li>✓ Arena de Vendas</li>
-          <li>✓ Agenda Comercial</li>
-          <li>✓ Controle de Leads</li>
-          <li>✓ Cadastro de clientes</li>
-          <li>✓ Export com imagem</li>
-        </ul>
-        <button class="btn btn-primary btn-full" id="btn-equipe" onclick="iniciarCheckout('equipe_mensal')">Assinar Equipe</button>
-      </div>
-
-      <!-- Plano Pro -->
-      <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column;">
-        <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;">Pro</div>
-        <div style="margin-bottom:4px;">
-          <span id="preco-pro" style="font-size:1.55rem; font-weight:700; color:var(--text-primary);">R$ 327</span>
-          <span id="periodo-pro" style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">/mês</span>
-        </div>
-        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;" id="sub-pro">até 5 usuários · cancele quando quiser</div>
-        <ul style="font-size:0.8rem; color:var(--text-secondary); list-style:none; display:flex; flex-direction:column; gap:5px; margin-bottom:18px; flex:1;">
-          <li>✓ Até 5 usuários</li>
-          <li>✓ Tudo do EQUIPE</li>
-          <li>✓ Metas por vendedor</li>
-          <li>✓ Relatório de desempenho da equipe</li>
-          <li>✓ Ranking avançado com metas</li>
-          <li>✓ Suporte prioritário</li>
-        </ul>
-        <button class="btn btn-secondary btn-full" id="btn-pro" onclick="iniciarCheckout('pro_mensal')">Assinar Pro</button>
+        <button class="btn btn-primary btn-full" id="btn-start" onclick="iniciarCheckout('start_mensal')">Assinar agora →</button>
       </div>
     </div>
 
@@ -808,263 +759,6 @@
   </div>
 </div>
 
-<!-- ══════════════ MODAL: REGISTRAR VENDA ══════════════ -->
-<div class="modal-overlay" id="modal-venda">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <span class="modal-title">💰 Registrar venda</span>
-      <button class="modal-close" onclick="fecharModalVenda()">✕</button>
-    </div>
-    <p class="text-secondary text-sm" style="margin-bottom:20px">
-      Registre uma venda fechada. Ela vai aparecer no ranking da equipe e te dará XP.
-    </p>
-
-    <!-- Nome do cliente -->
-    <div class="form-group">
-      <label class="form-label">Nome do cliente *</label>
-      <input id="venda-cliente" type="text" placeholder="Ex: João Silva" />
-    </div>
-
-    <!-- Telefone -->
-    <div class="form-group">
-      <label class="form-label">Telefone do cliente <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
-      <input id="venda-telefone" type="tel" placeholder="(11) 99999-9999" />
-    </div>
-
-    <!-- Origem -->
-    <div class="form-group">
-      <label class="form-label">Origem do cliente *</label>
-      <select id="venda-origem">
-        <option value="">Selecione a origem</option>
-        <option value="indicacao">Indicação</option>
-        <option value="instagram">Instagram</option>
-        <option value="trafego_meta">Tráfego pago — Meta (Facebook/Instagram Ads)</option>
-        <option value="trafego_google">Tráfego pago — Google</option>
-        <option value="grupo_whatsapp">Grupo de WhatsApp</option>
-        <option value="parceria">Parceria</option>
-        <option value="tiktok">TikTok</option>
-        <option value="outro">Outro</option>
-      </select>
-    </div>
-
-    <!-- Produto / Serviço -->
-    <div class="form-group">
-      <label class="form-label">Produto / Serviço *</label>
-      <input id="venda-produto" type="text" placeholder="Ex: Contrato trabalhista, Revisional de financiamento..." />
-    </div>
-
-    <!-- Valor -->
-    <div class="form-group">
-      <label class="form-label">Valor do contrato <span style="color:var(--text-muted);font-size:11px">(opcional — deixe vazio se for êxito)</span></label>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="color:var(--text-muted);font-size:14px;white-space:nowrap">R$</span>
-        <input id="venda-valor" type="number" min="0" step="0.01" placeholder="0,00" style="flex:1" />
-      </div>
-    </div>
-
-    <!-- Datas lado a lado -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">1º Contato <span style="color:var(--text-muted);font-size:11px">(opcional)</span></label>
-        <input id="venda-data-contato" type="date" />
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Fechamento *</label>
-        <input id="venda-data-fechamento" type="date" />
-      </div>
-    </div>
-
-    <div id="venda-resultado" style="display:none;background:rgba(125,207,151,0.08);border:1px solid rgba(125,207,151,0.25);border-radius:8px;padding:14px;margin:16px 0">
-      <div style="color:#7dcf97;font-weight:600;font-size:14px;margin-bottom:4px">✓ Venda registrada!</div>
-      <div id="venda-resultado-texto" style="font-size:13px;color:var(--text-secondary)"></div>
-    </div>
-
-    <button class="btn btn-primary btn-full" onclick="registrarVenda()" id="btn-confirmar-venda" style="margin-top:20px">
-      Registrar venda
-    </button>
-  </div>
-</div>
-
-<!-- ══════════════ MODAL: FUNIL SDR / CLOSER ══════════════ -->
-<div class="modal-overlay" id="modal-funil">
-  <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
-    <div class="modal-header">
-      <div>
-        <span class="modal-title">🎯 Cadastrar Cliente Potencial</span>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Gerencie leads e briefings automáticos</div>
-      </div>
-      <button class="modal-close" onclick="fecharModalFunil()">✕</button>
-    </div>
-
-    <!-- Tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px">
-      <button class="funil-tab active" id="tab-novo-lead" onclick="funil.aba('novo')">➕ Novo Lead</button>
-      <button class="funil-tab" id="tab-leads" onclick="funil.aba('lista')">📋 Leads</button>
-    </div>
-
-    <!-- ABA: NOVO LEAD (SDR) -->
-    <div id="funil-aba-novo">
-      <form onsubmit="funil.registrar(event)" style="display:flex;flex-direction:column;gap:14px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group">
-            <label class="form-label">Nome do Lead *</label>
-            <input type="text" id="fl-nome" class="form-input" placeholder="João Silva" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Empresa / Escritório</label>
-            <input type="text" id="fl-empresa" class="form-input" placeholder="Advocacia Oliveira" />
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-group">
-            <label class="form-label">Origem</label>
-            <select id="fl-origem" class="form-input" onchange="toggleOutroFunil(this.value)">
-              <option value="indicação">Indicação</option>
-              <option value="instagram">Instagram</option>
-              <option value="tráfego pago — meta">Tráfego pago — Meta (Facebook/Instagram Ads)</option>
-              <option value="tráfego pago — google">Tráfego pago — Google</option>
-              <option value="grupo de whatsapp">Grupo de WhatsApp</option>
-              <option value="parceria">Parceria</option>
-              <option value="tiktok">TikTok</option>
-              <option value="outro">Outro</option>
-            </select>
-            <input type="text" id="fl-origem-outro" class="form-input" placeholder="Descreva a origem…"
-              style="margin-top:6px;display:none" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Valor estimado (R$)</label>
-            <input type="number" id="fl-valor" class="form-input" placeholder="5000" min="0" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Contexto levantado *</label>
-          <textarea id="fl-contexto" class="form-input" rows="3" style="resize:vertical"
-            placeholder="O que você sabe sobre esse lead? Qual é a dor dele, o que ele mencionou, qual é a urgência..." required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Objeção inicial (se houver)</label>
-          <input type="text" id="fl-objecao" class="form-input" placeholder="É caro, precisa pensar, já tem advogado..." />
-        </div>
-
-        <div class="form-group" id="fl-closer-group" style="display:none">
-          <label class="form-label">Atribuir para Closer</label>
-          <select id="fl-closer" class="form-input">
-            <option value="">— Sem closer (eu mesmo farei) —</option>
-          </select>
-        </div>
-
-        <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text-muted)">
-          ✨ A May vai gerar automaticamente um <strong style="color:#A78BFA">briefing personalizado</strong> para o closer entrar na reunião preparado.
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="btn-registrar-lead">
-          🎯 Registrar Lead e Gerar Briefing
-        </button>
-      </form>
-    </div>
-
-    <!-- ABA: LISTA DE LEADS -->
-    <div id="funil-aba-lista" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <select id="funil-filtro-status" class="form-input" style="min-width:160px;flex:1"
-          onchange="funil.listar()">
-          <option value="">Todos os status</option>
-          <option value="briefing_gerado">Briefing gerado</option>
-          <option value="reuniao_agendada">Reunião agendada</option>
-          <option value="negociando">Negociando</option>
-          <option value="ganhou">Ganhou ✅</option>
-          <option value="perdeu">Perdeu ❌</option>
-        </select>
-      </div>
-      <div id="funil-leads-lista" style="display:flex;flex-direction:column;gap:12px">
-        <div style="text-align:center;color:var(--text-muted);padding:32px">Carregando leads…</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MODAL: BRIEFING DO LEAD -->
-<div class="modal-overlay" id="modal-briefing">
-  <div class="modal" style="max-width:560px;max-height:88vh;overflow-y:auto">
-    <div class="modal-header">
-      <div>
-        <span class="modal-title" id="briefing-titulo">Briefing do Lead</span>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="briefing-origem"></div>
-      </div>
-      <button class="modal-close" onclick="fecharModalBriefing()">✕</button>
-    </div>
-
-    <!-- Briefing IA -->
-    <div id="briefing-conteudo" style="white-space:pre-wrap;font-size:13px;line-height:1.7;
-      background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);
-      border-radius:12px;padding:16px 18px;margin-bottom:16px"></div>
-
-    <!-- Atualizar status -->
-    <div style="border-top:1px solid var(--border);padding-top:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
-        Atualizar status do lead
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-        <button class="btn-status" data-status="reuniao_agendada" onclick="funil.atualizarStatus(this)">📅 Reunião marcada</button>
-        <button class="btn-status" data-status="negociando" onclick="funil.atualizarStatus(this)">🤝 Negociando</button>
-        <button class="btn-status btn-ganhou" data-status="ganhou" onclick="funil.atualizarStatus(this)">✅ Ganhou</button>
-        <button class="btn-status btn-perdeu" data-status="perdeu" onclick="funil.atualizarStatus(this)">❌ Perdeu</button>
-      </div>
-      <!-- Campos de agendamento (aparecem ao marcar Reunião marcada) -->
-      <div id="briefing-agenda-group" style="display:none;margin-bottom:12px;display:none;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:12px 14px;gap:8px;flex-direction:column">
-        <div style="font-size:11px;font-weight:700;color:#34D399;margin-bottom:4px">📅 Dados da reunião</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div>
-            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Data e hora *</label>
-            <input type="datetime-local" id="briefing-data-reuniao" class="form-input" />
-          </div>
-          <div>
-            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Local / Link</label>
-            <input type="text" id="briefing-local-reuniao" class="form-input" placeholder="Meet, Zoom, Escritório…" />
-          </div>
-        </div>
-        <button class="btn btn-primary" style="margin-top:4px" onclick="funil.confirmarAgendamento()">
-          Confirmar agendamento
-        </button>
-      </div>
-      <textarea id="briefing-resultado" class="form-input" rows="2" style="resize:vertical"
-        placeholder="Anotações pós-reunião (opcional)..."></textarea>
-      <div id="briefing-valor-group" style="display:none;margin-top:8px">
-        <input type="number" id="briefing-valor-fechado" class="form-input" placeholder="Valor fechado (R$)" min="0" />
-      </div>
-    </div>
-
-    <input type="hidden" id="briefing-lead-id" />
-
-    <style>
-      .btn-status { background:var(--surface);border:1px solid var(--border);border-radius:8px;
-        padding:6px 12px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .2s; }
-      .btn-status:hover { border-color:rgba(167,139,250,.4); }
-      .btn-status.btn-ganhou { color:#6EE7B7;border-color:rgba(16,185,129,.3); }
-      .btn-status.btn-ganhou:hover { background:rgba(16,185,129,.1); }
-      .btn-status.btn-perdeu { color:#FCA5A5;border-color:rgba(239,68,68,.3); }
-      .btn-status.btn-perdeu:hover { background:rgba(239,68,68,.1); }
-      .funil-tab { background:transparent;border:none;padding:8px 14px;font-size:13px;
-        font-weight:600;color:var(--text-muted);cursor:pointer;border-radius:8px;transition:all .2s; }
-      .funil-tab.active { background:var(--brand-subtle);color:#A78BFA; }
-      .lead-card { background:var(--surface);border:1px solid var(--border);border-radius:12px;
-        padding:14px 16px;cursor:pointer;transition:all .2s; }
-      .lead-card:hover { border-color:rgba(124,58,237,.35);transform:translateY(-1px); }
-      .lead-status-pill { display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;
-        border-radius:20px;text-transform:uppercase;letter-spacing:.04em; }
-      .status-briefing_gerado { background:rgba(96,165,250,.15);color:#60A5FA; }
-      .status-reuniao_agendada { background:rgba(167,139,250,.15);color:#A78BFA; }
-      .status-negociando { background:rgba(245,158,11,.15);color:#F59E0B; }
-      .status-ganhou { background:rgba(16,185,129,.15);color:#10B981; }
-      .status-perdeu { background:rgba(239,68,68,.15);color:#EF4444; }
-    </style>
-  </div>
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="/js/api.js"></script>
 <script src="/js/markdown.js"></script>
@@ -1102,51 +796,40 @@
     draw();
   })();
 
-  // ── Planos: toggle mensal / anual ────────────────────────────────────────────
+  // ── Plano único: toggle mensal / anual ──────────────────────────────────────
   const PRECOS = {
-    mensal: {
-      start:  { preco: 'R$ 291',   sub: '1 usuário · cobrado a cada 3 meses',        checkout: 'start_trimestral'  },
-      equipe: { preco: 'R$ 591',   sub: 'até 3 usuários · cobrado a cada 3 meses',   checkout: 'equipe_trimestral' },
-      pro:    { preco: 'R$ 981',   sub: 'até 5 usuários · cobrado a cada 3 meses',   checkout: 'pro_trimestral'    },
-      periodo: '/trim',
-    },
-    anual: {
-      start:  { preco: 'R$ 970',   sub: '1 usuário · equivale a R$ 80/mês',          checkout: 'start_anual'   },
-      equipe: { preco: 'R$ 1.970', sub: 'até 3 usuários · equivale a R$ 164/mês',    checkout: 'equipe_anual'  },
-      pro:    { preco: 'R$ 3.270', sub: 'até 5 usuários · equivale a R$ 272/mês',    checkout: 'pro_anual'     },
-      periodo: '/ano',
-    },
+    mensal: { preco: 'R$ 97',  sub: 'cobrado mensalmente · cancele quando quiser',    checkout: 'start_mensal', periodo: '/mês'  },
+    anual:  { preco: 'R$ 847', sub: 'cobrado anualmente · equivale a R$ 70/mês',      checkout: 'start_anual',  periodo: '/ano'  },
   };
   let _periodoAtual = 'mensal';
 
   function trocarPeriodo(periodo) {
     _periodoAtual = periodo;
     const p = PRECOS[periodo];
+    const precoEl   = document.getElementById('preco-start');
+    const periodoEl = document.getElementById('periodo-start');
+    const subEl     = document.getElementById('sub-start');
+    const btnEl     = document.getElementById('btn-start');
+    if (precoEl)   precoEl.textContent   = p.preco;
+    if (periodoEl) periodoEl.textContent = p.periodo;
+    if (subEl)     subEl.textContent     = p.sub;
+    if (btnEl)     btnEl.onclick         = () => iniciarCheckout(p.checkout);
 
-    ['start', 'equipe', 'pro'].forEach(plano => {
-      const el = p[plano];
-      document.getElementById(`preco-${plano}`).textContent   = el.preco;
-      document.getElementById(`periodo-${plano}`).textContent = p.periodo;
-      document.getElementById(`sub-${plano}`).textContent     = el.sub;
-      document.getElementById(`btn-${plano}`).onclick         = () => iniciarCheckout(el.checkout);
-    });
-
-    // Estilo dos botões do toggle
     const btnM = document.getElementById('toggle-mensal');
     const btnA = document.getElementById('toggle-anual');
     if (periodo === 'mensal') {
-      btnM.style.background = 'var(--accent)'; btnM.style.color = '#fff';
-      btnA.style.background = 'transparent';   btnA.style.color = 'var(--text-muted)';
+      if (btnM) { btnM.style.background = 'var(--accent)'; btnM.style.color = '#fff'; }
+      if (btnA) { btnA.style.background = 'transparent';   btnA.style.color = 'var(--text-muted)'; }
     } else {
-      btnA.style.background = 'var(--accent)'; btnA.style.color = '#fff';
-      btnM.style.background = 'transparent';   btnM.style.color = 'var(--text-muted)';
+      if (btnA) { btnA.style.background = 'var(--accent)'; btnA.style.color = '#fff'; }
+      if (btnM) { btnM.style.background = 'transparent';   btnM.style.color = 'var(--text-muted)'; }
     }
   }
 
   function abrirModalPlanos(novoUsuario = false) {
     document.getElementById('modal-planos').classList.add('active');
     document.getElementById('trial-banner-modal').style.display = novoUsuario ? 'block' : 'none';
-    trocarPeriodo(novoUsuario ? 'anual' : 'mensal'); // novo usuário abre no anual (melhor oferta)
+    trocarPeriodo(novoUsuario ? 'anual' : 'mensal');
   }
 
   // Detecta novo usuário via URL

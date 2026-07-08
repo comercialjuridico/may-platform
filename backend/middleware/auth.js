@@ -41,16 +41,20 @@ async function authMiddleware(req, res, next) {
       return res.status(401).json({ erro: 'Usuário não encontrado.' });
     }
 
-    // Tenta carregar cielo_recurrent_payment_id (coluna opcional — pode não existir ainda)
+    // Tenta carregar colunas opcionais (podem não existir ainda em ambientes antigos)
     try {
       const { data: pRow } = await supabase
         .from('users')
-        .select('cielo_recurrent_payment_id')
+        .select('cielo_recurrent_payment_id, logo_escritorio, cor_escritorio')
         .eq('id', payload.id)
         .single();
       user.cielo_recurrent_payment_id = pRow?.cielo_recurrent_payment_id ?? null;
+      user.logo_escritorio = pRow?.logo_escritorio ?? null;
+      user.cor_escritorio  = pRow?.cor_escritorio  ?? '#7C3AED';
     } catch (_) {
       user.cielo_recurrent_payment_id = null;
+      user.logo_escritorio = null;
+      user.cor_escritorio  = '#7C3AED';
     }
 
     // Verifica se o plano ainda está ativo

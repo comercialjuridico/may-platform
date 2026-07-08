@@ -136,16 +136,18 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
 // ─── PUT /api/user/perfil ───────────────────────────────────────────────────
 router.put('/perfil', authMiddleware, async (req, res) => {
   try {
-    const { name, avatar_url } = req.body;
+    const { name, avatar_url, logo_escritorio, cor_escritorio } = req.body;
     const updates = {};
-    if (name) updates.name = name;
+    if (name !== undefined) updates.name = name;
     if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+    if (logo_escritorio !== undefined) updates.logo_escritorio = logo_escritorio;
+    if (cor_escritorio  !== undefined) updates.cor_escritorio  = cor_escritorio;
 
     const { data, error } = await supabase
       .from('users')
       .update(updates)
       .eq('id', req.user.id)
-      .select('id, name, email, avatar_url')
+      .select('id, name, email, avatar_url, logo_escritorio, cor_escritorio')
       .single();
 
     if (error) throw error;

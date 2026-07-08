@@ -56,18 +56,6 @@ app.get('/app', (req, res) => {
 app.get('/manual', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/manual.html'));
 });
-app.get('/agenda', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
-});
-app.get('/agenda.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
-});
-app.get('/leads', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/leads.html'));
-});
-app.get('/leads.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/leads.html'));
-});
 
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
 // Cache longo para assets imutáveis (js/css/imgs com hash no nome)
@@ -92,11 +80,7 @@ app.use('/api/user',   require('./routes/user'));
 app.use('/api/cielo',  require('./routes/cielo'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/export', require('./routes/export'));
-app.use('/api/gestor', require('./routes/gestor'));
-app.use('/api/vendas',   require('./routes/vendas'));
 app.use('/api/areas',   require('./routes/areas'));
-app.use('/api/ranking', require('./routes/ranking'));
-app.use('/api/metas',  require('./routes/metas'));
 app.use('/api/2fa',          require('./routes/twofa'));
 app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/trilha',      require('./routes/trilha'));
@@ -126,13 +110,11 @@ app.use((err, req, res, next) => {
 
 // ─── Inicialização ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-const { registrarCronRelatorio } = require('./jobs/relatorio-semanal');
 
 app.listen(PORT, () => {
   console.log(`✓ May rodando na porta ${PORT}`);
   console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
   iniciarCronPush();
-  registrarCronRelatorio();
 });
 
 // ─── Cron de notificações push ───────────────────────────────────────────────

@@ -88,6 +88,44 @@ router.post('/avatar', authMiddleware, uploadImagem.single('foto'), async (req, 
   }
 });
 
+// ─── POST /api/upload/logo-escritorio ──────────────────────────────────────
+// Faz upload do logo do escritório para o Supabase Storage
+router.post('/logo-escritorio', authMiddleware, uploadImagem.single('logo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ erro: 'Nenhuma imagem enviada.' });
+
+  try {
+    const ext      = req.file.mimetype.split('/')[1].replace('jpeg', 'jpg');
+    const filename = `logos/${req.user.id}.${ext}`;
+
+    const { error: uploadErr } = await supabase.storage
+      .from('avatars') // reutiliza o mesmo bucket
+      .upload(filename, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true,
+      });
+
+    if (uploadErr) throw uploadErr;
+
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filename);
+
+    const logo_url = urlData.publicUrl;
+
+    const { error: updateErr } = await supabase
+      .from('users')
+      .update({ logo_escritorio: logo_url })
+      .eq('id', req.user.id);
+
+    if (updateErr) throw updateErr;
+
+    res.json({ logo_url });
+  } catch (err) {
+    console.error('Erro ao fazer upload do logo:', err.message);
+    res.status(500).json({ erro: 'Erro ao salvar logo do escritório.' });
+  }
+});
+
 // ─── Limite de uploads por plano ─────────────────────────────────────────────
 const LIMITE_UPLOADS = { free: 5, start: 5, equipe: 20, pro: 50, prof: null }; // null = ilimitado
 

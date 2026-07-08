@@ -62,13 +62,13 @@ function temAcesso(ferramentaId, user) {
 
 // ─── Onboarding + Trial + Payment Wall ───────────────────────────────────────
 
-// Preços do payment wall
+// Preços do payment wall — plano único
 const PW_PRECOS = {
-  mensal: { start: 'R$ 97',  equipe: 'R$ 227',  pro: 'R$ 397',  prof: 'R$ 897'  },
-  anual:  { start: 'R$ 78',  equipe: 'R$ 182',  pro: 'R$ 318',  prof: 'R$ 718'  },
+  mensal: { preco: 'R$ 97',  sub: 'cobrado mensalmente · cancele quando quiser',  checkout: 'start_mensal' },
+  anual:  { preco: 'R$ 847', sub: 'cobrado anualmente · equivale a R$ 70/mês',    checkout: 'start_anual'  },
 };
 let _pwPeriodo = 'mensal';
-let _pwPlano   = null;
+let _pwPlano   = 'start'; // sempre start — único plano
 
 function verificarFluxoOnboarding(user) {
   // Calcula dias desde criação
@@ -146,7 +146,6 @@ function abrirPaymentWall(bloqueante) {
     wall.onclick = null;
   }
   pwPeriodo('mensal');
-  pwAtualizarPrecos();
 }
 
 function fecharPaymentWall() {
@@ -158,46 +157,28 @@ function pwPeriodo(p) {
   _pwPeriodo = p;
   const bM = document.getElementById('pw-btn-mensal');
   const bA = document.getElementById('pw-btn-anual');
-  if (bM) bM.style.cssText = p === 'mensal'
-    ? 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:rgba(124,58,237,.8);color:#fff;'
-    : 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(200,190,255,.5);';
-  if (bA) bA.style.cssText = p === 'anual'
-    ? 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:rgba(124,58,237,.8);color:#fff;'
-    : 'padding:6px 18px;border-radius:8px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(200,190,255,.5);';
-  pwAtualizarPrecos();
-}
+  const ativo   = 'padding:7px 22px;border-radius:8px;border:none;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;background:rgba(124,58,237,.8);color:#fff;';
+  const inativo = 'padding:7px 22px;border-radius:8px;border:none;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:rgba(200,190,255,.5);';
+  if (bM) bM.style.cssText = p === 'mensal' ? ativo : inativo;
+  if (bA) bA.style.cssText = p === 'anual'  ? ativo : inativo;
 
-function pwAtualizarPrecos() {
-  const p = PW_PRECOS[_pwPeriodo];
-  ['start','equipe','pro','prof'].forEach(k => {
-    const el = document.getElementById(`pw-price-${k}`);
-    if (el) el.innerHTML = `${p[k]}<span>/mês</span>`;
-  });
-}
-
-function pwSelecionarPlano(plano) {
-  _pwPlano = plano;
-  ['start','equipe','pro','prof'].forEach(k => {
-    const card = document.getElementById(`pw-card-${k}`);
-    if (!card) return;
-    const isSelected = k === plano;
-    card.style.borderColor = isSelected ? '#7C3AED' : '';
-    card.style.background  = isSelected ? 'rgba(124,58,237,.15)' : '';
-  });
-  const btn = document.getElementById('pw-btn-avancar');
-  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  const dados = PW_PRECOS[p];
+  const precoEl  = document.getElementById('pw-price-main');
+  const subEl    = document.getElementById('pw-price-sub');
+  const labelEl  = document.getElementById('pw-period-label');
+  if (precoEl)  precoEl.textContent  = dados.preco;
+  if (subEl)    subEl.textContent    = dados.sub;
+  if (labelEl)  labelEl.textContent  = p === 'mensal' ? '/mês' : '/ano';
 }
 
 function pwAvancarPagamento() {
-  if (!_pwPlano) return;
   document.getElementById('pw-pane1').style.display = 'none';
   document.getElementById('pw-pane2').style.display = 'block';
   document.getElementById('pw-step1-label').style.color = 'rgba(200,190,255,.4)';
   document.getElementById('pw-step2-label').style.cssText = 'font-weight:700;color:#A78BFA;';
-  const preco = PW_PRECOS[_pwPeriodo][_pwPlano];
-  const nomes = { start:'MAY IA START', equipe:'MAY IA PLUS', pro:'MAY IA PRO', prof:'MAY IA ULTRA' };
-  document.getElementById('pw-resumo-plano').textContent = nomes[_pwPlano];
-  document.getElementById('pw-resumo-preco').textContent = `${preco}/mês`;
+  const dados = PW_PRECOS[_pwPeriodo];
+  document.getElementById('pw-resumo-plano').textContent = 'MAY IA — Plano Completo';
+  document.getElementById('pw-resumo-preco').textContent = `${dados.preco}/${_pwPeriodo === 'mensal' ? 'mês' : 'ano'}`;
 
   // Máscaras
   document.getElementById('pw-numero')?.addEventListener('input', e => {
@@ -235,7 +216,7 @@ async function pwSubmit(e) {
   try {
     const validade = document.getElementById('pw-validade').value.trim();
     const [mm, aa] = validade.split('/');
-    const planoKey = `${_pwPlano}_${_pwPeriodo}`;
+    const planoKey = PW_PRECOS[_pwPeriodo].checkout;
 
     // 1. Pré-validar cartão
     const preRes = await fetch('/api/cielo/pre-validar', {
@@ -274,8 +255,7 @@ async function pwSubmit(e) {
     const barTop = document.getElementById('trial-top-bar');
     if (barTop) barTop.style.display = 'none';
 
-    const nomeDoPlano = { start:'MAY IA START', equipe:'MAY IA PLUS', pro:'MAY IA PRO', prof:'MAY IA ULTRA' }[_pwPlano];
-    mostrarToast(`✅ Assinatura confirmada! Bem-vindo(a) ao ${nomeDoPlano}`);
+    mostrarToast(`✅ Assinatura confirmada! Bem-vindo(a) à May IA`);
 
     // Recarrega dados do servidor para refletir empresa_id e permissões atualizadas
     await carregarDadosIniciais();
@@ -530,22 +510,6 @@ function renderizarSidebar() {
   // Contador de uso
   atualizarContadorUso();
 
-  // Botões contextuais — sempre visíveis; cadeado aplicado via classe
-  const temEquipe    = !!user?.empresa_id;
-  const temGestor    = user?.role === 'gestor' || user?.role === 'admin';
-
-  const _navLock = (id, temAcessoLocal) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle('nav-item-locked', !temAcessoLocal);
-  };
-
-  _navLock('link-gestor',        temGestor);
-  _navLock('btn-registrar-venda', temEquipe);
-  _navLock('link-ranking',        temEquipe);
-  _navLock('btn-funil',           temEquipe);
-  _navLock('link-agenda',         temEquipe);
-  _navLock('link-leads',          temEquipe);
 }
 
 // ─── Seletor de Área Ativa ───────────────────────────────────────────────────
@@ -648,167 +612,6 @@ function selecionarFerramenta(id) {
   }
   renderizarSidebar();
   fecharMenuMobile();
-}
-
-// ─── Navegação premium com preview bloqueado ─────────────────────────────────
-
-const AREAS_PREMIUM = {
-  gestor:  { nome: 'Painel da Equipe',        icon: '👥', desc: 'Gerencie sua equipe, metas e desempenho individual de cada vendedor.' },
-  ranking: { nome: 'Arena de Vendas',          icon: '🏆', desc: 'Ranking em tempo real, metas coletivas e gamificação para seu time.' },
-  agenda:  { nome: 'Agenda Comercial',         icon: '📅', desc: 'Organize reuniões, follow-ups e atividades comerciais em um só lugar.' },
-  leads:   { nome: 'Controle de Leads',        icon: '📋', desc: 'Pipeline completo de clientes potenciais com status e histórico.' },
-  funil:   { nome: 'Cadastrar Cliente',        icon: '🎯', desc: 'Cadastre leads e acompanhe o progresso de cada oportunidade.' },
-  venda:   { nome: 'Registrar Venda',          icon: '💰', desc: 'Registre vendas para o ranking da equipe e métricas coletivas.' },
-};
-
-function navegarPremium(event, area) {
-  const temEquipe = !!estado.user?.empresa_id;
-  const temGestor = estado.user?.role === 'gestor' || estado.user?.role === 'admin';
-  const acesso = area === 'gestor' ? temGestor : temEquipe;
-  if (acesso) return true; // navega normalmente
-  event.preventDefault();
-  mostrarAreaBloqueada(area);
-  fecharMenuMobile();
-  return false;
-}
-
-function abrirModalVendaPremium() {
-  if (estado.user?.empresa_id) { abrirModalVenda(); return; }
-  mostrarAreaBloqueada('venda');
-}
-
-function abrirFunilPremium() {
-  if (estado.user?.empresa_id) { abrirModalFunil(); return; }
-  mostrarAreaBloqueada('funil');
-}
-
-function mostrarAreaBloqueada(area) {
-  const info = AREAS_PREMIUM[area] || { nome: area, icon: '🔒', desc: '' };
-
-  // Esconde input de chat, limpa header
-  const wrapper = document.getElementById('chat-input-wrapper');
-  if (wrapper) wrapper.style.display = 'none';
-  const titleEl = document.getElementById('chat-title');
-  const labelEl = document.getElementById('chat-tool-label');
-  if (titleEl) titleEl.textContent = info.nome;
-  if (labelEl) labelEl.textContent = 'Disponível no MAY IA EQUIPE';
-
-  const container = document.getElementById('messages-container');
-  if (!container) return;
-
-  container.innerHTML = `
-    <div class="area-bloqueada-wrap">
-      <!-- Preview desfocado atrás do overlay -->
-      <div class="area-preview-blur" aria-hidden="true">
-        ${_mockupArea(area)}
-      </div>
-      <!-- Overlay com cadeado -->
-      <div class="area-lock-overlay">
-        <div class="area-lock-box">
-          <div class="area-lock-icone">🔒</div>
-          <div style="font-size:2rem;margin-bottom:8px">${info.icon}</div>
-          <h2 class="area-lock-titulo">${info.nome}</h2>
-          <p class="area-lock-desc">${info.desc}</p>
-          <div class="area-lock-plano">MAY IA EQUIPE</div>
-          <div class="area-lock-preco">R$ 227<span style="font-size:.85rem;opacity:.7">/mês</span></div>
-          <button onclick="abrirPaymentWall(false)" class="upsell-btn" style="margin-top:20px;border:none;cursor:pointer;width:100%">
-            Ver planos → Acesso imediato
-          </button>
-          <p class="upsell-fine" style="margin-top:12px">✓ Sem fidelidade &nbsp;·&nbsp; ✓ Cancele quando quiser</p>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function _mockupArea(area) {
-  // Cores vivas para ficarem visíveis mesmo com filtro de escurecimento
-  const ROW_BG   = 'rgba(30,24,60,0.9)';
-  const ROW_LINE = '1px solid rgba(120,100,200,.2)';
-  const CARD_BG  = 'rgba(35,25,70,0.95)';
-  const BAR_DARK = 'rgba(160,130,255,.55)';
-  const BAR_MID  = 'rgba(200,180,255,.35)';
-  const AVATAR   = 'rgba(140,100,255,.6)';
-  const TEXT_C   = 'rgba(230,220,255,.9)';
-  const TEXT_M   = 'rgba(180,160,255,.6)';
-
-  const rows = (n, w1, w2) => Array.from({length:n}, (_,i) => `
-    <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:${ROW_LINE};gap:12px;background:${i%2===0?ROW_BG:'transparent'}">
-      <div style="width:34px;height:34px;border-radius:50%;background:${AVATAR};flex-shrink:0"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-        <div style="height:10px;background:${BAR_DARK};border-radius:4px;width:${w1[i%w1.length]}px"></div>
-        <div style="height:7px;background:${BAR_MID};border-radius:4px;width:${w2[i%w2.length]}px"></div>
-      </div>
-    </div>`).join('');
-
-  const cards = (labels, values, colors) => labels.map((l,i) => `
-    <div style="flex:1;background:${CARD_BG};border-radius:12px;padding:18px;min-width:0;border:1px solid rgba(120,100,200,.25)">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:${TEXT_M};margin-bottom:8px">${l}</div>
-      <div style="font-size:1.5rem;font-weight:800;color:${colors[i]||TEXT_C}">${values[i]}</div>
-    </div>`).join('');
-
-  const header = (icon, title) => `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-      <span style="font-size:1.3rem">${icon}</span>
-      <span style="font-size:1rem;font-weight:700;color:${TEXT_C}">${title}</span>
-    </div>`;
-
-  const wrap = (content) => `
-    <div style="padding:28px 24px;background:rgba(10,8,25,0.95);min-height:100%;font-family:sans-serif">
-      ${content}
-    </div>`;
-
-  if (area === 'ranking') return wrap(`
-    ${header('🏆','Arena de Vendas — Esta semana')}
-    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
-      ${['🥇','🥈','🥉','4️⃣','5️⃣'].map((m,i) => `
-        <div style="display:flex;align-items:center;padding:14px 18px;border-bottom:${ROW_LINE};gap:14px">
-          <span style="font-size:1.3rem;width:30px">${m}</span>
-          <div style="width:36px;height:36px;border-radius:50%;background:${AVATAR}"></div>
-          <div style="flex:1">
-            <div style="height:10px;background:${BAR_DARK};border-radius:4px;width:${[180,150,120,95,70][i]}px;margin-bottom:5px"></div>
-            <div style="height:7px;background:${BAR_MID};border-radius:4px;width:${[100,80,65,50,40][i]}px"></div>
-          </div>
-          <div style="font-size:.85rem;font-weight:700;color:${['#a78bfa','#8b5cf6','#7c3aed','#6d28d9','#5b21b6'][i]}">${[24,19,15,11,8][i]} vendas</div>
-        </div>`).join('')}
-    </div>`);
-
-  if (area === 'gestor') return wrap(`
-    ${header('👥','Painel da Equipe')}
-    <div style="display:flex;gap:14px;margin-bottom:20px">
-      ${cards(['Membros ativos','Meta do mês','Conversões'],['5','R$ 50k','68%'],['#a78bfa','#34d399','#60a5fa'])}
-    </div>
-    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
-      ${rows(5,[170,140,160,120,150],[90,70,80,60,85])}
-    </div>`);
-
-  if (area === 'agenda') return wrap(`
-    ${header('📅','Agenda Comercial — Junho 2026')}
-    <div style="display:flex;gap:14px;margin-bottom:20px">
-      ${cards(['Reuniões hoje','Follow-ups','Propostas'],['3','7','2'],['#60a5fa','#f59e0b','#34d399'])}
-    </div>
-    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
-      ${rows(5,[160,130,150,110,140],[80,65,90,55,75])}
-    </div>`);
-
-  if (area === 'leads') return wrap(`
-    ${header('📋','Controle de Leads')}
-    <div style="display:flex;gap:14px;margin-bottom:20px">
-      ${cards(['Total de leads','Em negociação','Taxa de conversão'],['42','18','31%'],['#a78bfa','#f59e0b','#34d399'])}
-    </div>
-    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
-      ${rows(6,[150,120,165,100,140,125],[80,60,90,50,75,65])}
-    </div>`);
-
-  // funil, venda
-  return wrap(`
-    ${header(AREAS_PREMIUM[area]?.icon||'🔒', AREAS_PREMIUM[area]?.nome||area)}
-    <div style="display:flex;gap:14px;margin-bottom:20px">
-      ${cards(['Clientes','Oportunidades','Fechamentos'],['28','12','5'],['#a78bfa','#60a5fa','#34d399'])}
-    </div>
-    <div style="background:rgba(20,15,45,.9);border-radius:14px;overflow:hidden;border:1px solid rgba(120,100,200,.2)">
-      ${rows(5,[155,125,160,105,145],[85,65,90,55,80])}
-    </div>`);
 }
 
 // ─── Upsell wall (área bloqueada) ────────────────────────────────────────────
@@ -1149,7 +952,16 @@ async function enviarMensagem() {
 
 // ─── Adicionar mensagem ao DOM ────────────────────────────────────────────────
 function msgActionButtons(msgId) {
+  const isProposal = estado.ferramentaAtiva === 'gerador_proposta';
+  const proposalBtn = isProposal ? `
+    <button class="msg-action-btn" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);color:#C4B5FD;font-weight:600" onclick="baixarPropostaPDF('${msgId}')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      📄 Proposta PDF
+    </button>
+  ` : '';
+
   return `<div class="msg-actions">
+    ${proposalBtn}
     <button class="msg-action-btn" onclick="copiarMensagem('${msgId}')">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
       Copiar
@@ -1171,6 +983,49 @@ function msgActionButtons(msgId) {
       Imagem
     </button>
   </div>`;
+}
+
+// ─── Baixar proposta com branding do escritório ───────────────────────────────
+async function baixarPropostaPDF(msgId) {
+  const bolha = document.querySelector(`#${msgId} .msg-bubble`);
+  if (!bolha) return;
+
+  // Extrai texto puro da bolha (sem HTML)
+  const conteudo = bolha.innerText || bolha.textContent || '';
+  if (!conteudo.trim()) return;
+
+  // Detecta título da proposta na primeira linha com #
+  const primeiraLinha = conteudo.split('\n').find(l => l.trim());
+  const titulo = primeiraLinha?.replace(/^#+\s*/, '').slice(0, 80) || 'Proposta Comercial';
+
+  const btn = bolha.closest('.message')?.querySelector('button[onclick*="baixarPropostaPDF"]');
+  const textoOriginal = btn?.textContent?.trim() || '📄 Proposta PDF';
+  if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+
+  try {
+    const token = getAccessToken();
+    const res = await fetch('/api/export/pdf', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conteudo, titulo }),
+    });
+
+    if (!res.ok) { mostrarToast('Erro ao gerar PDF.', 'erro'); return; }
+
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = titulo.replace(/[^a-zA-Z0-9À-ÿ\s]/g,'').replace(/\s+/g,'_').slice(0,60) + '.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    mostrarToast('PDF da proposta baixado! 📄', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro ao gerar PDF.', 'erro');
+  } finally {
+    if (btn) { btn.innerHTML = '📄 Proposta PDF'; btn.disabled = false; }
+  }
 }
 
 function adicionarMensagem(role, conteudo, scroll = true) {
@@ -1753,6 +1608,20 @@ function abrirModalPerfil() {
     inicial.textContent = (user?.name || 'U').charAt(0).toUpperCase();
   }
 
+  // Logo e cor do escritório
+  const logoImg         = document.getElementById('logo-escritorio-img');
+  const logoPlaceholder = document.getElementById('logo-escritorio-placeholder');
+  const corInput        = document.getElementById('perfil-cor-escritorio');
+  if (user?.logo_escritorio && logoImg) {
+    logoImg.src = user.logo_escritorio;
+    logoImg.style.display = 'block';
+    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+  } else {
+    if (logoImg) logoImg.style.display = 'none';
+    if (logoPlaceholder) logoPlaceholder.style.display = '';
+  }
+  if (corInput) corInput.value = user?.cor_escritorio || '#7C3AED';
+
   // Atualiza status 2FA
   atualizar2FAStatus();
 
@@ -1851,11 +1720,46 @@ async function uploadFotoPerfil(input) {
   }
 }
 
+async function uploadLogoEscritorio(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('logo', file);
+
+  mostrarToast('Enviando logo...', 'info');
+
+  try {
+    const token = getAccessToken();
+    const res = await fetch('/api/upload/logo-escritorio', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+
+    estado.user = { ...estado.user, logo_escritorio: data.logo_url };
+    salvarUser(estado.user);
+
+    // Preview no modal
+    const logoImg         = document.getElementById('logo-escritorio-img');
+    const logoPlaceholder = document.getElementById('logo-escritorio-placeholder');
+    if (logoImg) { logoImg.src = data.logo_url; logoImg.style.display = 'block'; }
+    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+
+    mostrarToast('Logo atualizado!', 'sucesso');
+  } catch {
+    mostrarToast('Erro ao enviar logo.', 'erro');
+  }
+}
+
 async function salvarPerfil() {
-  const name = document.getElementById('perfil-nome').value.trim();
+  const name          = document.getElementById('perfil-nome').value.trim();
+  const cor_escritorio = document.getElementById('perfil-cor-escritorio')?.value || '#7C3AED';
   if (!name) { mostrarToast('Nome obrigatório.', 'erro'); return; }
 
-  const res = await api.put('/user/perfil', { name });
+  const res = await api.put('/user/perfil', { name, cor_escritorio });
   if (!res?.ok) { mostrarToast('Erro ao salvar perfil', 'erro'); return; }
 
   const data = await res.json();
@@ -1984,85 +1888,6 @@ function formatarCPF(input) {
   v = v.replace(/(\d{3})(\d)/, '$1.$2');
   v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
   input.value = v;
-}
-
-// ─── Modal: Registrar Venda ───────────────────────────────────────────────────
-function abrirModalVenda() {
-  ['venda-cliente','venda-telefone','venda-produto','venda-valor','venda-data-contato','venda-data-fechamento'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  const origem = document.getElementById('venda-origem');
-  if (origem) origem.value = '';
-  document.getElementById('venda-resultado').style.display = 'none';
-  document.getElementById('btn-confirmar-venda').style.display = 'block';
-  document.getElementById('btn-confirmar-venda').disabled = false;
-  document.getElementById('modal-venda').classList.add('active');
-
-  // Preenche data de fechamento com hoje por padrão
-  const hoje = new Date().toISOString().slice(0, 10);
-  document.getElementById('venda-data-fechamento').value = hoje;
-}
-
-function fecharModalVenda() {
-  document.getElementById('modal-venda').classList.remove('active');
-}
-
-async function registrarVenda() {
-  const cliente       = document.getElementById('venda-cliente').value.trim();
-  const origem        = document.getElementById('venda-origem').value;
-  const produto       = document.getElementById('venda-produto').value.trim();
-  const telefone      = document.getElementById('venda-telefone').value.trim();
-  const valorRaw      = document.getElementById('venda-valor').value;
-  const valor         = valorRaw ? parseFloat(valorRaw) : null;
-  const dataContato   = document.getElementById('venda-data-contato').value || null;
-  const dataFechamento= document.getElementById('venda-data-fechamento').value || null;
-
-  if (!cliente) { mostrarToast('Informe o nome do cliente.', 'erro'); return; }
-  if (!origem)  { mostrarToast('Selecione a origem do cliente.', 'erro'); return; }
-  if (!produto) { mostrarToast('Informe o produto ou serviço.', 'erro'); return; }
-
-  const btn = document.getElementById('btn-confirmar-venda');
-  btn.disabled = true;
-  btn.textContent = 'Registrando...';
-
-  try {
-    const res = await api.post('/vendas', {
-      cliente,
-      telefone:        telefone  || null,
-      origem,
-      descricao:       produto,
-      valor:           valor && valor > 0 ? valor : null,
-      data_contato:    dataContato,
-      data_fechamento: dataFechamento,
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      mostrarToast(data.erro || 'Erro ao registrar venda.', 'erro');
-      btn.disabled = false;
-      btn.textContent = 'Registrar venda';
-      return;
-    }
-
-    const fmt = v => v ? 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : null;
-    const textoResultado = [
-      `${produto} — ${cliente} registrado.`,
-      `+${data.xp_ganho} XP`,
-      valor ? fmt(valor) : 'Êxito (sem valor definido)',
-      data.posicao_ranking ? `${data.posicao_ranking}° no ranking` : '',
-    ].filter(Boolean).join(' · ');
-
-    document.getElementById('venda-resultado-texto').textContent = textoResultado;
-    document.getElementById('venda-resultado').style.display = 'block';
-    btn.style.display = 'none';
-
-    mostrarToast(`💰 Venda registrada! +${data.xp_ganho} XP`, 'sucesso');
-  } catch (err) {
-    mostrarToast('Erro de conexão.', 'erro');
-    btn.disabled = false;
-    btn.textContent = 'Registrar venda';
-  }
 }
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
@@ -2377,160 +2202,10 @@ function mostrarHomeDashboard() {
         <button class="hd-btn primary" onclick="abrirModalTrilha()">📚 Ver trilha completa</button>
         <button class="hd-btn" onclick="selecionarFerramenta('simular_reuniao')">🎭 Simular reunião</button>
         <button class="hd-btn" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
-        ${user?.empresa_id ? `<button class="hd-btn" onclick="abrirModalVenda()">💰 Registrar venda</button>` : ''}
       </div>
 
-      ${user?.empresa_id ? `
-      <div class="hd-card" style="margin-top:16px" id="hd-agenda-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="hd-card-label" style="margin-bottom:0">📅 Próximas reuniões & follow-ups</div>
-          <div style="display:flex;gap:8px">
-            <button onclick="abrirModalFollowup()" style="font-size:0.72rem;padding:4px 10px;background:rgba(167,139,250,0.15);color:#A78BFA;border:1px solid rgba(167,139,250,0.3);border-radius:6px;cursor:pointer">+ Follow-up</button>
-            <a href="/agenda" style="font-size:0.72rem;padding:4px 10px;background:rgba(52,211,153,0.1);color:#34D399;border:1px solid rgba(52,211,153,0.25);border-radius:6px;text-decoration:none">Ver agenda →</a>
-          </div>
-        </div>
-        <div id="hd-agenda-list"><div style="color:var(--text-muted);font-size:0.82rem">Carregando…</div></div>
-      </div>` : ''}
-    </div>
-
-    <!-- Modal Follow-up rápido -->
-    <div class="modal-overlay" id="modal-followup-rapido" style="z-index:9999">
-      <div class="modal" style="max-width:400px">
-        <div class="modal-header">
-          <span class="modal-title">📞 Agendar Follow-up</span>
-          <button class="modal-close" onclick="document.getElementById('modal-followup-rapido').classList.remove('active')">✕</button>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
-          <div class="form-group">
-            <label class="form-label">Tipo</label>
-            <select id="fu-tipo" class="form-input">
-              <option value="ligação">📞 Ligação</option>
-              <option value="mensagem">💬 Mensagem (WhatsApp)</option>
-              <option value="email">📧 E-mail</option>
-              <option value="reunião">📅 Reunião</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Lead / Contato</label>
-            <input type="text" id="fu-nome" class="form-input" placeholder="Nome do lead (opcional)" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Data e hora *</label>
-            <input type="datetime-local" id="fu-data" class="form-input" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Observação</label>
-            <input type="text" id="fu-desc" class="form-input" placeholder="Ex: Retornar proposta enviada" />
-          </div>
-          <button class="btn btn-primary btn-full" onclick="salvarFollowup()">Agendar follow-up</button>
-        </div>
-      </div>
     </div>
   `;
-
-  // Carrega agenda após render
-  if (user?.empresa_id) carregarAgendaHome();
-}
-
-async function carregarAgendaHome() {
-  const el = document.getElementById('hd-agenda-list');
-  if (!el) return;
-
-  try {
-    const [resAgenda, resFollowups] = await Promise.all([
-      api.get('/leads/agenda'),
-      api.get('/followups/proximos'),
-    ]);
-
-    const agenda    = resAgenda?.ok    ? (await resAgenda.json()).reunioes     : [];
-    const followups = resFollowups?.ok ? (await resFollowups.json()).followups : [];
-
-    // Mescla e ordena por data
-    const tiposIcon = { 'ligação':'📞', 'mensagem':'💬', 'email':'📧', 'reunião':'📅' };
-    const itens = [
-      ...agenda.map(r => ({
-        tipo: 'reuniao',
-        data: new Date(r.data_reuniao),
-        label: r.nome_lead + (r.empresa_lead ? ` · ${r.empresa_lead}` : ''),
-        sub: r.local_reuniao || 'Reunião',
-        icon: '📅',
-        id: r.id,
-      })),
-      ...followups.map(f => ({
-        tipo: 'followup',
-        data: new Date(f.data_hora),
-        label: f.nome_lead || 'Follow-up',
-        sub: f.descricao || f.tipo,
-        icon: tiposIcon[f.tipo] || '📌',
-        id: f.id,
-        concluido: f.concluido,
-      })),
-    ].sort((a, b) => a.data - b.data).slice(0, 6);
-
-    if (!itens.length) {
-      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem">Nenhum compromisso próximo. <a href="/agenda" style="color:var(--accent-light)">Ver agenda completa →</a></div>';
-      return;
-    }
-
-    const agora = new Date();
-    el.innerHTML = itens.map(item => {
-      const diff = item.data - agora;
-      const emBreve = diff > 0 && diff < 2 * 60 * 60 * 1000;
-      const hora = item.data.toLocaleString('pt-BR', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-      const badge = emBreve ? '<span style="font-size:0.65rem;background:#EF4444;color:#fff;padding:2px 6px;border-radius:99px;margin-left:6px">EM BREVE</span>' : '';
-      const check = item.tipo === 'followup'
-        ? `<button onclick="concluirFollowup('${item.id}')" title="Marcar concluído" style="margin-left:auto;background:transparent;border:1px solid rgba(52,211,153,0.3);color:#34D399;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem">✓</button>`
-        : '';
-      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:1.1rem;margin-top:2px">${item.icon}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:0.85rem;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.label)}${badge}</div>
-          <div style="font-size:0.75rem;color:var(--text-muted)">${hora} · ${escapeHtml(item.sub)}</div>
-        </div>
-        ${check}
-      </div>`;
-    }).join('');
-
-  } catch (e) {
-    if (el) el.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem">Não foi possível carregar a agenda.</div>';
-  }
-}
-
-function abrirModalFollowup() {
-  // Preenche data mínima = agora
-  const input = document.getElementById('fu-data');
-  if (input) {
-    const agora = new Date();
-    agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
-    input.min = agora.toISOString().slice(0,16);
-  }
-  document.getElementById('modal-followup-rapido').classList.add('active');
-}
-
-async function salvarFollowup() {
-  const tipo    = document.getElementById('fu-tipo').value;
-  const nome    = document.getElementById('fu-nome').value.trim();
-  const data    = document.getElementById('fu-data').value;
-  const desc    = document.getElementById('fu-desc').value.trim();
-
-  if (!data) { mostrarToast('Informe a data e hora.', 'aviso'); return; }
-
-  const res = await api.post('/followups', { tipo, nome_lead: nome || null, data_hora: data, descricao: desc || null });
-  if (!res?.ok) { mostrarToast('Erro ao agendar follow-up.', 'erro'); return; }
-
-  document.getElementById('modal-followup-rapido').classList.remove('active');
-  mostrarToast('Follow-up agendado! 📞', 'sucesso');
-
-  // Limpa form
-  ['fu-nome','fu-data','fu-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-
-  carregarAgendaHome();
-}
-
-async function concluirFollowup(id) {
-  await api.patch(`/followups/${id}`, { concluido: true });
-  mostrarToast('Follow-up concluído! ✓', 'sucesso');
-  carregarAgendaHome();
 }
 
 function mostrarInputChat() {
@@ -2716,198 +2391,6 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// ─── Funil SDR / Closer ──────────────────────────────────────────────────────
-const funil = (() => {
-  let _leads = [];
-  let _leadAtivo = null;
-
-  function aba(nome) {
-    ['novo', 'lista'].forEach(n => {
-      const el = document.getElementById(`funil-aba-${n}`);
-      if (el) el.style.display = n === nome ? 'block' : 'none';
-      const tab = document.getElementById(`tab-${n === 'novo' ? 'novo-lead' : 'leads'}`);
-      if (tab) tab.classList.toggle('active', n === nome);
-    });
-    if (nome === 'lista') listar();
-  }
-
-  async function listar() {
-    const container = document.getElementById('funil-leads-lista');
-    if (!container) return;
-    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">Carregando…</div>';
-
-    const status = document.getElementById('funil-filtro-status')?.value || '';
-    const url    = '/leads' + (status ? `?status=${encodeURIComponent(status)}` : '');
-
-    try {
-      const res  = await api.get(url);
-      if (!res?.ok) throw new Error();
-      const data = await res.json();
-      _leads = data.leads || [];
-
-      if (!_leads.length) {
-        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:32px">Nenhum lead encontrado.</div>';
-        return;
-      }
-
-      const statusLabel = {
-        novo: 'Novo',
-        briefing_gerado: 'Briefing pronto',
-        reuniao_agendada: 'Reunião marcada',
-        negociando: 'Negociando',
-        ganhou: 'Ganhou ✅',
-        perdeu: 'Perdeu ❌',
-      };
-
-      container.innerHTML = _leads.map(l => `
-        <div class="lead-card" onclick="funil.abrirBriefing('${l.id}')">
-          <div style="display:flex;align-items:flex-start;gap:10px;justify-content:space-between">
-            <div style="flex:1">
-              <div style="font-weight:700;font-size:14px;margin-bottom:2px">${esc(l.nome_lead)}</div>
-              ${l.empresa_lead ? `<div style="font-size:12px;color:var(--text-muted)">${esc(l.empresa_lead)}</div>` : ''}
-            </div>
-            <span class="lead-status-pill status-${l.status || 'novo'}">${statusLabel[l.status] || l.status}</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:8px;line-height:1.4">
-            ${esc(l.contexto?.slice(0, 100))}${(l.contexto?.length || 0) > 100 ? '…' : ''}
-          </div>
-          <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--text-muted)">
-            <span>SDR: ${l.sdr?.name || '—'}</span>
-            ${l.closer?.name ? `<span>Closer: ${l.closer.name}</span>` : ''}
-            <span>Origem: ${esc(l.origem || '—')}</span>
-            ${l.valor_estimado ? `<span style="color:#10B981">R$ ${Number(l.valor_estimado).toLocaleString('pt-BR')}</span>` : ''}
-          </div>
-        </div>
-      `).join('');
-    } catch {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:32px">Erro ao carregar leads.</div>';
-    }
-  }
-
-  async function registrar(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-registrar-lead');
-    btn.disabled = true;
-    btn.textContent = '⏳ Gerando briefing com May…';
-
-    try {
-      const body = {
-        nome_lead:       document.getElementById('fl-nome').value.trim(),
-        empresa_lead:    document.getElementById('fl-empresa').value.trim() || null,
-        contexto:        document.getElementById('fl-contexto').value.trim(),
-        objecao_inicial: document.getElementById('fl-objecao').value.trim() || null,
-        origem:          document.getElementById('fl-origem').value === 'outro'
-                           ? (document.getElementById('fl-origem-outro').value.trim() || 'outro')
-                           : document.getElementById('fl-origem').value,
-        valor_estimado:  document.getElementById('fl-valor').value || null,
-        closer_id:       document.getElementById('fl-closer')?.value || null,
-      };
-
-      const res  = await api.post('/leads', body);
-      const data = await res?.json();
-
-      if (!res?.ok) throw new Error(data?.erro || 'Erro ao registrar lead.');
-
-      // Limpa form
-      ['fl-nome','fl-empresa','fl-contexto','fl-objecao','fl-valor'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-
-      mostrarToast('✅ Lead registrado! Briefing gerado pela May.', 'sucesso');
-
-      // Exibe briefing imediatamente
-      _leadAtivo = data.lead;
-      mostrarBriefing(data.lead);
-
-    } catch (err) {
-      mostrarToast(err.message || 'Erro ao registrar lead.', 'erro');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '🎯 Registrar Lead e Gerar Briefing';
-    }
-  }
-
-  function abrirBriefing(id) {
-    const lead = _leads.find(l => l.id === id);
-    if (!lead) return;
-    _leadAtivo = lead;
-    mostrarBriefing(lead);
-  }
-
-  function mostrarBriefing(lead) {
-    document.getElementById('briefing-titulo').textContent   = `🎯 ${lead.nome_lead}`;
-    document.getElementById('briefing-origem').textContent   = `Origem: ${lead.origem || '—'} · ${lead.empresa_lead || ''}`;
-    document.getElementById('briefing-conteudo').textContent = lead.briefing || 'Briefing não disponível.';
-    document.getElementById('briefing-lead-id').value        = lead.id;
-    document.getElementById('briefing-resultado').value      = lead.resultado || '';
-    document.getElementById('briefing-valor-group').style.display = 'none';
-    document.getElementById('modal-briefing').classList.add('active');
-  }
-
-  async function atualizarStatus(btn) {
-    const id     = document.getElementById('briefing-lead-id')?.value;
-    const status = btn.dataset.status;
-    if (!id) return;
-
-    // Reunião marcada: mostra campos de data/hora
-    if (status === 'reuniao_agendada') {
-      const ag = document.getElementById('briefing-agenda-group');
-      if (ag) { ag.style.display = 'flex'; }
-      document.getElementById('briefing-valor-group').style.display = 'none';
-      return; // aguarda confirmarAgendamento()
-    }
-
-    const ganhando = status === 'ganhou';
-    document.getElementById('briefing-valor-group').style.display  = ganhando ? 'block' : 'none';
-    document.getElementById('briefing-agenda-group').style.display = 'none';
-    if (!ganhando) _confirmarStatus(id, status);
-  }
-
-  async function confirmarAgendamento() {
-    const id           = document.getElementById('briefing-lead-id')?.value;
-    const data_reuniao = document.getElementById('briefing-data-reuniao')?.value;
-    const local        = document.getElementById('briefing-local-reuniao')?.value || null;
-
-    if (!data_reuniao) { mostrarToast('Informe a data e hora da reunião.', 'erro'); return; }
-
-    await _confirmarStatus(id, 'reuniao_agendada', { data_reuniao: new Date(data_reuniao).toISOString(), local_reuniao: local });
-    mostrarToast('📅 Reunião agendada! Aparecerá na Agenda Comercial.', 'sucesso');
-  }
-
-  async function _confirmarStatus(id, status, extra = {}) {
-    const resultado     = document.getElementById('briefing-resultado')?.value;
-    const valor_fechado = document.getElementById('briefing-valor-fechado')?.value || null;
-
-    try {
-      const body = { status, resultado, valor_fechado, ...extra };
-      const res  = await api.patch(`/leads/${id}/status`, body);
-      if (!res?.ok) throw new Error();
-      if (status !== 'reuniao_agendada') mostrarToast('Status atualizado!', 'sucesso');
-      document.getElementById('modal-briefing').classList.remove('active');
-      document.getElementById('briefing-agenda-group').style.display = 'none';
-      listar();
-    } catch {
-      mostrarToast('Erro ao atualizar status.', 'erro');
-    }
-  }
-
-  return { aba, listar, registrar, abrirBriefing, atualizarStatus, confirmarAgendamento };
-})();
-
-function abrirModalFunil() {
-  document.getElementById('modal-funil').classList.add('active');
-  funil.aba('novo');
-}
-
-function fecharModalFunil() {
-  document.getElementById('modal-funil').classList.remove('active');
-}
-
-function fecharModalBriefing() {
-  document.getElementById('modal-briefing').classList.remove('active');
-}
-
 // ─── Cancelamento de assinatura com feedback ──────────────────────────────────
 function abrirModalCancelamento() {
   const modal = document.getElementById('modal-cancelamento');
@@ -2945,18 +2428,15 @@ Object.assign(window, {
   enviarMensagem, novaConversa, carregarConversa, excluirConversa,
   selecionarFerramenta, uploadArquivo, toggleGravacao, removerAnexo,
   abrirModalDiagnostico, salvarDiagnostico,
-  abrirModalPerfil, salvarPerfil, uploadFotoPerfil,
+  abrirModalPerfil, salvarPerfil, uploadFotoPerfil, uploadLogoEscritorio, baixarPropostaPDF,
   iniciarCheckout, abrirPortalStripe, logout,
   toggleMenuMobile, mostrarToast, toggleUserDropdown, fecharUserDropdown,
   copiarMensagem, exportarDocx, exportarPdf, exportarImagem, salvarTemplate,
   abrirArquivosArea, copiarArquivo, excluirArquivo,
-  abrirModalVenda, fecharModalVenda, registrarVenda,
   toggle2FA, confirmar2FAAtivacao, confirmar2FADesativacao,
   abrirModalTrilha, marcarExercicio, iniciarSimulacao, iniciarExercicioTrilha,
   testarNotificacao,
   instalarPWA, fecharBannerPWA,
   toggleTema,
-  abrirModalFunil, fecharModalFunil, fecharModalBriefing,
-  funil,
   abrirModalCancelamento, fecharModalCancelamento, confirmarCancelamento,
 });
