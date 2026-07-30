@@ -652,12 +652,12 @@ function renderGradeMes(ano, mes, reunioes, followups) {
   reunioes.forEach(r => {
     const d = (r.data_reuniao || '').slice(0, 10);
     if (!eventosPorDia[d]) eventosPorDia[d] = [];
-    eventosPorDia[d].push({ tipo: 'reuniao', nome: r.nome_lead || r.empresa || '—', hora: (r.data_reuniao || '').slice(11, 16) });
+    eventosPorDia[d].push({ tipo: 'reuniao', id: r.id, nome: r.nome_lead || r.empresa || '—', hora: (r.data_reuniao || '').slice(11, 16) });
   });
   followups.forEach(f => {
     const d = (f.data_hora || '').slice(0, 10);
     if (!eventosPorDia[d]) eventosPorDia[d] = [];
-    eventosPorDia[d].push({ tipo: 'followup', nome: f.nome_lead || f.descricao || '—', hora: (f.data_hora || '').slice(11, 16), concluido: f.concluido });
+    eventosPorDia[d].push({ tipo: 'followup', id: f.id, nome: f.nome_lead || f.descricao || '—', hora: (f.data_hora || '').slice(11, 16), concluido: f.concluido });
   });
 
   // Dia da semana em que começa o mês (0=dom)
@@ -686,10 +686,12 @@ function renderGradeMes(ano, mes, reunioes, followups) {
       <div style="min-height:80px;border-radius:8px;background:${isHoje ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)'};border:1px solid ${isHoje ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'};padding:6px;position:relative">
         <div style="font-size:0.75rem;font-weight:${isHoje ? '700' : '500'};color:${isHoje ? '#A78BFA' : '#ccc'};margin-bottom:4px">${dia}</div>
         ${eventos.slice(0, maxShow).map(ev => `
-          <div style="font-size:0.65rem;padding:2px 5px;border-radius:4px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+          <div onclick="${ev.tipo === 'reuniao' ? `abrirBriefing('${ev.id}')` : `toggleFollowup('${ev.id}', ${ev.concluido})`}"
+            style="font-size:0.65rem;padding:2px 5px;border-radius:4px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;
             background:${ev.tipo === 'reuniao' ? 'rgba(59,130,246,0.2)' : ev.concluido ? 'rgba(34,197,94,0.15)' : 'rgba(109,40,217,0.25)'};
             color:${ev.tipo === 'reuniao' ? '#93C5FD' : ev.concluido ? '#86EFAC' : '#C4B5FD'};
-            border-left:2px solid ${ev.tipo === 'reuniao' ? '#3B82F6' : ev.concluido ? '#22C55E' : '#6D28D9'}">
+            border-left:2px solid ${ev.tipo === 'reuniao' ? '#3B82F6' : ev.concluido ? '#22C55E' : '#6D28D9'}"
+            title="${ev.hora} · ${ev.nome}">
             ${ev.hora} ${ev.nome}
           </div>
         `).join('')}
