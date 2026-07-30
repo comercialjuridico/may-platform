@@ -578,7 +578,7 @@
   const token = localStorage.getItem('may_access');
   if (!token) { window.location.href = '/auth.html'; return; }
   try {
-    const r = await fetch('/api/modulos/check/arena_vendas', {
+    const r = await fetch('/api/modulos/check/painel_gestor', {
       headers: { Authorization: `Bearer ${token}` }
     });
     const d = await r.json();

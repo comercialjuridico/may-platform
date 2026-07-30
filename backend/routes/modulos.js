@@ -7,23 +7,14 @@ const { criarRecorrencia, cancelarRecorrencia } = require('../services/cielo');
 
 // Catálogo de módulos disponíveis
 const MODULOS = {
-  arena_vendas: {
-    id:          'arena_vendas',
-    nome:        'Arena de Vendas',
-    descricao:   'Painel do gestor com visão da equipe, simulações em modo competitivo e evolução individual de cada vendedor.',
+  painel_gestor: {
+    id:          'painel_gestor',
+    nome:        'Painel do Gestor',
+    descricao:   'Visão completa da equipe: Arena de Vendas, Metas, Ranking de contratos fechados e performance individual de cada vendedor — tudo em um só lugar.',
     emoji:       '🏟️',
-    bonus:       true,          // não cobra — liberado como bônus quando empresa tem ≥2 membros
-    bonus_label: 'Bônus de lançamento',
-    rota:        '/gestor',
-  },
-  ranking_vendas: {
-    id:          'ranking_vendas',
-    nome:        'Ranking de Vendas',
-    descricao:   'Registro de contratos fechados, leaderboard da equipe em tempo real e metas visuais.',
-    emoji:       '🏆',
     valor_m:     '147.00',
     valor_a:     '117.00',
-    rota:        '/ranking',
+    rota:        '/gestor',
   },
   calendario_cadencia: {
     id:          'calendario_cadencia',
@@ -57,7 +48,6 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const empresa_id = user?.empresa_id;
 
-    // Módulos pagos ativos
     let ativos = [];
     if (empresa_id) {
       const { data } = await supabase
@@ -67,41 +57,18 @@ router.get('/', authMiddleware, async (req, res) => {
       ativos = data || [];
     }
 
-    // Conta membros da empresa (para bônus Arena de Vendas)
-    let totalMembros = 1;
-    if (empresa_id) {
-      const { count } = await supabase
-        .from('users')
-        .select('id', { count: 'exact', head: true })
-        .eq('empresa_id', empresa_id);
-      totalMembros = count || 1;
-    }
-
-    const arenaDesbloqueada = totalMembros >= 2 || user?.role === 'admin_may';
-
     const ativosMap = {};
     ativos.forEach(m => { ativosMap[m.modulo_id] = m; });
 
-    const catalogo = Object.values(MODULOS).map(mod => {
-      // Módulo bônus (Arena de Vendas): ativo se tiver equipe
-      if (mod.bonus) {
-        return {
-          ...mod,
-          ativo:           arenaDesbloqueada,
-          bonus_desbloqueado: arenaDesbloqueada,
-          membros_equipe:  totalMembros,
-        };
-      }
-      return {
-        ...mod,
-        ativo:      !!ativosMap[mod.id],
-        periodo:    ativosMap[mod.id]?.periodo || null,
-        ativo_desde: ativosMap[mod.id]?.created_at || null,
-        cielo_id:   ativosMap[mod.id]?.cielo_recurrent_id || null,
-      };
-    });
+    const catalogo = Object.values(MODULOS).map(mod => ({
+      ...mod,
+      ativo:       !!ativosMap[mod.id],
+      periodo:     ativosMap[mod.id]?.periodo || null,
+      ativo_desde: ativosMap[mod.id]?.created_at || null,
+      cielo_id:    ativosMap[mod.id]?.cielo_recurrent_id || null,
+    }));
 
-    res.json({ modulos: catalogo, membros_equipe: totalMembros });
+    res.json({ modulos: catalogo });
   } catch (err) {
     console.error('Erro GET /modulos:', err.message);
     res.status(500).json({ erro: 'Erro ao buscar módulos.' });
@@ -128,15 +95,6 @@ router.get('/check/:moduloId', authMiddleware, async (req, res) => {
     if (user?.role === 'admin_may') return res.json({ acesso: true });
 
     if (!user?.empresa_id) return res.json({ acesso: false });
-
-    // Módulo bônus (Arena de Vendas): libera se empresa tem ≥2 membros
-    if (MODULOS[moduloId]?.bonus) {
-      const { count } = await supabase
-        .from('users')
-        .select('id', { count: 'exact', head: true })
-        .eq('empresa_id', user.empresa_id);
-      return res.json({ acesso: (count || 0) >= 2 });
-    }
 
     const { data } = await supabase
       .from('empresa_modulos')
