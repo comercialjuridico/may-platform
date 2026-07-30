@@ -63,6 +63,30 @@ router.get('/agenda', authMiddleware, async (req, res) => {
 
 // ─── GET /api/leads ──────────────────────────────────────────────────────────
 // Lista leads da empresa do usuário
+// ─── GET /api/leads/:id ───────────────────────────────────────────────────────
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('leads')
+      .select(`
+        id, nome_lead, empresa_lead, whatsapp, produto, valor_honorarios,
+        prioridade, origem, origem_canal, contexto, objecao_inicial,
+        status, briefing, data_reuniao, local_reuniao, participou_reuniao,
+        fechado_em, created_at,
+        sdr:sdr_id(id, name), closer:closer_id(id, name)
+      `)
+      .eq('id', req.params.id)
+      .eq('empresa_id', req.user.empresa_id)
+      .single();
+    if (error || !data) return res.status(404).json({ erro: 'Lead não encontrado.' });
+    res.json(data);
+  } catch (err) {
+    console.error('Erro ao buscar lead:', err.message);
+    res.status(500).json({ erro: 'Erro ao buscar lead.' });
+  }
+});
+
+// ─── GET /api/leads ───────────────────────────────────────────────────────────
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { status, closer_id } = req.query;

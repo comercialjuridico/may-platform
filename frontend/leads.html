@@ -445,7 +445,10 @@ function renderTabela(leads) {
                        : '—';
     const fechou       = l.status === 'ganhou' ? '✅ Sim' : l.status === 'perdeu' ? '❌ Não' : '—';
     const prio         = l.prioridade ? `<span class="prio-badge prio-${l.prioridade}">${l.prioridade}</span>` : '—';
-    const status       = `<span class="status-pill s-${l.status||'briefing_gerado'}">${STATUS_PT[l.status]||l.status}</span>`;
+    const temBriefing  = !!l.briefing;
+    const status       = temBriefing
+      ? `<span class="status-pill s-${l.status||'briefing_gerado'}" style="cursor:pointer" onclick="event.stopPropagation();verBriefing('${l.id}')" title="Ver briefing">${STATUS_PT[l.status]||l.status} 📋</span>`
+      : `<span class="status-pill s-${l.status||'briefing_gerado'}">${STATUS_PT[l.status]||l.status}</span>`;
 
     return `<tr onclick="abrirEdicao('${l.id}')">
       <td class="td-num">${i + 1}</td>
@@ -464,6 +467,7 @@ function renderTabela(leads) {
       <td>${status}</td>
       <td>
         <div class="row-actions" onclick="event.stopPropagation()">
+          ${temBriefing ? `<button class="btn-row" onclick="verBriefing('${l.id}')">📋 Briefing</button>` : ''}
           <button class="btn-row" onclick="abrirEdicao('${l.id}')">✏️ Editar</button>
           <button class="btn-row danger" onclick="confirmarExclusao('${l.id}')">🗑️</button>
         </div>
@@ -780,6 +784,87 @@ function iniciarCanvas() {
   }
   window.addEventListener('resize', resize); resize(); draw();
 }
+
+// ── Modal de Briefing ────────────────────────────────────────────────────────
+let _briefingLeadCache = {};
+
+async function verBriefing(id) {
+  // Usa cache se já carregou
+  let lead = _briefingLeadCache[id];
+  if (!lead) {
+    const token = localStorage.getItem('may_access');
+    const res = await fetch(`/api/leads/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return;
+    lead = await res.json();
+    _briefingLeadCache[id] = lead;
+  }
+
+  const modal = document.getElementById('modal-briefing-leads');
+  document.getElementById('briefing-lead-nome').textContent   = lead.nome_lead || '—';
+  document.getElementById('briefing-lead-empresa').textContent = lead.empresa_lead ? `· ${lead.empresa_lead}` : '';
+  document.getElementById('briefing-lead-produto').textContent = lead.produto || '—';
+  document.getElementById('briefing-lead-origem').textContent  = lead.origem_canal || lead.origem || '—';
+  document.getElementById('briefing-lead-contexto').textContent = lead.contexto || '—';
+  document.getElementById('briefing-lead-conteudo').innerHTML =
+    (lead.briefing || 'Nenhum briefing gerado ainda.').replace(/\n/g, '<br>');
+  document.getElementById('briefing-lead-id').value = id;
+  modal.style.display = 'flex';
+}
+
+function fecharBriefingLeads() {
+  document.getElementById('modal-briefing-leads').style.display = 'none';
+}
+
+async function regerarBriefingLead() {
+  const id    = document.getElementById('briefing-lead-id').value;
+  const token = localStorage.getItem('may_access');
+  const btn   = document.getElementById('btn-regen-briefing');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const res = await fetch(`/api/leads/${id}/rebriefing`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await res.json();
+    if (data.briefing) {
+      document.getElementById('briefing-lead-conteudo').innerHTML = data.briefing.replace(/\n/g, '<br>');
+      delete _briefingLeadCache[id]; // limpa cache
+    }
+  } finally {
+    btn.disabled = false; btn.textContent = '🔄 Regerar';
+  }
+}
 </script>
+
+<!-- Modal Briefing -->
+<div id="modal-briefing-leads" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#0e1426;border:1px solid rgba(124,58,237,.3);border-radius:20px;padding:28px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800" id="briefing-lead-nome"></div>
+        <div style="font-size:13px;color:rgba(200,190,255,.5);margin-top:3px">
+          <span id="briefing-lead-empresa"></span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+          <span style="font-size:11px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.25);color:#A78BFA;padding:2px 10px;border-radius:20px" id="briefing-lead-produto"></span>
+          <span style="font-size:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(200,190,255,.6);padding:2px 10px;border-radius:20px" id="briefing-lead-origem"></span>
+        </div>
+      </div>
+      <button onclick="fecharBriefingLeads()" style="background:none;border:none;color:rgba(200,190,255,.5);font-size:20px;cursor:pointer;flex-shrink:0">✕</button>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:rgba(200,190,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Contexto do lead</div>
+    <div id="briefing-lead-contexto" style="font-size:13px;color:rgba(200,190,255,.65);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;margin-bottom:20px;line-height:1.6"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:11px;font-weight:700;color:rgba(200,190,255,.4);text-transform:uppercase;letter-spacing:.06em">📋 Briefing May</div>
+      <button id="btn-regen-briefing" onclick="regerarBriefingLead()" style="background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.3);color:#A78BFA;font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer">🔄 Regerar</button>
+    </div>
+    <div id="briefing-lead-conteudo" style="font-size:13px;color:#E8E4FF;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.15);border-radius:12px;padding:16px;line-height:1.7;white-space:pre-wrap"></div>
+
+    <input type="hidden" id="briefing-lead-id" />
+    <button onclick="fecharBriefingLeads()" style="margin-top:20px;width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;color:rgba(200,190,255,.6);font-size:14px;font-weight:600;cursor:pointer">Fechar</button>
+  </div>
+</div>
 </body>
 </html>
