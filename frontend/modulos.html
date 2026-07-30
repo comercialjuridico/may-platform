@@ -301,15 +301,47 @@ function renderModulos() {
   if (!_modulos.length) { grid.innerHTML = '<p style="color:var(--sub)">Nenhum módulo disponível.</p>'; return; }
 
   grid.innerHTML = _modulos.map(mod => {
+    // ── Card de bônus (Arena de Vendas) ─────────────────────────────────────
+    if (mod.bonus) {
+      const desbloqueado = mod.bonus_desbloqueado;
+      const membros      = mod.membros_equipe || 1;
+
+      const badgeBonus = `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#F59E0B;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap">🎁 ${mod.bonus_label || 'Bônus'}</span>`;
+
+      const acoesBonus = desbloqueado
+        ? `<a href="${mod.rota}" class="btn-acessar">Acessar →</a>`
+        : `<span style="font-size:12px;color:var(--sub)">Convide 1 pessoa para desbloquear</span>`;
+
+      const precoBonus = desbloqueado
+        ? `<div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green)">Grátis 🎁</div>
+           <div style="font-size:11px;color:var(--sub)">Desbloqueado com ${membros} membro${membros!==1?'s':''} na equipe</div>`
+        : `<div style="font-size:13px;color:var(--sub)">Desbloqueado ao convidar<br>o 1º membro da equipe</div>`;
+
+      return `
+      <div class="modulo-card ${desbloqueado ? 'ativo' : ''}" id="card-${mod.id}" style="${desbloqueado ? 'border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.04)' : ''}">
+        <div class="modulo-top">
+          <div class="modulo-emoji" style="${desbloqueado ? 'background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3)' : ''}">${mod.emoji}</div>
+          <div class="modulo-info">
+            <div class="modulo-nome">${mod.nome}</div>
+            <div class="modulo-desc">${mod.descricao}</div>
+          </div>
+          ${badgeBonus}
+        </div>
+        <div class="modulo-bottom">
+          <div class="modulo-preco">${precoBonus}</div>
+          <div style="display:flex;gap:8px;align-items:center">${acoesBonus}</div>
+        </div>
+      </div>`;
+    }
+
+    // ── Cards pagos normais ──────────────────────────────────────────────────
     const preco = _periodo === 'a' ? mod.valor_a : mod.valor_m;
     const perLabel = _periodo === 'a' ? '/mês · cobrado anualmente' : '/mês';
     const econLabel = _periodo === 'a'
-      ? `<div class="modulo-preco-economia">Você economiza R$${fmt((parseFloat(mod.valor_m) - parseFloat(mod.valor_a)) * 12)}/ano</div>`
+      ? `<div class="modulo-preco-economia">Economize R$${fmt((parseFloat(mod.valor_m) - parseFloat(mod.valor_a)) * 12)}/ano</div>`
       : '';
 
-    const badgeAtivo = mod.ativo
-      ? `<span class="modulo-badge-ativo">✓ Ativo</span>`
-      : '';
+    const badgeAtivo = mod.ativo ? `<span class="modulo-badge-ativo">✓ Ativo</span>` : '';
 
     const acoes = mod.ativo
       ? `<a href="${mod.rota}" class="btn-acessar">Acessar →</a>

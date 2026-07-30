@@ -313,6 +313,19 @@
   </style>
 </head>
 <body>
+<script>
+(async function() {
+  const token = localStorage.getItem('may_access');
+  if (!token) { window.location.href = '/auth.html'; return; }
+  try {
+    const r = await fetch('/api/modulos/check/arena_vendas', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const d = await r.json();
+    if (!d.acesso) window.location.href = '/modulos';
+  } catch(e) { /* se falhar, deixa carregar */ }
+})();
+</script>
 <canvas id="canvas-bg"></canvas>
 
 <div class="page">
