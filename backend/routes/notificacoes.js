@@ -5,11 +5,16 @@ const webpush   = require('web-push');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 
-webpush.setVapidDetails(
-  'mailto:comercialjuridico1@gmail.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+const VAPID_OK = process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY;
+if (VAPID_OK) {
+  webpush.setVapidDetails(
+    'mailto:comercialjuridico1@gmail.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+} else {
+  console.warn('[notificacoes] VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY não configuradas — push notifications desativadas.');
+}
 
 // ─── GET /api/notificacoes/vapid-public ──────────────────────────────────────
 // Retorna a chave pública para o frontend assinar
