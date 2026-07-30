@@ -56,6 +56,21 @@ app.get('/app', (req, res) => {
 app.get('/manual', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/manual.html'));
 });
+app.get('/modulos', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/modulos.html'));
+});
+app.get('/ranking', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/ranking.html'));
+});
+app.get('/agenda', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
+});
+app.get('/leads', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/leads.html'));
+});
+app.get('/gestor', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/gestor.html'));
+});
 
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
 // Cache longo para assets imutáveis (js/css/imgs com hash no nome)
@@ -88,6 +103,7 @@ app.use('/api/leads',       require('./routes/leads'));
 app.use('/api/followups',   require('./routes/followups'));
 app.use('/api/public',      require('./routes/public'));
 app.use('/api/stripe',      require('./routes/stripe'));
+app.use('/api/modulos',     require('./routes/modulos'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulos — May</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #060912;
+      --bg2:    #0B0F20;
+      --purple: #7C3AED;
+      --plite:  #A78BFA;
+      --green:  #10B981;
+      --gold:   #F59E0B;
+      --red:    #EF4444;
+      --border: rgba(255,255,255,.08);
+      --surface: rgba(255,255,255,.04);
+      --text:   #E8E4FF;
+      --sub:    rgba(200,190,255,.5);
+      --radius: 16px;
+    }
+    html, body { min-height:100vh; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
+    h1,h2,h3 { font-family:'Syne',sans-serif; }
+
+    #canvas-bg { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.3; }
+
+    .page { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+
+    /* ── Header ── */
+    .header { display:flex; align-items:center; gap:14px; margin-bottom:36px; flex-wrap:wrap; }
+    .back-btn {
+      background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:8px 14px; font-size:13px; font-weight:600; color:var(--plite);
+      text-decoration:none; display:flex; align-items:center; gap:6px; transition:background .2s;
+    }
+    .back-btn:hover { background:rgba(124,58,237,.15); }
+    .header-title { flex:1; }
+    .header-title h1 { font-size:clamp(20px,3vw,26px); font-weight:800; }
+    .header-title p { font-size:13px; color:var(--sub); margin-top:4px; }
+
+    /* ── Toggle mensal/anual ── */
+    .toggle-wrap { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+    .toggle-label { font-size:13px; color:var(--sub); }
+    .toggle-label.active { color:var(--text); font-weight:600; }
+    .toggle-switch {
+      width:44px; height:24px; border-radius:12px; background:rgba(255,255,255,.1);
+      border:1px solid var(--border); cursor:pointer; position:relative; transition:background .2s;
+    }
+    .toggle-switch.on { background:var(--purple); }
+    .toggle-switch::after {
+      content:''; position:absolute; top:3px; left:3px;
+      width:16px; height:16px; border-radius:50%; background:#fff;
+      transition:transform .2s;
+    }
+    .toggle-switch.on::after { transform:translateX(20px); }
+    .economia-badge {
+      background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3);
+      color:var(--green); font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px;
+    }
+
+    /* ── Grid de módulos ── */
+    .modulos-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr));
+      gap:16px;
+    }
+    @media(max-width:500px) { .modulos-grid { grid-template-columns:1fr; } }
+
+    .modulo-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:24px;
+      display:flex; flex-direction:column; gap:16px;
+      transition:border-color .2s;
+    }
+    .modulo-card.ativo {
+      border-color:rgba(124,58,237,.4);
+      background:rgba(124,58,237,.06);
+    }
+    .modulo-card:hover { border-color:rgba(167,139,250,.25); }
+
+    .modulo-top { display:flex; align-items:flex-start; gap:14px; }
+    .modulo-emoji {
+      width:48px; height:48px; border-radius:14px;
+      background:rgba(124,58,237,.15); border:1px solid rgba(124,58,237,.25);
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; flex-shrink:0;
+    }
+    .modulo-card.ativo .modulo-emoji { background:rgba(124,58,237,.3); }
+    .modulo-info { flex:1; }
+    .modulo-nome { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
+    .modulo-desc { font-size:13px; color:var(--sub); line-height:1.5; }
+
+    .modulo-badge-ativo {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.25);
+      color:var(--green); font-size:11px; font-weight:700;
+      padding:3px 10px; border-radius:20px; white-space:nowrap; align-self:flex-start;
+    }
+
+    .modulo-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    .modulo-preco { }
+    .modulo-preco-val { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+    .modulo-preco-per { font-size:12px; color:var(--sub); }
+    .modulo-preco-economia { font-size:11px; color:var(--green); font-weight:600; margin-top:2px; }
+
+    .btn-ativar {
+      background:linear-gradient(135deg,#7C3AED,#6D28D9);
+      border:none; border-radius:10px; padding:10px 20px;
+      color:#fff; font-size:13px; font-weight:700; cursor:pointer;
+      transition:opacity .2s; white-space:nowrap;
+    }
+    .btn-ativar:hover { opacity:.85; }
+    .btn-cancelar {
+      background:transparent; border:1px solid rgba(239,68,68,.3);
+      border-radius:10px; padding:10px 20px;
+      color:var(--red); font-size:13px; font-weight:600; cursor:pointer;
+      transition:all .2s; white-space:nowrap;
+    }
+    .btn-cancelar:hover { background:rgba(239,68,68,.1); }
+    .btn-acessar {
+      background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.25);
+      border-radius:10px; padding:10px 20px;
+      color:var(--green); font-size:13px; font-weight:700; cursor:pointer;
+      text-decoration:none; transition:background .2s; white-space:nowrap;
+    }
+    .btn-acessar:hover { background:rgba(16,185,129,.2); }
+
+    /* ── Modal de ativação ── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.7);
+      backdrop-filter:blur(6px); z-index:100;
+      display:none; align-items:center; justify-content:center; padding:16px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:#0e1426; border:1px solid rgba(124,58,237,.3);
+      border-radius:20px; padding:28px; width:100%; max-width:440px;
+    }
+    .modal h2 { font-family:'Syne',sans-serif; font-size:18px; margin-bottom:6px; }
+    .modal-sub { font-size:13px; color:var(--sub); margin-bottom:20px; }
+    .modal label { font-size:12px; color:var(--sub); font-weight:600; display:block; margin-bottom:6px; }
+    .modal input {
+      width:100%; background:rgba(255,255,255,.05); border:1px solid var(--border);
+      border-radius:10px; padding:10px 14px; color:var(--text); font-size:14px;
+      font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; margin-bottom:14px;
+    }
+    .modal input:focus { border-color:var(--purple); }
+    .modal-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .modal-actions { display:flex; gap:10px; margin-top:8px; }
+    .btn-modal-cancel {
+      flex:1; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px; color:var(--sub); font-size:14px; font-weight:600;
+      cursor:pointer;
+    }
+    .btn-modal-confirm {
+      flex:2; background:linear-gradient(135deg,#7C3AED,#6D28D9);
+      border:none; border-radius:10px; padding:12px;
+      color:#fff; font-size:14px; font-weight:700; cursor:pointer;
+      transition:opacity .2s;
+    }
+    .btn-modal-confirm:hover { opacity:.85; }
+    .btn-modal-confirm:disabled { opacity:.5; cursor:not-allowed; }
+    .modal-erro { font-size:12px; color:var(--red); margin-top:8px; min-height:16px; }
+
+    /* ── Toast ── */
+    .toast {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      background:#1a1f3a; border:1px solid rgba(124,58,237,.4);
+      border-radius:12px; padding:12px 20px; font-size:13px; font-weight:600;
+      z-index:200; opacity:0; transition:opacity .3s; white-space:nowrap;
+    }
+    .toast.show { opacity:1; }
+    .toast.ok { border-color:rgba(16,185,129,.4); color:var(--green); }
+    .toast.err { border-color:rgba(239,68,68,.4); color:var(--red); }
+
+    /* ── Skeleton ── */
+    .skeleton { border-radius:8px; background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+    @keyframes shimmer { to { background-position:-200% 0; } }
+    .sk-card { height:180px; border-radius:var(--radius); }
+  </style>
+</head>
+<body>
+<canvas id="canvas-bg"></canvas>
+
+<div class="page">
+  <!-- Header -->
+  <div class="header">
+    <a href="/app" class="back-btn">← Voltar</a>
+    <div class="header-title">
+      <h1>🧩 Módulos</h1>
+      <p>Expanda sua plataforma com funcionalidades adicionais</p>
+    </div>
+  </div>
+
+  <!-- Toggle mensal/anual -->
+  <div class="toggle-wrap">
+    <span class="toggle-label active" id="label-m">Mensal</span>
+    <div class="toggle-switch" id="toggle-periodo" onclick="togglePeriodo()"></div>
+    <span class="toggle-label" id="label-a">Anual</span>
+    <span class="economia-badge" id="badge-eco" style="display:none">Economize ~20%</span>
+  </div>
+
+  <!-- Grid de módulos -->
+  <div class="modulos-grid" id="modulos-grid">
+    <!-- skeleton -->
+    <div class="skeleton sk-card"></div>
+    <div class="skeleton sk-card"></div>
+    <div class="skeleton sk-card"></div>
+    <div class="skeleton sk-card"></div>
+  </div>
+</div>
+
+<!-- Modal de ativação -->
+<div class="modal-overlay" id="modal-ativar">
+  <div class="modal">
+    <h2 id="modal-titulo">Ativar módulo</h2>
+    <p class="modal-sub" id="modal-sub">Informe os dados do cartão para ativar.</p>
+    <label>Número do cartão</label>
+    <input id="card-numero" type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="mascaraCartao(this)" />
+    <label>Nome no cartão</label>
+    <input id="card-titular" type="text" placeholder="Como aparece no cartão" />
+    <div class="modal-row">
+      <div>
+        <label>Validade</label>
+        <input id="card-validade" type="text" placeholder="MM/AA" maxlength="5" oninput="mascaraVal(this)" />
+      </div>
+      <div>
+        <label>CVV</label>
+        <input id="card-cvv" type="text" placeholder="123" maxlength="4" />
+      </div>
+    </div>
+    <label>CPF do titular</label>
+    <input id="card-cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" />
+    <div class="modal-erro" id="modal-erro"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-modal-confirm" id="btn-confirmar" onclick="confirmarAtivacao()">Ativar agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Estado ──────────────────────────────────────────────────────────────────
+let _periodo   = 'm';
+let _modulos   = [];
+let _moduloId  = null;
+
+const TOKEN = localStorage.getItem('may_access');
+
+// ── Auth guard ───────────────────────────────────────────────────────────────
+if (!TOKEN) { window.location.href = '/auth.html'; }
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function fmt(val) {
+  return parseFloat(val).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function toast(msg, tipo = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${tipo} show`;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Toggle período ──────────────────────────────────────────────────────────
+function togglePeriodo() {
+  _periodo = _periodo === 'm' ? 'a' : 'm';
+  const sw = document.getElementById('toggle-periodo');
+  sw.classList.toggle('on', _periodo === 'a');
+  document.getElementById('label-m').classList.toggle('active', _periodo === 'm');
+  document.getElementById('label-a').classList.toggle('active', _periodo === 'a');
+  document.getElementById('badge-eco').style.display = _periodo === 'a' ? 'inline-flex' : 'none';
+  renderModulos();
+}
+
+// ── Carregar módulos ─────────────────────────────────────────────────────────
+async function carregarModulos() {
+  try {
+    const res = await fetch('/api/modulos', {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    });
+    if (res.status === 401) { window.location.href = '/auth.html'; return; }
+    const data = await res.json();
+    _modulos = data.modulos || [];
+    renderModulos();
+  } catch (e) {
+    document.getElementById('modulos-grid').innerHTML =
+      '<p style="color:var(--sub);font-size:14px">Erro ao carregar módulos. Recarregue a página.</p>';
+  }
+}
+
+// ── Renderizar cards ─────────────────────────────────────────────────────────
+function renderModulos() {
+  const grid = document.getElementById('modulos-grid');
+  if (!_modulos.length) { grid.innerHTML = '<p style="color:var(--sub)">Nenhum módulo disponível.</p>'; return; }
+
+  grid.innerHTML = _modulos.map(mod => {
+    const preco = _periodo === 'a' ? mod.valor_a : mod.valor_m;
+    const perLabel = _periodo === 'a' ? '/mês · cobrado anualmente' : '/mês';
+    const econLabel = _periodo === 'a'
+      ? `<div class="modulo-preco-economia">Você economiza R$${fmt((parseFloat(mod.valor_m) - parseFloat(mod.valor_a)) * 12)}/ano</div>`
+      : '';
+
+    const badgeAtivo = mod.ativo
+      ? `<span class="modulo-badge-ativo">✓ Ativo</span>`
+      : '';
+
+    const acoes = mod.ativo
+      ? `<a href="${mod.rota}" class="btn-acessar">Acessar →</a>
+         <button class="btn-cancelar" onclick="cancelarModulo('${mod.id}', '${mod.nome}')">Cancelar</button>`
+      : `<button class="btn-ativar" onclick="abrirModal('${mod.id}')">Ativar módulo</button>`;
+
+    return `
+    <div class="modulo-card ${mod.ativo ? 'ativo' : ''}" id="card-${mod.id}">
+      <div class="modulo-top">
+        <div class="modulo-emoji">${mod.emoji}</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">${mod.nome}</div>
+          <div class="modulo-desc">${mod.descricao}</div>
+        </div>
+        ${badgeAtivo}
+      </div>
+      <div class="modulo-bottom">
+        <div class="modulo-preco">
+          <div class="modulo-preco-val">R$${fmt(preco)}<span style="font-size:14px;font-weight:400;color:var(--sub)">${perLabel}</span></div>
+          ${econLabel}
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">${acoes}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Modal de ativação ────────────────────────────────────────────────────────
+function abrirModal(moduloId) {
+  _moduloId = moduloId;
+  const mod = _modulos.find(m => m.id === moduloId);
+  const preco = _periodo === 'a' ? mod.valor_a : mod.valor_m;
+  document.getElementById('modal-titulo').textContent = `Ativar ${mod.nome}`;
+  document.getElementById('modal-sub').textContent =
+    `R$${fmt(preco)}/mês · cobrança imediata no cartão`;
+  document.getElementById('modal-erro').textContent = '';
+  document.getElementById('modal-ativar').classList.add('open');
+}
+
+function fecharModal() {
+  document.getElementById('modal-ativar').classList.remove('open');
+  _moduloId = null;
+}
+
+// ── Confirmar ativação ───────────────────────────────────────────────────────
+async function confirmarAtivacao() {
+  const btn = document.getElementById('btn-confirmar');
+  const erroEl = document.getElementById('modal-erro');
+  erroEl.textContent = '';
+
+  const numero   = document.getElementById('card-numero').value.replace(/\s/g,'');
+  const titular  = document.getElementById('card-titular').value.trim();
+  const validade = document.getElementById('card-validade').value.trim();
+  const cvv      = document.getElementById('card-cvv').value.trim();
+  const cpf      = document.getElementById('card-cpf').value.replace(/\D/g,'');
+
+  if (!numero || !titular || !validade || !cvv || !cpf) {
+    erroEl.textContent = 'Preencha todos os campos.'; return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Processando...';
+
+  try {
+    const res = await fetch('/api/modulos/ativar', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${TOKEN}` },
+      body: JSON.stringify({
+        modulo_id: _moduloId,
+        periodo:   _periodo,
+        cpf,
+        cartao: { numero, titular, validade, cvv },
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      erroEl.textContent = data.erro || 'Erro ao ativar.';
+      btn.disabled = false; btn.textContent = 'Ativar agora';
+      return;
+    }
+
+    fecharModal();
+    toast(`✓ ${_modulos.find(m=>m.id===_moduloId)?.nome} ativado!`, 'ok');
+    await carregarModulos();
+  } catch (e) {
+    erroEl.textContent = 'Erro de conexão. Tente novamente.';
+    btn.disabled = false; btn.textContent = 'Ativar agora';
+  }
+}
+
+// ── Cancelar módulo ──────────────────────────────────────────────────────────
+async function cancelarModulo(moduloId, nome) {
+  if (!confirm(`Cancelar o módulo "${nome}"? O acesso será removido imediatamente.`)) return;
+
+  try {
+    const res = await fetch(`/api/modulos/${moduloId}`, {
+      method: 'DELETE',
+      headers: { Authorization:`Bearer ${TOKEN}` },
+    });
+    if (res.ok) {
+      toast(`Módulo ${nome} cancelado.`, 'err');
+      await carregarModulos();
+    } else {
+      const d = await res.json();
+      toast(d.erro || 'Erro ao cancelar.', 'err');
+    }
+  } catch (e) {
+    toast('Erro de conexão.', 'err');
+  }
+}
+
+// ── Máscaras ─────────────────────────────────────────────────────────────────
+function mascaraCartao(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,16);
+  el.value = v.match(/.{1,4}/g)?.join(' ') || v;
+}
+function mascaraVal(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,4);
+  if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+  el.value = v;
+}
+function mascaraCPF(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2')
+       .replace(/(\d{3})(\d)/,'$1.$2')
+       .replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value = v;
+}
+
+// ── Canvas partículas ─────────────────────────────────────────────────────────
+(function() {
+  const c = document.getElementById('canvas-bg');
+  const ctx = c.getContext('2d');
+  let W, H, pts = [];
+  function resize() { W = c.width = innerWidth; H = c.height = innerHeight; }
+  function mkPt() { return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.2+.3, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3, a:Math.random() }; }
+  function init() { resize(); pts = Array.from({length:60},mkPt); }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(167,139,250,${p.a*.4})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  init(); draw();
+})();
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+carregarModulos();
+</script>
+</body>
+</html>
