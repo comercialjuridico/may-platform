@@ -5,32 +5,29 @@ const { supabase }          = require('../services/supabase');
 const { authMiddleware }    = require('../middleware/auth');
 const { criarRecorrencia, consultarPagamento, cancelarRecorrencia } = require('../services/cielo');
 
-// Planos válidos e suas durações em meses (para calcular plano_fim depois do trial)
+// Planos válidos e suas durações em meses
+// Modelo por assento: R$97/mês base (1 usuário) + R$47/usuário adicional (gerenciado internamente)
 const PLANOS_CONFIG = {
-  start_mensal:  { meses: 1,  maxMembros: 1  },
-  start_anual:   { meses: 12, maxMembros: 1  },
-  equipe_mensal: { meses: 1,  maxMembros: 3  },
-  equipe_anual:  { meses: 12, maxMembros: 3  },
-  pro_mensal:    { meses: 1,  maxMembros: 5  },
-  pro_anual:     { meses: 12, maxMembros: 5  },
-  prof_mensal:   { meses: 1,  maxMembros: 10 },
-  prof_anual:    { meses: 12, maxMembros: 10 },
-  // legado
-  mensal: { meses: 1,  maxMembros: 1 },
-  anual:  { meses: 12, maxMembros: 1 },
+  solo_mensal:   { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  solo_anual:    { meses: 12, maxMembros: 1,  valor: '936.00' }, // R$78/mês · 20% off
+  equipe_mensal: { meses: 1,  maxMembros: 10, valor: '97.00'  }, // base; usuários adicionais cobrados separadamente
+  equipe_anual:  { meses: 12, maxMembros: 10, valor: '936.00' }, // base anual
+  // legado (manter compatibilidade com contas antigas)
+  mensal:        { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  anual:         { meses: 12, maxMembros: 1,  valor: '936.00' },
+  start_mensal:  { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  pro_mensal:    { meses: 1,  maxMembros: 10, valor: '97.00'  },
 };
 
 // ─── GET /api/cielo/precos ──────────────────────────────────────────────────
 router.get('/precos', (req, res) => {
   res.json({
-    start_mensal:  '97.00',
-    start_anual:   '936.00',
-    equipe_mensal: '227.00',
-    equipe_anual:  '2184.00',
-    pro_mensal:    '397.00',
-    pro_anual:     '3816.00',
-    prof_mensal:   '897.00',
-    prof_anual:    '8616.00',
+    solo_mensal:      '97.00',
+    solo_anual:       '936.00',
+    equipe_mensal:    '97.00',
+    equipe_anual:     '936.00',
+    extra_usuario_m:  '47.00',  // por usuário adicional, mensal
+    extra_usuario_a:  '38.00',  // por usuário adicional, anual (20% off × 12 / 12 ≈ R$38)
   });
 });
 

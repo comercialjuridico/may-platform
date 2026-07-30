@@ -4,1077 +4,821 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#7C3AED" />
-  <title>Comercial Jurídico Plataforma — Treine sua equipe para fechar contratos</title>
-  <meta name="description" content="A plataforma que coloca o método comercial do Comercial Jurídico na rotina do seu escritório. Scripts, playbooks e treinamentos para fechar mais contratos." />
+  <title>May — Plataforma Comercial Jurídica</title>
+  <meta name="description" content="Simulações com IA, análise de transcrição de reunião e CRM jurídico. O método que transforma advogados em closers." />
   <link rel="icon" href="/assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:     #060912;
-      --bg2:    #0B0F20;
-      --bg3:    #0e1426;
-      --purple: #7C3AED;
-      --plite:  #A78BFA;
-      --text:   #EAE6FF;
-      --muted:  rgba(200,190,255,.5);
-      --border: rgba(255,255,255,.07);
-      --glass:  rgba(255,255,255,.04);
-      --r:      14px;
-    }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.65; }
-    canvas#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .35; }
-    section, nav, footer, .ticker-section { position: relative; z-index: 1; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:     #060912;
+    --bg2:    #0B0F20;
+    --bg3:    #0e1426;
+    --purple: #7C3AED;
+    --plite:  #A78BFA;
+    --text:   #EAE6FF;
+    --muted:  rgba(200,190,255,.5);
+    --border: rgba(255,255,255,.07);
+    --glass:  rgba(255,255,255,.04);
+    --r:      14px;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.65; }
+  canvas#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .35; }
+  section, nav, footer, .ticker-section { position: relative; z-index: 1; }
 
-    /* ═══ NAV ═══ */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 6vw;
-      background: rgba(6,9,18,.93); backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-mark {
-      width: 38px; height: 38px; border-radius: 12px;
-      background: linear-gradient(145deg, #9B6DFF, #6D28D9);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-weight: 900; color: #fff; font-size: 1.1rem;
-      box-shadow: 0 0 22px rgba(124,58,237,.55), 0 2px 8px rgba(0,0,0,.4);
-      flex-shrink: 0;
-    }
-    .logo-name {
-      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem;
-      background: linear-gradient(135deg, #fff 30%, #C4B5FD 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      letter-spacing: -.01em; line-height: 1;
-    }
-    .logo-sub  { font-size: .62rem; color: var(--muted); white-space: nowrap; margin-top: 1px; }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 18px; border-radius: 8px; font-size: .84rem; cursor: pointer; transition: all .2s; text-decoration: none; }
-    .btn-ghost:hover { border-color: var(--plite); color: var(--text); }
-    .btn-nav { background: linear-gradient(135deg,#7C3AED,#6D28D9); border: none; color: #fff; padding: 9px 22px; border-radius: 8px; font-size: .84rem; font-weight: 600; cursor: pointer; transition: all .2s; text-decoration: none; box-shadow: 0 4px 18px rgba(124,58,237,.35); white-space: nowrap; }
-    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 26px rgba(124,58,237,.5); }
+  /* ═══ NAV ═══ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 6vw;
+    background: rgba(6,9,18,.93); backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-mark {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: linear-gradient(145deg, #9B6DFF, #6D28D9);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 900; color: #fff; font-size: 1.1rem;
+    box-shadow: 0 0 22px rgba(124,58,237,.55), 0 2px 8px rgba(0,0,0,.4);
+    flex-shrink: 0;
+  }
+  .logo-name {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem;
+    background: linear-gradient(135deg, #fff 30%, #C4B5FD 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    letter-spacing: -.01em; line-height: 1;
+  }
+  .logo-sub { font-size: .62rem; color: var(--muted); white-space: nowrap; margin-top: 1px; }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: .875rem; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 18px; border-radius: 8px; font-size: .84rem; cursor: pointer; transition: all .2s; text-decoration: none; }
+  .btn-ghost:hover { border-color: var(--plite); color: var(--text); }
+  .btn-nav { background: linear-gradient(135deg,#7C3AED,#6D28D9); border: none; color: #fff; padding: 9px 22px; border-radius: 8px; font-size: .84rem; font-weight: 600; cursor: pointer; transition: all .2s; text-decoration: none; box-shadow: 0 4px 18px rgba(124,58,237,.35); white-space: nowrap; }
+  .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 26px rgba(124,58,237,.5); }
+  @media(max-width: 768px) { .nav-links { display: none; } }
 
-    /* ═══ UTILS ═══ */
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 6vw; }
-    .section-label {
-      font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--plite); font-weight: 700; margin-bottom: 18px; display: block;
-    }
-    .accent { background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 50%, #818CF8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    h2.section-h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.75rem, 3.8vw, 3rem);
-      font-weight: 700; line-height: 1.15; letter-spacing: -.018em;
-      margin-bottom: 16px;
-    }
-    p.lead { color: rgba(200,190,255,.65); font-size: clamp(.9rem, 1.8vw, 1.05rem); line-height: 1.8; }
-    .center { text-align: center; }
+  /* ═══ UTILS ═══ */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 6vw; }
+  .section-label {
+    font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--plite); font-weight: 700; margin-bottom: 18px; display: block;
+  }
+  .accent { background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 50%, #818CF8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  h2.section-h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.75rem, 3.8vw, 3rem);
+    font-weight: 700; line-height: 1.15; letter-spacing: -.018em;
+    margin-bottom: 16px;
+  }
+  p.lead { color: rgba(200,190,255,.65); font-size: clamp(.9rem, 1.8vw, 1.05rem); line-height: 1.8; }
+  .center { text-align: center; }
 
-    /* ═══ BUTTONS ═══ */
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: linear-gradient(135deg,#7C3AED,#6D28D9);
-      border: none; color: #fff; padding: 16px 34px; border-radius: 10px;
-      font-size: .97rem; font-weight: 700; cursor: pointer; transition: all .25s;
-      text-decoration: none; box-shadow: 0 6px 28px rgba(124,58,237,.4);
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 38px rgba(124,58,237,.55); }
-    .btn-outline {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: transparent; border: 1px solid rgba(167,139,250,.3);
-      color: var(--plite); padding: 15px 28px; border-radius: 10px;
-      font-size: .92rem; font-weight: 600; cursor: pointer; transition: all .2s;
-      text-decoration: none; font-family: 'Inter', sans-serif;
-    }
-    .btn-outline:hover { border-color: var(--plite); background: rgba(124,58,237,.07); }
-    .microcopy { font-size: .76rem; color: var(--muted); text-align: center; margin-top: 10px; }
+  /* ═══ BUTTONS ═══ */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg,#7C3AED,#6D28D9);
+    border: none; color: #fff; padding: 16px 34px; border-radius: 10px;
+    font-size: .97rem; font-weight: 700; cursor: pointer; transition: all .25s;
+    text-decoration: none; box-shadow: 0 6px 28px rgba(124,58,237,.4);
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 38px rgba(124,58,237,.55); }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: transparent; border: 1px solid rgba(167,139,250,.3);
+    color: var(--plite); padding: 15px 28px; border-radius: 10px;
+    font-size: .92rem; font-weight: 600; cursor: pointer; transition: all .2s;
+    text-decoration: none; font-family: 'Inter', sans-serif;
+  }
+  .btn-outline:hover { border-color: var(--plite); background: rgba(124,58,237,.07); }
+  .microcopy { font-size: .76rem; color: var(--muted); text-align: center; margin-top: 10px; }
 
-    /* ═══════════════════════════════
-       HERO — flanking cards layout
-    ═══════════════════════════════ */
-    .hero {
-      min-height: auto;
-      padding: 80px 6vw 80px;
-      display: grid;
-      grid-template-columns: 240px 1fr 240px;
-      gap: 28px;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    @media(max-width: 1024px) {
-      .hero { grid-template-columns: 1fr; padding: 120px 6vw 60px; }
-      .hero-side { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    }
-    @media(max-width: 560px) {
-      .hero-side { grid-template-columns: 1fr; }
-    }
-    .hero-center { text-align: center; }
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.3);
-      border-radius: 50px; padding: 7px 18px; font-size: .75rem;
-      color: var(--plite); margin-bottom: 28px; font-weight: 600; letter-spacing: .03em;
-    }
-    .pulse { width: 6px; height: 6px; background: var(--purple); border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
-    h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.5rem, 2.2vw, 2.4rem);
-      font-weight: 700; line-height: 1.18; letter-spacing: -.02em;
-      margin-bottom: 24px;
-    }
-    .hero-sub {
-      color: rgba(200,190,255,.65); font-size: clamp(.92rem, 1.9vw, 1.1rem);
-      max-width: 560px; margin: 0 auto 36px; line-height: 1.78;
-    }
-    .hero-ctas { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  /* ═══ HERO ═══ */
+  .hero-wrap {
+    background: radial-gradient(ellipse 70% 60% at 70% 30%, rgba(124,58,237,.09) 0%, transparent 70%);
+  }
+  .hero {
+    padding: 130px 6vw 90px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media(max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 120px 6vw 60px; gap: 52px; }
+    .hero-right { order: -1; }
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.3);
+    border-radius: 50px; padding: 7px 18px; font-size: .75rem;
+    color: var(--plite); margin-bottom: 28px; font-weight: 600; letter-spacing: .03em;
+  }
+  .pulse { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+  .hero-left h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.8vw, 3.4rem);
+    font-weight: 900; line-height: 1.1; letter-spacing: -.03em;
+    margin-bottom: 24px;
+  }
+  .hero-left h1 em { font-style: normal; color: var(--plite); }
+  .hero-sub {
+    color: rgba(200,190,255,.7); font-size: clamp(.95rem, 1.7vw, 1.1rem);
+    margin-bottom: 36px; line-height: 1.75; max-width: 520px;
+  }
+  .hero-ctas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 36px; }
+  .hero-trust {
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    padding-top: 24px; border-top: 1px solid var(--border);
+  }
+  .trust-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted); }
+  .trust-check { color: #4ade80; font-size: .85rem; }
 
-    /* flanking feature card */
-    .hero-feat-card {
-      background: var(--glass); border: 1px solid var(--border);
-      border-radius: 16px; padding: 20px 18px;
-      display: flex; flex-direction: column; gap: 10px;
-      transition: border-color .2s, transform .2s;
-    }
-    .hero-feat-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-2px); }
-    .hero-feat-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-    }
-    .hero-feat-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .88rem; line-height: 1.3; }
-    .hero-feat-desc { font-size: .78rem; color: var(--muted); line-height: 1.55; }
+  /* ─── HERO MOCKUP ─── */
+  .hero-right { position: relative; }
+  .mockup-shell {
+    background: var(--bg2);
+    border: 1px solid rgba(124,58,237,.25);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 80px rgba(124,58,237,.12), 0 32px 80px rgba(0,0,0,.5);
+    position: relative;
+  }
+  .mockup-shell::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,.4), transparent);
+    z-index: 1;
+  }
+  .mockup-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    background: rgba(124,58,237,.06);
+  }
+  .mockup-dots { display: flex; gap: 6px; }
+  .mockup-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-dots span:nth-child(1) { background: #ff5f57; }
+  .mockup-dots span:nth-child(2) { background: #febc2e; }
+  .mockup-dots span:nth-child(3) { background: #28c840; }
+  .mockup-title {
+    font-family: 'Syne', sans-serif; font-size: .72rem; font-weight: 700;
+    color: var(--muted); letter-spacing: .06em; text-transform: uppercase;
+  }
+  .mockup-badge {
+    background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.2);
+    border-radius: 20px; padding: 3px 10px; font-size: .65rem;
+    color: #4ade80; font-weight: 600; letter-spacing: .04em;
+  }
+  .mockup-chat { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg-av {
+    width: 30px; height: 30px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, #9B6DFF, #6D28D9);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 900; color: #fff; font-size: .75rem;
+  }
+  .msg-bubble {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 4px 12px 12px 12px;
+    padding: 10px 14px; font-size: .8rem; line-height: 1.55; color: var(--text); max-width: 80%;
+  }
+  .msg.user { flex-direction: row-reverse; }
+  .msg.user .msg-av { background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.2); color: var(--plite); font-size: .7rem; }
+  .msg.user .msg-bubble { border-radius: 12px 4px 12px 12px; background: rgba(124,58,237,.1); border-color: rgba(124,58,237,.2); }
+  .msg-tag {
+    display: inline-block; margin-top: 6px; font-size: .64rem;
+    background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.2);
+    border-radius: 4px; padding: 2px 7px; color: var(--plite);
+  }
+  .mockup-scores {
+    border-top: 1px solid var(--border); padding: 14px 18px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    background: rgba(0,0,0,.15);
+  }
+  .score-item { text-align: center; }
+  .score-label { font-size: .58rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .score-bar { height: 3px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+  .score-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+  .score-val { font-family: 'Syne', sans-serif; font-size: .75rem; font-weight: 700; color: var(--plite); }
 
-    .hero-proof {
-      display: flex; align-items: center; justify-content: center; gap: 32px;
-      margin-top: 48px; padding-top: 36px; border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .proof-item { text-align: center; }
-    .proof-num { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 900; }
-    .proof-label { font-size: .75rem; color: var(--muted); margin-top: 3px; max-width: 120px; line-height: 1.4; }
+  /* ═══ TICKER ═══ */
+  .sticker-wrap {
+    padding: 20px 0; background: var(--bg2);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    overflow: hidden; position: relative;
+  }
+  .sticker-wrap::before, .sticker-wrap::after {
+    content: ''; position: absolute; top: 0; width: 100px; height: 100%; z-index: 2;
+  }
+  .sticker-wrap::before { left: 0; background: linear-gradient(90deg, var(--bg2), transparent); }
+  .sticker-wrap::after  { right: 0; background: linear-gradient(270deg, var(--bg2), transparent); }
+  .sticker-track { display: flex; gap: 0; width: max-content; animation: ticker 40s linear infinite; }
+  .sticker-wrap:hover .sticker-track { animation-play-state: paused; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .sticker-item {
+    display: flex; align-items: center; gap: 10px; padding: 0 32px;
+    white-space: nowrap; font-family: 'Syne', sans-serif; font-size: .78rem; font-weight: 700;
+    color: rgba(167,139,250,.4); letter-spacing: .05em; text-transform: uppercase;
+  }
+  .sticker-item::before { content: '✦'; font-size: .6rem; color: rgba(124,58,237,.4); }
 
-    /* ═══ SERVICE TICKER ═══ */
-    .sticker-wrap {
-      padding: 20px 0; background: var(--bg2);
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      overflow: hidden; position: relative;
-    }
-    .sticker-wrap::before, .sticker-wrap::after {
-      content: ''; position: absolute; top: 0; width: 100px; height: 100%; z-index: 2;
-    }
-    .sticker-wrap::before { left: 0; background: linear-gradient(90deg, var(--bg2), transparent); }
-    .sticker-wrap::after  { right: 0; background: linear-gradient(270deg, var(--bg2), transparent); }
-    .sticker-track {
-      display: flex; gap: 0; width: max-content;
-      animation: ticker 40s linear infinite;
-    }
-    .sticker-wrap:hover .sticker-track { animation-play-state: paused; }
-    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-    .sticker-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 0 32px; white-space: nowrap;
-      font-family: 'Syne', sans-serif; font-size: .78rem; font-weight: 700;
-      color: rgba(167,139,250,.4); letter-spacing: .05em; text-transform: uppercase;
-    }
-    .sticker-item::before {
-      content: '✦'; font-size: .6rem; color: rgba(124,58,237,.4);
-    }
+  /* ═══ O PROBLEMA ═══ */
+  .problema { padding: 100px 0; }
+  .problema-header { text-align: center; margin-bottom: 64px; }
+  .problema-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--border);
+  }
+  @media(max-width: 700px) { .problema-grid { grid-template-columns: 1fr; } }
+  .prob-card {
+    background: var(--bg2); padding: 40px 32px; transition: background .2s;
+  }
+  .prob-card:hover { background: var(--bg3); }
+  .prob-num {
+    font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900; line-height: 1; margin-bottom: 14px;
+    background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 50%, #818CF8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .prob-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+  .prob-desc { font-size: .85rem; color: var(--muted); line-height: 1.65; }
 
-    /* ═══ LOGOS TICKER ═══ */
-    .logos-ticker-wrap {
-      padding: 32px 0; background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      overflow: hidden; position: relative;
-    }
-    .logos-ticker-wrap::before, .logos-ticker-wrap::after {
-      content: ''; position: absolute; top: 0; width: 160px; height: 100%; z-index: 2; pointer-events: none;
-    }
-    .logos-ticker-wrap::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
-    .logos-ticker-wrap::after  { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
-    .logos-ticker-track {
-      display: flex; align-items: center; gap: 0; width: max-content;
-      animation: ticker 45s linear infinite;
-    }
-    .logos-ticker-wrap:hover .logos-ticker-track { animation-play-state: paused; }
-    .logos-ticker-logo {
-      height: 68px; padding: 0 48px;
-      filter: grayscale(100%) brightness(2) contrast(0.75);
-      opacity: 0.5;
-      transition: filter .4s ease, opacity .4s ease, transform .3s ease;
-      object-fit: contain; flex-shrink: 0;
-    }
-    .logos-ticker-logo:hover {
-      filter: grayscale(0%) brightness(1) contrast(1);
-      opacity: 1; transform: scale(1.08);
-    }
+  /* ═══ A SOLUÇÃO ═══ */
+  .solucao { padding: 100px 0; background: var(--bg2); }
+  .solucao-header { text-align: center; margin-bottom: 64px; }
+  .pilares { display: flex; flex-direction: column; gap: 2px; }
+  .pilar {
+    display: grid; grid-template-columns: 260px 1fr; gap: 0;
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    background: var(--bg3); transition: border-color .2s;
+  }
+  .pilar:hover { border-color: rgba(124,58,237,.3); }
+  @media(max-width: 768px) { .pilar { grid-template-columns: 1fr; } }
+  .pilar-left {
+    padding: 36px 28px; border-right: 1px solid var(--border);
+    background: rgba(124,58,237,.04);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  @media(max-width: 768px) { .pilar-left { border-right: none; border-bottom: 1px solid var(--border); } }
+  .pilar-num {
+    font-family: 'Syne', sans-serif; font-size: 4.5rem; font-weight: 900;
+    color: rgba(124,58,237,.2); line-height: 1; letter-spacing: -.04em; margin-bottom: 20px;
+  }
+  .pilar-label { font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--plite); font-weight: 700; margin-bottom: 6px; }
+  .pilar-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; line-height: 1.25; }
+  .pilar-right { padding: 36px 40px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+  @media(max-width: 768px) { .pilar-right { padding: 24px; } }
+  .pilar-desc { font-size: .92rem; color: rgba(200,190,255,.75); line-height: 1.8; }
+  .pilar-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pilar-tag {
+    font-size: .72rem; font-weight: 600; padding: 5px 12px; border-radius: 6px;
+    background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2); color: var(--plite);
+  }
 
-    /* ═══════════════════════════════
-       DIAGNÓSTICO — numbered circular icons
-    ═══════════════════════════════ */
-    .diag { padding: 100px 0; background: var(--bg2); }
-    .diag-header { text-align: center; margin-bottom: 60px; }
-    .diag-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-    }
-    @media(max-width: 860px) { .diag-grid { grid-template-columns: 1fr 1fr; } }
-    @media(max-width: 560px) { .diag-grid { grid-template-columns: 1fr; } }
-    .diag-card {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px 24px;
-      transition: border-color .2s, transform .2s;
-    }
-    .diag-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-3px); }
-    .diag-num {
-      width: 44px; height: 44px; border-radius: 50%;
-      border: 1.5px solid rgba(124,58,237,.4);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-weight: 800; font-size: .9rem;
-      color: var(--plite); margin-bottom: 18px;
-    }
-    .diag-card h3 {
-      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
-      margin-bottom: 10px; line-height: 1.3;
-    }
-    .diag-card p { font-size: .85rem; color: var(--muted); line-height: 1.65; }
-    .diag-callout {
-      margin-top: 48px; text-align: center; padding: 32px 40px;
-      background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(96,165,250,.04));
-      border: 1px solid rgba(124,58,237,.18); border-radius: 16px;
-    }
-    .diag-callout p {
-      font-family: 'Syne', sans-serif; font-size: clamp(1rem, 2.4vw, 1.5rem);
-      font-weight: 700; line-height: 1.5;
-    }
-    @media(max-width: 640px) { .diag-callout { padding: 24px 20px; } }
+  /* ═══ COMO FUNCIONA ═══ */
+  .como { padding: 100px 0; }
+  .como-header { text-align: center; margin-bottom: 64px; }
+  .steps {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  @media(max-width: 900px) { .steps { grid-template-columns: 1fr 1fr; } }
+  @media(max-width: 560px) { .steps { grid-template-columns: 1fr; } }
+  .step {
+    padding: 32px 22px; text-align: center;
+    border: 1px solid var(--border); border-radius: 16px;
+    background: var(--glass); transition: border-color .2s, transform .25s;
+  }
+  .step:hover { border-color: rgba(124,58,237,.3); transform: translateY(-4px); }
+  .step-num {
+    width: 48px; height: 48px; border-radius: 14px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(124,58,237,.2), rgba(109,40,217,.1));
+    border: 1px solid rgba(124,58,237,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 900; font-size: .9rem; color: var(--plite);
+  }
+  .step h3 { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+  .step p { font-size: .82rem; color: var(--muted); line-height: 1.6; }
 
-    /* ═══════════════════════════════
-       O QUE É — feature showcase
-    ═══════════════════════════════ */
-    .whatis { padding: 100px 0; }
-    .whatis-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
-      align-items: start; margin-top: 52px;
-    }
-    @media(max-width: 768px) { .whatis-grid { grid-template-columns: 1fr; gap: 40px; } }
-    .whatis-left p.lead { margin-bottom: 22px; }
-    .whatis-quote {
-      border-left: 3px solid var(--purple); padding: 18px 22px;
-      background: rgba(124,58,237,.07); border-radius: 0 12px 12px 0;
-      font-size: .9rem; color: var(--text); line-height: 1.7; font-style: italic;
-      margin-top: 8px;
-    }
-    .feat-list { display: flex; flex-direction: column; gap: 10px; }
-    .feat-item {
-      display: flex; align-items: flex-start; gap: 14px;
-      background: var(--glass); border: 1px solid var(--border);
-      border-radius: 12px; padding: 16px 18px;
-      transition: border-color .2s;
-    }
-    .feat-item:hover { border-color: rgba(124,58,237,.25); }
-    .feat-icon {
-      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.18);
-      display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
-    }
-    .feat-text { font-size: .86rem; color: var(--text); line-height: 1.6; }
-    .feat-text strong { display: block; margin-bottom: 2px; font-size: .88rem; }
+  /* ═══ ORIGEM ═══ */
+  .origem {
+    padding: 80px 0; background: var(--bg2);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .origem-inner { display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center; }
+  @media(max-width: 860px) { .origem-inner { grid-template-columns: 1fr; } }
+  .origem-text h2 {
+    font-family: 'Syne', sans-serif; font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+    font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -.02em;
+  }
+  .origem-text p { color: var(--muted); font-size: .9rem; line-height: 1.75; max-width: 540px; margin-bottom: 10px; }
+  .origem-stats { display: flex; gap: 40px; flex-wrap: wrap; flex-shrink: 0; }
+  .origem-stat { text-align: center; }
+  .origem-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 900; }
+  .origem-label { font-size: .72rem; color: var(--muted); margin-top: 4px; max-width: 110px; line-height: 1.4; }
 
-    /* ═══════════════════════════════
-       COMO FUNCIONA — numbered grid cards
-    ═══════════════════════════════ */
-    .how { padding: 100px 0; background: var(--bg2); }
-    .how-header { text-align: center; margin-bottom: 60px; }
-    .how-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
-    }
-    @media(max-width: 900px) { .how-grid { grid-template-columns: 1fr 1fr; } }
-    @media(max-width: 540px) { .how-grid { grid-template-columns: 1fr; } }
-    .how-card {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px 22px;
-      transition: border-color .2s, transform .2s;
-    }
-    .how-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-2px); }
-    .how-num {
-      font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 900;
-      color: rgba(124,58,237,.2); line-height: 1; margin-bottom: 16px;
-      letter-spacing: -.03em;
-    }
-    .how-card h3 {
-      font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700;
-      margin-bottom: 10px; line-height: 1.35;
-    }
-    .how-card p { font-size: .83rem; color: var(--muted); line-height: 1.65; }
-    .how-cta-bar {
-      margin-top: 48px; display: flex; align-items: center; justify-content: space-between;
-      gap: 24px; flex-wrap: wrap;
-      background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 24px 32px;
-    }
-    .how-cta-bar p { font-size: .9rem; color: rgba(200,190,255,.7); max-width: 520px; line-height: 1.6; }
-    @media(max-width: 640px) { .how-cta-bar { flex-direction: column; gap: 16px; text-align: center; } }
+  /* ═══ SOCIAL PROOF PHOTOS ═══ */
+  .social { padding: 100px 0; }
+  .social-header { text-align: center; margin-bottom: 52px; }
+  .masonry { columns: 4; column-gap: 14px; }
+  @media(max-width: 900px) { .masonry { columns: 3; } }
+  @media(max-width: 640px) { .masonry { columns: 2; } }
+  .ps-card {
+    break-inside: avoid; margin-bottom: 14px; border-radius: 12px; overflow: hidden;
+    background: var(--bg2); border: 1px solid var(--border);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .ps-card:hover { transform: scale(1.02); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+  .ps-card img { width: 100%; display: block; }
+  .ps-label { padding: 10px 12px; font-size: .72rem; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .ps-result { font-size: .68rem; color: var(--plite); margin-top: 3px; }
 
-    /* ═══════════════════════════════
-       POR QUE ESCOLHER — numbered benefits
-    ═══════════════════════════════ */
-    .why { padding: 100px 0; }
-    .why-header { text-align: center; margin-bottom: 60px; }
-    .why-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-    }
-    @media(max-width: 640px) { .why-grid { grid-template-columns: 1fr; } }
-    .why-card {
-      background: var(--glass); border: 1px solid var(--border);
-      border-radius: 16px; padding: 26px 24px; display: flex; gap: 20px; align-items: flex-start;
-      transition: border-color .2s, transform .2s;
-    }
-    .why-card:hover { border-color: rgba(124,58,237,.25); transform: translateY(-2px); }
-    .why-num-badge {
-      min-width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.22);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-weight: 800; font-size: .9rem; color: var(--plite);
-    }
-    .why-body h3 { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; margin-bottom: 7px; line-height: 1.3; }
-    .why-body p { font-size: .84rem; color: var(--muted); line-height: 1.65; }
+  /* ═══ DEPOIMENTOS ═══ */
+  .testis { padding: 80px 0; background: var(--bg2); }
+  .testis-header { text-align: center; margin-bottom: 48px; }
+  .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media(max-width: 900px) { .testi-grid { grid-template-columns: 1fr 1fr; } }
+  @media(max-width: 560px) { .testi-grid { grid-template-columns: 1fr; } }
+  .testi {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 16px;
+    padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+    gap: 18px; transition: border-color .2s;
+  }
+  .testi:hover { border-color: rgba(124,58,237,.25); }
+  .testi-q { font-size: .87rem; line-height: 1.7; color: rgba(200,190,255,.82); }
+  .testi-q::before { content: '"'; font-family: 'Syne',sans-serif; font-size: 2.5rem; line-height: .5; color: rgba(124,58,237,.3); display: block; margin-bottom: 10px; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-av {
+    width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(124,58,237,.2), rgba(109,40,217,.1));
+    border: 1px solid rgba(124,58,237,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .8rem; color: var(--plite);
+  }
+  .testi-name { font-size: .82rem; font-weight: 600; }
 
-    /* ═══════════════════════════════
-       ORIGEM — story section
-    ═══════════════════════════════ */
-    .origem { padding: 100px 0; background: var(--bg2); }
-    .origem-inner { max-width: 960px; margin: 0 auto; text-align: center; }
-    .origem-gpt-wrap {
-      display: flex; align-items: flex-start; gap: 40px; margin: 40px auto 0;
-      max-width: 820px; text-align: left;
-    }
-    .origem-gpt-img {
-      width: 220px; flex-shrink: 0; border-radius: 18px;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 32px rgba(0,0,0,.4);
-      image-rendering: auto;
-      cursor: zoom-in;
-      transition: transform .35s ease, box-shadow .35s ease;
-      transform-origin: left center;
-    }
-    .origem-gpt-img:hover {
-      transform: scale(2.2);
-      box-shadow: 0 20px 60px rgba(0,0,0,.7);
-      z-index: 10;
-      position: relative;
-    }
-    .origem-gpt-text { flex: 1; }
-    .origem-gpt-text h3 {
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.15rem;
-      margin-bottom: 12px; line-height: 1.3;
-    }
-    .origem-gpt-text p { font-size: .87rem; color: var(--muted); line-height: 1.7; margin-bottom: 12px; }
-    .origem-gpt-stats {
-      display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap;
-    }
-    .origem-gpt-stat strong {
-      display: block; font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
-      background: linear-gradient(135deg,#C4B5FD,#A78BFA);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .origem-gpt-stat span { font-size: .72rem; color: var(--muted); }
-    @media(max-width:680px){
-      .origem-gpt-wrap { flex-direction: column; align-items: center; text-align: center; }
-      .origem-gpt-img { width: 180px; }
-      .origem-gpt-stats { justify-content: center; }
-    }
-    .origem-stat-row {
-      display: flex; align-items: center; justify-content: center;
-      gap: 0; flex-wrap: wrap; margin: 48px 0;
-    }
-    .origem-stat { padding: 20px 40px; }
-    .origem-num {
-      font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: 900; line-height: 1; margin-bottom: 6px;
-      background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 50%, #818CF8 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .origem-label { font-size: .78rem; color: var(--muted); max-width: 130px; line-height: 1.4; margin: 0 auto; }
-    .origem-divider { width: 1px; height: 48px; background: rgba(255,255,255,.08); flex-shrink: 0; }
-    .origem-quote {
-      max-width: 600px; margin: 0 auto;
-      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px; padding: 22px 24px;
-      text-align: left; display: flex; gap: 16px; align-items: flex-start;
-    }
-    .origem-quote-avatar {
-      width: 72px; height: 72px; border-radius: 50%;
-      object-fit: cover; object-position: center 8%; flex-shrink: 0;
-      border: 2px solid rgba(124,58,237,.5);
-    }
-    .origem-quote-body { flex: 1; }
-    .origem-quote-text { font-size: .88rem; line-height: 1.65; color: rgba(234,230,255,.75); font-style: italic; margin-bottom: 10px; }
-    .origem-quote-autor {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .75rem; color: rgba(255,255,255,.4); font-weight: 600;
-    }
-    .origem-quote-autor::before { content: ''; width: 20px; height: 1px; background: rgba(124,58,237,.5); }
-    @media(max-width: 600px) { .origem-divider { display: none; } .origem-stat { padding: 14px 20px; } }
+  /* ═══ PLANOS ═══ */
+  .planos-sec { padding: 100px 0; }
+  .planos-header { text-align: center; margin-bottom: 24px; }
+  .planos-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 4px; margin: 0 auto 52px; width: fit-content;
+  }
+  .toggle-btn {
+    background: transparent; border: none; color: var(--muted); padding: 9px 22px;
+    border-radius: 7px; font-size: .85rem; cursor: pointer; transition: all .2s; font-family: 'Inter',sans-serif;
+  }
+  .toggle-btn.active { background: var(--purple); color: #fff; font-weight: 600; }
+  .planos-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media(max-width: 720px) { .planos-layout { grid-template-columns: 1fr; } }
+  .plano-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 36px 32px; position: relative; transition: border-color .2s, transform .2s;
+  }
+  .plano-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-3px); }
+  .plano-card.featured {
+    border-color: rgba(124,58,237,.4);
+    background: linear-gradient(145deg, rgba(124,58,237,.07), var(--bg2));
+  }
+  .plano-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, #7C3AED, #6D28D9);
+    color: #fff; font-size: .7rem; font-weight: 700; padding: 5px 16px; border-radius: 20px;
+    letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(124,58,237,.4);
+  }
+  .plano-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; margin-bottom: 6px; }
+  .plano-desc { font-size: .82rem; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .plano-price-from { font-size: .72rem; color: var(--muted); display: block; margin-bottom: 2px; min-height: 16px; }
+  .plano-price { margin-bottom: 6px; }
+  .plano-price .price-val {
+    font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 900; line-height: 1;
+  }
+  .plano-price .price-period { font-size: .82rem; color: var(--muted); margin-left: 4px; }
+  .plano-price-note { font-size: .78rem; color: var(--muted); margin-bottom: 28px; min-height: 20px; }
+  .plano-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+  .plano-feats { display: flex; flex-direction: column; gap: 11px; margin-bottom: 28px; }
+  .plano-feat {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: .85rem; color: rgba(200,190,255,.8); line-height: 1.4;
+  }
+  .plano-feat::before { content: '✓'; color: var(--plite); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .plano-cta {
+    width: 100%; padding: 15px; font-size: .92rem; border-radius: 10px;
+    text-align: center; cursor: pointer; font-family: 'Inter',sans-serif;
+    font-weight: 700; transition: all .25s; text-decoration: none; display: block;
+  }
+  .plano-cta.primary {
+    background: linear-gradient(135deg,#7C3AED,#6D28D9); color: #fff; border: none;
+    box-shadow: 0 6px 24px rgba(124,58,237,.35);
+  }
+  .plano-cta.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(124,58,237,.5); }
+  .plano-cta.outline { background: transparent; border: 1px solid rgba(167,139,250,.3); color: var(--plite); }
+  .plano-cta.outline:hover { border-color: var(--plite); background: rgba(124,58,237,.07); }
+  .plano-note { font-size: .72rem; color: var(--muted); text-align: center; margin-top: 10px; }
 
-    /* ═══ PROVAS SOCIAIS ═══ */
-    .social { padding: 100px 0; }
-    .social-header { text-align: center; margin-bottom: 52px; }
-    .masonry { columns: 3; column-gap: 16px; }
-    @media(max-width:860px){ .masonry { columns: 2; } }
-    @media(max-width:520px){ .masonry { columns: 1; } }
-    .ps-card {
-      break-inside: avoid; margin-bottom: 16px;
-      background: var(--glass); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden;
-      transition: transform .2s, border-color .2s;
-    }
-    .ps-card:hover { transform: translateY(-3px); border-color: rgba(124,58,237,.35); }
-    .ps-card img { width: 100%; display: block; }
-    .ps-label { padding: 11px 14px; font-size: .79rem; color: var(--muted); font-weight: 600; }
-    .ps-result {
-      display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;
-      background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.2);
-      border-radius: 50px; padding: 2px 9px; font-size: .73rem; color: #6EE7B7; font-weight: 700;
-    }
+  /* user counter */
+  .user-counter {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    background: rgba(0,0,0,.2); border: 1px solid var(--border); border-radius: 10px; padding: 13px 16px;
+  }
+  .counter-label { flex: 1; }
+  .counter-label-top { font-size: .75rem; color: var(--muted); margin-bottom: 2px; }
+  .counter-label-total { font-size: .88rem; font-weight: 600; color: var(--text); }
+  .counter-btns { display: flex; align-items: center; gap: 10px; }
+  .counter-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.25);
+    color: var(--plite); font-size: 1.2rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .2s;
+    line-height: 1;
+  }
+  .counter-btn:hover { background: rgba(124,58,237,.3); }
+  .counter-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; min-width: 22px; text-align: center; }
 
-    /* ═══ DEPOIMENTOS ═══ */
-    .testis { padding: 80px 0; background: var(--bg2); }
-    .testis-header { text-align: center; margin-bottom: 48px; }
-    .testi-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 16px; }
-    .testi {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 16px; padding: 26px 22px;
-      transition: border-color .2s, transform .2s;
-    }
-    .testi:hover { border-color: rgba(124,58,237,.25); transform: translateY(-2px); }
-    .testi-q { font-size: .91rem; line-height: 1.72; color: var(--text); margin-bottom: 20px; position: relative; padding-top: 8px; }
-    .testi-q::before { content: '"'; font-size: 2.5rem; color: var(--purple); line-height: .3; display: block; margin-bottom: 12px; font-family: 'Syne', sans-serif; }
-    .testi-author { display: flex; align-items: center; gap: 10px; }
-    .testi-av {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg,#7C3AED,#5B21B6);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: .82rem; color: #fff; flex-shrink: 0;
-    }
-    .testi-name { font-weight: 700; font-size: .85rem; }
+  /* ═══ FAQ ═══ */
+  .faq-sec { padding: 100px 0; background: var(--bg2); }
+  .faq-header { text-align: center; margin-bottom: 52px; }
+  .faq-list { display: flex; flex-direction: column; gap: 8px; max-width: 760px; margin: 0 auto; }
+  .faq-item { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
+  .faq-item:hover { border-color: rgba(124,58,237,.25); }
+  .faq-q {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: .9rem;
+    background: var(--glass); user-select: none;
+  }
+  .faq-icon { font-size: 1.3rem; color: var(--plite); transition: transform .3s; flex-shrink: 0; margin-left: 16px; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-a { display: none; padding: 0 24px 20px; font-size: .875rem; color: var(--muted); line-height: 1.75; }
+  .faq-item.open .faq-a { display: block; }
+  .faq-footer { text-align: center; margin-top: 36px; font-size: .88rem; color: var(--muted); }
+  .faq-footer a { color: var(--plite); text-decoration: none; }
+  .faq-footer a:hover { text-decoration: underline; }
 
-    /* ═══ PLANOS ═══ */
-    .plans { padding: 100px 0; }
-    .plans-header { text-align: center; margin-bottom: 8px; }
-    .plans-toggle {
-      display: flex; align-items: center; justify-content: center; gap: 14px; margin: 28px 0 10px;
-    }
-    .tlabel { font-size: .86rem; color: var(--muted); cursor: pointer; transition: color .2s; }
-    .tlabel.on { color: var(--text); font-weight: 600; }
-    .ttrack {
-      width: 46px; height: 25px; background: rgba(124,58,237,.2);
-      border-radius: 50px; position: relative; cursor: pointer;
-      border: 1px solid rgba(124,58,237,.3); transition: background .2s;
-    }
-    .ttrack.on { background: rgba(124,58,237,.45); }
-    .tthumb {
-      position: absolute; top: 3px; left: 3px; width: 17px; height: 17px;
-      border-radius: 50%; background: var(--purple); transition: left .2s;
-    }
-    .ttrack.on .tthumb { left: 24px; }
-    .disc { font-size: .72rem; background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.22); color: #6EE7B7; border-radius: 50px; padding: 2px 8px; font-weight: 600; }
-    .plans-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 24px; }
-    @media(max-width:1100px){ .plans-grid { grid-template-columns: repeat(2,1fr); } }
-    @media(max-width:580px){ .plans-grid { grid-template-columns: 1fr; } }
-    .plan {
-      background: var(--glass); border: 1px solid var(--border);
-      border-radius: 16px; padding: 30px 24px; position: relative; transition: transform .2s;
-    }
-    .plan:hover { transform: translateY(-3px); }
-    .plan.pop { border-color: rgba(124,58,237,.5); background: linear-gradient(160deg,rgba(124,58,237,.1),rgba(124,58,237,.03)); }
-    .plan-badge {
-      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
-      background: linear-gradient(135deg,#7C3AED,#6D28D9); color: #fff;
-      font-size: .7rem; font-weight: 700; padding: 3px 13px; border-radius: 50px;
-      letter-spacing: .05em; white-space: nowrap;
-    }
-    .plan-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
-    .plan-sub  { font-size: .78rem; color: var(--muted); margin-bottom: 22px; }
-    .plan-price { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 500; background: linear-gradient(135deg,#C4B5FD,#A78BFA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .plan-per { font-size: .78rem; color: var(--muted); margin-bottom: 22px; }
-    .plan-feats { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
-    .plan-feats li { font-size: .84rem; color: rgba(200,190,255,.72); display: flex; align-items: flex-start; gap: 8px; }
-    .plan-feats li::before { content: '✓'; color: var(--purple); font-weight: 700; flex-shrink: 0; }
-    .plan-btn {
-      display: block; text-align: center; width: 100%; padding: 12px;
-      border-radius: 9px; font-weight: 700; font-size: .88rem; cursor: pointer;
-      text-decoration: none; transition: all .2s; border: none; font-family: 'Inter', sans-serif;
-    }
-    .plan-btn.solid { background: linear-gradient(135deg,#7C3AED,#6D28D9); color: #fff; box-shadow: 0 4px 16px rgba(124,58,237,.35); }
-    .plan-btn.solid:hover { box-shadow: 0 6px 24px rgba(124,58,237,.5); transform: translateY(-1px); }
-    .plan-btn.border { background: transparent; border: 1px solid var(--border); color: var(--muted); }
-    .plan-btn.border:hover { border-color: var(--plite); color: var(--text); }
+  /* ═══ CTA FINAL ═══ */
+  .cta-final {
+    padding: 100px 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,.12) 0%, transparent 70%);
+    border-top: 1px solid var(--border);
+  }
 
-    /* ═══ CHECKOUT MODAL ═══ */
-    #co-overlay {
-      display:none; position:fixed; inset:0; z-index:2000;
-      background:rgba(5,5,15,.82); backdrop-filter:blur(6px);
-      align-items:center; justify-content:center; padding:16px;
-    }
-    #co-overlay.open { display:flex; }
-    #co-box {
-      background:#0e1426; border:1px solid rgba(124,58,237,.3);
-      border-radius:20px; width:100%; max-width:480px;
-      max-height:92vh; overflow-y:auto; padding:32px 28px 28px;
-      position:relative; animation:coIn .22s ease;
-    }
-    @keyframes coIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-    #co-box::-webkit-scrollbar { width:4px; }
-    #co-box::-webkit-scrollbar-thumb { background:rgba(124,58,237,.3); border-radius:4px; }
-    #co-close {
-      position:absolute; top:14px; right:18px; background:none; border:none;
-      color:rgba(200,190,255,.4); font-size:1.5rem; cursor:pointer; line-height:1; padding:4px 8px;
-    }
-    #co-close:hover { color:#fff; }
-    .co-badge {
-      display:inline-flex; align-items:center; gap:10px; margin-bottom:18px;
-      background:rgba(124,58,237,.15); border:1px solid rgba(124,58,237,.3);
-      border-radius:30px; padding:6px 14px;
-    }
-    .co-badge-name { font-family:'Syne',sans-serif; font-weight:700; font-size:.82rem; color:#C4B5FD; }
-    .co-badge-price { font-size:.82rem; color:rgba(200,190,255,.6); }
-    #co-box h2 { font-family:'Syne',sans-serif; font-weight:700; font-size:1.35rem; margin-bottom:6px; line-height:1.3; }
-    #co-box .co-sub { font-size:.82rem; color:var(--muted); margin-bottom:24px; line-height:1.6; }
-    .co-label { font-size:.72rem; font-weight:700; color:rgba(200,190,255,.5); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 8px; }
-    .co-field {
-      width:100%; background:rgba(255,255,255,.08); border:1px solid rgba(124,58,237,.3);
-      border-radius:10px; padding:13px 14px; color:#EAE6FF; font-size:.9rem;
-      font-family:'Inter',sans-serif; outline:none; box-sizing:border-box; transition:border .2s, background .2s;
-    }
-    .co-field:focus { border-color:#A78BFA; background:rgba(167,139,250,.1); }
-    .co-field::placeholder { color:rgba(200,190,255,.45); }
-    .co-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    #co-erro {
-      display:none; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3);
-      border-radius:8px; padding:10px 14px; font-size:.82rem; color:#FCA5A5; margin:14px 0 4px;
-    }
-    #co-submit {
-      width:100%; margin-top:20px; padding:15px; border:none; border-radius:12px;
-      background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff;
-      font-family:'Inter',sans-serif; font-weight:700; font-size:.95rem;
-      cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(124,58,237,.35);
-    }
-    #co-submit:hover:not(:disabled) { box-shadow:0 6px 28px rgba(124,58,237,.55); transform:translateY(-1px); }
-    #co-submit:disabled { opacity:.6; cursor:not-allowed; transform:none; }
-    .co-fine { font-size:.72rem; color:var(--muted); text-align:center; margin-top:12px; line-height:1.6; }
-    .co-login { font-size:.78rem; text-align:center; color:var(--muted); margin-top:14px; }
-    .co-login a { color:#A78BFA; text-decoration:none; }
-    .co-login a:hover { text-decoration:underline; }
-    .co-lock { display:flex; align-items:center; justify-content:center; gap:6px; font-size:.72rem; color:rgba(200,190,255,.35); margin-top:10px; }
-
-    /* ═══ FAQ ═══ */
-    .faq { padding: 100px 0; background: var(--bg2); }
-    .faq-header { text-align: center; margin-bottom: 52px; }
-    .faq-list { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
-    .faq-item {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 14px; overflow: hidden;
-    }
-    .faq-q {
-      padding: 20px 24px; font-weight: 600; font-size: .9rem; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: background .15s;
-    }
-    .faq-q:hover { background: rgba(124,58,237,.06); }
-    .faq-icon { color: var(--plite); font-size: 1.3rem; transition: transform .2s; flex-shrink: 0; font-weight: 300; }
-    .faq-item.open .faq-icon { transform: rotate(45deg); }
-    .faq-a { max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .2s; font-size: .86rem; color: rgba(200,190,255,.62); line-height: 1.78; padding: 0 24px; }
-    .faq-item.open .faq-a { max-height: 400px; padding: 0 24px 20px; }
-    .faq-footer { text-align: center; margin-top: 32px; font-size: .87rem; color: var(--muted); }
-    .faq-footer a { color: var(--plite); text-decoration: none; font-weight: 600; }
-    .faq-footer a:hover { color: var(--text); }
-
-    /* ═══ CTA FINAL ═══ */
-    .cta-final {
-      padding: 120px 0; text-align: center;
-      background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(124,58,237,.18), transparent);
-    }
-    .cta-final h2.section-h2 { font-size: clamp(1.9rem, 4.5vw, 3.2rem); margin-bottom: 20px; }
-    .cta-final p.lead { max-width: 560px; margin: 0 auto 36px; }
-    .cta-ctas { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
-
-    /* ═══ FOOTER ═══ */
-    footer {
-      background: var(--bg); border-top: 1px solid var(--border);
-      padding: 36px 6vw; display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 14px;
-    }
-    .fl { display: flex; align-items: center; gap: 9px; }
-    .flinks { display: flex; gap: 18px; flex-wrap: wrap; }
-    .flinks a { font-size: .78rem; color: var(--muted); text-decoration: none; }
-    .flinks a:hover { color: var(--text); }
-    .fcopy { font-size: .76rem; color: var(--muted); }
+  /* ═══ FOOTER ═══ */
+  footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 48px 6vw 32px; }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: start;
+  }
+  @media(max-width: 640px) { .footer-inner { grid-template-columns: 1fr; } }
+  .footer-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 12px; }
+  .footer-tagline { font-size: .8rem; color: var(--muted); line-height: 1.6; max-width: 320px; }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: flex-end; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: .82rem; transition: color .2s; }
+  .footer-links a:hover { color: var(--text); }
+  .footer-copy {
+    max-width: 1100px; margin: 32px auto 0; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: .74rem; color: rgba(200,190,255,.3); text-align: center;
+  }
   </style>
 </head>
 <body>
-
 <canvas id="bg"></canvas>
 
-<!-- ═══════ NAV ═══════ -->
+<!-- ══════════════ NAV ══════════════ -->
 <nav>
   <a href="/" class="nav-logo">
     <div class="logo-mark">M</div>
     <div>
       <div class="logo-name">May</div>
-      <div class="logo-sub">Uma plataforma Comercial Jurídico</div>
+      <div class="logo-sub">Plataforma Comercial Jurídica</div>
     </div>
   </a>
+  <div class="nav-links">
+    <a href="#como">Como funciona</a>
+    <a href="#planos">Planos</a>
+    <a href="#faq">FAQ</a>
+  </div>
   <div class="nav-right">
-    <a href="/auth.html" class="btn-ghost">Entrar</a>
-    <a href="#planos" class="btn-nav">7 dias por nossa conta →</a>
+    <a href="/login" class="btn-ghost">Entrar</a>
+    <a href="#planos" class="btn-nav">Começar grátis →</a>
   </div>
 </nav>
 
-<!-- ═══════════════════════════════════
-     HERO — flanking cards + headline
-════════════════════════════════════ -->
-<div style="position:relative;z-index:1;padding-top:80px">
+<!-- ══════════════ HERO ══════════════ -->
+<div class="hero-wrap">
   <div class="hero">
-    <!-- LADO ESQUERDO -->
-    <div class="hero-side">
-      <div class="hero-feat-card">
-        <div class="hero-feat-icon">📋</div>
-        <div class="hero-feat-title">Scripts prontos para cada etapa</div>
-        <div class="hero-feat-desc">Abordagem, proposta, objeção e fechamento. O que falar já está escrito.</div>
-      </div>
-      <div class="hero-feat-card">
-        <div class="hero-feat-icon">🎯</div>
-        <div class="hero-feat-title">Simuladores de atendimento com IA</div>
-        <div class="hero-feat-desc">Sua equipe treina situações reais antes de encarar o cliente.</div>
-      </div>
-    </div>
 
-    <!-- CENTRO -->
-    <div class="hero-center">
+    <!-- LEFT: TEXTO -->
+    <div class="hero-left">
       <div class="hero-eyebrow">
         <span class="pulse"></span>
-        Comercial Jurídico Plataforma
+        Plataforma comercial para advogados
       </div>
-
       <h1>
-        Não faltam leads.<br>
-        <span class="accent">Falta saber o que dizer.</span>
+        Da consulta ao<br>
+        contrato assinado —<br>
+        <em>em semanas, não meses.</em>
       </h1>
-
       <p class="hero-sub">
-        A May entrega o script, o argumento ou o modelo de mensagem
-        na hora que você precisa — objeção de preço, follow-up travado,
-        reunião daqui a pouco. Você abre, aplica e avança a conversa.
-        Sem curso para assistir. Sem teoria para estudar.
+        Simulações de atendimento com IA, análise de transcrição de reunião
+        e CRM jurídico. O método Comercial Jurídico aplicado em cada
+        conversa com o cliente.
       </p>
-
       <div class="hero-ctas">
-        <a href="#planos" class="btn-primary">
-          🚀 Quero testar 7 dias por nossa conta
-        </a>
-        <a href="#como-funciona" class="btn-outline">Ver como funciona ↓</a>
+        <a href="#planos" class="btn-primary">Começar 7 dias grátis →</a>
+        <a href="#como" class="btn-outline">↓ Ver como funciona</a>
       </div>
-      <p class="microcopy">7 dias por nossa conta, sem cobrança. Sem cursos. Você usa na primeira hora.</p>
+      <div class="hero-trust">
+        <div class="trust-item"><span class="trust-check">✓</span> Sem cartão de crédito</div>
+        <div class="trust-item"><span class="trust-check">✓</span> 7 dias grátis</div>
+        <div class="trust-item"><span class="trust-check">✓</span> Acesse em 5 minutos</div>
+        <div class="trust-item"><span class="trust-check">✓</span> Cancele quando quiser</div>
+      </div>
+    </div>
 
-      <div class="hero-proof">
-        <div class="proof-item">
-          <div class="proof-num accent">+500</div>
-          <div class="proof-label">escritórios atendidos</div>
+    <!-- RIGHT: MOCKUP DO PRODUTO -->
+    <div class="hero-right">
+      <div class="mockup-shell">
+        <div class="mockup-header">
+          <div class="mockup-dots"><span></span><span></span><span></span></div>
+          <div class="mockup-title">Simulação · Cliente Hesitante</div>
+          <div class="mockup-badge">AO VIVO</div>
         </div>
-        <div class="proof-item">
-          <div class="proof-num accent">140</div>
-          <div class="proof-label">contratos em um mês (cliente real)</div>
+        <div class="mockup-chat">
+          <div class="msg">
+            <div class="msg-av">M</div>
+            <div>
+              <div class="msg-bubble">
+                Entendo que o valor parece alto. Mas te pergunto: quanto você estima perder se esse problema não for resolvido este ano?
+                <span class="msg-tag">🎯 Ancoragem de valor</span>
+              </div>
+            </div>
+          </div>
+          <div class="msg user">
+            <div class="msg-av">V</div>
+            <div>
+              <div class="msg-bubble">"Vou pensar e te retorno até sexta..."</div>
+            </div>
+          </div>
+          <div class="msg">
+            <div class="msg-av">M</div>
+            <div>
+              <div class="msg-bubble">
+                ⚠️ Objeção de timing detectada. Tente: <em>"O que precisa acontecer para você decidir hoje?"</em>
+                <span class="msg-tag">💡 SPIN · Pergunta de implicação</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="proof-item">
-          <div class="proof-num accent">+R$32k</div>
-          <div class="proof-label">acima do mês anterior</div>
+        <div class="mockup-scores">
+          <div class="score-item">
+            <div class="score-label">Escuta</div>
+            <div class="score-bar"><div class="score-fill" style="width:82%"></div></div>
+            <div class="score-val">8.2</div>
+          </div>
+          <div class="score-item">
+            <div class="score-label">Rapport</div>
+            <div class="score-bar"><div class="score-fill" style="width:76%"></div></div>
+            <div class="score-val">7.6</div>
+          </div>
+          <div class="score-item">
+            <div class="score-label">Técnica</div>
+            <div class="score-bar"><div class="score-fill" style="width:90%"></div></div>
+            <div class="score-val">9.0</div>
+          </div>
+          <div class="score-item">
+            <div class="score-label">Fechamento</div>
+            <div class="score-bar"><div class="score-fill" style="width:64%"></div></div>
+            <div class="score-val">6.4</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- LADO DIREITO -->
-    <div class="hero-side">
-      <div class="hero-feat-card">
-        <div class="hero-feat-icon">🔔</div>
-        <div class="hero-feat-title">Notificações e agendamento de reunião</div>
-        <div class="hero-feat-desc">A plataforma avisa quando um lead está esfriando. Nenhum contato some do radar.</div>
-      </div>
-      <div class="hero-feat-card">
-        <div class="hero-feat-icon">🏆</div>
-        <div class="hero-feat-title">Ranking de vendas em tempo real</div>
-        <div class="hero-feat-desc">Competição saudável que move a equipe. Quem está fechando mais aparece no topo.</div>
-      </div>
-    </div>
   </div>
 </div>
 
-<!-- ═══════ SERVICE TICKER ═══════ -->
+<!-- ══════════════ TICKER ══════════════ -->
 <div class="sticker-wrap">
   <div class="sticker-track">
-    <span class="sticker-item">Scripts Comerciais</span>
-    <span class="sticker-item">Ranking de Vendas</span>
-    <span class="sticker-item">Simuladores de Atendimento</span>
-    <span class="sticker-item">Agendamento de Reunião</span>
-    <span class="sticker-item">Playbooks de Venda</span>
-    <span class="sticker-item">Notificações de Follow-up</span>
-    <span class="sticker-item">Argumentação de Honorários</span>
-    <span class="sticker-item">Quebra de Objeções</span>
-    <span class="sticker-item">Gestão de Equipe Comercial</span>
-    <span class="sticker-item">Gerador de Proposta</span>
-    <span class="sticker-item">Trilha de Capacitação</span>
-    <span class="sticker-item">Onboarding Comercial</span>
-    <!-- duplicado -->
-    <span class="sticker-item">Scripts Comerciais</span>
-    <span class="sticker-item">Ranking de Vendas</span>
-    <span class="sticker-item">Simuladores de Atendimento</span>
-    <span class="sticker-item">Agendamento de Reunião</span>
-    <span class="sticker-item">Playbooks de Venda</span>
-    <span class="sticker-item">Notificações de Follow-up</span>
-    <span class="sticker-item">Argumentação de Honorários</span>
-    <span class="sticker-item">Quebra de Objeções</span>
-    <span class="sticker-item">Gestão de Equipe Comercial</span>
-    <span class="sticker-item">Gerador de Proposta</span>
-    <span class="sticker-item">Trilha de Capacitação</span>
-    <span class="sticker-item">Onboarding Comercial</span>
+    <div class="sticker-item">Simulações com IA</div>
+    <div class="sticker-item">Análise de transcrição</div>
+    <div class="sticker-item">CRM jurídico</div>
+    <div class="sticker-item">Funil SDR</div>
+    <div class="sticker-item">Follow-up automático</div>
+    <div class="sticker-item">Diagnóstico SPIN</div>
+    <div class="sticker-item">Scripts de objeção</div>
+    <div class="sticker-item">Agenda comercial</div>
+    <div class="sticker-item">Simulações com IA</div>
+    <div class="sticker-item">Análise de transcrição</div>
+    <div class="sticker-item">CRM jurídico</div>
+    <div class="sticker-item">Funil SDR</div>
+    <div class="sticker-item">Follow-up automático</div>
+    <div class="sticker-item">Diagnóstico SPIN</div>
+    <div class="sticker-item">Scripts de objeção</div>
+    <div class="sticker-item">Agenda comercial</div>
   </div>
 </div>
 
-<!-- ═══════ LOGOS TICKER ═══════ -->
-<div style="text-align:center;padding:32px 0 10px;background:var(--bg)">
-  <p style="font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700">escritórios que já resolvem isso com a May</p>
-</div>
-<div class="logos-ticker-wrap" style="border-top:none;padding:16px 0 28px">
-  <div class="logos-ticker-track" id="logos-ticker">
-    <img class="logos-ticker-logo" src="assets/logos/logo2.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo3.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo4.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo5.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo7.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo8.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo9.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo10.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo11.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo12.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo13.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo14.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo15.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo16.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo17.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo18.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo19.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo20.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo21.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo22.png" alt="escritório">
-    <!-- duplicado -->
-    <img class="logos-ticker-logo" src="assets/logos/logo2.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo3.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo4.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo5.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo7.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo8.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo9.png"  alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo10.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo11.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo12.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo13.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo14.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo15.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo16.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo17.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo18.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo19.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo20.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo21.png" alt="escritório">
-    <img class="logos-ticker-logo" src="assets/logos/logo22.png" alt="escritório">
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════
-     DIAGNÓSTICO — numbered circular icons
-════════════════════════════════════ -->
-<section class="diag">
+<!-- ══════════════ O PROBLEMA ══════════════ -->
+<section class="problema">
   <div class="wrap">
-    <div class="diag-header">
-      <span class="section-label">Você se identifica com isso?</span>
-      <h2 class="section-h2">As situações que se repetem toda semana<br>e custam contratos ao seu escritório <span class="accent">sem que ninguém perceba.</span></h2>
-      <p class="lead" style="max-width:560px;margin:0 auto">Não é falta de lead. É que os mesmos momentos que travam uma venda aparecem toda semana — e na hora que acontece, ninguém sabe o que fazer.</p>
-    </div>
-
-    <div class="diag-grid">
-      <div class="diag-card">
-        <div class="diag-num">01</div>
-        <h3>O lead chega, mas a venda não avança</h3>
-        <p>Você atende, manda proposta e o cliente some. Ninguém sabe como retomar sem parecer insistente.</p>
-      </div>
-      <div class="diag-card">
-        <div class="diag-num">02</div>
-        <h3>Follow-up é "alguma novidade?"</h3>
-        <p>Sua equipe manda mensagem para "dar um oi", mas não cria contexto, gera urgência ou avança a conversa.</p>
-      </div>
-      <div class="diag-card">
-        <div class="diag-num">03</div>
-        <h3>"Está caro" paralisa o atendimento</h3>
-        <p>Quando o cliente objeta o preço, ninguém sabe o que responder. A venda morre ali.</p>
-      </div>
-      <div class="diag-card">
-        <div class="diag-num">04</div>
-        <h3>Vendedor novo demora meses para produzir</h3>
-        <p>Você precisa explicar tudo de novo para cada pessoa nova porque o método está na sua cabeça.</p>
-      </div>
-      <div class="diag-card">
-        <div class="diag-num">05</div>
-        <h3>O gestor repete a mesma orientação toda semana</h3>
-        <p>Você vira o manual vivo da equipe. Toda decisão comercial passa por você e isso consome tempo.</p>
-      </div>
-      <div class="diag-card">
-        <div class="diag-num">06</div>
-        <h3>Cada atendimento é diferente, sem padrão</h3>
-        <p>Um atendente conduz bem, outro perde o cliente. Não existe um padrão que a equipe inteira siga.</p>
-      </div>
-    </div>
-
-    <div class="diag-callout">
-      <p>
-        Essas situações se repetem todo mês.<br>
-        A May entrega a resposta certa <span class="accent">na hora em que acontece.</span>
+    <div class="problema-header">
+      <span class="section-label">O Problema</span>
+      <h2 class="section-h2">
+        A advocacia forma ótimos técnicos.<br>
+        <span class="accent">Ninguém treina para fechar contratos.</span>
+      </h2>
+      <p class="lead" style="max-width:560px;margin:0 auto">
+        O problema não está na qualidade do seu trabalho. Está na conversa que acontece antes de assinar.
       </p>
     </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════
-     O QUE É A PLATAFORMA
-════════════════════════════════════ -->
-<section class="whatis" id="como-funciona">
-  <div class="wrap">
-    <div class="whatis-grid">
-      <div class="whatis-left">
-        <span class="section-label">O que é a May</span>
-        <h2 class="section-h2">Tudo que o comercial do seu escritório<br>já precisava ter, <span class="accent">em um único lugar.</span></h2>
-        <p class="lead" style="margin-bottom:20px">
-          O advogado não perde contrato por falta de técnica jurídica.
-          Perde porque na hora certa — objeção de preço, follow-up travado, reunião daqui a pouco —
-          ninguém sabe o que dizer. A May entrega isso em tempo real.
-          Você chega com a situação, abre a plataforma e sai com o que falar.
-        </p>
-        <p class="lead" style="margin-bottom:24px">
-          Scripts prontos, simuladores de atendimento, modelos de follow-up,
-          gestão da equipe e painel do gestor — tudo em um só lugar.
-          Sem curso para assistir. Sem módulo para completar.
-          Você usa agora, na conversa que está acontecendo.
-        </p>
-        <div class="whatis-quote">
-          Não é mais um software para aprender.<br>
-          É a resposta certa disponível para toda a equipe, no momento que precisa.
-        </div>
+    <div class="problema-grid">
+      <div class="prob-card">
+        <div class="prob-num">8/10</div>
+        <div class="prob-title">Advogados vendem por instinto, não por método</div>
+        <div class="prob-desc">Sem script, sem estrutura para apresentar honorários, sem técnica para responder objeções — a conversa vai para onde o cliente leva.</div>
       </div>
-      <div class="feat-list">
-        <div class="feat-item">
-          <div class="feat-icon">📋</div>
-          <div class="feat-text"><strong>Scripts e playbooks comerciais</strong>O que falar em cada etapa: abordagem, qualificação, proposta e fechamento.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">🎯</div>
-          <div class="feat-text"><strong>Simuladores de atendimento</strong>Sua equipe pratica situações reais antes de encarar o cliente, com feedback da IA.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">🔁</div>
-          <div class="feat-text"><strong>Modelos de follow-up</strong>Cadências prontas para retomar leads sem parecer desesperado ou invasivo.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">⚖️</div>
-          <div class="feat-text"><strong>Argumentação jurídica e comercial</strong>Como explicar valor, justificar honorários e conduzir objeções de preço.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">📊</div>
-          <div class="feat-text"><strong>Painel do gestor</strong>Acompanhe a equipe, convide colaboradores e centralize o comercial em um só lugar.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">🧠</div>
-          <div class="feat-text"><strong>Trilha de capacitação</strong>Onboarding comercial completo para quem entra na equipe, sem depender de você para ensinar.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">🏆</div>
-          <div class="feat-text"><strong>Ranking de vendas da equipe</strong>Classificação em tempo real de quem está fechando mais. Competição saudável que move a equipe sem o gestor precisar cobrar.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">📅</div>
-          <div class="feat-text"><strong>Agendamento de reunião integrado</strong>Agende, registre e acompanhe reuniões com leads diretamente na plataforma. Pipeline sempre atualizado, sem planilha paralela.</div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon">🔔</div>
-          <div class="feat-text"><strong>Notificações de follow-up</strong>A plataforma avisa quando um lead está esfriando e ainda não teve retorno. Ninguém some do radar por falta de atenção.</div>
-        </div>
+      <div class="prob-card">
+        <div class="prob-num">70%</div>
+        <div class="prob-title">"Vou pensar" é o fechamento que nunca volta</div>
+        <div class="prob-desc">Clientes que saem da consulta sem decisão raramente retornam. Falta de follow-up estruturado é a maior causa silenciosa de perda de receita.</div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-num">R$0</div>
+        <div class="prob-title">O ROI de treinamento comercial na faculdade</div>
+        <div class="prob-desc">Cursos jurídicos ignoram a competência comercial. O resultado: advogados tecnicamente excelentes que travam na hora de apresentar o valor do seu trabalho.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════
-     COMO FUNCIONA — numbered grid cards
-════════════════════════════════════ -->
-<section class="how">
+<!-- ══════════════ A SOLUÇÃO ══════════════ -->
+<section class="solucao">
   <div class="wrap">
-    <div class="how-header">
-      <span class="section-label">Como funciona na prática</span>
-      <h2 class="section-h2">Você usa no dia em que precisa,<br><span class="accent">não no dia em que tem tempo.</span></h2>
+    <div class="solucao-header">
+      <span class="section-label">A Solução</span>
+      <h2 class="section-h2">
+        Três ferramentas. Um método.<br>
+        <span class="accent">Resultado em cada atendimento.</span>
+      </h2>
     </div>
+    <div class="pilares">
 
-    <div class="how-grid">
-      <div class="how-card">
-        <div class="how-num">01</div>
-        <h3>Sua equipe acessa no dia a dia</h3>
-        <p>Antes de um atendimento importante, numa hora livre, ou no início da semana. Disponível 24h, de qualquer dispositivo.</p>
-      </div>
-      <div class="how-card">
-        <div class="how-num">02</div>
-        <h3>Treina com simulações e scripts reais</h3>
-        <p>Os simuladores recriam situações reais da venda jurídica. A IA responde como um cliente real, não como conteúdo genérico de treinamento.</p>
-      </div>
-      <div class="how-card">
-        <div class="how-num">03</div>
-        <h3>Aplica direto na conversa com o cliente</h3>
-        <p>Script de abordagem pronto? Usa. Follow-up travado? Consulta o modelo e adapta. O método vai da tela para a conversa real.</p>
-      </div>
-      <div class="how-card">
-        <div class="how-num">04</div>
-        <h3>Gestor acompanha sem microgerenciar</h3>
-        <p>O painel do gestor mostra o engajamento da equipe e centraliza o comercial sem você precisar repetir orientações toda semana.</p>
-      </div>
-    </div>
-
-    <div class="how-cta-bar">
-      <p>5 anos estruturando o comercial de escritórios de advocacia. O que funcionou está dentro da plataforma — disponível para a sua equipe usar agora.</p>
-      <a href="#planos" class="btn-primary" style="white-space:nowrap">Testar 7 dias grátis →</a>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════
-     POR QUE ESCOLHER — numbered benefits
-════════════════════════════════════ -->
-<section class="why">
-  <div class="wrap">
-    <div class="why-header">
-      <span class="section-label">Por que escolher</span>
-      <h2 class="section-h2">O que torna a plataforma<br><span class="accent">diferente de qualquer outro treinamento.</span></h2>
-    </div>
-
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="why-num-badge">01</div>
-        <div class="why-body">
-          <h3>Construída dentro de escritórios reais, não em sala de aula</h3>
-          <p>Não é teoria de livro. São 5 anos estruturando o comercial de escritórios de advocacia — o que funcionou na prática está dentro da plataforma.</p>
+      <div class="pilar">
+        <div class="pilar-left">
+          <div class="pilar-num">01</div>
+          <div>
+            <div class="pilar-label">Treinamento</div>
+            <div class="pilar-title">Simulações ao vivo com IA</div>
+          </div>
         </div>
-      </div>
-      <div class="why-card">
-        <div class="why-num-badge">02</div>
-        <div class="why-body">
-          <h3>IA treinada com raciocínio comercial jurídico real</h3>
-          <p>A May responde com o raciocínio do Comercial Jurídico — situações reais, argumentos testados, não respostas genéricas de chatbot.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-num-badge">03</div>
-        <div class="why-body">
-          <h3>Treino prático, não conteúdo para assistir</h3>
-          <p>Simuladores de atendimento onde a equipe pratica antes de encarar o cliente. Feedback real, não passivo.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-num-badge">04</div>
-        <div class="why-body">
-          <h3>Ranking, agendamento e notificações mudam a cultura da equipe</h3>
-          <p>Competição saudável pelo ranking, pipeline organizado com agendamento e nenhum lead esquecido graças às notificações automáticas. A equipe começa a se mover sozinha.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-num-badge">05</div>
-        <div class="why-body">
-          <h3>Onboarding comercial incluso no plano</h3>
-          <p>Quem entra na equipe já tem trilha de capacitação pronta. Zero dependência do gestor para ensinar do zero.</p>
-        </div>
-      </div>
-      <div class="why-card">
-        <div class="why-num-badge">06</div>
-        <div class="why-body">
-          <h3>7 dias para avaliar com acesso completo</h3>
-          <p>Sem conteúdo bloqueado, sem versão limitada. Acesso real ao método completo para você decidir com segurança.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════
-     ORIGEM — story
-════════════════════════════════════ -->
-<section class="origem">
-  <div class="wrap">
-    <div class="origem-inner">
-      <span class="section-label">Como a May surgiu</span>
-      <h2 class="section-h2">Anos consultando escritórios de advocacia.<br><span class="accent">Vi de perto o que trava a venda — e o que fecha.</span></h2>
-      <p class="lead" style="max-width:620px;margin:0 auto">
-        Depois de anos estruturando o comercial de escritórios, percebi que os mesmos problemas apareciam toda semana em lugares diferentes. Não era falta de talento — era falta de ter a resposta certa na hora certa. Criei a May para que qualquer advogado ou equipe comercial tivesse isso disponível, sem depender de consultoria, curso ou de alguém para lembrar.
-      </p>
-
-      <div class="origem-gpt-wrap">
-        <img class="origem-gpt-img" src="/assets/may-gpt.png" alt="May GPT — 5K+ conversas no ChatGPT" />
-        <div class="origem-gpt-text">
-          <h3>Antes de virar plataforma,<br>a May já era usada por milhares de advogados.</h3>
-          <p>A May começou como um GPT personalizado no ChatGPT. Em pouco tempo, mais de 5.000 advogados estavam usando para tirar dúvidas comerciais, criar scripts e preparar atendimentos.</p>
-          <p>A demanda mostrou que o problema era real e que a solução funcionava. A plataforma nasceu para ir além — com simuladores, gestão de equipe, ranking e tudo o que um GPT sozinho não consegue entregar.</p>
-          <div class="origem-gpt-stats">
-            <div class="origem-gpt-stat">
-              <strong>5K+</strong>
-              <span>conversas no GPT</span>
-            </div>
-            <div class="origem-gpt-stat">
-              <strong>4.9</strong>
-              <span>avaliação média</span>
-            </div>
+        <div class="pilar-right">
+          <p class="pilar-desc">
+            Pratique o atendimento antes de entrar na reunião real. A May assume o papel do cliente —
+            hesitante, questionador, com objeção de preço — e você treina a resposta certa sem o custo
+            de errar com um lead real. Cada simulação é pontuada, com feedback sobre técnica,
+            rapport e fechamento.
+          </p>
+          <div class="pilar-tags">
+            <span class="pilar-tag">SPIN Selling</span>
+            <span class="pilar-tag">Objeção de preço</span>
+            <span class="pilar-tag">Rapport</span>
+            <span class="pilar-tag">Fechamento</span>
+            <span class="pilar-tag">Negociação</span>
           </div>
         </div>
       </div>
 
-      <div class="origem-stat-row" style="margin-top:48px">
-        <div class="origem-stat">
-          <div class="origem-num">+5.000</div>
-          <div class="origem-label">advogados já usaram a May</div>
+      <div class="pilar">
+        <div class="pilar-left">
+          <div class="pilar-num">02</div>
+          <div>
+            <div class="pilar-label">Análise</div>
+            <div class="pilar-title">Análise de transcrição de reunião</div>
+          </div>
         </div>
-        <div class="origem-divider"></div>
-        <div class="origem-stat">
-          <div class="origem-num">0</div>
-          <div class="origem-label">suporte manual: o método responde sozinho</div>
-        </div>
-        <div class="origem-divider"></div>
-        <div class="origem-stat">
-          <div class="origem-num">5 anos</div>
-          <div class="origem-label">de método jurídico dentro da IA</div>
+        <div class="pilar-right">
+          <p class="pilar-desc">
+            Cole a transcrição de uma reunião real com cliente e a May analisa tudo: onde houve rapport,
+            onde travou, qual técnica funcionou ou faltou — e o que fazer diferente na próxima conversa.
+            Como ter um coach comercial lendo cada atendimento seu.
+          </p>
+          <div class="pilar-tags">
+            <span class="pilar-tag">Diagnóstico de reunião</span>
+            <span class="pilar-tag">Pontos de travamento</span>
+            <span class="pilar-tag">Sugestões práticas</span>
+            <span class="pilar-tag">Avaliação de técnica</span>
+          </div>
         </div>
       </div>
 
-      <div class="origem-quote">
-        <img class="origem-quote-avatar" src="/assets/mayra-avatar.png" alt="Mayra Alves" />
-        <div class="origem-quote-body">
-          <div class="origem-quote-text">"Não foi uma aposta. Foi uma resposta a uma demanda real e funcionou. Agora esse mesmo método está disponível como plataforma de treinamento para o seu escritório."</div>
-          <div class="origem-quote-autor">Mayra Alves, fundadora do Comercial Jurídico</div>
+      <div class="pilar">
+        <div class="pilar-left">
+          <div class="pilar-num">03</div>
+          <div>
+            <div class="pilar-label">Gestão Comercial</div>
+            <div class="pilar-title">CRM + Funil SDR Jurídico</div>
+          </div>
+        </div>
+        <div class="pilar-right">
+          <p class="pilar-desc">
+            Pipeline de leads, agenda de follow-ups, briefing automático antes de reuniões e rotina
+            comercial integrada — pensado para a realidade do escritório de advocacia.
+            Da prospecção ao contrato assinado, sem perder lead no caminho.
+          </p>
+          <div class="pilar-tags">
+            <span class="pilar-tag">Pipeline de leads</span>
+            <span class="pilar-tag">Agenda de follow-ups</span>
+            <span class="pilar-tag">Briefing de reunião</span>
+            <span class="pilar-tag">Funil SDR</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ COMO FUNCIONA ══════════════ -->
+<section class="como" id="como">
+  <div class="wrap">
+    <div class="como-header">
+      <span class="section-label">Como funciona</span>
+      <h2 class="section-h2">
+        Acesse, treine e feche.<br>
+        <span class="accent">Em quatro passos simples.</span>
+      </h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Configure seu escritório</h3>
+        <p>Informe sua área de atuação, perfil de cliente e metas. A May calibra as simulações para o seu contexto.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Simule antes de cada reunião</h3>
+        <p>Escolha o cenário, pratique o atendimento com a IA e receba o feedback antes de entrar na conversa real.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Analise o que aconteceu</h3>
+        <p>Após a reunião, cole a transcrição. A May aponta o que funcionou, o que travou e como melhorar.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Gerencie leads e follow-ups</h3>
+        <p>Registre no CRM, agende o follow-up e acompanhe cada lead até o fechamento — sem perder ninguém.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ORIGEM ══════════════ -->
+<section class="origem">
+  <div class="wrap">
+    <div class="origem-inner">
+      <div class="origem-text">
+        <span class="section-label">Sobre a May</span>
+        <h2>Feita por quem construiu<br>o método comercial jurídico.</h2>
+        <p>
+          A May é a plataforma do <strong style="color:var(--text)">Comercial Jurídico</strong>,
+          criado por Mayra Alves — 5 anos de método, centenas de advogados treinados e resultados
+          como 140 contratos em um único mês.
+        </p>
+        <p>
+          "Não foi uma aposta. Foi uma resposta a uma demanda real — e funcionou.
+          Agora esse mesmo método está disponível como plataforma para o seu escritório." — Mayra Alves
+        </p>
+      </div>
+      <div class="origem-stats">
+        <div class="origem-stat">
+          <div class="origem-num accent">5 anos</div>
+          <div class="origem-label">de método jurídico dentro da plataforma</div>
+        </div>
+        <div class="origem-stat">
+          <div class="origem-num accent">140+</div>
+          <div class="origem-label">contratos fechados em um único mês</div>
+        </div>
+        <div class="origem-stat">
+          <div class="origem-num accent">0</div>
+          <div class="origem-label">suporte manual — o método responde sozinho</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════
-     PROVAS SOCIAIS — prints
-════════════════════════════════════ -->
+<!-- ══════════════ PROVAS SOCIAIS ══════════════ -->
 <section class="social">
   <div class="wrap">
     <div class="social-header">
@@ -1082,95 +826,32 @@
       <h2 class="section-h2">O que os clientes do Comercial Jurídico<br><span class="accent">relatam na prática.</span></h2>
       <p class="lead">Sem filtro. Do jeito que chegou.</p>
     </div>
-
     <div class="masonry">
-      <div class="ps-card">
-        <img src="/assets/provas/ps5.jpg" alt="Suelen Rodrigues" loading="lazy" />
-        <div class="ps-label">Suelen Rodrigues<div class="ps-result">↑ Aumento significativo de contratos</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps7.jpg" alt="Glauciane Menário" loading="lazy" />
-        <div class="ps-label">Glauciane Menário<div class="ps-result">↑ 140 contratos em janeiro</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps3.jpg" alt="Cliente +R$32k" loading="lazy" />
-        <div class="ps-label">Cliente Comercial Jurídico<div class="ps-result">↑ +R$32k acima do mês anterior</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps4.jpg" alt="20 contratos" loading="lazy" />
-        <div class="ps-label">Setor Comercial · Suelen Rodrigues<div class="ps-result">↑ 20 contratos fechados</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps8.jpg" alt="Filipe Judson" loading="lazy" />
-        <div class="ps-label">Filipe Judson<div class="ps-result">↑ 8 contratos de IPVA no mês</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps9.jpg" alt="Thais Vilasanta" loading="lazy" />
-        <div class="ps-label">Thais Vilasanta<div class="ps-result">↑ Follow-up converteu na hora</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps1.jpg" alt="Marcelo Moreira Lima" loading="lazy" />
-        <div class="ps-label">Marcelo Moreira Lima<div class="ps-result">↑ "Extremamente satisfeito"</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps2.jpg" alt="Dra. Elayne Santos" loading="lazy" />
-        <div class="ps-label">Dra. Elayne Santos<div class="ps-result">↑ "Melhor investimento que fiz"</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/ps10.jpg" alt="Livia Rodrigues Peres" loading="lazy" />
-        <div class="ps-label">Livia Rodrigues Peres<div class="ps-result">↑ Técnicas de abordagem aplicadas</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d4.jpg" alt="Rogerio Cirino" loading="lazy" />
-        <div class="ps-label">Rogerio Cirino<div class="ps-result">↑ 101 contratos no trimestre</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d2.jpg" alt="42 contratos" loading="lazy" />
-        <div class="ps-label">Cliente Comercial Jurídico<div class="ps-result">↑ 42 contratos usando o script</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d3.jpg" alt="Contrato R$4k" loading="lazy" />
-        <div class="ps-label">Setor Comercial<div class="ps-result">↑ 1 treinamento, contrato de R$4k</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d5.jpg" alt="Eduarda R$30k" loading="lazy" />
-        <div class="ps-label">Eduarda<div class="ps-result">↑ Contrato de R$30 mil fechado</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d7.jpg" alt="Milena Stabele" loading="lazy" />
-        <div class="ps-label">Milena Stabele<div class="ps-result">↑ Meta dobrada: 20 contratos</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d8.jpg" alt="Hilquias" loading="lazy" />
-        <div class="ps-label">Hilquias<div class="ps-result">↑ 80 contratos em agosto</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d1.jpg" alt="Bríndilla Ventura" loading="lazy" />
-        <div class="ps-label">Bríndilla Ventura<div class="ps-result">↑ Venda mais rápida da carreira</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/d6.jpg" alt="2 contratos" loading="lazy" />
-        <div class="ps-label">Cliente Comercial Jurídico<div class="ps-result">↑ 2 contratos na mesma reunião</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/manu1.png" alt="Manu R$15k" loading="lazy" />
-        <div class="ps-label">Manu · Advogada da Saúde<div class="ps-result">↑ R$15 mil no pix em um dia</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/manu5.png" alt="Manu R$12k" loading="lazy" />
-        <div class="ps-label">Manu · Advogada da Saúde<div class="ps-result">↑ Cliente queria pagar R$12 mil</div></div>
-      </div>
-      <div class="ps-card">
-        <img src="/assets/provas/manu6.png" alt="Manu objeção quebrada" loading="lazy" />
-        <div class="ps-label">Manu · Advogada da Saúde<div class="ps-result">↑ R$12 mil no pix, objeção quebrada</div></div>
-      </div>
+      <div class="ps-card"><img src="/assets/provas/ps5.jpg"   alt="Suelen Rodrigues"      loading="lazy" /><div class="ps-label">Suelen Rodrigues<div class="ps-result">↑ Aumento significativo de contratos</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps7.jpg"   alt="Glauciane Menário"     loading="lazy" /><div class="ps-label">Glauciane Menário<div class="ps-result">↑ 140 contratos em janeiro</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps3.jpg"   alt="Cliente +R$32k"        loading="lazy" /><div class="ps-label">Cliente Comercial Jurídico<div class="ps-result">↑ +R$32k acima do mês anterior</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps4.jpg"   alt="20 contratos"          loading="lazy" /><div class="ps-label">Setor Comercial · Suelen Rodrigues<div class="ps-result">↑ 20 contratos fechados</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps8.jpg"   alt="Filipe Judson"         loading="lazy" /><div class="ps-label">Filipe Judson<div class="ps-result">↑ 8 contratos de IPVA no mês</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps9.jpg"   alt="Thais Vilasanta"       loading="lazy" /><div class="ps-label">Thais Vilasanta<div class="ps-result">↑ Follow-up converteu na hora</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps1.jpg"   alt="Marcelo Moreira Lima"  loading="lazy" /><div class="ps-label">Marcelo Moreira Lima<div class="ps-result">↑ "Extremamente satisfeito"</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps2.jpg"   alt="Dra. Elayne Santos"    loading="lazy" /><div class="ps-label">Dra. Elayne Santos<div class="ps-result">↑ "Melhor investimento que fiz"</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/ps10.jpg"  alt="Livia Rodrigues Peres" loading="lazy" /><div class="ps-label">Livia Rodrigues Peres<div class="ps-result">↑ Técnicas de abordagem aplicadas</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d4.jpg"    alt="Rogerio Cirino"        loading="lazy" /><div class="ps-label">Rogerio Cirino<div class="ps-result">↑ 101 contratos no trimestre</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d2.jpg"    alt="42 contratos"          loading="lazy" /><div class="ps-label">Cliente Comercial Jurídico<div class="ps-result">↑ 42 contratos usando o script</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d3.jpg"    alt="Contrato R$4k"         loading="lazy" /><div class="ps-label">Setor Comercial<div class="ps-result">↑ 1 treinamento, contrato de R$4k</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d5.jpg"    alt="Eduarda R$30k"         loading="lazy" /><div class="ps-label">Eduarda<div class="ps-result">↑ Contrato de R$30 mil fechado</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d7.jpg"    alt="Milena Stabele"        loading="lazy" /><div class="ps-label">Milena Stabele<div class="ps-result">↑ Meta dobrada: 20 contratos</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d8.jpg"    alt="Hilquias"              loading="lazy" /><div class="ps-label">Hilquias<div class="ps-result">↑ 80 contratos em agosto</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d1.jpg"    alt="Bríndilla Ventura"     loading="lazy" /><div class="ps-label">Bríndilla Ventura<div class="ps-result">↑ Venda mais rápida da carreira</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/d6.jpg"    alt="2 contratos"           loading="lazy" /><div class="ps-label">Cliente Comercial Jurídico<div class="ps-result">↑ 2 contratos na mesma reunião</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/manu1.png" alt="Manu R$15k"            loading="lazy" /><div class="ps-label">Manu · Advogada da Saúde<div class="ps-result">↑ R$15 mil no pix em um dia</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/manu5.png" alt="Manu R$12k"            loading="lazy" /><div class="ps-label">Manu · Advogada da Saúde<div class="ps-result">↑ Cliente queria pagar R$12 mil</div></div></div>
+      <div class="ps-card"><img src="/assets/provas/manu6.png" alt="Manu objeção quebrada" loading="lazy" /><div class="ps-label">Manu · Advogada da Saúde<div class="ps-result">↑ R$12 mil no pix, objeção quebrada</div></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════
-     DEPOIMENTOS EM TEXTO
-════════════════════════════════════ -->
+<!-- ══════════════ DEPOIMENTOS ══════════════ -->
 <section class="testis">
   <div class="wrap">
     <div class="testis-header">
@@ -1181,265 +862,207 @@
 
       <div class="testi">
         <div class="testi-q">Depois da consultoria da Mayra, nosso escritório mudou completamente a forma de atuar no setor comercial. O número de contratos aumentou significativamente e hoje já estamos precisando contratar um estagiário para dar conta do operacional.</div>
-        <div class="testi-author">
-          <div class="testi-av">SR</div>
-          <div><div class="testi-name">Suelen Rodrigues</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">SR</div><div><div class="testi-name">Suelen Rodrigues</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Tô me sentindo mais confiante. Meu atendimento já está mais organizado. Sei exatamente o que vender e como vender. Consigo identificar os clientes com potencial para o produto principal e os secundários.</div>
-        <div class="testi-author">
-          <div class="testi-av">FJ</div>
-          <div><div class="testi-name">Filipe Judson</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">FJ</div><div><div class="testi-name">Filipe Judson</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Melhor investimento que eu poderia ter feito foi contratar vocês! Só o alinhamento de hoje já pagou o investimento! Estamos muito felizes e determinadas a fazer dar certo!</div>
-        <div class="testi-author">
-          <div class="testi-av">ES</div>
-          <div><div class="testi-name">Dra. Elayne Santos</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">ES</div><div><div class="testi-name">Dra. Elayne Santos</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">A estratégia que a Mayra passou deu muito certo! Usamos no follow-up hoje e olha só: contratos assinados na hora.</div>
-        <div class="testi-author">
-          <div class="testi-av">TV</div>
-          <div><div class="testi-name">Thais Vilasanta</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">TV</div><div><div class="testi-name">Thais Vilasanta</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Foi muito gratificante conseguir esse resultado. Segui todas as técnicas de abordagem e funcionou. É diferente quando você sabe exatamente o que fazer, não só a intuição.</div>
-        <div class="testi-author">
-          <div class="testi-av">LP</div>
-          <div><div class="testi-name">Livia Rodrigues Peres</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">LP</div><div><div class="testi-name">Livia Rodrigues Peres</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Estou extremamente satisfeito. Acertaram na veia. A contratação foi bastante assertiva. Parabéns pelo serviço prestado.</div>
-        <div class="testi-author">
-          <div class="testi-av">MM</div>
-          <div><div class="testi-name">Marcelo Moreira Lima</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">MM</div><div><div class="testi-name">Marcelo Moreira Lima</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Só nesse trimestre já fechamos 101 contratos. O mesmo número de casos de todo o ano de 2023.</div>
-        <div class="testi-author">
-          <div class="testi-av">RC</div>
-          <div><div class="testi-name">Rogerio Cirino</div></div>
-        </div>
-      </div>
-
-      <div class="testi">
-        <div class="testi-q">Nunca fiz uma venda tão rápida. Usando a técnica da ligação de 10 minutos. Tô gostando muito.</div>
-        <div class="testi-author">
-          <div class="testi-av">BV</div>
-          <div><div class="testi-name">Bríndilla Ventura</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">RC</div><div><div class="testi-name">Rogerio Cirino</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Fechei contrato de 30 mil. Fingi naturalidade para o cliente, mas em choque por dentro.</div>
-        <div class="testi-author">
-          <div class="testi-av">ED</div>
-          <div><div class="testi-name">Eduarda</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">ED</div><div><div class="testi-name">Eduarda</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Da nossa meta de 10, acabamos de dobrar ela. Fechamos 20 contratos esse mês.</div>
-        <div class="testi-author">
-          <div class="testi-av">MS</div>
-          <div><div class="testi-name">Milena Stabele</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">MS</div><div><div class="testi-name">Milena Stabele</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">Aplicando técnicas da Mayra fui para a reunião com proposta para 1 contrato e saí com 2 contratos fechados com a mesma cliente.</div>
-        <div class="testi-author">
-          <div class="testi-av">CA</div>
-          <div><div class="testi-name">Camila</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">CA</div><div><div class="testi-name">Camila</div></div></div>
       </div>
 
       <div class="testi">
         <div class="testi-q">2 contratos fechados hoje!! Totalizei 15 mil de inicial no pix. To nem acreditando!!!</div>
-        <div class="testi-author">
-          <div class="testi-av">MA</div>
-          <div><div class="testi-name">Manu</div></div>
-        </div>
+        <div class="testi-author"><div class="testi-av">MA</div><div><div class="testi-name">Manu · Advogada da Saúde</div></div></div>
       </div>
 
       <div class="testi">
-        <div class="testi-q">A cliente viu tanto valor no meu trabalho que disse: "nossa doutora, eu achei que você ia cobrar uns 12 mil reais." Ruim é ouvir "está caro". Mas que achou que fosse mais é sinal de que você está vendendo bem.</div>
-        <div class="testi-author">
-          <div class="testi-av">MA</div>
-          <div><div class="testi-name">Manu</div></div>
-        </div>
-      </div>
-
-      <div class="testi">
-        <div class="testi-q">Eu quebrei a objeção do honorário: a mãe achava injusto pagar algo que deveria ser custeado pelo plano. Mas ela me pagou 12 mil no pix porque sentiu segurança no meu trabalho.</div>
-        <div class="testi-author">
-          <div class="testi-av">MA</div>
-          <div><div class="testi-name">Manu</div></div>
-        </div>
+        <div class="testi-q">Nunca fiz uma venda tão rápida. Usando a técnica da ligação de 10 minutos. Tô gostando muito.</div>
+        <div class="testi-author"><div class="testi-av">BV</div><div><div class="testi-name">Bríndilla Ventura</div></div></div>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════
-     PLANOS
-════════════════════════════════════ -->
-<section class="plans" id="planos">
-  <div class="wrap center">
-    <div class="plans-header">
-      <span class="section-label">Acesse o método</span>
-      <h2 class="section-h2">Use enquanto faz sentido.<br><span class="accent">Cancele quando quiser, sem burocracia.</span></h2>
-      <p class="lead" style="max-width:540px;margin:0 auto">7 dias por nossa conta para testar com acesso completo. Depois, assina mensalmente sem compromisso ou economiza 20% no anual.</p>
+<!-- ══════════════ PLANOS ══════════════ -->
+<section class="planos-sec" id="planos">
+  <div class="wrap">
+    <div class="planos-header">
+      <span class="section-label">Planos</span>
+      <h2 class="section-h2">
+        Simples. Justo.<br>
+        <span class="accent">Pague pelo que usa.</span>
+      </h2>
+      <p class="lead" style="margin-bottom:32px">Comece com 7 dias grátis. Sem cartão de crédito.</p>
     </div>
 
-    <!-- Toggle Mensal / Anual -->
-    <div class="plans-toggle">
-      <span class="tlabel on" id="lbl-t">Mensal</span>
-      <div class="ttrack" id="tgl" onclick="toggleP()"><div class="tthumb"></div></div>
-      <span class="tlabel" id="lbl-a">Anual <span class="disc">-20%</span></span>
+    <div class="planos-toggle">
+      <button class="toggle-btn active" id="btnMes" onclick="setPlano('m')">Mensal</button>
+      <button class="toggle-btn" id="btnAno" onclick="setPlano('a')">Anual &nbsp;<span style="color:#4ade80;font-size:.8rem">−20%</span></button>
     </div>
 
-    <!-- Trust badges -->
-    <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:28px">
-      <span style="font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:6px">✓ Cancele quando quiser</span>
-      <span style="font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:6px">✓ Sem fidelidade ou multa</span>
-      <span style="font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:6px">✓ 7 dias sem cobrança</span>
+    <div class="planos-layout">
+
+      <!-- SOLO -->
+      <div class="plano-card">
+        <div class="plano-name">MAY SOLO</div>
+        <div class="plano-desc">Para o advogado que atende sozinho e quer método comercial na prática.</div>
+        <div class="plano-price-from" id="solo-from"></div>
+        <div class="plano-price">
+          <span class="price-val">R$<span id="solo-val">97</span></span>
+          <span class="price-period">/mês</span>
+        </div>
+        <div class="plano-price-note" id="solo-note">· 7 dias grátis · cancele quando quiser</div>
+        <div class="plano-divider"></div>
+        <div class="plano-feats">
+          <div class="plano-feat">Simulações ao vivo com IA (ilimitadas)</div>
+          <div class="plano-feat">Análise de transcrição de reunião</div>
+          <div class="plano-feat">CRM + Funil SDR jurídico</div>
+          <div class="plano-feat">Agenda com follow-ups</div>
+          <div class="plano-feat">Diagnóstico SPIN e playbooks</div>
+          <div class="plano-feat">Chat com a May (ilimitado)</div>
+          <div class="plano-feat">1 usuário</div>
+        </div>
+        <a href="/register?plano=solo_mensal" id="solo-link" class="plano-cta outline">Começar 7 dias grátis</a>
+        <p class="plano-note">Sem cartão necessário para começar</p>
+      </div>
+
+      <!-- EQUIPE (PER-SEAT) -->
+      <div class="plano-card featured">
+        <div class="plano-badge">MAIS ESCOLHIDO</div>
+        <div class="plano-name">MAY + EQUIPE</div>
+        <div class="plano-desc">Para escritórios com setor comercial. Convide a equipe e pague por usuário real.</div>
+        <div class="plano-price-from" id="eq-from"></div>
+        <div class="plano-price">
+          <span class="price-val">R$<span id="eq-val">97</span></span>
+          <span class="price-period">/mês</span>
+        </div>
+        <div class="plano-price-note" id="eq-note">+ R$47/usuário adicional convidado</div>
+
+        <div class="user-counter">
+          <div class="counter-label">
+            <div class="counter-label-top">Usuários adicionais</div>
+            <div class="counter-label-total" id="counter-total">Total: R$97/mês</div>
+          </div>
+          <div class="counter-btns">
+            <button class="counter-btn" onclick="changeUsers(-1)">−</button>
+            <span class="counter-val" id="userCount">0</span>
+            <button class="counter-btn" onclick="changeUsers(1)">+</button>
+          </div>
+        </div>
+
+        <div class="plano-divider"></div>
+        <div class="plano-feats">
+          <div class="plano-feat">Tudo do plano Solo</div>
+          <div class="plano-feat">Convidar usuários adicionais (+R$47/usuário)</div>
+          <div class="plano-feat">Painel de equipe e gestão de membros</div>
+          <div class="plano-feat">Resultados individuais por membro</div>
+          <div class="plano-feat">Leads compartilhados na equipe</div>
+          <div class="plano-feat">Prioridade no suporte</div>
+        </div>
+        <a href="/register?plano=equipe_mensal" id="eq-link" class="plano-cta primary">Começar 7 dias grátis →</a>
+        <p class="plano-note">Adicione usuários dentro da plataforma</p>
+      </div>
+
     </div>
-
-    <div class="plans-grid">
-      <div class="plan">
-        <div class="plan-name">MAY IA START</div>
-        <div class="plan-sub">Para o advogado solo</div>
-        <div class="plan-price" id="pp-start">R$ 97</div>
-        <div class="plan-per" id="pr-start">por mês · cancele quando quiser</div>
-        <ul class="plan-feats">
-          <li>1 usuário</li>
-          <li>Chat com IA comercial jurídica</li>
-          <li>Scripts e playbooks ilimitados</li>
-          <li>Simuladores de atendimento — até 5/mês</li>
-          <li>Trilha de capacitação comercial</li>
-          <li>Gerador de proposta PDF/Word — até 5/mês</li>
-        </ul>
-        <a href="/auth.html?plano=start" id="ca-start" class="plan-btn border" style="display:block;text-align:center;text-decoration:none;line-height:normal;padding:12px;">Começar agora</a>
-      </div>
-
-      <div class="plan pop">
-        <div class="plan-badge">Mais popular</div>
-        <div class="plan-name">MAY IA PLUS</div>
-        <div class="plan-sub">Para escritórios com equipe comercial</div>
-        <div class="plan-price" id="pp-equipe">R$ 227</div>
-        <div class="plan-per" id="pr-equipe">por mês · cancele quando quiser</div>
-        <ul class="plan-feats">
-          <li>Até 3 usuários</li>
-          <li>Tudo do Start — ilimitado</li>
-          <li>1 painel do gestor</li>
-          <li>Ranking de vendas da equipe</li>
-          <li>Agendamento de reunião</li>
-          <li>Notificações de follow-up</li>
-        </ul>
-        <a href="/auth.html?plano=equipe" id="ca-equipe" class="plan-btn solid" style="display:block;text-align:center;text-decoration:none;line-height:normal;padding:12px;">7 dias por nossa conta →</a>
-      </div>
-
-      <div class="plan">
-        <div class="plan-name">MAY IA PRO</div>
-        <div class="plan-sub">Para escritórios que escalam</div>
-        <div class="plan-price" id="pp-pro">R$ 397</div>
-        <div class="plan-per" id="pr-pro">por mês · cancele quando quiser</div>
-        <ul class="plan-feats">
-          <li>Até 5 usuários</li>
-          <li>Tudo do Equipe</li>
-          <li>1 painel do gestor</li>
-          <li>Sessão de onboarding incluída</li>
-          <li>Relatórios avançados de equipe</li>
-          <li>Prioridade no suporte</li>
-        </ul>
-        <a href="/auth.html?plano=pro" id="ca-pro" class="plan-btn border" style="display:block;text-align:center;text-decoration:none;line-height:normal;padding:12px;">Começar agora</a>
-      </div>
-
-      <div class="plan">
-        <div class="plan-name">MAY IA ULTRA</div>
-        <div class="plan-sub">Para grandes equipes comerciais</div>
-        <div class="plan-price" id="pp-prof">R$ 897</div>
-        <div class="plan-per" id="pr-prof">por mês · cancele quando quiser</div>
-        <ul class="plan-feats">
-          <li>Até 10 usuários</li>
-          <li>Tudo do Pro</li>
-          <li>1 painel do gestor</li>
-          <li>Onboarding dedicado da equipe</li>
-          <li>Gestor de múltiplas filiais</li>
-          <li>SLA de suporte prioritário</li>
-        </ul>
-        <a href="/auth.html?plano=prof" id="ca-prof" class="plan-btn border" style="display:block;text-align:center;text-decoration:none;line-height:normal;padding:12px;">Começar agora</a>
-      </div>
-    </div>
-
-    <p style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--muted)">Precisa de mais usuários? <strong style="color:var(--fg)">+ R$ 77/mês por usuário adicional</strong> em qualquer plano.</p>
-    <p class="microcopy" style="margin-top:12px">Cartão necessário apenas para garantir o início. Sem cobrança nos 7 dias. Cancele antes do 8º dia sem nenhum custo.</p>
+    <p class="microcopy" style="margin-top:32px">
+      Precisando de mais de 10 usuários?
+      <a href="mailto:contato@usemayapp.com" style="color:var(--plite)">Fale com a gente</a>
+      para um plano personalizado.
+    </p>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════
-     FAQ
-════════════════════════════════════ -->
-<section class="faq">
+<!-- ══════════════ FAQ ══════════════ -->
+<section class="faq-sec" id="faq">
   <div class="wrap">
     <div class="faq-header">
-      <span class="section-label">Dúvidas</span>
-      <h2 class="section-h2">Perguntas <span class="accent">frequentes.</span></h2>
+      <span class="section-label">FAQ</span>
+      <h2 class="section-h2">Perguntas frequentes</h2>
     </div>
-
     <div class="faq-list">
+
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">São cursos ou aulas? O que é a plataforma?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Não. Não tem aula para assistir, módulo para completar, nem vídeo para maratonar. A May funciona em tempo real: você chega com uma situação real, como uma reunião daqui a pouco, um follow-up travado ou uma objeção de preço que você não soube responder, e a plataforma entrega o script, o argumento ou o modelo de mensagem na hora. Você aplica direto na conversa. Sem teoria, sem curso, sem esperar. Entra no seu dia, não no seu calendar.</div>
+        <div class="faq-q" onclick="toggleFaq(this)">Os 7 dias grátis são de verdade? Preciso colocar cartão?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Sim, de verdade. Você acessa a plataforma completa por 7 dias sem precisar cadastrar cartão de crédito. Só pedimos o cartão quando você decide continuar depois do período de teste.</div>
       </div>
+
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Isso é um CRM ou sistema de atendimento?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Não. A plataforma não foi criada para substituir WhatsApp, CRM ou atendimento humano. Ela foi criada para treinar quem faz o atendimento, entregando o método, os scripts e os playbooks comerciais para que cada conversa avance até o contrato.</div>
+        <div class="faq-q" onclick="toggleFaq(this)">Como funciona o preço por usuário adicional?<span class="faq-icon">+</span></div>
+        <div class="faq-a">O plano base é R$97/mês para 1 usuário (você). Se quiser convidar membros da sua equipe, cada usuário adicional custa R$47/mês — tudo gerenciado de dentro da plataforma. No plano anual, 20% de desconto em tudo.</div>
       </div>
+
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Para quem é essa plataforma?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Para advogados que vendem, seja o sócio que precisa de método, o vendedor que precisa de treino, ou o escritório com equipe comercial que precisa de padrão. Funciona para quem está começando a estruturar o comercial e para quem já vende e quer melhorar a condução e o fechamento.</div>
+        <div class="faq-q" onclick="toggleFaq(this)">Preciso ter equipe para usar a May?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Não. A May serve tanto para o advogado solo quanto para escritórios com equipe comercial. O plano começa com um usuário — você — e escala conforme você crescer. O método funciona igualmente nos dois casos.</div>
       </div>
+
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Já tenho CRM. A plataforma ainda faz sentido?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Sim. O CRM mostra onde o lead está parado. A plataforma ensina o que fazer para destravar: o script de retomada, o argumento para a objeção, o modelo de follow-up. São ferramentas complementares que resolvem problemas diferentes.</div>
+        <div class="faq-q" onclick="toggleFaq(this)">O que é a análise de transcrição de reunião?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Após uma reunião com um cliente, você cola a transcrição (do Google Meet, Teams, Zoom ou qualquer ferramenta) dentro da May. A IA lê o conteúdo e devolve uma análise: onde houve rapport, onde a conversa travou, qual técnica funcionou ou faltou, e o que fazer diferente na próxima vez.</div>
       </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Como funciona o período de 7 dias?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Você cadastra, informa o cartão e tem acesso completo à plataforma por 7 dias, sem nenhuma cobrança. No 8º dia começa o plano escolhido. Você pode cancelar antes disso sem nenhum custo.</div>
-      </div>
+
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">Serve para escritório pequeno, sem equipe?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Serve. O advogado que vende sozinho precisa do método tanto quanto quem tem equipe, às vezes mais. A plataforma ajuda na segurança para conduzir uma conversa, apresentar honorários sem travar, responder objeções com clareza e fazer um follow-up que avança.</div>
+        <div class="faq-a">Serve. O advogado que vende sozinho precisa do método tanto quanto quem tem equipe — às vezes mais. A plataforma ajuda na segurança para conduzir uma conversa, apresentar honorários sem travar, responder objeções com clareza e fazer um follow-up que avança.</div>
       </div>
+
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">Isso garante que vou fechar mais contratos?<span class="faq-icon">+</span></div>
-        <div class="faq-a">Garantia de resultado não existe. Depende de execução, contexto e qualidade dos leads. O que a plataforma entrega é a estrutura que aumenta as chances de cada conversa avançar. Os resultados dos nossos clientes (140 contratos em um mês, +R$32k no mês) vêm de equipes que aplicaram o que a May entrega na prática.</div>
+        <div class="faq-a">Garantia de resultado não existe — depende de execução, contexto e qualidade dos leads. O que a plataforma entrega é a estrutura que aumenta as chances de cada conversa avançar. Os resultados dos clientes do Comercial Jurídico (140 contratos em um mês, +R$32k no mês) vêm de equipes que aplicaram o que a May entrega na prática.</div>
       </div>
-    </div>
 
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Posso cancelar quando quiser?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Sim. Sem multa, sem burocracia. Se cancelar, você mantém o acesso até o final do período já pago. No plano anual, o cancelamento encerra as renovações automaticamente.</div>
+      </div>
+
+    </div>
     <div class="faq-footer">Ainda em dúvida? <a href="#planos">Teste 7 dias por nossa conta</a> e avalie com acesso real.</div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════
-     CTA FINAL
-════════════════════════════════════ -->
+<!-- ══════════════ CTA FINAL ══════════════ -->
 <section class="cta-final">
   <div class="wrap center">
     <span class="section-label" style="display:block;margin-bottom:20px">Comece agora</span>
@@ -1452,17 +1075,41 @@
       Trava porque ninguém sabia o que falar naquele momento.
       A May resolve exatamente isso.
     </p>
-    <div class="cta-ctas">
-      <a href="#planos" class="btn-primary" style="font-size:1rem;padding:18px 36px">
-        🚀 Quero usar por 7 dias por nossa conta
-      </a>
-    </div>
-    <p class="microcopy" style="margin-top:14px">7 dias por nossa conta. Acesso real ao método para avaliar com profundidade.</p>
+    <a href="#planos" class="btn-primary" style="font-size:1rem;padding:18px 36px">
+      Quero usar por 7 dias grátis →
+    </a>
+    <p class="microcopy" style="margin-top:14px">7 dias por nossa conta. Acesso completo. Sem cartão.</p>
   </div>
 </section>
 
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a href="/" class="footer-logo">
+        <div class="logo-mark">M</div>
+        <div>
+          <div class="logo-name">May</div>
+          <div class="logo-sub">Plataforma Comercial Jurídica</div>
+        </div>
+      </a>
+      <p class="footer-tagline">O método Comercial Jurídico na rotina do seu escritório — via IA.</p>
+    </div>
+    <div class="footer-links">
+      <a href="#como">Como funciona</a>
+      <a href="#planos">Planos</a>
+      <a href="#faq">FAQ</a>
+      <a href="/login">Entrar</a>
+      <a href="/termos" target="_blank">Termos</a>
+      <a href="/privacidade" target="_blank">Privacidade</a>
+    </div>
+  </div>
+  <div class="footer-copy">
+    © 2025 May · Comercial Jurídico Plataforma. Todos os direitos reservados. · contato@usemayapp.com
+  </div>
+</footer>
 
-<!-- ═══════ FLOATING MAY CHAT ═══════ -->
+<!-- ══════════════ FLOATING MAY CHAT ══════════════ -->
 <div id="may-fab" onclick="toggleMayChat()" title="Fale com a May" style="
   position:fixed; bottom:28px; right:28px; z-index:1000;
   width:56px; height:56px; border-radius:16px;
@@ -1473,212 +1120,168 @@
   font-family:'Syne',sans-serif; font-weight:900; color:#fff; font-size:1.25rem;
 " onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'">
   M
-  <span id="may-fab-dot" style="
+  <span style="
     position:absolute; top:-3px; right:-3px;
     width:12px; height:12px; background:#22c55e; border-radius:50%;
     border:2px solid var(--bg); animation:pulse 2s infinite;
   "></span>
 </div>
 
-<!-- Chat modal -->
 <div id="may-chat-modal" style="
   display:none; position:fixed; bottom:96px; right:28px; z-index:1001;
   width:340px; max-width:calc(100vw - 40px);
-  background:#0e1426; border:1px solid rgba(124,58,237,.3);
-  border-radius:20px; box-shadow:0 16px 48px rgba(0,0,0,.6);
-  font-family:'Inter',sans-serif; overflow:hidden;
-  animation:chatIn .2s ease;
+  background:var(--bg2); border:1px solid rgba(124,58,237,.3);
+  border-radius:20px; overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.5), 0 0 40px rgba(124,58,237,.15);
+  font-family:'Inter',sans-serif;
 ">
-  <style>
-    @keyframes chatIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    #may-msgs::-webkit-scrollbar { width:4px; }
-    #may-msgs::-webkit-scrollbar-track { background:transparent; }
-    #may-msgs::-webkit-scrollbar-thumb { background:rgba(124,58,237,.3); border-radius:4px; }
-    .may-msg { max-width:85%; padding:10px 13px; border-radius:14px; font-size:.84rem; line-height:1.55; margin-bottom:8px; }
-    .may-msg.may { background:rgba(124,58,237,.18); border:1px solid rgba(124,58,237,.2); color:#EAE6FF; align-self:flex-start; border-radius:4px 14px 14px 14px; }
-    .may-msg.user { background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; align-self:flex-end; border-radius:14px 4px 14px 14px; }
-    .may-typing span { display:inline-block; width:6px; height:6px; border-radius:50%; background:rgba(167,139,250,.6); margin:0 2px; animation:typing 1.2s infinite; }
-    .may-typing span:nth-child(2){animation-delay:.2s} .may-typing span:nth-child(3){animation-delay:.4s}
-    @keyframes typing { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-  </style>
-
-  <!-- Header -->
-  <div style="padding:14px 16px;background:rgba(124,58,237,.12);border-bottom:1px solid rgba(124,58,237,.15);display:flex;align-items:center;justify-content:space-between">
+  <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(124,58,237,.08);display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#9B6DFF,#6D28D9);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:1rem;font-family:'Syne',sans-serif">M</div>
+      <div class="logo-mark" style="width:32px;height:32px;font-size:.9rem">M</div>
       <div>
-        <div style="font-weight:700;font-size:.88rem;color:#EAE6FF">May</div>
-        <div style="font-size:.7rem;color:#6EE7B7;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block"></span>Online agora</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem">May</div>
+        <div style="font-size:.65rem;color:#4ade80">● Online agora</div>
       </div>
     </div>
-    <button onclick="toggleMayChat()" style="background:none;border:none;color:rgba(200,190,255,.4);font-size:1.3rem;cursor:pointer;padding:2px 6px;line-height:1">×</button>
+    <button onclick="toggleMayChat()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px">×</button>
   </div>
-
-  <!-- Messages -->
-  <div id="may-msgs" style="padding:16px;display:flex;flex-direction:column;gap:0;height:280px;overflow-y:auto">
-    <div class="may-msg may">Olá! Sou a May, assistente comercial jurídica. Pode me perguntar qualquer coisa sobre a plataforma ou sobre como fechar mais contratos no seu escritório.</div>
+  <div id="may-msgs" style="padding:16px;max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px">
+    <div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:4px 12px 12px 12px;padding:10px 14px;font-size:.82rem;line-height:1.55;max-width:85%">
+      Oi! Sou a May 👋 Tem alguma dúvida sobre a plataforma? Me pergunte!
+    </div>
   </div>
-
-  <!-- Input -->
-  <div style="padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px;align-items:center">
-    <input id="may-input" type="text" placeholder="Escreva sua dúvida..." maxlength="500" style="
-      flex:1; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);
-      border-radius:10px; padding:10px 13px; color:#EAE6FF; font-size:.84rem;
-      font-family:'Inter',sans-serif; outline:none;
-    " onkeydown="if(event.key==='Enter')sendToMay()">
-    <button onclick="sendToMay()" style="
-      width:36px;height:36px;border-radius:10px;border:none;cursor:pointer;
-      background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;
-      font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    ">↑</button>
+  <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px">
+    <input id="may-input" placeholder="Sua pergunta..." style="
+      flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);
+      border-radius:8px;padding:9px 12px;color:var(--text);font-size:.83rem;
+      font-family:'Inter',sans-serif;outline:none;
+    " onkeydown="if(event.key==='Enter')sendMayMsg()" />
+    <button onclick="sendMayMsg()" style="
+      background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;color:#fff;
+      border-radius:8px;padding:9px 14px;cursor:pointer;font-size:.82rem;font-weight:600;
+    ">→</button>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="fl">
-    <div class="logo-mark" style="width:30px;height:30px;font-size:.8rem">CJ</div>
-    <div>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem">May</div>
-      <div class="logo-sub">Uma plataforma Comercial Jurídico</div>
-    </div>
-  </div>
-  <div class="flinks">
-    <a href="/termos.html">Termos</a>
-    <a href="/privacidade.html">Privacidade</a>
-    <a href="/auth.html">Entrar</a>
-  </div>
-  <div class="fcopy">© 2026 Comercial Jurídico. Todos os direitos reservados.</div>
-</footer>
-
 <script>
-// Partículas de fundo
+/* ─── CANVAS PARTICLES ─────────────────────────────────────────── */
 (function(){
-  const c=document.getElementById('bg'),ctx=c.getContext('2d');
-  let ps=[],W,H;
-  function r(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
-  window.addEventListener('resize',r);r();
-  for(let i=0;i<55;i++) ps.push({
-    x:Math.random()*W,y:Math.random()*H,
-    r:Math.random()*.7+.15,
-    vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,
-    a:Math.random(),da:(Math.random()*.25+.04)*(Math.random()>.5?1:-1)*.005,
-    col:['#7C3AED','#A78BFA','#818CF8'][Math.floor(Math.random()*3)]
-  });
+  const c = document.getElementById('bg');
+  const ctx = c.getContext('2d');
+  let W, H, pts;
+  function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+  function init(){
+    pts = Array.from({length:70}, () => ({
+      x: Math.random()*W, y: Math.random()*H,
+      vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+      r: Math.random()*1.5+.4,
+    }));
+  }
   function draw(){
     ctx.clearRect(0,0,W,H);
-    ps.forEach(p=>{
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<-4)p.x=W+4;if(p.x>W+4)p.x=-4;
-      if(p.y<-4)p.y=H+4;if(p.y>H+4)p.y=-4;
-      p.a+=p.da;if(p.a>1||p.a<0)p.da*=-1;
-      ctx.save();ctx.globalAlpha=Math.max(0,p.a*.5);
-      ctx.fillStyle=p.col;ctx.shadowColor=p.col;ctx.shadowBlur=p.r*5;
-      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(124,58,237,.7)'; ctx.fill();
     });
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(124,58,237,${.15*(1-d/120)})`; ctx.lineWidth=.5; ctx.stroke();
+        }
+      }
+    }
     requestAnimationFrame(draw);
   }
-  draw();
+  window.addEventListener('resize',()=>{resize();init();});
+  resize(); init(); draw();
 })();
 
-// FAQ accordion
-function toggleFaq(el){
-  const it=el.parentElement,open=it.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
-  if(!open)it.classList.add('open');
-}
-
-// Toggle planos mensal/anual
-const P={
-  m:{
-    start: {p:'R$ 97',  s:'por mês · cancele quando quiser', pl:'start_mensal'},
-    equipe:{p:'R$ 227', s:'por mês · cancele quando quiser', pl:'equipe_mensal'},
-    pro:   {p:'R$ 397', s:'por mês · cancele quando quiser', pl:'pro_mensal'},
-    prof:  {p:'R$ 897', s:'por mês · cancele quando quiser', pl:'prof_mensal'}
+/* ─── PLANOS TOGGLE ────────────────────────────────────────────── */
+const PRICES = {
+  m: {
+    solo: { val:'97', from:'',                                    note:'· 7 dias grátis · cancele quando quiser',   link:'/register?plano=solo_mensal',  base:97, extra:47 },
+    eq:   { val:'97', from:'',                                    note:'+ R$47/usuário adicional convidado',        link:'/register?plano=equipe_mensal', base:97, extra:47 },
   },
-  a:{
-    start: {p:'R$ 78',  s:'por mês · cobrado anualmente · economize 20%', pl:'start_anual',  t:'R$ 936 cobrado anualmente'},
-    equipe:{p:'R$ 182', s:'por mês · cobrado anualmente · economize 20%', pl:'equipe_anual', t:'R$ 2.184 cobrado anualmente'},
-    pro:   {p:'R$ 318', s:'por mês · cobrado anualmente · economize 20%', pl:'pro_anual',    t:'R$ 3.816 cobrado anualmente'},
-    prof:  {p:'R$ 718', s:'por mês · cobrado anualmente · economize 20%', pl:'prof_anual',   t:'R$ 8.604 cobrado anualmente'}
-  }
+  a: {
+    solo: { val:'78', from:'por mês · cobrado anualmente',        note:'R$936 cobrado anualmente · economize 20%', link:'/register?plano=solo_anual',    base:78, extra:38 },
+    eq:   { val:'78', from:'por mês · cobrado anualmente',        note:'+ R$38/usuário adicional (anual)',         link:'/register?plano=equipe_anual',  base:78, extra:38 },
+  },
 };
-let _p='m';
-function toggleP(){
-  _p=_p==='m'?'a':'m';
-  document.getElementById('tgl').classList.toggle('on',_p==='a');
-  document.getElementById('lbl-t').classList.toggle('on',_p==='m');
-  document.getElementById('lbl-a').classList.toggle('on',_p==='a');
-  ['start','equipe','pro','prof'].forEach(k=>{
-    const c=P[_p][k];
-    document.getElementById('pp-'+k).textContent=c.p;
-    document.getElementById('pr-'+k).textContent=c.s;
-    // onclick já usa abrirCheckout(k) que lê _p no momento do clique
-  });
+let _plano = 'm', _users = 0;
+
+function setPlano(p){
+  _plano = p;
+  document.getElementById('btnMes').classList.toggle('active', p==='m');
+  document.getElementById('btnAno').classList.toggle('active', p==='a');
+  const s = PRICES[p].solo, e = PRICES[p].eq;
+  document.getElementById('solo-val').textContent  = s.val;
+  document.getElementById('solo-from').textContent = s.from;
+  document.getElementById('solo-note').textContent = s.note;
+  document.getElementById('solo-link').href        = s.link;
+  document.getElementById('eq-val').textContent    = e.val;
+  document.getElementById('eq-from').textContent   = e.from;
+  document.getElementById('eq-note').textContent   = e.note;
+  document.getElementById('eq-link').href          = e.link;
+  updateCounter();
 }
 
-// ─── May floating chat ────────────────────────────────────────────────────────
+/* ─── USER COUNTER ─────────────────────────────────────────────── */
+function changeUsers(delta){
+  _users = Math.max(0, Math.min(9, _users + delta));
+  document.getElementById('userCount').textContent = _users;
+  updateCounter();
+}
+function updateCounter(){
+  const cfg = PRICES[_plano].eq;
+  const total = cfg.base + _users * cfg.extra;
+  const label = _users === 0
+    ? `Total: R$${cfg.base}/mês`
+    : `Total: R$${total}/mês (${_users+1} usuário${_users>0?'s':''})`;
+  document.getElementById('counter-total').textContent = label;
+}
+
+/* ─── FAQ ───────────────────────────────────────────────────────── */
+function toggleFaq(el){
+  const item = el.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+/* ─── FLOATING MAY CHAT ─────────────────────────────────────────── */
 function toggleMayChat(){
-  const m=document.getElementById('may-chat-modal');
-  const open=m.style.display==='block';
-  m.style.display=open?'none':'block';
-  if(!open) document.getElementById('may-input').focus();
+  const m = document.getElementById('may-chat-modal');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
 }
-
-async function sendToMay(){
-  const input=document.getElementById('may-input');
-  const msgs=document.getElementById('may-msgs');
-  const text=input.value.trim();
-  if(!text) return;
-
-  // Mensagem do usuário
-  input.value='';
-  const uDiv=document.createElement('div');
-  uDiv.className='may-msg user'; uDiv.textContent=text;
-  msgs.appendChild(uDiv);
-
-  // Indicador de digitação
-  const typing=document.createElement('div');
-  typing.className='may-msg may may-typing';
-  typing.innerHTML='<span></span><span></span><span></span>';
-  msgs.appendChild(typing);
-  msgs.scrollTop=msgs.scrollHeight;
-
+async function sendMayMsg(){
+  const inp = document.getElementById('may-input');
+  const msg = inp.value.trim();
+  if(!msg) return;
+  inp.value = '';
+  const msgs = document.getElementById('may-msgs');
+  msgs.innerHTML += `<div style="align-self:flex-end;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.3);border-radius:12px 4px 12px 12px;padding:9px 13px;font-size:.82rem;max-width:85%">${msg}</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  msgs.innerHTML += `<div id="dot-typing" style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:4px 12px 12px 12px;padding:10px 14px;font-size:.82rem;max-width:85%;color:var(--muted)">...</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
   try {
-    const res=await fetch('/api/public/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({mensagem:text})
+    const r = await fetch('/api/chat/landing', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({msg})
     });
-
-    typing.remove();
-
-    if(res.ok){
-      const data=await res.json();
-      const aDiv=document.createElement('div');
-      aDiv.className='may-msg may'; aDiv.textContent=data.resposta;
-      msgs.appendChild(aDiv);
-    } else {
-      throw new Error('fallback');
-    }
+    const d = await r.json();
+    document.getElementById('dot-typing')?.remove();
+    msgs.innerHTML += `<div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:4px 12px 12px 12px;padding:10px 14px;font-size:.82rem;max-width:85%;line-height:1.55">${d.resposta||'...'}</div>`;
   } catch {
-    typing.remove();
-    const fallback=document.createElement('div');
-    fallback.className='may-msg may';
-    fallback.innerHTML='Não consegui responder agora. Entre em contato pelo e-mail <a href="mailto:contato@usemayapp.com" style="color:#A78BFA">contato@usemayapp.com</a>';
-    msgs.appendChild(fallback);
+    document.getElementById('dot-typing')?.remove();
+    msgs.innerHTML += `<div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:4px 12px 12px 12px;padding:10px 14px;font-size:.82rem;max-width:85%">Estou aqui para ajudar! Para começar, <a href="#planos" style="color:var(--plite)">clique aqui</a> e teste 7 dias grátis.</div>`;
   }
-
-  msgs.scrollTop=msgs.scrollHeight;
+  msgs.scrollTop = msgs.scrollHeight;
 }
-
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
-  });
-});
 </script>
 </body>
 </html>
