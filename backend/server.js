@@ -71,6 +71,9 @@ app.get('/leads', (req, res) => {
 app.get('/gestor', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/gestor.html'));
 });
+app.get('/ranking-vendas', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/ranking-vendas.html'));
+});
 
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
 // Cache longo para assets imutáveis (js/css/imgs com hash no nome)
@@ -103,7 +106,8 @@ app.use('/api/leads',       require('./routes/leads'));
 app.use('/api/followups',   require('./routes/followups'));
 app.use('/api/public',      require('./routes/public'));
 app.use('/api/stripe',      require('./routes/stripe'));
-app.use('/api/modulos',     require('./routes/modulos'));
+app.use('/api/modulos',        require('./routes/modulos'));
+app.use('/api/ranking-vendas', require('./routes/ranking-vendas'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

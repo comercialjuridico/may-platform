@@ -373,15 +373,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   estado.user = user;
+  await carregarDadosIniciais(); // atualiza estado.user com dados frescos do servidor
+  renderizarSidebar();
 
   // Gestor/admin vai direto para o dashboard da equipe (a não ser que já tenha ?app=1)
-  if (['gestor', 'admin'].includes(user?.role) && !new URLSearchParams(window.location.search).get('app')) {
+  if (['gestor', 'admin'].includes(estado.user?.role) && !new URLSearchParams(window.location.search).get('app')) {
     window.location.href = '/gestor';
     return;
   }
-
-  await carregarDadosIniciais();
-  renderizarSidebar();
   verificarFluxoOnboarding(estado.user);
   verificarDiagnostico();
   verificarQueryParams();

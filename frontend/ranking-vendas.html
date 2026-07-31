@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranking de Vendas — May</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:#7C3AED; --brand-light:rgba(124,58,237,.15); --brand-glow:rgba(124,58,237,.4);
+      --gold:#F59E0B; --green:#10B981; --red:#EF4444; --blue:#60A5FA;
+      --surface:rgba(255,255,255,.05); --border:rgba(255,255,255,.09);
+      --text:#E8E4FF; --sub:rgba(200,190,255,.5); --radius:14px;
+    }
+    html,body { min-height:100vh; font-family:'Inter',sans-serif; background:#080B1A; color:var(--text); overflow-x:hidden; }
+    h1,h2,h3 { font-family:'Syne',sans-serif; }
+    #canvas-bg { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.4; }
+    .page { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:24px 16px 80px; }
+
+    /* Header */
+    .dash-header { display:flex; align-items:center; gap:14px; margin-bottom:24px; flex-wrap:wrap; }
+    .back-btn { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:8px 14px; font-size:13px; font-weight:600; color:#C4B5FD;
+      text-decoration:none; display:flex; align-items:center; gap:6px; transition:background .2s; }
+    .back-btn:hover { background:var(--brand-light); }
+    .dash-title { flex:1; }
+    .dash-title h1 { font-size:24px; font-weight:800; letter-spacing:-.02em;
+      background:linear-gradient(135deg,#fff 30%,#F59E0B); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .dash-title p { font-size:12px; color:var(--sub); margin-top:3px; }
+
+    /* Minha posição */
+    .minha-pos { background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));
+      border:1px solid rgba(245,158,11,.3); border-radius:var(--radius); padding:16px 20px;
+      margin-bottom:20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .pos-numero { font-family:'Syne',sans-serif; font-size:42px; font-weight:800; color:#F59E0B; line-height:1; min-width:60px; }
+    .pos-info { flex:1; }
+    .pos-info .name { font-size:15px; font-weight:700; color:#fff; }
+    .pos-info .stats { font-size:12px; color:rgba(245,158,11,.7); margin-top:4px; }
+    .btn-lancar { background:linear-gradient(135deg,#F59E0B,#D97706); color:#000;
+      border:none; border-radius:10px; padding:10px 22px; font-size:14px; font-weight:800;
+      cursor:pointer; box-shadow:0 4px 14px rgba(245,158,11,.35); white-space:nowrap; transition:transform .15s; }
+    .btn-lancar:hover { transform:translateY(-1px); }
+
+    /* Período tabs */
+    .periodo-tabs { display:flex; gap:6px; margin-bottom:20px; }
+    .periodo-tab { background:var(--surface); border:1px solid var(--border); border-radius:8px;
+      padding:6px 16px; font-size:12px; font-weight:600; color:var(--sub); cursor:pointer; transition:all .2s; }
+    .periodo-tab.active { background:var(--brand-light); border-color:rgba(124,58,237,.4); color:#C4B5FD; }
+
+    /* Ranking list */
+    .ranking-list { display:flex; flex-direction:column; gap:10px; }
+    .rank-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+      padding:14px 18px; display:flex; align-items:center; gap:14px; backdrop-filter:blur(8px);
+      transition:transform .15s, border-color .2s; }
+    .rank-item:hover { transform:translateY(-1px); border-color:rgba(167,139,250,.2); }
+    .rank-item.pos-1 { background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.04)); border-color:rgba(245,158,11,.3); }
+    .rank-item.pos-2 { background:linear-gradient(135deg,rgba(148,163,184,.1),rgba(148,163,184,.03)); border-color:rgba(148,163,184,.25); }
+    .rank-item.pos-3 { background:linear-gradient(135deg,rgba(180,100,50,.1),rgba(180,100,50,.03)); border-color:rgba(180,100,50,.25); }
+    .rank-item.eu    { border-color:rgba(124,58,237,.45) !important; box-shadow:0 0 0 1px rgba(124,58,237,.2); }
+
+    .rank-pos { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; min-width:36px; text-align:center; }
+    .rank-pos.p1 { color:#F59E0B; }
+    .rank-pos.p2 { color:#CBD5E1; }
+    .rank-pos.p3 { color:#B46332; }
+    .rank-pos.pn { color:var(--sub); font-size:16px; }
+
+    .rank-avatar { width:40px; height:40px; border-radius:50%; background:var(--brand-light);
+      display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700;
+      color:#A78BFA; flex-shrink:0; border:2px solid rgba(124,58,237,.2); overflow:hidden; }
+    .rank-avatar img { width:100%; height:100%; object-fit:cover; }
+    .rank-info { flex:1; }
+    .rank-name { font-size:14px; font-weight:700; color:#fff; }
+    .rank-qtd  { font-size:11px; color:var(--sub); margin-top:2px; }
+    .rank-valor { font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
+      background:linear-gradient(135deg,#A78BFA,#60A5FA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .rank-medal { font-size:24px; }
+
+    /* Empty */
+    .empty-state { text-align:center; padding:60px 20px; color:var(--sub); }
+    .empty-state .icon { font-size:48px; margin-bottom:14px; }
+    .empty-state p { font-size:14px; }
+
+    /* Modal lançar venda */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
+      z-index:100; display:none; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#12102A; border:1px solid rgba(124,58,237,.3); border-radius:18px;
+      padding:28px; width:100%; max-width:440px; }
+    .modal-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:#fff; margin-bottom:20px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:11px; font-weight:700; color:var(--sub);
+      text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    .form-group input, .form-group textarea {
+      width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+      border-radius:10px; padding:10px 14px; font-size:14px; color:var(--text);
+      outline:none; font-family:'Inter',sans-serif; transition:border-color .2s; }
+    .form-group input:focus, .form-group textarea:focus { border-color:rgba(124,58,237,.5); }
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+    .btn-cancel { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:9px 20px; font-size:13px; font-weight:600; color:var(--sub); cursor:pointer; }
+    .btn-save { background:linear-gradient(135deg,#F59E0B,#D97706); color:#000; border:none;
+      border-radius:10px; padding:9px 22px; font-size:13px; font-weight:800; cursor:pointer;
+      box-shadow:0 4px 14px rgba(245,158,11,.3); }
+    .btn-save:disabled { opacity:.5; cursor:not-allowed; }
+
+    /* Seção lançamentos recentes */
+    .sec-title { font-size:11px; font-weight:700; color:var(--sub); text-transform:uppercase;
+      letter-spacing:.08em; margin-bottom:12px; margin-top:28px; }
+    .lancamento-item { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:10px 14px; display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .lanc-info { flex:1; font-size:13px; }
+    .lanc-info strong { color:#fff; }
+    .lanc-info span { color:var(--sub); font-size:11px; }
+    .lanc-valor { font-family:'Syne',sans-serif; font-weight:700; color:#10B981; font-size:14px; }
+    .btn-del { background:none; border:none; color:var(--sub); cursor:pointer; font-size:14px; padding:4px; }
+    .btn-del:hover { color:#EF4444; }
+
+    .loading { color:var(--sub); font-size:13px; padding:40px 0; text-align:center; }
+  </style>
+</head>
+<body>
+<script>
+// ── Gate: módulo ranking_vendas ──────────────────────────────────────────────
+(async function() {
+  const token = localStorage.getItem('may_access');
+  if (!token) { window.location.href = '/auth.html'; return; }
+  try {
+    const r = await fetch('/api/modulos/check/ranking_vendas', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const d = await r.json();
+    if (!d.acesso) window.location.href = '/modulos';
+  } catch(e) {}
+})();
+</script>
+
+<canvas id="canvas-bg"></canvas>
+<div class="page">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div class="dash-title">
+      <h1>🏆 Ranking de Vendas</h1>
+      <p id="dash-sub">Carregando...</p>
+    </div>
+    <a class="back-btn" href="/gestor">← Dashboard</a>
+  </div>
+
+  <!-- Minha posição + botão lançar -->
+  <div class="minha-pos" id="minha-pos" style="display:none">
+    <div class="pos-numero" id="minha-posicao-num">—</div>
+    <div class="pos-info">
+      <div class="name" id="minha-pos-name">—</div>
+      <div class="stats" id="minha-pos-stats">—</div>
+    </div>
+    <button class="btn-lancar" onclick="abrirModal()">+ Lançar venda</button>
+  </div>
+  <!-- Se ainda não tem posição -->
+  <div id="sem-pos" style="display:none;margin-bottom:20px;text-align:right">
+    <button class="btn-lancar" onclick="abrirModal()">🎯 Lançar minha primeira venda</button>
+  </div>
+
+  <!-- Período tabs -->
+  <div class="periodo-tabs">
+    <button class="periodo-tab active" onclick="setPeriodo('mes',this)">Este mês</button>
+    <button class="periodo-tab" onclick="setPeriodo('semana',this)">Esta semana</button>
+    <button class="periodo-tab" onclick="setPeriodo('total',this)">Geral</button>
+  </div>
+
+  <!-- Ranking -->
+  <div id="ranking-list" class="ranking-list">
+    <div class="loading">Carregando ranking...</div>
+  </div>
+
+  <!-- Lançamentos recentes meus -->
+  <div id="meus-lanc-sec" style="display:none">
+    <p class="sec-title">Meus lançamentos</p>
+    <div id="meus-lanc-list"></div>
+  </div>
+
+</div>
+
+<!-- Modal lançar venda -->
+<div class="modal-overlay" id="modal-lancar">
+  <div class="modal-box">
+    <div class="modal-title">🎯 Registrar Venda</div>
+    <div class="form-group">
+      <label>Cliente / Empresa</label>
+      <input type="text" id="lanc-cliente" placeholder="Nome do cliente ou empresa" />
+    </div>
+    <div class="form-group">
+      <label>Valor dos honorários (R$)</label>
+      <input type="text" id="lanc-valor" placeholder="0,00" oninput="mascaraValor(this)" />
+    </div>
+    <div class="form-group">
+      <label>Descrição (opcional)</label>
+      <input type="text" id="lanc-descricao" placeholder="Ex: Contrato de inventário" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" id="btn-salvar-lanc" onclick="salvarLancamento()">Registrar 🏆</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const API = '/api';
+let _periodoAtual = 'mes';
+let _meuId = null;
+let _meusLancamentos = [];
+
+function getToken() { return localStorage.getItem('may_access'); }
+async function apiFetch(path, opts = {}) {
+  return fetch(API + path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}`, ...(opts.headers || {}) },
+  });
+}
+
+function fmtBRL(v) {
+  return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function mascaraValor(el) {
+  let v = el.value.replace(/\D/g, '');
+  v = (parseInt(v || '0') / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  el.value = v;
+}
+function tempoAtras(iso) {
+  const s = (Date.now() - new Date(iso)) / 1000;
+  if (s < 60)   return 'agora';
+  if (s < 3600) return Math.floor(s/60) + 'min atrás';
+  if (s < 86400) return Math.floor(s/3600) + 'h atrás';
+  return Math.floor(s/86400) + 'd atrás';
+}
+function inicialAvatar(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+
+async function carregarRanking() {
+  const r = await apiFetch(`/ranking-vendas?periodo=${_periodoAtual}`);
+  if (!r.ok) return;
+  const { ranking, minha_posicao } = await r.json();
+
+  // Atualiza minha posição
+  const u = JSON.parse(localStorage.getItem('may_user') || '{}');
+  _meuId = u.id;
+
+  if (minha_posicao) {
+    document.getElementById('minha-pos').style.display = 'flex';
+    document.getElementById('sem-pos').style.display = 'none';
+    document.getElementById('minha-posicao-num').textContent = `#${minha_posicao.posicao}`;
+    document.getElementById('minha-pos-name').textContent = minha_posicao.name;
+    document.getElementById('minha-pos-stats').textContent =
+      `${minha_posicao.qtd} venda${minha_posicao.qtd !== 1 ? 's' : ''} · ${fmtBRL(minha_posicao.total)}`;
+    _meusLancamentos = minha_posicao.lancamentos || [];
+    renderMeusLancamentos();
+  } else {
+    document.getElementById('minha-pos').style.display = 'none';
+    document.getElementById('sem-pos').style.display = 'block';
+  }
+
+  // Render ranking
+  const list = document.getElementById('ranking-list');
+  if (!ranking.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><p>Nenhuma venda registrada neste período.<br>Seja o primeiro!</p></div>`;
+    document.getElementById('dash-sub').textContent = 'Nenhuma venda ainda';
+    return;
+  }
+
+  const MEDALS = ['🥇', '🥈', '🥉'];
+  const POS_CLASS = ['pos-1', 'pos-2', 'pos-3'];
+  const POS_LABEL = ['p1', 'p2', 'p3'];
+
+  list.innerHTML = ranking.map(v => {
+    const i = v.posicao - 1;
+    const euClass = v.user_id === _meuId ? ' eu' : '';
+    const posClass = POS_CLASS[i] || '';
+    const posLabel = POS_LABEL[i] || 'pn';
+    const posText  = i < 3 ? MEDALS[i] : `#${v.posicao}`;
+    const avatar   = v.avatar_url
+      ? `<img src="${v.avatar_url}" alt="${v.name}" />`
+      : inicialAvatar(v.name);
+
+    return `<div class="rank-item ${posClass}${euClass}">
+      <div class="rank-pos ${posLabel}">${posText}</div>
+      <div class="rank-avatar">${avatar}</div>
+      <div class="rank-info">
+        <div class="rank-name">${v.name}${v.user_id === _meuId ? ' <span style="font-size:10px;color:#A78BFA;font-weight:600">(você)</span>' : ''}</div>
+        <div class="rank-qtd">${v.qtd} contrato${v.qtd !== 1 ? 's' : ''} fechado${v.qtd !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="rank-valor">${fmtBRL(v.total)}</div>
+    </div>`;
+  }).join('');
+
+  const total = ranking.reduce((s, v) => s + v.total, 0);
+  document.getElementById('dash-sub').textContent =
+    `${ranking.length} vendedor${ranking.length !== 1 ? 'es' : ''} · ${fmtBRL(total)} em vendas`;
+}
+
+function renderMeusLancamentos() {
+  if (!_meusLancamentos.length) {
+    document.getElementById('meus-lanc-sec').style.display = 'none';
+    return;
+  }
+  document.getElementById('meus-lanc-sec').style.display = 'block';
+  const list = document.getElementById('meus-lanc-list');
+  list.innerHTML = _meusLancamentos.slice(0, 10).map(l => `
+    <div class="lancamento-item">
+      <div class="lanc-info">
+        <strong>${l.cliente}</strong><br>
+        <span>${l.descricao || ''} · ${tempoAtras(l.created_at)}</span>
+      </div>
+      <div class="lanc-valor">${fmtBRL(l.valor)}</div>
+      <button class="btn-del" onclick="deletarLancamento('${l.id}')" title="Remover">✕</button>
+    </div>
+  `).join('');
+}
+
+function setPeriodo(p, btn) {
+  _periodoAtual = p;
+  document.querySelectorAll('.periodo-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  carregarRanking();
+}
+
+function abrirModal() {
+  document.getElementById('lanc-cliente').value = '';
+  document.getElementById('lanc-valor').value = '';
+  document.getElementById('lanc-descricao').value = '';
+  document.getElementById('modal-lancar').classList.add('open');
+  setTimeout(() => document.getElementById('lanc-cliente').focus(), 100);
+}
+function fecharModal() {
+  document.getElementById('modal-lancar').classList.remove('open');
+}
+
+async function salvarLancamento() {
+  const cliente   = document.getElementById('lanc-cliente').value.trim();
+  const valorStr  = document.getElementById('lanc-valor').value;
+  const descricao = document.getElementById('lanc-descricao').value.trim();
+
+  if (!cliente) { alert('Informe o nome do cliente.'); return; }
+  if (!valorStr) { alert('Informe o valor.'); return; }
+
+  const btn = document.getElementById('btn-salvar-lanc');
+  btn.disabled = true; btn.textContent = 'Registrando...';
+
+  try {
+    const r = await apiFetch('/ranking-vendas', {
+      method: 'POST',
+      body: JSON.stringify({ cliente, valor: valorStr, descricao }),
+    });
+    const d = await r.json();
+    if (!r.ok) { alert(d.erro || 'Erro ao registrar.'); return; }
+    fecharModal();
+    carregarRanking();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Registrar 🏆';
+  }
+}
+
+async function deletarLancamento(id) {
+  if (!confirm('Remover este lançamento?')) return;
+  await apiFetch(`/ranking-vendas/${id}`, { method: 'DELETE' });
+  carregarRanking();
+}
+
+// Canvas partículas
+(function() {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 60; i++) particles.push({
+    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+    r: Math.random() * 1.5 + .3, vx: (Math.random()-.5) * .3, vy: (Math.random()-.5) * .3,
+    a: Math.random() * .5 + .1
+  });
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(245,158,11,${p.a})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+window.addEventListener('DOMContentLoaded', carregarRanking);
+</script>
+</body>
+</html>

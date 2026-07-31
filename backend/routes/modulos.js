@@ -34,6 +34,15 @@ const MODULOS = {
     valor_a:     '37.00',
     rota:        '/leads',
   },
+  ranking_vendas: {
+    id:          'ranking_vendas',
+    nome:        'Ranking de Vendas',
+    descricao:   'Cada vendedor lança seu contrato fechado e sobe no ranking da equipe. Gamificado, em tempo real, visível para todos.',
+    emoji:       '🏆',
+    valor_m:     '97.00',
+    valor_a:     '77.00',
+    rota:        '/ranking-vendas',
+  },
 };
 
 // ─── GET /api/modulos ─────────────────────────────────────────────────────────
