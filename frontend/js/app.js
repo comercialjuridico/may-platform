@@ -373,6 +373,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   estado.user = user;
+
+  // Gestor vai direto para o dashboard da equipe (a não ser que já tenha ?app=1)
+  if (user?.role === 'gestor' && !new URLSearchParams(window.location.search).get('app')) {
+    window.location.href = '/gestor';
+    return;
+  }
+
   await carregarDadosIniciais();
   renderizarSidebar();
   verificarFluxoOnboarding(estado.user);
@@ -487,6 +494,10 @@ function renderizarSidebar() {
   if (nameEl) nameEl.textContent = user?.name || '';
   const badgeEl = document.getElementById('user-plan-badge');
   if (badgeEl) badgeEl.innerHTML = `<span class="badge badge-${user?.plano||'free'}">${user?.plano||'free'}</span>`;
+
+  // Link Painel do Gestor: visível só para gestores
+  const linkGestor = document.getElementById('link-painel-gestor');
+  if (linkGestor) linkGestor.style.display = (user?.role === 'gestor') ? 'flex' : 'none';
 
   // Ferramentas
   const toolList = document.getElementById('tool-list');
