@@ -376,11 +376,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await carregarDadosIniciais(); // atualiza estado.user com dados frescos do servidor
   renderizarSidebar();
 
-  // Gestor/admin vai direto para o dashboard da equipe (a não ser que já tenha ?app=1)
-  if (['gestor', 'admin'].includes(estado.user?.role) && !new URLSearchParams(window.location.search).get('app')) {
-    window.location.href = '/gestor';
-    return;
-  }
   carregarModulosHeader(); // carrega módulos ativos no topo
   verificarFluxoOnboarding(estado.user);
   verificarDiagnostico();
@@ -2155,6 +2150,12 @@ function mostrarHomeDashboard() {
   const wrapper   = document.getElementById('chat-input-wrapper');
   if (wrapper) wrapper.style.display = 'none';
 
+  // Gestor/admin: mostra dashboard comercial no lugar da trilha
+  if (['gestor', 'admin'].includes(estado.user?.role)) {
+    mostrarDashboardComercial();
+    return;
+  }
+
   const user  = estado.user;
   // Os campos do diagnóstico ficam diretamente em user, não em user.diagnostico
   const diag  = {
@@ -2217,6 +2218,170 @@ function mostrarHomeDashboard() {
 
     </div>
   `;
+}
+
+// ─── Dashboard Comercial (para gestor/admin) ──────────────────────────────────
+let _dashPeriodo = 'mes';
+async function mostrarDashboardComercial() {
+  const container = document.getElementById('messages-container');
+  const hora = new Date().getHours();
+  const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+  const nome = (estado.user?.name || '').split(' ')[0];
+
+  container.innerHTML = `
+    <div style="padding:24px 20px 60px;max-width:1000px;margin:0 auto">
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+        <div>
+          <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin:0">${saudacao}, ${escapeHtml(nome)}! 👋</h2>
+          <p style="font-size:12px;color:rgba(200,190,255,.5);margin:3px 0 0">Dashboard comercial da equipe</p>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="setDashPeriodo('hoje',this)" class="_dp-tab" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;color:rgba(200,190,255,.6);cursor:pointer">Hoje</button>
+          <button onclick="setDashPeriodo('semana',this)" class="_dp-tab" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;color:rgba(200,190,255,.6);cursor:pointer">Semana</button>
+          <button onclick="setDashPeriodo('mes',this)" class="_dp-tab" style="background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#C4B5FD;cursor:pointer">Mês</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div id="dash-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        ${['CONTRATOS','FATURAMENTO','TICKET MÉDIO','REUNIÕES'].map(l=>`
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px;text-align:center">
+            <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;background:linear-gradient(135deg,#A78BFA,#60A5FA);-webkit-background-clip:text;-webkit-text-fill-color:transparent">—</div>
+            <div style="font-size:10px;color:rgba(200,190,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">${l}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Vendedores + Leads fechados -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:rgba(200,190,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Vendedores</div>
+          <div id="dash-vendedores" style="display:flex;flex-direction:column;gap:8px">
+            <div style="color:rgba(200,190,255,.4);font-size:13px">Carregando...</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:rgba(200,190,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Clientes fechados</div>
+          <div id="dash-fechados" style="display:flex;flex-direction:column;gap:8px">
+            <div style="color:rgba(200,190,255,.4);font-size:13px">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Atalhos rápidos -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <a href="/leads" style="display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#C4B5FD;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;text-decoration:none">📋 Leads</a>
+        <a href="/agenda" id="_atalho-agenda" style="display:none;align-items:center;gap:6px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#C4B5FD;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;text-decoration:none">📅 Agenda</a>
+        <a href="/ranking-vendas" id="_atalho-ranking" style="display:none;align-items:center;gap:6px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#C4B5FD;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;text-decoration:none">🏆 Ranking</a>
+        <a href="/gestor" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(200,190,255,.5);font-size:12px;font-weight:600;padding:8px 16px;border-radius:20px;text-decoration:none">⚙️ Painel completo</a>
+      </div>
+
+    </div>`;
+
+  carregarDashComercial();
+}
+
+function setDashPeriodo(p, btn) {
+  _dashPeriodo = p;
+  document.querySelectorAll('._dp-tab').forEach(b => {
+    b.style.background = 'rgba(255,255,255,.05)';
+    b.style.borderColor = 'rgba(255,255,255,.1)';
+    b.style.color = 'rgba(200,190,255,.6)';
+    b.style.fontWeight = '600';
+  });
+  btn.style.background = 'rgba(124,58,237,.2)';
+  btn.style.borderColor = 'rgba(124,58,237,.4)';
+  btn.style.color = '#C4B5FD';
+  btn.style.fontWeight = '700';
+  carregarDashComercial();
+}
+
+async function carregarDashComercial() {
+  try {
+    const hoje = new Date();
+    let inicio, fim = hoje.toISOString().slice(0,10);
+    if (_dashPeriodo === 'hoje') {
+      inicio = fim;
+    } else if (_dashPeriodo === 'semana') {
+      const d = new Date(hoje); d.setDate(d.getDate() - d.getDay()); inicio = d.toISOString().slice(0,10);
+    } else {
+      inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().slice(0,10);
+    }
+
+    const r = await api.get(`/gestor/dashboard?inicio=${inicio}&fim=${fim}`);
+    if (!r.ok) return;
+    const d = await r.json();
+
+    const kpis = d.kpis || {};
+    const vendedores = d.vendedores || [];
+    const fechados = d.vendas_fechadas || [];
+
+    // Verifica módulos para atalhos
+    try {
+      const rm = await api.get('/modulos');
+      if (rm.ok) {
+        const { modulos } = await rm.json();
+        const ativos = modulos.filter(m => m.ativo).map(m => m.id);
+        const el1 = document.getElementById('_atalho-agenda');
+        const el2 = document.getElementById('_atalho-ranking');
+        if (el1 && ativos.includes('calendario_cadencia')) el1.style.display = 'inline-flex';
+        if (el2 && ativos.includes('ranking_vendas')) el2.style.display = 'inline-flex';
+      }
+    } catch(_) {}
+
+    // KPIs
+    const kpiEl = document.getElementById('dash-kpis');
+    if (kpiEl) {
+      const fmtBRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2});
+      const kpiData = [
+        { label: 'CONTRATOS',   valor: kpis.total_contratos ?? '—', cor: '#A78BFA' },
+        { label: 'FATURAMENTO', valor: kpis.total_faturamento != null ? fmtBRL(kpis.total_faturamento) : '—', cor: '#34D399' },
+        { label: 'TICKET MÉDIO',valor: kpis.ticket_medio != null ? fmtBRL(kpis.ticket_medio) : '—', cor: '#60A5FA' },
+        { label: 'REUNIÕES',    valor: kpis.total_reunioes ?? '—', cor: '#F59E0B' },
+      ];
+      kpiEl.innerHTML = kpiData.map(k => `
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(167,139,250,.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:${k.cor}">${k.valor}</div>
+          <div style="font-size:10px;color:rgba(200,190,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">${k.label}</div>
+        </div>`).join('');
+    }
+
+    // Vendedores
+    const vEl = document.getElementById('dash-vendedores');
+    if (vEl) {
+      if (!vendedores.length) {
+        vEl.innerHTML = '<div style="color:rgba(200,190,255,.35);font-size:13px">Nenhum vendedor encontrado.</div>';
+      } else {
+        const STATUS_ICON = { ok:'🟢', destaque:'⭐', atencao:'🟡', queda:'🔴' };
+        vEl.innerHTML = vendedores.map((v,i) => `
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+            <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:rgba(200,190,255,.3);min-width:22px">#${i+1}</span>
+            <span style="font-size:13px;font-weight:600;color:#fff;flex:1">${escapeHtml(v.name)}</span>
+            <span style="font-size:12px;font-weight:700;color:#34D399">R$${Number(v.faturamento||0).toLocaleString('pt-BR',{minimumFractionDigits:0})}</span>
+            <span>${STATUS_ICON[v.status]||''}</span>
+          </div>`).join('');
+      }
+    }
+
+    // Fechados
+    const fEl = document.getElementById('dash-fechados');
+    if (fEl) {
+      if (!fechados.length) {
+        fEl.innerHTML = '<div style="color:rgba(200,190,255,.35);font-size:13px">Nenhum cliente registrado neste período.</div>';
+      } else {
+        const fmtBRL2 = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        fEl.innerHTML = fechados.slice(0,5).map(l => `
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:#fff">${escapeHtml(l.nome_lead||l.empresa_lead||'—')}</div>
+              <div style="font-size:11px;color:rgba(200,190,255,.4)">${escapeHtml(l.closer?.name||'')}</div>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:#34D399">${fmtBRL2(l.valor_honorarios)}</div>
+          </div>`).join('');
+      }
+    }
+  } catch(e) { console.error('dashComercial:', e); }
 }
 
 function mostrarInputChat() {
