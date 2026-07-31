@@ -56,7 +56,7 @@ router.post('/register', async (req, res) => {
     if (convite_token) {
       const { data: convite } = await supabase
         .from('convites')
-        .select('id, empresa_id, email, aceito')
+        .select('id, empresa_id, email, aceito, permissoes')
         .eq('token', convite_token)
         .single();
 
@@ -76,10 +76,11 @@ router.post('/register', async (req, res) => {
       plano: 'free',
     };
 
-    // Vincula à empresa do convite
+    // Vincula à empresa do convite e copia permissões
     if (conviteData) {
       novoUsuario.empresa_id = conviteData.empresa_id;
       novoUsuario.role = 'membro';
+      novoUsuario.permissoes = conviteData.permissoes || { leads: true, agenda: false, ranking: false };
     }
 
     const { data: user, error } = await supabase
@@ -141,7 +142,7 @@ router.post('/login', async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, name, password_hash, plano, plano_status, plano_fim, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, totp_enabled')
+      .select('id, email, name, password_hash, plano, plano_status, plano_fim, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, totp_enabled, role, empresa_id, permissoes')
       .eq('email', email.toLowerCase())
       .single();
 

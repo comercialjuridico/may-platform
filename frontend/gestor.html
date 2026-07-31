@@ -339,6 +339,9 @@
     </div>
   </div>
 
+  <!-- Módulos ativos -->
+  <div id="modulos-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;min-height:28px"></div>
+
   <!-- Filtros -->
   <div class="filtros-bar">
     <div class="filtro-group">
@@ -547,6 +550,29 @@
         <label>E-mail do colaborador</label>
         <input type="email" id="convite-email" placeholder="nome@empresa.com" />
       </div>
+
+      <!-- Permissões baseadas nos módulos ativos -->
+      <div id="convite-permissoes-wrap" style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:10px">Acesso do colaborador</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <!-- Leads sempre visível -->
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" id="perm-leads" checked style="width:16px;height:16px;accent-color:#7C3AED" />
+            📋 Registro de contratos / leads
+          </label>
+          <!-- Agenda: só aparece se módulo ativo -->
+          <label id="perm-agenda-row" style="display:none;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" id="perm-agenda" style="width:16px;height:16px;accent-color:#7C3AED" />
+            📅 Calendário e cadência
+          </label>
+          <!-- Ranking: só aparece se módulo ativo -->
+          <label id="perm-ranking-row" style="display:none;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" id="perm-ranking" style="width:16px;height:16px;accent-color:#7C3AED" />
+            🏆 Ranking de contratos
+          </label>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button class="btn-cancel" onclick="fecharModalConvite()">Cancelar</button>
         <button class="btn-save" onclick="gerarConvite()">Gerar link</button>
@@ -758,9 +784,19 @@ async function carregarEquipe() {
   }
 }
 
-function abrirModalConvite() {
+async function abrirModalConvite() {
   novoConvite();
   document.getElementById('modal-convite').classList.add('open');
+  // Mostra checkboxes de módulos que a empresa tem ativos
+  try {
+    const r = await apiFetch('/api/modulos');
+    if (r.ok) {
+      const { modulos } = await r.json();
+      const ativos = new Set(modulos.filter(m => m.ativo).map(m => m.id));
+      document.getElementById('perm-agenda-row').style.display  = ativos.has('calendario_cadencia') ? 'flex' : 'none';
+      document.getElementById('perm-ranking-row').style.display = ativos.has('painel_gestor')       ? 'flex' : 'none';
+    }
+  } catch {}
 }
 function fecharModalConvite() {
   document.getElementById('modal-convite').classList.remove('open');
@@ -777,7 +813,12 @@ async function gerarConvite() {
   const email = document.getElementById('convite-email').value.trim();
   if (!email) { alert('Informe o e-mail do colaborador.'); return; }
 
-  const r = await apiFetch('/api/gestor/convidar', { method:'POST', body: JSON.stringify({ email }) });
+  const permissoes = {
+    leads:   document.getElementById('perm-leads').checked,
+    agenda:  document.getElementById('perm-agenda')?.checked  ?? false,
+    ranking: document.getElementById('perm-ranking')?.checked ?? false,
+  };
+  const r = await apiFetch('/api/gestor/convidar', { method:'POST', body: JSON.stringify({ email, permissoes }) });
   const d = await r.json();
 
   if (!r.ok) { alert(d.erro || 'Erro ao gerar convite.'); return; }
@@ -823,6 +864,23 @@ async function criarEmpresa(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+async function carregarModulosBar() {
+  try {
+    const r = await apiFetch('/api/modulos');
+    if (!r.ok) return;
+    const { modulos } = await r.json();
+    const bar = document.getElementById('modulos-bar');
+    const ativos = modulos.filter(m => m.ativo);
+    if (!ativos.length) {
+      bar.innerHTML = `<a href="/modulos" style="font-size:11px;color:rgba(200,190,255,.4);text-decoration:none">🧩 Nenhum módulo ativo · <span style="color:#A78BFA">Ver módulos →</span></a>`;
+      return;
+    }
+    bar.innerHTML = ativos.map(m =>
+      `<a href="${m.rota}" style="display:inline-flex;align-items:center;gap:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#C4B5FD;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;text-decoration:none;transition:background .2s" onmouseover="this.style.background='rgba(124,58,237,.25)'" onmouseout="this.style.background='rgba(124,58,237,.12)'">${m.emoji} ${m.nome}</a>`
+    ).join('') + `<a href="/modulos" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(200,190,255,.5);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;text-decoration:none">+ Módulos</a>`;
+  } catch(_) {}
+}
+
 window.addEventListener('DOMContentLoaded',async()=>{
   const token = getToken();
   if(!token){ window.location.href='index.html'; return; }
@@ -834,6 +892,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('f-fim').value    = hoje.toISOString().slice(0,10);
 
   await carregarUsuarioGestor();
+  carregarModulosBar();
   await carregarDash();
   await Promise.all([carregarMetas(), carregarFunil(), carregarReunioesSemana(), carregarEquipe()]);
   // Relatório semanal — carrega config (exibe card automaticamente se for ULTRA)

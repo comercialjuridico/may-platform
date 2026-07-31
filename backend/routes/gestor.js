@@ -142,7 +142,7 @@ router.get('/equipe', authMiddleware, gestorMiddleware, async (req, res) => {
 // ─── POST /api/gestor/convidar ──────────────────────────────────────────────
 // Gera link de convite para um e-mail
 router.post('/convidar', authMiddleware, gestorMiddleware, async (req, res) => {
-  const { email } = req.body;
+  const { email, permissoes } = req.body;
   if (!email) return res.status(400).json({ erro: 'E-mail é obrigatório.' });
 
   try {
@@ -167,11 +167,18 @@ router.post('/convidar', authMiddleware, gestorMiddleware, async (req, res) => {
     const token = uuidv4();
 
     // Salva o convite (substitui se já existir para o mesmo e-mail)
+    const permissoesFinais = {
+      leads:   permissoes?.leads   ?? true,
+      agenda:  permissoes?.agenda  ?? false,
+      ranking: permissoes?.ranking ?? false,
+    };
+
     await supabase.from('convites').upsert({
       empresa_id: req.user.empresa_id,
       email,
       token,
       aceito: false,
+      permissoes: permissoesFinais,
     }, { onConflict: 'email,empresa_id' });
 
     const link = `${process.env.APP_URL}/auth.html?convite=${token}`;

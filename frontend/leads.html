@@ -155,6 +155,19 @@
   </style>
 </head>
 <body>
+<script>
+// ── Gate de permissão para membros ──────────────────────────────────────────
+(function() {
+  const token = localStorage.getItem('may_access');
+  if (!token) { window.location.href = '/auth.html'; return; }
+  try {
+    const u = JSON.parse(localStorage.getItem('may_user') || '{}');
+    if (u.role === 'membro' && u.permissoes && u.permissoes.leads === false) {
+      window.location.href = '/app';
+    }
+  } catch {}
+})();
+</script>
 
 <canvas id="canvas-bg"></canvas>
 

@@ -573,10 +573,19 @@
 </head>
 <body>
 <script>
-// ── Gate de módulo ─────────────────────────────────────────────────────────
+// ── Gate: módulo (gestor) + permissão (membro) ──────────────────────────────
 (async function() {
   const token = localStorage.getItem('may_access');
   if (!token) { window.location.href = '/auth.html'; return; }
+  // Para membros: verifica permissão local (rápido, sem API)
+  try {
+    const u = JSON.parse(localStorage.getItem('may_user') || '{}');
+    if (u.role === 'membro') {
+      if (!u.permissoes?.ranking) { window.location.href = '/app'; return; }
+      return; // membro com permissão → libera sem checar módulo da empresa
+    }
+  } catch {}
+  // Para gestores: verifica se módulo está ativo na empresa
   try {
     const r = await fetch('/api/modulos/check/painel_gestor', {
       headers: { Authorization: `Bearer ${token}` }
