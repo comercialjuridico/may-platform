@@ -164,15 +164,8 @@
         <span class="nav-icon">📚</span> Minha Trilha
       </button>
       <a href="/modulos" class="btn-ghost btn-full">
-        <span class="nav-icon">🧩</span> Módulos
+        <span class="nav-icon">🧩</span> Módulos adicionais
       </a>
-      <a href="/manual" class="btn-ghost btn-full">
-        <span class="nav-icon">📖</span> Manual de uso
-      </a>
-      <button onclick="abrirModalAreas()" class="btn-ghost btn-full">
-        <span class="nav-icon">⚖️</span> Áreas de trabalho
-        <span id="areas-badge" style="font-size:0.68rem;margin-left:auto;opacity:.45"></span>
-      </button>
     </div>
   </aside>
 
@@ -188,6 +181,9 @@
           <div class="chat-tool-label text-xs text-muted" id="chat-tool-label">May — Assistente de vendas</div>
         </div>
       </div>
+      <!-- Módulos ativos -->
+      <div id="header-modulos" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
+
       <div class="header-actions">
         <button class="btn-ghost btn-sm" onclick="abrirModalPlanos()" title="Planos">
           ⭐ Planos

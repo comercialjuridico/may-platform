@@ -381,6 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = '/gestor';
     return;
   }
+  carregarModulosHeader(); // carrega módulos ativos no topo
   verificarFluxoOnboarding(estado.user);
   verificarDiagnostico();
   verificarQueryParams();
@@ -2450,3 +2451,29 @@ Object.assign(window, {
   toggleTema,
   abrirModalCancelamento, fecharModalCancelamento, confirmarCancelamento,
 });
+
+// ─── Módulos ativos no header ──────────────────────────────────────────────
+async function carregarModulosHeader() {
+  const el = document.getElementById('header-modulos');
+  if (!el) return;
+  try {
+    const r = await api.get('/modulos');
+    if (!r.ok) return;
+    const { modulos } = await r.json();
+    const ativos = modulos.filter(m => m.ativo);
+    if (!ativos.length) { el.style.display = 'none'; return; }
+
+    el.style.display = 'flex';
+    el.innerHTML = ativos.map(m => `
+      <a href="${m.rota}" style="
+        display:inline-flex;align-items:center;gap:5px;
+        background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);
+        color:#C4B5FD;font-size:11px;font-weight:700;
+        padding:4px 11px;border-radius:20px;text-decoration:none;
+        white-space:nowrap;transition:background .2s"
+        onmouseover="this.style.background='rgba(124,58,237,.25)'"
+        onmouseout="this.style.background='rgba(124,58,237,.12)'">
+        ${m.emoji} ${m.nome}
+      </a>`).join('');
+  } catch(_) { el.style.display = 'none'; }
+}
