@@ -127,6 +127,23 @@
   </div>
 </div>
 
+<!-- ═══ BLOQUEIO: ASSINATURA EXPIRADA ═══ -->
+<div id="expired-wall" class="expired-wall">
+  <div class="expired-card">
+    <div class="expired-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </div>
+    <h2 class="expired-titulo">Sua assinatura expirou</h2>
+    <p class="expired-desc">Renove agora para voltar a usar a May e todas as suas funcionalidades.</p>
+    <button class="expired-btn primary" id="exp-preco-mensal" onclick="renovarAssinatura('mensal')">Renovar agora</button>
+    <button class="expired-btn" id="exp-preco-anual" onclick="renovarAssinatura('anual')">Plano anual (economize!)</button>
+    <button class="expired-sair" onclick="logout()">Sair</button>
+  </div>
+</div>
+
 <canvas id="canvas-app"></canvas>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenuMobile()"></div>
 

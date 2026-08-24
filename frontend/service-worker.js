@@ -1,5 +1,5 @@
 // ─── Service Worker — May PWA ─────────────────────────────────────────────────
-const CACHE_NAME = 'may-v3';
+const CACHE_NAME = 'may-v4';
 
 // Rotas HTML que NUNCA devem ser cacheadas (precisam sempre ir à rede)
 const NEVER_CACHE = ['/', '/app', '/index.html', '/auth.html', '/landing.html'];
@@ -45,16 +45,15 @@ self.addEventListener('fetch', event => {
   // Páginas HTML principais: sempre rede (nunca cachear — evita servir página errada)
   if (NEVER_CACHE.includes(url.pathname)) return;
 
-  // Estáticos (CSS/JS): cache first, fallback para rede
+  // Estáticos (CSS/JS): rede primeiro, cache só como fallback offline.
+  // Cache-first aqui fazia o usuário continuar rodando um app.js/app.css antigos
+  // depois de cada deploy, até o CACHE_NAME mudar.
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(res => {
-        if (!res || res.status !== 200 || res.type === 'opaque') return res;
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return res;
-      });
-    })
+    fetch(event.request).then(res => {
+      if (!res || res.status !== 200 || res.type === 'opaque') return res;
+      const clone = res.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+      return res;
+    }).catch(() => caches.match(event.request))
   );
 });

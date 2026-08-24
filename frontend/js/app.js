@@ -77,9 +77,10 @@ function verificarFluxoOnboarding(user) {
   const emTrial    = (user.plano === 'free' || !user.plano) &&
                      !user.cielo_recurrent_payment_id && !user.stripe_subscription_id;
 
-  // Dia 8+: bloqueia com payment wall
-  if (emTrial && diasDesde >= 7) {
-    abrirPaymentWall(true); // true = bloqueante (sem X)
+  // Assinatura expirada: a plataforma carrega normal e o bloqueio
+  // entra 3 segundos depois, cobrindo tudo (sem X, sem ESC).
+  if (assinaturaExpirada(user)) {
+    mostrarBloqueioExpirado();
     return;
   }
 
@@ -151,6 +152,44 @@ function abrirPaymentWall(bloqueante) {
 function fecharPaymentWall() {
   const wall = document.getElementById('payment-wall');
   if (wall) wall.style.display = 'none';
+}
+
+// ─── Bloqueio de assinatura expirada ─────────────────────────────────────────
+let _bloqueioExpiradoTimer = null;
+
+// Assinatura vencida: trial de 7 dias estourado OU plano marcado como expirado
+function assinaturaExpirada(user) {
+  if (!user) return false;
+  if (user.plano_status === 'expirado' || user._trial_expirado) return true;
+
+  const emTrial = (user.plano === 'free' || !user.plano) &&
+                  !user.cielo_recurrent_payment_id && !user.stripe_subscription_id;
+  if (!emTrial) return false;
+
+  const criado    = new Date(user.created_at || Date.now());
+  const diasDesde = (Date.now() - criado.getTime()) / (1000 * 60 * 60 * 24);
+  return diasDesde >= 7;
+}
+
+// Deixa a plataforma aparecer por alguns segundos e só então bloqueia tudo
+function mostrarBloqueioExpirado(delayMs) {
+  const wall = document.getElementById('expired-wall');
+  if (!wall || wall.classList.contains('ativo')) return;
+
+  clearTimeout(_bloqueioExpiradoTimer);
+  _bloqueioExpiradoTimer = setTimeout(() => {
+    const pm = document.getElementById('exp-preco-mensal');
+    const pa = document.getElementById('exp-preco-anual');
+    if (pm) pm.textContent = `Renovar agora — ${PW_PRECOS.mensal.preco}/mês`;
+    if (pa) pa.textContent = `Plano anual — ${PW_PRECOS.anual.preco} (economize!)`;
+    wall.classList.add('ativo');
+  }, delayMs == null ? 3000 : delayMs);
+}
+
+// Botões do bloqueio → payment wall (z-index maior, cobre o bloqueio)
+function renovarAssinatura(periodo) {
+  abrirPaymentWall(true);
+  pwPeriodo(periodo || 'mensal');
 }
 
 function pwPeriodo(p) {
@@ -850,9 +889,11 @@ async function enviarMensagem() {
 
   // Exibe mensagem do usuário
   const container = document.getElementById('messages-container');
-  // Remove tela vazia se existir
+  // Remove tela vazia / home se existir
   const vazia = container.querySelector('.chat-empty');
   if (vazia) vazia.remove();
+  const home = container.querySelector('.home-hero');
+  if (home) home.remove();
 
   adicionarMensagem('user', texto);
 
@@ -1957,6 +1998,16 @@ function fecharMenuMobile() {
 // ─── Nova conversa ───────────────────────────────────────────────────────────
 function novaConversa() {
   estado.conversaAtiva = null;
+  // No chat livre, "nova conversa" volta para a tela de início
+  if (!estado.ferramentaAtiva || estado.ferramentaAtiva === 'chat') {
+    estado.ferramentaAtiva = 'chat';
+    document.getElementById('chat-title').textContent = 'Chat livre';
+    document.getElementById('chat-tool-label').textContent = 'May — Assistente de vendas';
+    mostrarHomeDashboard();
+    renderizarSidebar();
+    fecharMenuMobile();
+    return;
+  }
   selecionarFerramenta(estado.ferramentaAtiva);
 }
 
@@ -2144,80 +2195,132 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
-// ─── Home Dashboard ──────────────────────────────────────────────────────────
+// ─── Home / Tela de início ───────────────────────────────────────────────────
+// Blocos de primeiro contato da home. Cada bloco pode:
+//   · tipo 'pergunta'   → manda a pergunta para o chat livre
+//   · tipo 'ferramenta' → abre uma ferramenta da sidebar
+//   · tipo 'link'       → navega para outra página
+const HOME_BLOCOS = [
+  {
+    tag: 'Estratégia', icon: '⚡', tipo: 'pergunta',
+    titulo: 'Como a May vai ajudar minha advocacia?',
+    texto: 'Me explica, de forma prática, como a May pode ajudar a minha advocacia no dia a dia — o que ela faz, em que momentos eu devo usar e que resultado eu posso esperar.',
+  },
+  {
+    tag: 'Primeiros passos', icon: '🚀', tipo: 'pergunta',
+    titulo: 'Por onde eu começo?',
+    texto: 'Sou novo aqui. Me diz por onde eu começo na plataforma: o que fazer primeiro, segundo e terceiro para tirar proveito da May já esta semana.',
+  },
+  {
+    tag: 'Módulos', icon: '🧩', tipo: 'pergunta',
+    titulo: 'O que são os módulos adicionais?',
+    texto: 'O que são os módulos adicionais da plataforma, para que serve cada um e como eu decido qual ativar primeiro?',
+  },
+  {
+    tag: 'Plataforma', icon: '💡', tipo: 'pergunta',
+    titulo: 'Dúvidas sobre a plataforma',
+    texto: 'Tenho dúvidas sobre a plataforma. Me explica o que cada ferramenta do menu faz e como eu uso cada uma no dia a dia.',
+  },
+  {
+    tag: 'Treino', icon: '🎭', tipo: 'ferramenta', ferramenta: 'simular_reuniao',
+    titulo: 'Simular uma reunião com cliente',
+    texto: 'Treine antes de ir para o cliente de verdade — a May faz o papel do cliente.',
+  },
+];
+
+function homeAbrirBloco(i) {
+  const b = HOME_BLOCOS[i];
+  if (!b) return;
+  if (b.tipo === 'ferramenta')      selecionarFerramenta(b.ferramenta);
+  else if (b.tipo === 'link')       window.location.href = b.href;
+  else                              homePerguntar(b.texto);
+}
+
+// Manda uma pergunta da home direto para o chat livre
+function homePerguntar(texto) {
+  estado.ferramentaAtiva = 'chat';
+  estado.conversaAtiva   = null;
+  document.getElementById('chat-title').textContent = 'Chat livre';
+  document.getElementById('chat-tool-label').textContent = 'May — Assistente de vendas';
+  mostrarInputChat();
+  document.getElementById('messages-container').innerHTML = '';
+  renderizarSidebar();
+  enviarMensagemRapida(texto);
+}
+
 function mostrarHomeDashboard() {
   const container = document.getElementById('messages-container');
-  const wrapper   = document.getElementById('chat-input-wrapper');
-  if (wrapper) wrapper.style.display = 'none';
+  mostrarInputChat(); // na home o campo de mensagem fica visível
 
-  // Gestor/admin: mostra dashboard comercial no lugar da trilha
-  if (['gestor', 'admin'].includes(estado.user?.role)) {
-    mostrarDashboardComercial();
-    return;
-  }
-
-  const user  = estado.user;
-  // Os campos do diagnóstico ficam diretamente em user, não em user.diagnostico
-  const diag  = {
-    experiencia:  user?.tempo_experiencia,
-    contr:        user?.contratos_mes,
-    dificuldades: user?.maior_dificuldade ? [user.maior_dificuldade] : [],
-  };
-  const nivel = calcularNivel(diag);
-  const meta  = metaDaSemana(diag);
-  const streak = estado.streak?.dias_seguidos || 0;
-  const prox  = proximosExercicios();
-  const hora  = new Date().getHours();
+  const user     = estado.user;
+  const hora     = new Date().getHours();
   const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-  const nome  = (user?.name || '').split(' ')[0];
+  const nome     = (user?.name || '').split(' ')[0];
+  const ehGestor = ['gestor', 'admin'].includes(user?.role);
+  const streak   = estado.streak?.dias_seguidos || 0;
+
+  const gestorStrip = !ehGestor ? '' : `
+    <div class="home-gestor">
+      <div class="home-gestor-label">Painel do gestor</div>
+      <div class="home-gestor-links">
+        <button class="home-gestor-link primary" onclick="mostrarDashboardComercial()">📊 Dashboard comercial</button>
+        <a class="home-gestor-link" href="/leads">📋 Leads</a>
+        <a class="home-gestor-link" href="/agenda"         id="_atalho-agenda"  style="display:none">📅 Agenda</a>
+        <a class="home-gestor-link" href="/ranking-vendas" id="_atalho-ranking" style="display:none">🏆 Ranking</a>
+        <a class="home-gestor-link ghost" href="/gestor">⚙️ Painel completo</a>
+      </div>
+    </div>`;
 
   container.innerHTML = `
-    <div class="home-dashboard">
-      <div class="hd-header">
-        <div>
-          <h2 class="hd-greeting">${saudacao}, ${escapeHtml(nome)}! 👋</h2>
-          <p class="hd-sub">Aqui está seu progresso comercial</p>
-        </div>
-        ${streak > 1 ? `<div class="hd-streak">🔥 ${streak} dias seguidos</div>` : ''}
+    <div class="home-hero">
+      ${gestorStrip}
+
+      <div class="home-avatar"><img src="/assets/may-gpt.png" alt="May" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'M',className:'home-avatar-fallback'}))" /></div>
+
+      <div class="home-greeting">
+        <span class="home-greeting-dot"></span>
+        ${saudacao}${nome ? `, ${escapeHtml(nome)}` : ''} · pronto pra começar
+        ${streak > 1 ? `<span class="home-streak">🔥 ${streak} dias seguidos</span>` : ''}
       </div>
 
-      <div class="hd-cards-row">
-        <div class="hd-card hd-nivel-card">
-          <div class="hd-card-label">Seu nível</div>
-          <div class="hd-nivel-badge">Nível ${nivel.n}</div>
-          <div class="hd-nivel-nome">${nivel.nome}</div>
-          <div class="hd-progress-bar"><div class="hd-progress-fill" style="width:${nivel.pct}%"></div></div>
-          <div class="hd-progress-label">${nivel.pct}% para o próximo nível</div>
-        </div>
-        <div class="hd-card">
-          <div class="hd-card-label">Meta da semana</div>
-          <p class="hd-meta-text">${meta}</p>
-        </div>
+      <h1 class="home-title">May <span>IA</span></h1>
+      <p class="home-sub">Sua advocacia, multiplicada por IA.</p>
+
+      <div class="home-blocos">
+        ${HOME_BLOCOS.map((b, i) => `
+          <button class="home-bloco" onclick="homeAbrirBloco(${i})">
+            <div class="home-bloco-tag"><span class="home-bloco-icon">${b.icon}</span>${escapeHtml(b.tag)}</div>
+            <div class="home-bloco-titulo">${escapeHtml(b.titulo)}</div>
+          </button>
+        `).join('')}
       </div>
 
-      <div class="hd-cards-row" style="margin-bottom:20px">
-        <div class="hd-card" style="grid-column:1/-1">
-          <div class="hd-card-label">Trilha de hoje — próximos exercícios</div>
-          <div class="hd-trilha-items">
-            ${prox.map(ex => `
-              <div class="hd-trilha-item" onclick="${ex.onclick}">
-                <div class="hd-check ${ex.feito ? 'done' : ''}">${ex.feito ? '✓' : ''}</div>
-                <span class="hd-trilha-label">${escapeHtml(ex.label)}</span>
-                ${!ex.feito ? '<span style="font-size:.72rem;color:var(--accent-light);margin-left:auto">→ Iniciar</span>' : ''}
-              </div>
-            `).join('')}
-          </div>
-        </div>
+      <div class="home-chips">
+        <button class="home-chip" onclick="abrirModalTrilha()">📚 Minha trilha</button>
+        <button class="home-chip" onclick="selecionarFerramenta('simulador_objecoes')">🎯 Treinar objeções</button>
+        <button class="home-chip" onclick="selecionarFerramenta('gerador_proposta')">📄 Criar proposta</button>
+        <button class="home-chip" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
       </div>
 
-      <div class="hd-actions">
-        <button class="hd-btn primary" onclick="abrirModalTrilha()">📚 Ver trilha completa</button>
-        <button class="hd-btn" onclick="selecionarFerramenta('simular_reuniao')">🎭 Simular reunião</button>
-        <button class="hd-btn" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
-      </div>
-
+      <div class="home-hint"><kbd>Enter</kbd> enviar · <kbd>Shift</kbd>+<kbd>Enter</kbd> nova linha</div>
     </div>
   `;
+
+  if (ehGestor) _revelarAtalhosGestor();
+}
+
+// Agenda e Ranking só aparecem se o módulo estiver ativo
+async function _revelarAtalhosGestor() {
+  try {
+    const rm = await api.get('/modulos');
+    if (!rm?.ok) return;
+    const { modulos } = await rm.json();
+    const ativos = (modulos || []).filter(m => m.ativo).map(m => m.id);
+    const el1 = document.getElementById('_atalho-agenda');
+    const el2 = document.getElementById('_atalho-ranking');
+    if (el1 && ativos.includes('calendario_cadencia')) el1.style.display = 'inline-flex';
+    if (el2 && ativos.includes('ranking_vendas'))      el2.style.display = 'inline-flex';
+  } catch (_) { /* silencioso */ }
 }
 
 // ─── Dashboard Comercial (para gestor/admin) ──────────────────────────────────
