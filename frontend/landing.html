@@ -503,6 +503,7 @@
   </a>
   <div class="nav-links">
     <a href="#como">Como funciona</a>
+    <a href="#comparativo">Comparativo</a>
     <a href="#planos">Planos</a>
     <a href="#faq">FAQ</a>
   </div>
@@ -925,6 +926,140 @@
 </section>
 
 <!-- ══════════════ PLANOS ══════════════ -->
+<!-- ═══════════════ COMPARATIVO ═══════════════ -->
+<section class="comp-sec" id="comparativo">
+  <style>
+    .comp-sec { padding: 100px 0; }
+    .comp-header { text-align: center; margin-bottom: 40px; }
+    .comp-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+    .comp-scroll::-webkit-scrollbar { height: 6px; }
+    .comp-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.04); border-radius: 99px; }
+    .comp-scroll::-webkit-scrollbar-thumb { background: rgba(167,139,250,.5); border-radius: 99px; }
+    .comp-table { width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0; font-size: .9rem; }
+    .comp-table th, .comp-table td { padding: 15px 16px; text-align: center; border-bottom: 1px solid var(--border); }
+    .comp-table thead th { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .82rem; color: var(--muted); vertical-align: bottom; }
+    .comp-table tbody td:first-child,
+    .comp-table thead th:first-child { text-align: left; }
+    .comp-table tbody td:first-child { color: var(--text); font-weight: 500; }
+    .comp-col-may { background: rgba(124,58,237,.09); }
+    .comp-table thead th.comp-col-may { border-top: 1px solid rgba(124,58,237,.35); border-radius: 14px 14px 0 0; }
+    .comp-table tbody tr:last-child td.comp-col-may { border-radius: 0 0 14px 14px; }
+    .comp-col-may:first-of-type { }
+    .comp-may-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; color: #fff; display: block; }
+    .comp-badge { display: inline-block; margin-top: 6px; font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+                  background: rgba(124,58,237,.25); border: 1px solid rgba(124,58,237,.45); color: #C4B5FD; border-radius: 99px; padding: 3px 9px; }
+    .yes { color: #4ade80; font-size: 1.05rem; font-weight: 700; }
+    .no  { color: rgba(255,255,255,.22); font-size: 1.05rem; }
+    .part { color: #F59E0B; font-size: .74rem; font-weight: 600; }
+    .comp-price td { font-family: 'Syne', sans-serif; font-weight: 800; font-size: .95rem; color: var(--text); }
+    .comp-price td:first-child { font-family: 'Inter', sans-serif; font-weight: 500; }
+    .comp-price .comp-col-may { color: #C4B5FD; font-size: 1.15rem; }
+    .comp-price .comp-outros { font-family: 'Inter', sans-serif; font-weight: 500; font-size: .82rem; color: var(--muted); }
+    .comp-nota { text-align: center; font-size: .8rem; color: var(--muted); margin-top: 22px; }
+    .comp-cta { text-align: center; margin-top: 30px; }
+    @media (max-width: 760px) { .comp-sec { padding: 70px 0; } }
+  </style>
+
+  <div class="wrap">
+    <div class="comp-header">
+      <span class="section-label">Comparativo</span>
+      <h2 class="section-h2">
+        O que você usa hoje<br>
+        <span class="accent">para treinar a conversa que fecha?</span>
+      </h2>
+      <p class="lead">A maioria dos escritórios resolve isso com um chat genérico, um curso gravado ou contratando alguém. Veja o que cada caminho entrega de verdade.</p>
+    </div>
+
+    <div class="comp-scroll">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="comp-col-may">
+              <span class="comp-may-name">May</span>
+              <span class="comp-badge">recomendado</span>
+            </th>
+            <th>IA genérica<br><span style="font-weight:400;font-size:.74rem">(ChatGPT e afins)</span></th>
+            <th>Curso de vendas<br><span style="font-weight:400;font-size:.74rem">gravado</span></th>
+            <th>Contratar um<br><span style="font-weight:400;font-size:.74rem">head comercial</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Treina com a sua área e o seu tipo de cliente</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="part">só se você configurar</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Analisa um atendimento real seu e aponta onde travou</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Método comercial jurídico validado por trás</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="part">depende do curso</span></td>
+            <td><span class="part">depende da pessoa</span></td>
+          </tr>
+          <tr>
+            <td>Disponível a qualquer hora, treino ilimitado</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Lembra do seu contexto entre uma conversa e outra</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="part">parcial</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Mede os contratos fechados pela equipe</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Ranking, metas e cultura comercial no time</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="part">só com processo</span></td>
+          </tr>
+          <tr>
+            <td>Escala para o escritório inteiro</td>
+            <td class="comp-col-may"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+          </tr>
+          <tr class="comp-price">
+            <td>Quanto custa</td>
+            <td class="comp-col-may">R$ 97/mês</td>
+            <td class="comp-outros">assinatura à parte,<br>sem método incluso</td>
+            <td class="comp-outros">pagamento único,<br>sem acompanhamento</td>
+            <td class="comp-outros">salário + encargos,<br>todo mês</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="comp-nota">A May não substitui um bom advogado. Substitui o improviso na hora de apresentar honorários.</p>
+
+    <div class="comp-cta">
+      <a href="#planos" class="btn-primary">Começar 7 dias grátis →</a>
+    </div>
+  </div>
+</section>
+
 <section class="planos-sec" id="planos">
   <div class="wrap">
     <div class="planos-header">

@@ -40,7 +40,7 @@ const FERRAMENTA_PLANO_MIN = {
   'simulador_objecoes': 'start',
   'gerador_proposta':   'start',
   'criador_prompt':     'equipe',   // MAY IA PLUS+
-  'simulador_vendas':   'equipe',   // MAY IA PLUS+
+  'simulador_vendas':   'start',    // consta na lista do plano vendido
 };
 
 const PLANO_NOME  = { start: 'MAY IA PLUS', equipe: 'MAY IA PLUS', pro: 'MAY IA PRO', prof: 'MAY IA ULTRA' };
@@ -50,7 +50,12 @@ const LIMITE_ANEXOS_MSG = { free: 1, start: 1, equipe: 2, pro: 3, prof: 5 };
 function limiteAnexosMensagem() {
   return LIMITE_ANEXOS_MSG[planoBase(estado.user)] || 1;
 }
-const PLANO_PRECO = { start: 'R$ 227/mês',  equipe: 'R$ 227/mês',  pro: 'R$ 397/mês', prof: 'R$ 897/mês'  };
+// Preço mostrado nas telas de upsell/bloqueio.
+// Lê sempre de PW_PRECOS (o mesmo objeto que o checkout cobra) para que a
+// plataforma nunca anuncie um valor diferente do que será cobrado de fato.
+function precoPlanoUpsell() {
+  return `${PW_PRECOS.mensal.preco}/mês`;
+}
 
 function temAcesso(ferramentaId, user) {
   const base = planoBase(user);
@@ -664,7 +669,7 @@ function mostrarUpsell(ferramentaId) {
   const ferr    = FERRAMENTAS.find(f => f.id === ferramentaId);
   const minBase = FERRAMENTA_PLANO_MIN[ferramentaId] || 'equipe';
   const nome    = PLANO_NOME[minBase]  || 'MAY IA PLUS';
-  const preco   = PLANO_PRECO[minBase] || 'R$ 227/mês';
+  const preco   = precoPlanoUpsell();
   const userBase = planoBase(estado.user);
   const planoAtualNome = {
     free: 'Período de teste', start: 'MAY IA START',
