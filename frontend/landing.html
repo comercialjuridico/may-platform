@@ -377,8 +377,34 @@
     border-radius: 7px; font-size: .85rem; cursor: pointer; transition: all .2s; font-family: 'Inter',sans-serif;
   }
   .toggle-btn.active { background: var(--purple); color: #fff; font-weight: 600; }
-  .planos-layout { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; max-width: 480px; margin: 0 auto; }
-  .plano-feats { display: grid; gap: 10px; }
+  .planos-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+  @media(max-width: 760px) { .planos-layout { grid-template-columns: 1fr; } }
+  .plano-card { display: flex; flex-direction: column; }
+  .plano-seat {
+    margin: 18px 0 24px; padding-top: 16px; border-top: 1px solid var(--border);
+    font-size: .85rem; color: var(--muted);
+  }
+  .plano-seat strong { color: var(--plite); font-weight: 700; }
+  .plano-card .plano-cta { margin-top: auto; }
+  .price-old { font-size: 1rem; color: var(--muted); text-decoration: line-through; margin-left: 10px; }
+  .price-off {
+    display: inline-block; margin-left: 8px; padding: 3px 9px; border-radius: 99px;
+    background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.35);
+    color: #4ade80; font-size: .72rem; font-weight: 700; vertical-align: middle;
+  }
+  /* Tudo incluído nos dois planos */
+  .planos-incluso {
+    margin-top: 26px; padding: 26px 28px;
+    background: var(--glass); border: 1px solid var(--border); border-radius: 18px;
+  }
+  .incluso-titulo {
+    text-align: center; font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
+  }
+  .incluso-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; }
+  @media(max-width: 620px) { .incluso-grid { grid-template-columns: 1fr; } }
+  .incluso-item { position: relative; padding-left: 24px; font-size: .89rem; color: var(--text); }
+  .incluso-item::before { content: "✓"; position: absolute; left: 0; color: var(--plite); font-weight: 700; }
   .plano-card {
     background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
     padding: 36px 32px; position: relative; transition: border-color .2s, transform .2s;
@@ -1065,61 +1091,64 @@
     <div class="planos-header">
       <span class="section-label">Planos</span>
       <h2 class="section-h2">
-        Simples. Justo.<br>
-        <span class="accent">Pague pelo que usa.</span>
+        Um plano.<br>
+        <span class="accent">Acesso completo.</span>
       </h2>
-      <p class="lead" style="margin-bottom:32px">Comece com 7 dias grátis. Sem cartão de crédito.</p>
-    </div>
-
-    <div class="planos-toggle">
-      <button class="toggle-btn active" id="btnMes" onclick="setPlano('m')">Mensal</button>
-      <button class="toggle-btn" id="btnAno" onclick="setPlano('a')">Anual &nbsp;<span style="color:#4ade80;font-size:.8rem">−20%</span></button>
+      <p class="lead" style="margin-bottom:36px">Sem tier escondido e sem upsell. Você assina, usa tudo e cancela quando quiser.</p>
     </div>
 
     <div class="planos-layout">
 
-      <!-- PLANO ÚNICO -->
+      <!-- ANUAL -->
       <div class="plano-card featured">
-        <div class="plano-badge">7 dias grátis</div>
-        <div class="plano-name">MAY</div>
-        <div class="plano-desc">Um plano só, com tudo dentro. Comece sozinho e convide a equipe quando precisar — você paga por usuário real.</div>
-        <div class="plano-price-from" id="plano-from"></div>
+        <div class="plano-badge">Mais escolhido</div>
+        <div class="plano-name">Plano Anual</div>
+        <div class="plano-desc">O ano todo por menos.</div>
         <div class="plano-price">
-          <span class="price-val">R$<span id="plano-val">97</span></span>
+          <span class="price-val">R$78</span>
+          <span class="price-period">/mês</span>
+          <span class="price-old">R$97</span>
+          <span class="price-off">−20%</span>
+        </div>
+        <div class="plano-price-note">Pagamento de <strong>R$936</strong>. Cobra uma vez, usa o ano inteiro.</div>
+        <div class="plano-seat">Usuário adicional: <strong>R$38/mês</strong></div>
+        <a href="/register?plano=anual" class="plano-cta primary">Assinar anual →</a>
+        <p class="plano-note">7 dias grátis · sem cartão para começar</p>
+      </div>
+
+      <!-- MENSAL -->
+      <div class="plano-card">
+        <div class="plano-name">Plano Mensal</div>
+        <div class="plano-desc">No seu ritmo.</div>
+        <div class="plano-price">
+          <span class="price-val">R$97</span>
           <span class="price-period">/mês</span>
         </div>
-        <div class="plano-price-note" id="plano-note">· 7 dias grátis · cancele quando quiser</div>
-
-        <div class="user-counter">
-          <div class="counter-label">
-            <div class="counter-label-top">Usuários adicionais <span id="seat-price">· R$47 cada</span></div>
-            <div class="counter-label-total" id="counter-total">Total: R$97/mês</div>
-          </div>
-          <div class="counter-btns">
-            <button class="counter-btn" onclick="changeUsers(-1)">−</button>
-            <span class="counter-val" id="userCount">0</span>
-            <button class="counter-btn" onclick="changeUsers(1)">+</button>
-          </div>
-        </div>
-
-        <div class="plano-divider"></div>
-        <div class="plano-feats">
-          <div class="plano-feat">Simulações ao vivo com IA (ilimitadas)</div>
-          <div class="plano-feat">Análise de transcrição de reunião</div>
-          <div class="plano-feat">CRM + Funil SDR jurídico</div>
-          <div class="plano-feat">Agenda com follow-ups</div>
-          <div class="plano-feat">Diagnóstico SPIN e playbooks</div>
-          <div class="plano-feat">Chat com a May (ilimitado)</div>
-          <div class="plano-feat">Painel de equipe e gestão de membros</div>
-          <div class="plano-feat">Resultados individuais por membro</div>
-          <div class="plano-feat">Leads compartilhados na equipe</div>
-          <div class="plano-feat">Prioridade no suporte</div>
-        </div>
-        <a href="/register?plano=mensal" id="plano-link" class="plano-cta primary">Começar 7 dias grátis →</a>
-        <p class="plano-note">Sem cartão necessário para começar</p>
+        <div class="plano-price-note">Assina, usa tudo, cancela quando quiser. Sem fidelidade, sem pegadinha.</div>
+        <div class="plano-seat">Usuário adicional: <strong>R$47/mês</strong></div>
+        <a href="/register?plano=mensal" class="plano-cta outline">Assinar mensal</a>
+        <p class="plano-note">7 dias grátis · sem cartão para começar</p>
       </div>
 
     </div>
+
+    <!-- Tudo incluído nos dois planos -->
+    <div class="planos-incluso">
+      <div class="incluso-titulo">Tudo isso incluído · nos dois planos</div>
+      <div class="incluso-grid">
+        <div class="incluso-item">Simulações ao vivo com IA (ilimitadas)</div>
+        <div class="incluso-item">Análise de transcrição de reunião</div>
+        <div class="incluso-item">CRM + Funil SDR jurídico</div>
+        <div class="incluso-item">Agenda com follow-ups</div>
+        <div class="incluso-item">Diagnóstico SPIN e playbooks</div>
+        <div class="incluso-item">Chat com a May (ilimitado)</div>
+        <div class="incluso-item">Painel de equipe e gestão de membros</div>
+        <div class="incluso-item">Resultados individuais por membro</div>
+        <div class="incluso-item">Leads compartilhados na equipe</div>
+        <div class="incluso-item">Prioridade no suporte</div>
+      </div>
+    </div>
+
     <p class="microcopy" style="margin-top:32px">
       Precisando de mais de 10 usuários?
       <a href="mailto:contato@usemayapp.com" style="color:var(--plite)">Fale com a gente</a>
@@ -1316,44 +1345,6 @@
   window.addEventListener('resize',()=>{resize();init();});
   resize(); init(); draw();
 })();
-
-/* ─── PLANOS TOGGLE ────────────────────────────────────────────── */
-const PRICES = {
-  // Valores alinhados com o que o checkout cobra de fato (PW_PRECOS no app.js).
-  // No anual tudo cai 20%: o acesso (R$97 → R$78) e o usuário adicional (R$47 → R$38).
-  m: { val:'97', from:'',                              note:'· 7 dias grátis · cancele quando quiser',    link:'/register?plano=mensal', base:97, extra:47 },
-  a: { val:'78', from:'por mês · cobrado anualmente',  note:'R$936 cobrado anualmente · economize 20%',   link:'/register?plano=anual',  base:78, extra:38 },
-};
-let _plano = 'm', _users = 0;
-
-function setPlano(p){
-  _plano = p;
-  document.getElementById('btnMes').classList.toggle('active', p==='m');
-  document.getElementById('btnAno').classList.toggle('active', p==='a');
-  const c = PRICES[p];
-  document.getElementById('plano-val').textContent  = c.val;
-  document.getElementById('plano-from').textContent = c.from;
-  document.getElementById('plano-note').textContent = c.note;
-  document.getElementById('plano-link').href        = c.link;
-  document.getElementById('seat-price').textContent = `· R$${c.extra} cada`;
-  updateCounter();
-}
-
-/* ─── USER COUNTER ─────────────────────────────────────────────── */
-function changeUsers(delta){
-  _users = Math.max(0, Math.min(9, _users + delta));
-  document.getElementById('userCount').textContent = _users;
-  updateCounter();
-}
-function updateCounter(){
-  const cfg   = PRICES[_plano];
-  const total = cfg.base + _users * cfg.extra;
-  const pess  = _users + 1;
-  document.getElementById('counter-total').textContent =
-    _users === 0
-      ? `Total: R$${cfg.base}/mês`
-      : `Total: R$${total}/mês (${pess} usuários)`;
-}
 
 /* ─── FAQ ───────────────────────────────────────────────────────── */
 function toggleFaq(el){
