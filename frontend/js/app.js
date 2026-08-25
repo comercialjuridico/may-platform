@@ -131,6 +131,15 @@ function iniciarDiagnostico() {
   abrirModalDiagnostico();
 }
 
+// Intenção de plano vinda da landing page (/register?plano=anual)
+function guardarPlanoEscolhido() {
+  const p = new URLSearchParams(window.location.search).get('plano');
+  if (p === 'anual' || p === 'mensal') localStorage.setItem('may_plano_escolhido', p);
+}
+function planoEscolhido() {
+  return localStorage.getItem('may_plano_escolhido') === 'anual' ? 'anual' : 'mensal';
+}
+
 // ── Payment wall ──────────────────────────────────────────────────────────────
 function abrirPaymentWall(bloqueante) {
   const wall = document.getElementById('payment-wall');
@@ -151,7 +160,8 @@ function abrirPaymentWall(bloqueante) {
   } else {
     wall.onclick = null;
   }
-  pwPeriodo('mensal');
+  // Respeita o plano que a pessoa escolheu na landing page
+  pwPeriodo(planoEscolhido());
 }
 
 function fecharPaymentWall() {
@@ -417,6 +427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   estado.user = user;
+  guardarPlanoEscolhido();
   await carregarDadosIniciais(); // atualiza estado.user com dados frescos do servidor
   renderizarSidebar();
 

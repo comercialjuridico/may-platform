@@ -160,6 +160,8 @@ const params = new URLSearchParams(window.location.search);
 const aviso  = document.getElementById('auth-aviso');
 if (params.get('verificado')) { aviso.style.display='block'; aviso.textContent='E-mail verificado com sucesso! Faça login.'; }
 if (params.get('erro')==='token_invalido') mostrarErro('Link inválido ou expirado.');
+// Veio da página de planos (?plano=mensal|anual) → abre direto o cadastro
+if (params.get('plano')) setTimeout(() => mostrarTab('register'), 0);
 
 let _tempToken = null;
 let _conviteToken = null;

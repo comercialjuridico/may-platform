@@ -53,6 +53,14 @@ app.get('/', (req, res) => {
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+// Cadastro e login: sem essas rotas, /register caía no fallback SPA, que servia
+// o app, que redirecionava para /auth.html — e a query (?plano=anual) se perdia no caminho.
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/auth.html'));
+});
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/auth.html'));
+});
 app.get('/manual', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/manual.html'));
 });
