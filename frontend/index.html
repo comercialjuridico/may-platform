@@ -688,6 +688,15 @@
       </div>
     </div>
 
+    <!-- Quem já usou o período grátis é cobrado na hora — precisa saber disso ANTES de digitar o cartão -->
+    <div id="cartao-cobranca-aviso" style="display:none;align-items:flex-start;gap:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 14px;margin:0 20px 0;">
+      <span style="font-size:18px;line-height:1;flex-shrink:0">💳</span>
+      <div>
+        <div style="font-size:.83rem;font-weight:700;color:#FBBF24;margin-bottom:2px" id="cartao-cobranca-titulo">Cobrança de <span id="cartao-cobranca-valor">R$ 97</span> agora</div>
+        <div style="font-size:.78rem;color:rgba(251,191,36,.7);line-height:1.4">Você já usou o período de teste desta conta, então a assinatura começa a valer imediatamente.</div>
+      </div>
+    </div>
+
     <form id="form-cartao" onsubmit="submeterCartao(event)" autocomplete="off">
       <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
 

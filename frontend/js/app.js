@@ -1854,9 +1854,27 @@ function iniciarCheckout(plano) {
   document.getElementById('cartao-titulo').textContent = `Assinar — ${label}`;
   document.getElementById('cartao-erro').style.display = 'none';
 
-  // Mostra aviso "7 dias por nossa conta" no modal do cartão
-  const trialAviso = document.getElementById('cartao-trial-aviso');
-  if (trialAviso) trialAviso.style.display = 'flex';
+  // Quem já usou o período grátis é cobrado na hora (o backend manda AuthorizeNow:true).
+  // O aviso precisa dizer a verdade — prometer "sem cobrança agora" para quem vai
+  // pagar imediatamente é o tipo de surpresa que gera chargeback.
+  const jaUsouTrial = !!estado.user?.periodo_gratis_inicio;
+  const preco       = (plano || '').endsWith('anual') ? PW_PRECOS.anual.preco : PW_PRECOS.mensal.preco;
+
+  const trialAviso    = document.getElementById('cartao-trial-aviso');
+  const cobrancaAviso = document.getElementById('cartao-cobranca-aviso');
+  const btnPagar      = document.getElementById('btn-pagar');
+
+  if (trialAviso)    trialAviso.style.display    = jaUsouTrial ? 'none' : 'flex';
+  if (cobrancaAviso) cobrancaAviso.style.display = jaUsouTrial ? 'flex' : 'none';
+
+  const valorEl = document.getElementById('cartao-cobranca-valor');
+  if (valorEl) valorEl.textContent = preco;
+
+  if (btnPagar) {
+    btnPagar.textContent = jaUsouTrial
+      ? `Assinar agora — ${preco}`
+      : 'Começar 7 dias por nossa conta';
+  }
 
   document.getElementById('modal-planos').classList.remove('active');
   document.getElementById('modal-cartao').classList.add('active');
@@ -1909,7 +1927,10 @@ async function submeterCartao(e) {
     erro.style.display = 'block';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Começar 7 dias por nossa conta';
+    // Restaura o texto certo — pode ser cobrança imediata, não necessariamente trial
+    const jaUsou = !!estado.user?.periodo_gratis_inicio;
+    const p      = (_planoSelecionado || '').endsWith('anual') ? PW_PRECOS.anual.preco : PW_PRECOS.mensal.preco;
+    btn.textContent = jaUsou ? `Assinar agora — ${p}` : 'Começar 7 dias por nossa conta';
   }
 }
 
