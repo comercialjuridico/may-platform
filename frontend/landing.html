@@ -377,8 +377,8 @@
     border-radius: 7px; font-size: .85rem; cursor: pointer; transition: all .2s; font-family: 'Inter',sans-serif;
   }
   .toggle-btn.active { background: var(--purple); color: #fff; font-weight: 600; }
-  .planos-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-  @media(max-width: 720px) { .planos-layout { grid-template-columns: 1fr; } }
+  .planos-layout { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; max-width: 480px; margin: 0 auto; }
+  .plano-feats { display: grid; gap: 10px; }
   .plano-card {
     background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
     padding: 36px 32px; position: relative; transition: border-color .2s, transform .2s;
@@ -1078,45 +1078,21 @@
 
     <div class="planos-layout">
 
-      <!-- SOLO -->
-      <div class="plano-card">
-        <div class="plano-name">MAY SOLO</div>
-        <div class="plano-desc">Para o advogado que atende sozinho e quer método comercial na prática.</div>
-        <div class="plano-price-from" id="solo-from"></div>
-        <div class="plano-price">
-          <span class="price-val">R$<span id="solo-val">97</span></span>
-          <span class="price-period">/mês</span>
-        </div>
-        <div class="plano-price-note" id="solo-note">· 7 dias grátis · cancele quando quiser</div>
-        <div class="plano-divider"></div>
-        <div class="plano-feats">
-          <div class="plano-feat">Simulações ao vivo com IA (ilimitadas)</div>
-          <div class="plano-feat">Análise de transcrição de reunião</div>
-          <div class="plano-feat">CRM + Funil SDR jurídico</div>
-          <div class="plano-feat">Agenda com follow-ups</div>
-          <div class="plano-feat">Diagnóstico SPIN e playbooks</div>
-          <div class="plano-feat">Chat com a May (ilimitado)</div>
-          <div class="plano-feat">1 usuário</div>
-        </div>
-        <a href="/register?plano=solo_mensal" id="solo-link" class="plano-cta outline">Começar 7 dias grátis</a>
-        <p class="plano-note">Sem cartão necessário para começar</p>
-      </div>
-
-      <!-- EQUIPE (PER-SEAT) -->
+      <!-- PLANO ÚNICO -->
       <div class="plano-card featured">
-        <div class="plano-badge">MAIS ESCOLHIDO</div>
-        <div class="plano-name">MAY + EQUIPE</div>
-        <div class="plano-desc">Para escritórios com setor comercial. Convide a equipe e pague por usuário real.</div>
-        <div class="plano-price-from" id="eq-from"></div>
+        <div class="plano-badge">7 dias grátis</div>
+        <div class="plano-name">MAY</div>
+        <div class="plano-desc">Um plano só, com tudo dentro. Comece sozinho e convide a equipe quando precisar — você paga por usuário real.</div>
+        <div class="plano-price-from" id="plano-from"></div>
         <div class="plano-price">
-          <span class="price-val">R$<span id="eq-val">97</span></span>
+          <span class="price-val">R$<span id="plano-val">97</span></span>
           <span class="price-period">/mês</span>
         </div>
-        <div class="plano-price-note" id="eq-note">+ R$47/usuário adicional convidado</div>
+        <div class="plano-price-note" id="plano-note">· 7 dias grátis · cancele quando quiser</div>
 
         <div class="user-counter">
           <div class="counter-label">
-            <div class="counter-label-top">Usuários adicionais</div>
+            <div class="counter-label-top">Usuários adicionais <span id="seat-price">· R$47 cada</span></div>
             <div class="counter-label-total" id="counter-total">Total: R$97/mês</div>
           </div>
           <div class="counter-btns">
@@ -1128,15 +1104,19 @@
 
         <div class="plano-divider"></div>
         <div class="plano-feats">
-          <div class="plano-feat">Tudo do plano Solo</div>
-          <div class="plano-feat">Convidar usuários adicionais (+R$47/usuário)</div>
+          <div class="plano-feat">Simulações ao vivo com IA (ilimitadas)</div>
+          <div class="plano-feat">Análise de transcrição de reunião</div>
+          <div class="plano-feat">CRM + Funil SDR jurídico</div>
+          <div class="plano-feat">Agenda com follow-ups</div>
+          <div class="plano-feat">Diagnóstico SPIN e playbooks</div>
+          <div class="plano-feat">Chat com a May (ilimitado)</div>
           <div class="plano-feat">Painel de equipe e gestão de membros</div>
           <div class="plano-feat">Resultados individuais por membro</div>
           <div class="plano-feat">Leads compartilhados na equipe</div>
           <div class="plano-feat">Prioridade no suporte</div>
         </div>
-        <a href="/register?plano=equipe_mensal" id="eq-link" class="plano-cta primary">Começar 7 dias grátis →</a>
-        <p class="plano-note">Adicione usuários dentro da plataforma</p>
+        <a href="/register?plano=mensal" id="plano-link" class="plano-cta primary">Começar 7 dias grátis →</a>
+        <p class="plano-note">Sem cartão necessário para começar</p>
       </div>
 
     </div>
@@ -1164,7 +1144,7 @@
 
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">Como funciona o preço por usuário adicional?<span class="faq-icon">+</span></div>
-        <div class="faq-a">O plano base é R$97/mês para 1 usuário (você). Se quiser convidar membros da sua equipe, cada usuário adicional custa R$47/mês — tudo gerenciado de dentro da plataforma. No plano anual, 20% de desconto em tudo.</div>
+        <div class="faq-a">O plano base é R$97/mês para 1 usuário (você). Se quiser convidar membros da sua equipe, cada usuário adicional custa R$47/mês — tudo gerenciado de dentro da plataforma. No plano anual tudo cai 20%: o acesso sai por R$936 no ano (equivale a R$78/mês) e cada usuário adicional passa a R$38/mês.</div>
       </div>
 
       <div class="faq-item">
@@ -1339,14 +1319,10 @@
 
 /* ─── PLANOS TOGGLE ────────────────────────────────────────────── */
 const PRICES = {
-  m: {
-    solo: { val:'97', from:'',                                    note:'· 7 dias grátis · cancele quando quiser',   link:'/register?plano=solo_mensal',  base:97, extra:47 },
-    eq:   { val:'97', from:'',                                    note:'+ R$47/usuário adicional convidado',        link:'/register?plano=equipe_mensal', base:97, extra:47 },
-  },
-  a: {
-    solo: { val:'78', from:'por mês · cobrado anualmente',        note:'R$936 cobrado anualmente · economize 20%', link:'/register?plano=solo_anual',    base:78, extra:38 },
-    eq:   { val:'78', from:'por mês · cobrado anualmente',        note:'+ R$38/usuário adicional (anual)',         link:'/register?plano=equipe_anual',  base:78, extra:38 },
-  },
+  // Valores alinhados com o que o checkout cobra de fato (PW_PRECOS no app.js).
+  // No anual tudo cai 20%: o acesso (R$97 → R$78) e o usuário adicional (R$47 → R$38).
+  m: { val:'97', from:'',                              note:'· 7 dias grátis · cancele quando quiser',    link:'/register?plano=mensal', base:97, extra:47 },
+  a: { val:'78', from:'por mês · cobrado anualmente',  note:'R$936 cobrado anualmente · economize 20%',   link:'/register?plano=anual',  base:78, extra:38 },
 };
 let _plano = 'm', _users = 0;
 
@@ -1354,15 +1330,12 @@ function setPlano(p){
   _plano = p;
   document.getElementById('btnMes').classList.toggle('active', p==='m');
   document.getElementById('btnAno').classList.toggle('active', p==='a');
-  const s = PRICES[p].solo, e = PRICES[p].eq;
-  document.getElementById('solo-val').textContent  = s.val;
-  document.getElementById('solo-from').textContent = s.from;
-  document.getElementById('solo-note').textContent = s.note;
-  document.getElementById('solo-link').href        = s.link;
-  document.getElementById('eq-val').textContent    = e.val;
-  document.getElementById('eq-from').textContent   = e.from;
-  document.getElementById('eq-note').textContent   = e.note;
-  document.getElementById('eq-link').href          = e.link;
+  const c = PRICES[p];
+  document.getElementById('plano-val').textContent  = c.val;
+  document.getElementById('plano-from').textContent = c.from;
+  document.getElementById('plano-note').textContent = c.note;
+  document.getElementById('plano-link').href        = c.link;
+  document.getElementById('seat-price').textContent = `· R$${c.extra} cada`;
   updateCounter();
 }
 
@@ -1373,12 +1346,13 @@ function changeUsers(delta){
   updateCounter();
 }
 function updateCounter(){
-  const cfg = PRICES[_plano].eq;
+  const cfg   = PRICES[_plano];
   const total = cfg.base + _users * cfg.extra;
-  const label = _users === 0
-    ? `Total: R$${cfg.base}/mês`
-    : `Total: R$${total}/mês (${_users+1} usuário${_users>0?'s':''})`;
-  document.getElementById('counter-total').textContent = label;
+  const pess  = _users + 1;
+  document.getElementById('counter-total').textContent =
+    _users === 0
+      ? `Total: R$${cfg.base}/mês`
+      : `Total: R$${total}/mês (${pess} usuários)`;
 }
 
 /* ─── FAQ ───────────────────────────────────────────────────────── */

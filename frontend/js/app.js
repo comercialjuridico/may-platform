@@ -70,7 +70,7 @@ function temAcesso(ferramentaId, user) {
 // Preços do payment wall — plano único
 const PW_PRECOS = {
   mensal: { preco: 'R$ 97',  sub: 'cobrado mensalmente · cancele quando quiser',  checkout: 'start_mensal' },
-  anual:  { preco: 'R$ 847', sub: 'cobrado anualmente · equivale a R$ 70/mês',    checkout: 'start_anual'  },
+  anual:  { preco: 'R$ 936', sub: 'cobrado anualmente · equivale a R$ 78/mês',    checkout: 'start_anual'  },
 };
 let _pwPeriodo = 'mensal';
 let _pwPlano   = 'start'; // sempre start — único plano
