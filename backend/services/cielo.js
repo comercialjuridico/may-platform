@@ -57,17 +57,18 @@ function detectarBandeira(numero) {
 
 // Tabela de planos: valor (centavos) e intervalo Cielo
 const PLANOS = {
-  // Espelha routes/cielo.js → PLANOS_CONFIG. Se mudar um, mude o outro.
-  start_mensal:  { valor:  9700, intervalo: 'Monthly' },
-  start_anual:   { valor: 93600, intervalo: 'Annual'  }, // R$78 × 12
-  mensal:        { valor:  9700, intervalo: 'Monthly' },
-  anual:         { valor: 93600, intervalo: 'Annual'  },
-  solo_mensal:   { valor:  9700, intervalo: 'Monthly' },
-  solo_anual:    { valor: 93600, intervalo: 'Annual'  },
-  equipe_mensal: { valor:  9700, intervalo: 'Monthly' },
-  equipe_anual:  { valor: 93600, intervalo: 'Annual'  },
+  start_mensal:  { valor:  9700,  intervalo: 'Monthly' },
+  start_anual:   { valor: 93600,  intervalo: 'Annual'  }, // R$78 × 12
+  equipe_mensal: { valor: 22700,  intervalo: 'Monthly' },
+  equipe_anual:  { valor: 218400, intervalo: 'Annual'  }, // R$182 × 12
+  pro_mensal:    { valor: 39700,  intervalo: 'Monthly' },
+  pro_anual:     { valor: 381600, intervalo: 'Annual'  }, // R$318 × 12
+  prof_mensal:   { valor: 89700,  intervalo: 'Monthly' },
+  prof_anual:    { valor: 861600, intervalo: 'Annual'  }, // R$718 × 12
+  // legado
+  mensal: { valor: 9700,  intervalo: 'Monthly' },
+  anual:  { valor: 93600, intervalo: 'Annual'  },
 };
-
 
 // Calcula data de início do trial (hoje + 7 dias) no formato YYYY-MM-DD
 function dataTrialFim() {
@@ -81,6 +82,12 @@ function dataTrialFim() {
 async function criarRecorrencia({ plano, cartao, cliente, userId, comPeriodoGratis = true }) {
   const cfg = PLANOS[plano];
   if (!cfg) throw new Error(`Plano desconhecido: ${plano}`);
+
+  // Sem credencial não adianta chamar a Cielo: ela recusa e o erro chega
+  // ao usuário como "cartão não autorizado", escondendo o problema real.
+  if (!process.env.CIELO_MERCHANT_ID || !process.env.CIELO_MERCHANT_KEY) {
+    throw new Error('CIELO_NAO_CONFIGURADA: falta CIELO_MERCHANT_ID e/ou CIELO_MERCHANT_KEY no ambiente.');
+  }
 
   const body = {
     MerchantOrderId: `MAY-${userId}-${Date.now()}`,
@@ -127,4 +134,11 @@ async function cancelarRecorrencia(recurrentPaymentId) {
   return request(BASE_URL, 'PUT', `/1/RecurrentPayment/${recurrentPaymentId}/Deactivate`, null);
 }
 
-module.exports = { criarRecorrencia, consultarPagamento, cancelarRecorrencia, detectarBandeira };
+function cieloStatus() {
+  return {
+    configurada: !!(process.env.CIELO_MERCHANT_ID && process.env.CIELO_MERCHANT_KEY),
+    ambiente:    SANDBOX ? 'sandbox' : 'producao',
+  };
+}
+
+module.exports = { criarRecorrencia, consultarPagamento, cancelarRecorrencia, detectarBandeira , cieloStatus };

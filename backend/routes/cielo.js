@@ -8,21 +8,16 @@ const { criarRecorrencia, consultarPagamento, cancelarRecorrencia } = require('.
 // Planos válidos e suas durações em meses
 // Modelo por assento: R$97/mês base (1 usuário) + R$47/usuário adicional (gerenciado internamente)
 const PLANOS_CONFIG = {
-  // Preço oficial: R$97/mês · R$936/ano (R$78/mês, 20% off).
-  // Usuário adicional: R$47/mês · R$38/mês no anual (ver GET /precos abaixo).
-  // Toda chave listada aqui PRECISA existir também em services/cielo.js → PLANOS,
-  // com o mesmo valor — senão a validação passa e a cobrança sai errada.
-  start_mensal:  { meses: 1,  maxMembros: 1,  valor: '97.00'  },
-  start_anual:   { meses: 12, maxMembros: 1,  valor: '936.00' },
-  // aliases usados por links antigos da landing page
+  solo_mensal:   { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  solo_anual:    { meses: 12, maxMembros: 1,  valor: '936.00' }, // R$78/mês · 20% off
+  equipe_mensal: { meses: 1,  maxMembros: 10, valor: '97.00'  }, // base; usuários adicionais cobrados separadamente
+  equipe_anual:  { meses: 12, maxMembros: 10, valor: '936.00' }, // base anual
+  // legado (manter compatibilidade com contas antigas)
   mensal:        { meses: 1,  maxMembros: 1,  valor: '97.00'  },
   anual:         { meses: 12, maxMembros: 1,  valor: '936.00' },
-  solo_mensal:   { meses: 1,  maxMembros: 1,  valor: '97.00'  },
-  solo_anual:    { meses: 12, maxMembros: 1,  valor: '936.00' },
-  equipe_mensal: { meses: 1,  maxMembros: 10, valor: '97.00'  }, // base; usuários adicionais cobrados à parte
-  equipe_anual:  { meses: 12, maxMembros: 10, valor: '936.00' },
+  start_mensal:  { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  pro_mensal:    { meses: 1,  maxMembros: 10, valor: '97.00'  },
 };
-
 
 // ─── GET /api/cielo/precos ──────────────────────────────────────────────────
 router.get('/precos', (req, res) => {
@@ -157,8 +152,22 @@ router.post('/checkout', authMiddleware, async (req, res) => {
       : [0, 1, 2].includes(pagamento?.Status);
 
     if (!pagamento || !statusOk) {
+      // Log com o retorno cru da Cielo (sem dado de cartão) — sem isso é impossível
+      // saber se foi recusa do emissor, credencial errada ou ambiente sandbox.
+      console.error('[cielo] recusa no checkout:', JSON.stringify({
+        httpStatus:    resultado.status,
+        paymentStatus: pagamento?.Status,
+        returnCode:    pagamento?.ReturnCode,
+        returnMessage: pagamento?.ReturnMessage,
+        erroCielo:     Array.isArray(resultado.body) ? resultado.body : undefined,
+      }));
+
       const motivo = pagamento?.ReturnMessage || 'Cartão não autorizado. Verifique os dados.';
-      return res.status(402).json({ erro: motivo, status: pagamento?.Status });
+      return res.status(402).json({
+        erro:    motivo,
+        status:  pagamento?.Status,
+        codigo:  pagamento?.ReturnCode,
+      });
     }
 
     const cfg      = PLANOS_CONFIG[plano];
@@ -205,6 +214,12 @@ router.post('/checkout', authMiddleware, async (req, res) => {
 
   } catch (err) {
     console.error('Erro ao criar recorrência Cielo:', err.message);
+    if (String(err.message).startsWith('CIELO_NAO_CONFIGURADA')) {
+      return res.status(503).json({
+        erro: 'Pagamento indisponível no momento: a integração com a Cielo não está configurada neste ambiente.',
+        code: 'CIELO_NAO_CONFIGURADA',
+      });
+    }
     res.status(500).json({ erro: 'Erro ao processar pagamento. Tente novamente.' });
   }
 });

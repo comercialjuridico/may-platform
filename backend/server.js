@@ -119,7 +119,14 @@ app.use('/api/ranking-vendas', require('./routes/ranking-vendas'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // `cielo` não expõe segredo nenhum — só diz se a credencial existe e em que
+  // ambiente ela aponta. Cartão real recusado em 'sandbox' é o esperado.
+  const { cieloStatus } = require('./services/cielo');
+  res.json({
+    status:    'ok',
+    timestamp: new Date().toISOString(),
+    cielo:     cieloStatus(),
+  });
 });
 
 // ─── Fallback SPA ──────────────────────────────────────────────────────────

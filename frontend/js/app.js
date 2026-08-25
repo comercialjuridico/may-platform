@@ -1838,14 +1838,14 @@ async function salvarPerfil() {
 let _planoSelecionado = 'start_trimestral';
 
 const PLANO_LABELS = {
-  start_trimestral:  'Start — Trimestral',
-  start_anual:       'Start — Anual',
-  equipe_trimestral: 'Equipe — Trimestral',
-  equipe_anual:      'Equipe — Anual',
-  pro_trimestral:    'Pro — Trimestral',
-  pro_anual:         'Pro — Anual',
-  mensal:            'Mensal',
-  anual:             'Anual',
+  start_mensal:  'Plano Mensal',
+  start_anual:   'Plano Anual',
+  solo_mensal:   'Plano Mensal',
+  solo_anual:    'Plano Anual',
+  equipe_mensal: 'Plano Mensal',
+  equipe_anual:  'Plano Anual',
+  mensal:        'Plano Mensal',
+  anual:         'Plano Anual',
 };
 
 function iniciarCheckout(plano) {
