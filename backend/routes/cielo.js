@@ -8,16 +8,21 @@ const { criarRecorrencia, consultarPagamento, cancelarRecorrencia } = require('.
 // Planos válidos e suas durações em meses
 // Modelo por assento: R$97/mês base (1 usuário) + R$47/usuário adicional (gerenciado internamente)
 const PLANOS_CONFIG = {
-  solo_mensal:   { meses: 1,  maxMembros: 1,  valor: '97.00'  },
-  solo_anual:    { meses: 12, maxMembros: 1,  valor: '936.00' }, // R$78/mês · 20% off
-  equipe_mensal: { meses: 1,  maxMembros: 10, valor: '97.00'  }, // base; usuários adicionais cobrados separadamente
-  equipe_anual:  { meses: 12, maxMembros: 10, valor: '936.00' }, // base anual
-  // legado (manter compatibilidade com contas antigas)
+  // Preço oficial: R$97/mês · R$936/ano (R$78/mês, 20% off).
+  // Usuário adicional: R$47/mês · R$38/mês no anual (ver GET /precos abaixo).
+  // Toda chave listada aqui PRECISA existir também em services/cielo.js → PLANOS,
+  // com o mesmo valor — senão a validação passa e a cobrança sai errada.
+  start_mensal:  { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  start_anual:   { meses: 12, maxMembros: 1,  valor: '936.00' },
+  // aliases usados por links antigos da landing page
   mensal:        { meses: 1,  maxMembros: 1,  valor: '97.00'  },
   anual:         { meses: 12, maxMembros: 1,  valor: '936.00' },
-  start_mensal:  { meses: 1,  maxMembros: 1,  valor: '97.00'  },
-  pro_mensal:    { meses: 1,  maxMembros: 10, valor: '97.00'  },
+  solo_mensal:   { meses: 1,  maxMembros: 1,  valor: '97.00'  },
+  solo_anual:    { meses: 12, maxMembros: 1,  valor: '936.00' },
+  equipe_mensal: { meses: 1,  maxMembros: 10, valor: '97.00'  }, // base; usuários adicionais cobrados à parte
+  equipe_anual:  { meses: 12, maxMembros: 10, valor: '936.00' },
 };
+
 
 // ─── GET /api/cielo/precos ──────────────────────────────────────────────────
 router.get('/precos', (req, res) => {
