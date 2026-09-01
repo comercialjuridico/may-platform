@@ -1907,7 +1907,12 @@ async function submeterCartao(e) {
       // para distinguir recusa do emissor de problema de configuração da conta.
       const base   = data.erro || 'Pagamento recusado. Verifique os dados e tente novamente.';
       const codigo = data.codigo ? ` (código Cielo ${data.codigo})` : '';
-      erro.textContent = base + codigo;
+      // _debug é temporário, só enquanto investigamos a recusa sem código
+      const dbg = data._debug
+        ? `\n\nHTTP ${data._debug.httpStatus} · ${data._debug.body}`
+        : '';
+      erro.textContent = base + codigo + dbg;
+      erro.style.whiteSpace = 'pre-wrap';
       erro.style.display = 'block';
       console.error('Checkout recusado:', data);
       return;

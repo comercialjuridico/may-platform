@@ -184,6 +184,13 @@ router.post('/checkout', authMiddleware, async (req, res) => {
         status:  pagamento?.Status,
         codigo:  pagamento?.ReturnCode,
         origem:  'cartao',
+        // DIAGNÓSTICO TEMPORÁRIO — remover antes de abrir para clientes.
+        // Devolve o retorno cru da Cielo (sem nenhum dado de cartão, que não
+        // volta na resposta) para descobrir por que não vem código de recusa.
+        _debug: {
+          httpStatus: resultado.status,
+          body:       JSON.stringify(resultado.body || null).slice(0, 600),
+        },
       });
     }
 
