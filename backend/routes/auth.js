@@ -124,7 +124,7 @@ router.post('/register', async (req, res) => {
     await supabase.from('streak').insert({ user_id: user.id });
 
     // Envia e-mail de verificação
-    await resend.emails.send({
+    await enviarEmail({
       from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
       to: user.email,
       subject: 'Confirme seu e-mail — May',
@@ -134,7 +134,7 @@ router.post('/register', async (req, res) => {
         <a href="${process.env.APP_URL}/api/auth/verify/${verify_token}">Confirmar e-mail</a>
         <p>O link expira em 24 horas.</p>
       `,
-    });
+    }, 'verificacao');
 
     const accessToken  = gerarAccessToken(user);
     const refreshToken = gerarRefreshToken(user);
@@ -238,6 +238,24 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
+// O SDK da Resend NÃO lança exceção quando a API recusa — devolve { error }.
+// Sem checar isso, um e-mail que nunca saiu passava por enviado.
+// Recusa comum: EMAIL_FROM em onboarding@resend.dev, que só entrega para o dono
+// da conta Resend; qualquer outro destinatário é bloqueado.
+async function enviarEmail(payload, contexto) {
+  try {
+    const r = await resend.emails.send(payload);
+    if (r?.error) {
+      console.error(`[email] falhou (${contexto}) para ${payload.to}:`, JSON.stringify(r.error));
+      return { ok: false, erro: r.error };
+    }
+    return { ok: true, id: r?.data?.id };
+  } catch (e) {
+    console.error(`[email] exceção (${contexto}) para ${payload.to}:`, e?.message || e);
+    return { ok: false, erro: { message: e?.message } };
+  }
+}
+
 // ─── POST /api/auth/forgot-password ────────────────────────────────────────
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -261,7 +279,7 @@ router.post('/forgot-password', async (req, res) => {
       reset_token_exp: resetExp.toISOString(),
     }).eq('id', user.id);
 
-    await resend.emails.send({
+    const envio = await enviarEmail({
       from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
       to: email,
       subject: 'Redefinição de senha — May',
@@ -271,7 +289,16 @@ router.post('/forgot-password', async (req, res) => {
         <a href="${process.env.APP_URL}/reset-password?token=${resetToken}">Redefinir senha</a>
         <p>O link expira em 1 hora. Se não solicitou, ignore este e-mail.</p>
       `,
-    });
+    }, 'reset-senha');
+
+    // Não revela se o e-mail existe, mas avisa quando o envio em si falhou —
+    // senão a pessoa fica esperando para sempre um e-mail que nunca saiu.
+    if (!envio.ok) {
+      return res.status(502).json({
+        erro: 'Não conseguimos enviar o e-mail agora. Fale com o suporte.',
+        code: 'EMAIL_NAO_ENVIADO',
+      });
+    }
 
     res.json({ mensagem: 'Se o e-mail existir, você receberá as instruções.' });
   } catch (err) {

@@ -61,6 +61,11 @@ app.get('/register', (req, res) => {
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/auth.html'));
 });
+// Link do e-mail de redefinição de senha. Sem esta rota o link caía no fallback
+// SPA, que servia o app e mandava o usuário para /auth.html — perdendo o token.
+app.get('/reset-password', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/auth.html'));
+});
 app.get('/manual', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/manual.html'));
 });

@@ -114,6 +114,25 @@
       </div>
     </div>
 
+    <!-- Redefinir senha (chegou pelo link do e-mail) -->
+    <div class="auth-panel" id="panel-reset">
+      <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
+        Escolha uma nova senha para a sua conta.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Nova senha</label>
+        <input type="password" id="reset-senha" placeholder="Mínimo 8 caracteres" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Repita a nova senha</label>
+        <input type="password" id="reset-senha2" placeholder="Digite de novo" />
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-reset" onclick="salvarNovaSenha()">Salvar nova senha</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" onclick="mostrarTab('login')" style="font-size:0.82rem; color:var(--text-muted)">Voltar ao login</a>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -163,6 +182,10 @@ if (params.get('erro')==='token_invalido') mostrarErro('Link inválido ou expira
 // Veio da página de planos (?plano=mensal|anual) → abre direto o cadastro
 if (params.get('plano')) setTimeout(() => mostrarTab('register'), 0);
 
+// Chegou pelo link de redefinição de senha (/reset-password?token=…)
+const _resetToken = params.get('token');
+if (_resetToken) setTimeout(() => mostrarTab('reset'), 0);
+
 let _tempToken = null;
 let _conviteToken = null;
 
@@ -200,7 +223,7 @@ let _conviteToken = null;
 })();
 
 function mostrarTab(tab) {
-  ['login','register','forgot','2fa'].forEach(t => {
+  ['login','register','forgot','2fa','reset'].forEach(t => {
     document.getElementById(`panel-${t}`)?.classList.toggle('active', t===tab);
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t===tab);
   });
@@ -264,6 +287,39 @@ async function criarConta() {
   window.location.href = '/app?novo=1' + (planoEscolhido ? '&plano=' + planoEscolhido : '');
 }
 
+async function salvarNovaSenha() {
+  const senha  = document.getElementById('reset-senha').value;
+  const senha2 = document.getElementById('reset-senha2').value;
+  if (!senha || !senha2)      { mostrarErro('Preencha os dois campos.'); return; }
+  if (senha.length < 8)       { mostrarErro('A senha precisa ter no mínimo 8 caracteres.'); return; }
+  if (senha !== senha2)       { mostrarErro('As duas senhas não são iguais.'); return; }
+  if (!_resetToken)           { mostrarErro('Link inválido. Peça a redefinição de novo.'); return; }
+
+  const btn = document.getElementById('btn-reset');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const res  = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _resetToken, password: senha }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      mostrarErro(data.erro || 'Não foi possível redefinir a senha.');
+      btn.disabled = false; btn.textContent = 'Salvar nova senha';
+      return;
+    }
+    limparErro();
+    aviso.style.display = 'block';
+    aviso.textContent   = 'Senha alterada. Pode entrar com a nova senha.';
+    mostrarTab('login');
+    window.history.replaceState({}, '', '/login');
+  } catch {
+    mostrarErro('Erro de conexão. Tente novamente.');
+    btn.disabled = false; btn.textContent = 'Salvar nova senha';
+  }
+}
+
 async function enviarReset() {
   const email = document.getElementById('forgot-email').value.trim();
   if (!email) { mostrarErro('Informe seu e-mail.'); return; }
@@ -293,6 +349,7 @@ document.addEventListener('keydown', e => {
   if (ativo==='panel-register') criarConta();
   if (ativo==='panel-forgot')   enviarReset();
   if (ativo==='panel-2fa')      validar2FA();
+  if (ativo==='panel-reset')    salvarNovaSenha();
 });
 </script>
 </body>
