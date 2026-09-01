@@ -91,6 +91,28 @@ router.post('/register', async (req, res) => {
 
     if (error) throw error;
 
+    // Sem convite, o usuário ficava com empresa_id nulo — e Leads, Agenda,
+    // Relatórios e Ranking filtram tudo por empresa_id. Cada conta nova sem
+    // convite ganha a própria empresa, com ela mesma como gestora.
+    if (!conviteData) {
+      try {
+        const { data: empresa, error: erroEmpresa } = await supabase
+          .from('empresas')
+          .insert({ nome: name || 'Meu escritório', gestor_id: user.id })
+          .select('id')
+          .single();
+
+        if (erroEmpresa) throw erroEmpresa;
+
+        await supabase.from('users').update({ empresa_id: empresa.id }).eq('id', user.id);
+        user.empresa_id = empresa.id;
+      } catch (e) {
+        // Não bloqueia o cadastro — mas precisa aparecer no log, senão a conta
+        // nasce quebrada em silêncio.
+        console.error('Falha ao criar empresa do usuário', user.id, e?.message || e);
+      }
+    }
+
     // Marca convite como aceito
     if (conviteData) {
       await supabase.from('convites')
