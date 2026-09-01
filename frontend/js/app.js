@@ -1903,8 +1903,13 @@ async function submeterCartao(e) {
     const data = await res.json();
 
     if (!res.ok) {
-      erro.textContent = data.erro || 'Pagamento recusado. Verifique os dados e tente novamente.';
+      // Mostra a mensagem e o código que a Cielo devolveu. Sem o código não dá
+      // para distinguir recusa do emissor de problema de configuração da conta.
+      const base   = data.erro || 'Pagamento recusado. Verifique os dados e tente novamente.';
+      const codigo = data.codigo ? ` (código Cielo ${data.codigo})` : '';
+      erro.textContent = base + codigo;
       erro.style.display = 'block';
+      console.error('Checkout recusado:', data);
       return;
     }
 
