@@ -3,6 +3,22 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 require('dotenv').config();
 
+// ─── Variáveis obrigatórias ────────────────────────────────────────────────
+// Sem isso, o processo morria dentro do SDK do Supabase com "supabaseUrl is
+// required" e o Railway ficava reiniciando em loop — sem dizer qual variável
+// faltava. Aqui a falta aparece nomeada, na primeira linha do log.
+const OBRIGATORIAS = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
+const faltando = OBRIGATORIAS.filter(k => !process.env[k]);
+if (faltando.length) {
+  console.error('═'.repeat(70));
+  console.error('A May não pode iniciar: falta configurar variável de ambiente.');
+  console.error('Faltando: ' + faltando.join(', '));
+  console.error('Configure em Railway → serviço → aba Variables e faça o redeploy.');
+  console.error('SUPABASE_URL e SUPABASE_SERVICE_KEY ficam em Supabase → Settings → API.');
+  console.error('═'.repeat(70));
+  process.exit(1);
+}
+
 const express      = require('express');
 const cors         = require('cors');
 const helmet       = require('helmet');
