@@ -54,8 +54,36 @@ router.post('/pre-validar', async (req, res) => {
     const pagamento = resultado.body?.Payment;
     const statusOk  = [0, 1, 2].includes(pagamento?.Status);
     if (!pagamento || !statusOk) {
+      console.error('[cielo] recusa no pre-validar:', JSON.stringify({
+        httpStatus:    resultado.status,
+        paymentStatus: pagamento?.Status,
+        returnCode:    pagamento?.ReturnCode,
+        returnMessage: pagamento?.ReturnMessage,
+        erroCielo:     Array.isArray(resultado.body) ? resultado.body : undefined,
+      }));
+
+      // Erro de requisição (credencial, campo inválido, recorrência não
+      // habilitada) vem como ARRAY, não como Payment.
+      const erroReq = Array.isArray(resultado.body) ? resultado.body[0] : null;
+      if (erroReq) {
+        return res.status(502).json({
+          erro:   `A Cielo recusou a requisição: ${erroReq.Message || 'sem detalhe'}`,
+          codigo: erroReq.Code,
+          origem: 'requisicao',
+        });
+      }
+
       const motivo = pagamento?.ReturnMessage || 'Cartão não autorizado. Verifique os dados.';
-      return res.status(402).json({ erro: motivo });
+      return res.status(402).json({
+        erro:   motivo,
+        codigo: pagamento?.ReturnCode,
+        origem: 'cartao',
+        // DIAGNÓSTICO TEMPORÁRIO — remover antes de abrir para clientes
+        _debug: {
+          httpStatus: resultado.status,
+          body:       JSON.stringify(resultado.body || null).slice(0, 600),
+        },
+      });
     }
 
     // Salva temporariamente no banco para vincular após registro
@@ -69,7 +97,13 @@ router.post('/pre-validar', async (req, res) => {
     res.json({ ok: true, orderId });
   } catch (err) {
     console.error('Erro pre-validar Cielo:', err.message);
-    res.status(500).json({ erro: 'Erro ao validar cartão. Tente novamente.' });
+    if (String(err.message).startsWith('CIELO_NAO_CONFIGURADA')) {
+      return res.status(503).json({
+        erro: 'Pagamento indisponível: a integração com a Cielo não está configurada.',
+        code: 'CIELO_NAO_CONFIGURADA',
+      });
+    }
+    res.status(500).json({ erro: `Erro ao validar cartão: ${err.message}` });
   }
 });
 

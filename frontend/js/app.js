@@ -288,7 +288,12 @@ async function pwSubmit(e) {
       }),
     });
     const preData = await preRes.json();
-    if (!preRes.ok) throw new Error(preData.erro || 'Cartão não autorizado.');
+    if (!preRes.ok) {
+      console.error('Pré-validação recusada:', preData);
+      const cod = preData.codigo ? ` (código Cielo ${preData.codigo})` : '';
+      const dbg = preData._debug ? `\n\nHTTP ${preData._debug.httpStatus} · ${preData._debug.body}` : '';
+      throw new Error((preData.erro || 'Cartão não autorizado.') + cod + dbg);
+    }
 
     // 2. Ativar plano (usuário já logado)
     const token = getAccessToken();
@@ -317,8 +322,9 @@ async function pwSubmit(e) {
     mostrarHomeDashboard();
 
   } catch (err) {
-    erro.textContent   = err.message;
-    erro.style.display = 'block';
+    erro.textContent    = err.message;
+    erro.style.whiteSpace = 'pre-wrap';
+    erro.style.display  = 'block';
     btn.disabled       = false;
     btn.textContent    = '🔒 Confirmar assinatura →';
   }
