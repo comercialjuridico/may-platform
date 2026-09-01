@@ -642,11 +642,21 @@ async function carregarRelatorio() {
   try {
     const qs  = `data_inicio=${inicio}&data_fim=${fim}`;
     const res = await api.get(`/leads/relatorio?${qs}`);
-    if (!res?.ok) throw new Error();
-    const d   = await res.json();
+
+    if (!res?.ok) {
+      // Mostra o motivo que o servidor deu — engolir o erro deixava a tela muda
+      const d = await res.json().catch(() => ({}));
+      const detalhe = d.motivo ? `<div style="font-size:.8rem;opacity:.6;margin-top:8px">${d.motivo}</div>` : '';
+      cont.innerHTML = `<div class="loading">${d.erro || 'Erro ao gerar relatório.'}${detalhe}</div>`;
+      console.error('Relatório falhou:', d);
+      return;
+    }
+
+    const d = await res.json();
     cont.innerHTML = renderRelatorio(d);
-  } catch {
-    cont.innerHTML = '<div class="loading">Erro ao gerar relatório.</div>';
+  } catch (err) {
+    console.error('Relatório falhou:', err);
+    cont.innerHTML = '<div class="loading">Erro de conexão ao gerar relatório.</div>';
   }
 }
 

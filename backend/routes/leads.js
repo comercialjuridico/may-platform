@@ -440,6 +440,15 @@ router.get('/relatorio', authMiddleware, async (req, res) => {
   try {
     const { data_inicio, data_fim } = req.query;
 
+    // Sem empresa vinculada o filtro vira `empresa_id=eq.null`, que o PostgREST
+    // rejeita — e o usuário só via "erro ao gerar relatório".
+    if (!req.user.empresa_id) {
+      return res.status(400).json({
+        erro: 'Sua conta ainda não está vinculada a uma empresa, então não há leads para relatar. Fale com o gestor.',
+        code: 'SEM_EMPRESA',
+      });
+    }
+
     let query = supabase
       .from('leads')
       .select(`
@@ -534,8 +543,19 @@ router.get('/relatorio', authMiddleware, async (req, res) => {
       produtos: topProdutos,
     });
   } catch (err) {
-    console.error('Erro no relatório:', err.message);
-    res.status(500).json({ erro: 'Erro ao gerar relatório.' });
+    // Erro do PostgREST traz code/details/hint — sem isso é impossível saber se
+    // faltou coluna, se o filtro estava inválido ou se foi permissão.
+    console.error('Erro no relatório:', JSON.stringify({
+      message: err?.message,
+      code:    err?.code,
+      details: err?.details,
+      hint:    err?.hint,
+    }));
+    res.status(500).json({
+      erro:   'Erro ao gerar relatório.',
+      motivo: err?.message || null,
+      code:   err?.code || null,
+    });
   }
 });
 
