@@ -162,11 +162,28 @@ router.post('/checkout', authMiddleware, async (req, res) => {
         erroCielo:     Array.isArray(resultado.body) ? resultado.body : undefined,
       }));
 
+      // A Cielo responde de duas formas diferentes:
+      //  · recusa de cartão  → body.Payment com ReturnCode/ReturnMessage
+      //  · erro de requisição → body é um ARRAY [{ Code, Message }] (credencial
+      //    errada, campo inválido, recorrência não habilitada na conta…)
+      // Antes só o primeiro caso era lido, e o segundo virava "cartão não
+      // autorizado" — culpando o cartão do cliente por um problema de configuração.
+      const erroReq = Array.isArray(resultado.body) ? resultado.body[0] : null;
+
+      if (erroReq) {
+        return res.status(502).json({
+          erro:   `A Cielo recusou a requisição: ${erroReq.Message || 'sem detalhe'}`,
+          codigo: erroReq.Code,
+          origem: 'requisicao',
+        });
+      }
+
       const motivo = pagamento?.ReturnMessage || 'Cartão não autorizado. Verifique os dados.';
       return res.status(402).json({
         erro:    motivo,
         status:  pagamento?.Status,
         codigo:  pagamento?.ReturnCode,
+        origem:  'cartao',
       });
     }
 
