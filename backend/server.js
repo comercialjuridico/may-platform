@@ -85,23 +85,19 @@ app.get('/reset-password', (req, res) => {
 app.get('/manual', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/manual.html'));
 });
-app.get('/modulos', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/modulos.html'));
-});
-app.get('/ranking', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/ranking.html'));
-});
-app.get('/agenda', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/agenda.html'));
-});
-app.get('/leads', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/leads.html'));
-});
-app.get('/gestor', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/gestor.html'));
-});
-app.get('/ranking-vendas', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/ranking-vendas.html'));
+// ─── Telas fora do produto no lançamento ───────────────────────────────────
+// A May foi lançada só como assistente de vendas jurídicas. Os módulos add-on
+// (painel do gestor, agenda, ranking, funil de leads) continuam no repositório,
+// mas ninguém acessa: as rotas caem no app e o acesso direto ao .html também.
+// Para reativar um deles, basta tirar o nome da lista abaixo e devolver o
+// sendFile correspondente.
+const PAGINAS_DESATIVADAS = [
+  'modulos', 'ranking', 'agenda', 'leads', 'gestor', 'ranking-vendas',
+];
+
+PAGINAS_DESATIVADAS.forEach(nome => {
+  app.get(`/${nome}`,       (req, res) => res.redirect('/app'));
+  app.get(`/${nome}.html`,  (req, res) => res.redirect('/app'));
 });
 
 // ─── Arquivos estáticos (frontend) ─────────────────────────────────────────
@@ -132,6 +128,7 @@ app.use('/api/2fa',          require('./routes/twofa'));
 app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/trilha',      require('./routes/trilha'));
 app.use('/api/leads',       require('./routes/leads'));
+app.use('/api/briefing',    require('./routes/briefing'));
 app.use('/api/followups',   require('./routes/followups'));
 app.use('/api/public',      require('./routes/public'));
 app.use('/api/stripe',      require('./routes/stripe'));

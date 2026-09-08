@@ -32,6 +32,7 @@ function planoBase(user) {
 // Plano mínimo exigido por ferramenta
 const FERRAMENTA_PLANO_MIN = {
   'chat':               'start',
+  'briefing':           'start',   // incluído no plano — é o diferencial do produto
   'follow_up':          'start',
   'negociacao':         'start',
   'diagnostico':        'start',
@@ -333,6 +334,7 @@ async function pwSubmit(e) {
 // ─── Ferramentas disponíveis ─────────────────────────────────────────────────
 const FERRAMENTAS = [
   { id: 'chat',               nome: 'Chat livre',                  icon: '💬' },
+  { id: 'briefing',           nome: 'Briefing de reuniões',        icon: '📋' },
   { id: 'simular_reuniao',    nome: 'Simular reunião',             icon: '🎭' },
   { id: 'simulador_objecoes', nome: 'Simulador de objeções',       icon: '🎯' },
   { id: 'gerador_proposta',   nome: 'Gerador de proposta',         icon: '📄' },
@@ -669,13 +671,20 @@ function selecionarFerramenta(id) {
   const ferramenta = FERRAMENTAS.find(f => f.id === id);
   document.getElementById('chat-title').textContent = ferramenta?.nome || 'Chat';
   document.getElementById('chat-tool-label').textContent =
-    id === 'chat' ? 'May — Assistente de vendas' : 'Ferramenta ativa';
+    id === 'chat'     ? 'May — Assistente de vendas' :
+    id === 'briefing' ? 'Prepare a reunião antes de entrar nela' : 'Ferramenta ativa';
 
-  mostrarInputChat();
-  if (id === 'simular_reuniao') {
-    mostrarCenariosSimulacao();
+  if (id === 'briefing') {
+    // Tela própria, sem campo de chat embaixo
+    esconderInputChat();
+    mostrarBriefing();
   } else {
-    mostrarTelaVazia(id);
+    mostrarInputChat();
+    if (id === 'simular_reuniao') {
+      mostrarCenariosSimulacao();
+    } else {
+      mostrarTelaVazia(id);
+    }
   }
   renderizarSidebar();
   fecharMenuMobile();
@@ -2265,9 +2274,9 @@ const HOME_BLOCOS = [
     texto: 'Sou novo aqui. Me diz por onde eu começo na plataforma: o que fazer primeiro, segundo e terceiro para tirar proveito da May já esta semana.',
   },
   {
-    tag: 'Módulos', icon: '🧩', tipo: 'pergunta',
-    titulo: 'O que são os módulos adicionais?',
-    texto: 'O que são os módulos adicionais da plataforma, para que serve cada um e como eu decido qual ativar primeiro?',
+    tag: 'Reunião', icon: '📋', tipo: 'ferramenta', ferramenta: 'briefing',
+    titulo: 'Preparar uma reunião com cliente',
+    texto: 'Cadastre o cliente e receba o relatório de preparação antes de entrar na reunião.',
   },
   {
     tag: 'Plataforma', icon: '💡', tipo: 'pergunta',
@@ -2312,17 +2321,9 @@ function mostrarHomeDashboard() {
   const ehGestor = ['gestor', 'admin'].includes(user?.role);
   const streak   = estado.streak?.dias_seguidos || 0;
 
-  const gestorStrip = !ehGestor ? '' : `
-    <div class="home-gestor">
-      <div class="home-gestor-label">Painel do gestor</div>
-      <div class="home-gestor-links">
-        <button class="home-gestor-link primary" onclick="mostrarDashboardComercial()">📊 Dashboard comercial</button>
-        <a class="home-gestor-link" href="/leads">📋 Leads</a>
-        <a class="home-gestor-link" href="/agenda"         id="_atalho-agenda"  style="display:none">📅 Agenda</a>
-        <a class="home-gestor-link" href="/ranking-vendas" id="_atalho-ranking" style="display:none">🏆 Ranking</a>
-        <a class="home-gestor-link ghost" href="/gestor">⚙️ Painel completo</a>
-      </div>
-    </div>`;
+  // Faixa do gestor removida no lançamento: todos os atalhos dela apontavam
+  // para os módulos add-on, que saíram do produto.
+  const gestorStrip = '';
 
   container.innerHTML = `
     <div class="home-hero">
@@ -2359,7 +2360,6 @@ function mostrarHomeDashboard() {
     </div>
   `;
 
-  if (ehGestor) _revelarAtalhosGestor();
 }
 
 // Agenda e Ranking só aparecem se o módulo estiver ativo
@@ -2773,28 +2773,600 @@ Object.assign(window, {
   abrirModalCancelamento, fecharModalCancelamento, confirmarCancelamento,
 });
 
-// ─── Módulos ativos no header ──────────────────────────────────────────────
-async function carregarModulosHeader() {
+// ─── Módulos add-on: fora do produto no lançamento ─────────────────────────
+// A May é vendida só como assistente de vendas jurídicas. Nada de módulo
+// aparece na tela: nem a faixa do topo, nem o link no fim do menu lateral.
+// Para reativar, é só devolver a versão antiga desta função e o link no HTML.
+function carregarModulosHeader() {
   const el = document.getElementById('header-modulos');
-  if (!el) return;
-  try {
-    const r = await api.get('/modulos');
-    if (!r.ok) return;
-    const { modulos } = await r.json();
-    const ativos = modulos.filter(m => m.ativo);
-    if (!ativos.length) { el.style.display = 'none'; return; }
+  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
 
-    el.style.display = 'flex';
-    el.innerHTML = ativos.map(m => `
-      <a href="${m.rota}" style="
-        display:inline-flex;align-items:center;gap:5px;
-        background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);
-        color:#C4B5FD;font-size:11px;font-weight:700;
-        padding:4px 11px;border-radius:20px;text-decoration:none;
-        white-space:nowrap;transition:background .2s"
-        onmouseover="this.style.background='rgba(124,58,237,.25)'"
-        onmouseout="this.style.background='rgba(124,58,237,.12)'">
-        ${m.emoji} ${m.nome}
-      </a>`).join('');
-  } catch(_) { el.style.display = 'none'; }
+  document.querySelectorAll('a[href="/modulos"], a[href="/gestor"], a[href="/agenda"], a[href="/leads"], a[href="/ranking"], a[href="/ranking-vendas"]')
+    .forEach(a => a.remove());
+
+  const linkGestor = document.getElementById('link-painel-gestor');
+  if (linkGestor) linkGestor.remove();
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Briefing de reuniões
+// A pessoa cadastra o cliente, a May devolve o relatório de preparação e depois
+// ela registra como a reunião foi. O histórico fica na segunda aba.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const brf = {
+  aba:      'novo',   // 'novo' | 'historico'
+  lista:    [],
+  carregou: false,
+  aberto:   null,     // briefing aberto na tela
+  gerando:  false,
+};
+
+function esconderInputChat() {
+  const wrapper = document.getElementById('chat-input-wrapper');
+  if (wrapper) wrapper.style.display = 'none';
+}
+
+// ─── Estilo (injetado uma vez) ───────────────────────────────────────────────
+function brfEstilo() {
+  if (document.getElementById('brf-style')) return;
+  const st = document.createElement('style');
+  st.id = 'brf-style';
+  st.textContent = `
+  .brf{--b-brand:#7C3AED;--b-brand-soft:rgba(124,58,237,.14);--b-surface:rgba(255,255,255,.05);
+       --b-border:rgba(255,255,255,.10);--b-text:#E8E4FF;--b-sub:rgba(200,190,255,.55);
+       --b-input:rgba(255,255,255,.04);--b-green:#10B981;--b-gold:#F59E0B;--b-red:#EF4444;
+       max-width:940px;margin:0 auto;padding:22px 18px 70px;color:var(--b-text)}
+  [data-theme="light"] .brf{--b-surface:rgba(20,12,50,.035);--b-border:rgba(20,12,50,.12);
+       --b-text:#1C1533;--b-sub:rgba(40,30,80,.62);--b-input:#fff}
+  .brf h2{font-family:'Syne',sans-serif;font-size:23px;font-weight:800;margin:0 0 4px}
+  .brf-lead{font-size:13px;color:var(--b-sub);margin:0 0 18px;line-height:1.5}
+  .brf-tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--b-border)}
+  .brf-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--b-sub);
+       font-size:13px;font-weight:700;padding:9px 14px;cursor:pointer;margin-bottom:-1px}
+  .brf-tab.on{color:var(--b-text);border-bottom-color:var(--b-brand)}
+  .brf-badge{display:inline-block;background:var(--b-brand-soft);color:#A78BFA;font-size:11px;
+       font-weight:800;border-radius:20px;padding:1px 7px;margin-left:5px}
+  .brf-card{background:var(--b-surface);border:1px solid var(--b-border);border-radius:14px;padding:18px}
+  .brf-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .brf-full{grid-column:1/-1}
+  .brf-campo label{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;
+       text-transform:uppercase;color:var(--b-sub);margin-bottom:5px}
+  .brf-campo input,.brf-campo select,.brf-campo textarea{width:100%;background:var(--b-input);
+       border:1px solid var(--b-border);border-radius:10px;padding:10px 12px;font-size:14px;
+       color:var(--b-text);font-family:inherit;box-sizing:border-box}
+  .brf-campo textarea{resize:vertical;min-height:78px;line-height:1.5}
+  .brf-campo input:focus,.brf-campo select:focus,.brf-campo textarea:focus{outline:none;
+       border-color:var(--b-brand);box-shadow:0 0 0 3px rgba(124,58,237,.18)}
+  .brf-dica{font-size:11px;color:var(--b-sub);margin:5px 0 0;line-height:1.45}
+  .brf-btn{background:var(--b-brand);color:#fff;border:none;border-radius:11px;padding:13px 22px;
+       font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .brf-btn:disabled{opacity:.6;cursor:default}
+  .brf-btn.ghost{background:transparent;border:1px solid var(--b-border);color:var(--b-text)}
+  .brf-btn.mini{padding:8px 14px;font-size:12.5px;border-radius:9px}
+  .brf-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;align-items:center}
+  .brf-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+       background:var(--b-surface);border:1px solid var(--b-border);border-radius:12px;
+       padding:13px 15px;margin-bottom:9px;cursor:pointer;color:var(--b-text);font-family:inherit}
+  .brf-item:hover{border-color:rgba(124,58,237,.45)}
+  .brf-item-nome{font-size:14.5px;font-weight:700}
+  .brf-item-emp{font-weight:400;color:var(--b-sub)}
+  .brf-item-meta{font-size:11.5px;color:var(--b-sub);margin-top:3px}
+  .brf-item-tag{margin-left:auto;flex-shrink:0;font-size:11.5px;font-weight:700;
+       border-radius:20px;padding:4px 11px;white-space:nowrap}
+  .brf-tag-nota{background:rgba(245,158,11,.15);color:var(--b-gold)}
+  .brf-tag-vazio{background:var(--b-brand-soft);color:#A78BFA}
+  .brf-vazio{text-align:center;padding:44px 20px;color:var(--b-sub);font-size:13.5px;line-height:1.6}
+  .brf-rel{background:var(--b-surface);border:1px solid var(--b-border);border-radius:14px;
+       padding:20px 22px;font-size:14.5px;line-height:1.72}
+  .brf-rel p{margin:0 0 12px}
+  .brf-rel strong{color:var(--b-text)}
+  .brf-rel ul{margin:0 0 12px;padding-left:19px}
+  .brf-rel li{margin-bottom:5px}
+  .brf-topo{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .brf-topo-meta{font-size:12px;color:var(--b-sub);margin-top:4px}
+  .brf-overlay{position:fixed;inset:0;background:rgba(8,4,22,.72);backdrop-filter:blur(3px);
+       display:flex;align-items:center;justify-content:center;z-index:9000;padding:18px}
+  .brf-modal{background:#17122B;border:1px solid var(--b-border);border-radius:16px;
+       width:100%;max-width:470px;padding:22px;color:#E8E4FF;max-height:90vh;overflow-y:auto}
+  [data-theme="light"] .brf-modal{background:#fff;color:#1C1533;border-color:rgba(20,12,50,.14)}
+  .brf-estrelas{display:flex;gap:5px;margin:4px 0 2px}
+  .brf-estrela{background:none;border:none;font-size:29px;cursor:pointer;padding:0;line-height:1;
+       filter:grayscale(1);opacity:.4;transition:all .12s}
+  .brf-estrela.on{filter:none;opacity:1;transform:scale(1.06)}
+  .brf-chips{display:flex;gap:7px;flex-wrap:wrap;margin:4px 0 2px}
+  .brf-chip{background:transparent;border:1px solid var(--b-border);border-radius:20px;
+       padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;color:inherit;font-family:inherit}
+  .brf-chip.on{background:var(--b-brand-soft);border-color:rgba(124,58,237,.5);color:#A78BFA}
+  @media (max-width:720px){.brf-grid{grid-template-columns:1fr}.brf{padding:16px 13px 60px}}
+  `;
+  document.head.appendChild(st);
+}
+
+// ─── Tela ────────────────────────────────────────────────────────────────────
+function mostrarBriefing(aba) {
+  brfEstilo();
+  if (aba) brf.aba = aba;
+  brf.aberto = null;
+
+  const container = document.getElementById('messages-container');
+  container.innerHTML = `
+    <div class="brf">
+      <h2>📋 Briefing de reuniões</h2>
+      <p class="brf-lead">
+        Cadastre o cliente antes da reunião e a May monta o relatório de preparação:
+        quem é, como abrir a conversa, o que perguntar, as objeções prováveis e o objetivo do encontro.
+        Depois da reunião você registra o que aconteceu.
+      </p>
+      <div class="brf-tabs">
+        <button class="brf-tab ${brf.aba === 'novo' ? 'on' : ''}" onclick="brfIrPara('novo')">Novo briefing</button>
+        <button class="brf-tab ${brf.aba === 'historico' ? 'on' : ''}" onclick="brfIrPara('historico')">
+          Meus briefings${brf.lista.length ? `<span class="brf-badge">${brf.lista.length}</span>` : ''}
+        </button>
+      </div>
+      <div id="brf-conteudo"></div>
+    </div>`;
+
+  container.scrollTop = 0;
+  if (brf.aba === 'novo') brfRenderForm();
+  else                    brfRenderHistorico();
+}
+
+function brfIrPara(aba) {
+  brf.aba = aba;
+  mostrarBriefing();
+  if (aba === 'historico' && !brf.carregou) brfCarregarLista();
+}
+
+// ─── Formulário ──────────────────────────────────────────────────────────────
+const BRF_ORIGENS = [
+  'Indicação', 'Instagram', 'WhatsApp', 'Google', 'Tráfego pago',
+  'Base antiga de clientes', 'Evento ou palestra', 'Outro',
+];
+
+function brfRenderForm() {
+  const alvo = document.getElementById('brf-conteudo');
+  if (!alvo) return;
+
+  alvo.innerHTML = `
+    <form class="brf-card" onsubmit="brfGerar(event)">
+      <div class="brf-grid">
+        <div class="brf-campo">
+          <label>Nome do cliente</label>
+          <input id="brf-nome" required placeholder="Como ele se apresenta" />
+        </div>
+        <div class="brf-campo">
+          <label>Empresa ou vínculo</label>
+          <input id="brf-empresa" placeholder="Onde trabalha, empresa, indicado por quem" />
+        </div>
+        <div class="brf-campo">
+          <label>WhatsApp</label>
+          <input id="brf-whatsapp" placeholder="(00) 00000-0000" />
+        </div>
+        <div class="brf-campo">
+          <label>Serviço em discussão</label>
+          <input id="brf-produto" placeholder="Ex: revisão de aposentadoria" />
+        </div>
+        <div class="brf-campo">
+          <label>Honorários previstos</label>
+          <input id="brf-valor" type="number" step="0.01" min="0" placeholder="Somente números" />
+        </div>
+        <div class="brf-campo">
+          <label>Como ele chegou até você</label>
+          <select id="brf-origem">
+            <option value="">Selecione</option>
+            ${BRF_ORIGENS.map(o => `<option>${o}</option>`).join('')}
+          </select>
+        </div>
+        <div class="brf-campo">
+          <label>Data e hora da reunião</label>
+          <input id="brf-data" type="datetime-local" />
+        </div>
+        <div class="brf-campo">
+          <label>Onde vai ser</label>
+          <input id="brf-local" placeholder="Escritório, Google Meet, ligação" />
+        </div>
+        <div class="brf-campo brf-full">
+          <label>O que você já sabe do caso</label>
+          <textarea id="brf-contexto" required
+            placeholder="Conte o que ele te falou até agora: qual é o problema, há quanto tempo, o que ele já tentou, se tem pressa, se já falou com outro advogado."></textarea>
+          <p class="brf-dica">Quanto mais detalhe aqui, mais preciso fica o relatório. Pode escrever do seu jeito.</p>
+        </div>
+        <div class="brf-campo brf-full">
+          <label>Alguma resistência que ele já demonstrou</label>
+          <textarea id="brf-objecao" style="min-height:58px"
+            placeholder="Ex: achou caro, disse que ia pensar, quer garantia de resultado"></textarea>
+        </div>
+      </div>
+      <div class="brf-acoes">
+        <button type="submit" class="brf-btn" id="brf-submit">Gerar briefing</button>
+        <span class="brf-dica" id="brf-status"></span>
+      </div>
+    </form>`;
+}
+
+function brfValor(id) {
+  const el = document.getElementById(id);
+  return el && el.value.trim() ? el.value.trim() : null;
+}
+
+async function brfGerar(ev) {
+  ev.preventDefault();
+  if (brf.gerando) return;
+
+  const nome = brfValor('brf-nome');
+  if (!nome) { mostrarToast('Informe o nome do cliente', 'erro'); return; }
+
+  const dataLocal = brfValor('brf-data');
+  const corpo = {
+    nome_lead:        nome,
+    empresa_lead:     brfValor('brf-empresa'),
+    whatsapp:         brfValor('brf-whatsapp'),
+    produto:          brfValor('brf-produto'),
+    valor_honorarios: brfValor('brf-valor'),
+    origem_canal:     brfValor('brf-origem'),
+    data_reuniao:     dataLocal ? new Date(dataLocal).toISOString() : null,
+    local_reuniao:    brfValor('brf-local'),
+    contexto:         brfValor('brf-contexto'),
+    objecao_inicial:  brfValor('brf-objecao'),
+  };
+
+  const btn    = document.getElementById('brf-submit');
+  const status = document.getElementById('brf-status');
+  brf.gerando = true;
+  btn.disabled = true;
+  btn.textContent = 'Montando o briefing...';
+  if (status) status.textContent = 'Leva alguns segundos.';
+
+  try {
+    const res  = await api.post('/briefing', corpo);
+    const data = await res.json().catch(() => ({}));
+
+    if (!res?.ok) {
+      mostrarToast(data.erro || 'Não consegui gerar o briefing', 'erro');
+      return;
+    }
+
+    brf.lista.unshift(data.lead);
+    // `carregou` fica como estava de propósito: se o histórico ainda não foi
+    // buscado, ele precisa vir inteiro do servidor na primeira abertura, e não
+    // ficar só com o briefing que acabou de ser gerado.
+    brfAbrirNaTela(data.lead);
+    mostrarToast('Briefing pronto', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão ao gerar o briefing', 'erro');
+  } finally {
+    brf.gerando = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Gerar briefing'; }
+    if (status) status.textContent = '';
+  }
+}
+
+// ─── Histórico ───────────────────────────────────────────────────────────────
+async function brfCarregarLista() {
+  const alvo = document.getElementById('brf-conteudo');
+  if (alvo && brf.aba === 'historico') {
+    alvo.innerHTML = '<div class="brf-vazio">Carregando seus briefings...</div>';
+  }
+  try {
+    const res  = await api.get('/briefing');
+    const data = await res.json().catch(() => ({}));
+    if (!res?.ok) {
+      if (alvo) alvo.innerHTML = `<div class="brf-vazio">${escapeHtml(data.erro || 'Erro ao carregar.')}</div>`;
+      return;
+    }
+    brf.lista    = data.briefings || [];
+    brf.carregou = true;
+  } catch (err) {
+    if (alvo) alvo.innerHTML = '<div class="brf-vazio">Erro de conexão ao carregar seus briefings.</div>';
+    return;
+  }
+  if (brf.aba === 'historico') mostrarBriefing();
+}
+
+function brfData(iso, comHora = true) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return null;
+  const opcoes = comHora
+    ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+    : { day: '2-digit', month: '2-digit', year: 'numeric' };
+  return d.toLocaleString('pt-BR', opcoes);
+}
+
+function brfRenderHistorico() {
+  const alvo = document.getElementById('brf-conteudo');
+  if (!alvo) return;
+
+  if (!brf.carregou) { brfCarregarLista(); alvo.innerHTML = '<div class="brf-vazio">Carregando seus briefings...</div>'; return; }
+
+  if (!brf.lista.length) {
+    alvo.innerHTML = `
+      <div class="brf-vazio">
+        Você ainda não gerou nenhum briefing.<br>
+        Cadastre o próximo cliente na aba "Novo briefing" e entre na reunião preparado.
+      </div>`;
+    return;
+  }
+
+  const RES_LABEL = {
+    fechou: 'fechou', negociando: 'em negociação',
+    nao_fechou: 'não fechou', nao_compareceu: 'não compareceu',
+  };
+
+  alvo.innerHTML = brf.lista.map(l => {
+    const reuniao = brfData(l.data_reuniao);
+    const gerado  = brfData(l.created_at, false);
+    const nota    = l.briefing_nota;
+    const res     = RES_LABEL[brfResultadoDe(l)];
+    const tag = nota
+      ? `<span class="brf-item-tag brf-tag-nota">${'★'.repeat(nota)} ${nota}/5</span>`
+      : `<span class="brf-item-tag brf-tag-vazio">Dar retorno</span>`;
+    return `
+      <div class="brf-item" onclick="brfAbrir('${l.id}')">
+        <div>
+          <div class="brf-item-nome">
+            ${escapeHtml(l.nome_lead || 'Sem nome')}
+            ${l.empresa_lead ? `<span class="brf-item-emp">· ${escapeHtml(l.empresa_lead)}</span>` : ''}
+          </div>
+          <div class="brf-item-meta">
+            ${reuniao ? `Reunião em ${reuniao}` : 'Sem data de reunião'} · briefing de ${gerado || '—'}${res ? ' · ' + res : ''}
+          </div>
+        </div>
+        ${tag}
+      </div>`;
+  }).join('');
+}
+
+// ─── Briefing aberto ─────────────────────────────────────────────────────────
+function brfAbrir(id) {
+  const lead = brf.lista.find(l => String(l.id) === String(id));
+  if (lead) brfAbrirNaTela(lead);
+}
+
+function brfAbrirNaTela(lead) {
+  brfEstilo();
+  brf.aberto = lead;
+
+  const container = document.getElementById('messages-container');
+  const reuniao   = brfData(lead.data_reuniao);
+  const nota      = lead.briefing_nota;
+
+  container.innerHTML = `
+    <div class="brf">
+      <div class="brf-topo">
+        <div style="flex:1;min-width:220px">
+          <h2 style="font-size:20px">${escapeHtml(lead.nome_lead || 'Cliente')}</h2>
+          <div class="brf-topo-meta">
+            ${lead.empresa_lead ? escapeHtml(lead.empresa_lead) + ' · ' : ''}
+            ${reuniao ? 'reunião em ' + reuniao : 'sem data de reunião'}
+            ${lead.local_reuniao ? ' · ' + escapeHtml(lead.local_reuniao) : ''}
+            ${nota ? ` · você deu nota ${nota}/5` : ''}
+          </div>
+        </div>
+        <button class="brf-btn ghost mini" onclick="brfIrPara('historico')">Voltar</button>
+      </div>
+
+      <div class="brf-rel" id="brf-relatorio">${renderMarkdown(lead.briefing || 'Briefing não gerado.')}</div>
+
+      <div class="brf-acoes">
+        <button class="brf-btn mini" onclick="brfFeedbackAbrir('${lead.id}')">
+          ${nota ? 'Atualizar retorno' : 'Como foi a reunião'}
+        </button>
+        <button class="brf-btn ghost mini" onclick="brfCopiar()">Copiar</button>
+        <button class="brf-btn ghost mini" onclick="brfPdf()">Baixar em PDF</button>
+        <button class="brf-btn ghost mini" onclick="brfRegerarAbrir()">Gerar de novo</button>
+      </div>
+
+      <div id="brf-regerar" style="display:none;margin-top:14px" class="brf-card">
+        <div class="brf-campo">
+          <label>O que mudou ou o que você descobriu depois</label>
+          <textarea id="brf-regerar-texto" style="min-height:70px"
+            placeholder="Ex: ele falou que o irmão passou pelo mesmo processo e ficou insatisfeito com o advogado anterior"></textarea>
+        </div>
+        <div class="brf-acoes">
+          <button class="brf-btn mini" id="brf-regerar-btn" onclick="brfRegerar()">Gerar briefing atualizado</button>
+          <button class="brf-btn ghost mini" onclick="document.getElementById('brf-regerar').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+    </div>`;
+
+  container.scrollTop = 0;
+}
+
+function brfCopiar() {
+  const el = document.getElementById('brf-relatorio');
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText || el.textContent)
+    .then(() => mostrarToast('Briefing copiado', 'sucesso'))
+    .catch(() => mostrarToast('Não consegui copiar', 'erro'));
+}
+
+async function brfPdf() {
+  const el = document.getElementById('brf-relatorio');
+  if (!el || !brf.aberto) return;
+
+  mostrarToast('Gerando PDF...', 'aviso');
+  const res = await api.post('/export/pdf', {
+    conteudo: el.innerText || el.textContent,
+    titulo:   `Briefing — ${brf.aberto.nome_lead || 'cliente'}`,
+  });
+
+  if (res?.ok) {
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `briefing_${Date.now()}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } else {
+    mostrarToast('Erro ao gerar PDF', 'erro');
+  }
+}
+
+function brfRegerarAbrir() {
+  const box = document.getElementById('brf-regerar');
+  if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+async function brfRegerar() {
+  if (!brf.aberto) return;
+  const campo = document.getElementById('brf-regerar-texto');
+  const btn   = document.getElementById('brf-regerar-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Montando...'; }
+
+  try {
+    const res  = await api.post(`/briefing/${brf.aberto.id}/regerar`, { contexto_extra: campo?.value || '' });
+    const data = await res.json().catch(() => ({}));
+    if (!res?.ok) { mostrarToast(data.erro || 'Erro ao gerar de novo', 'erro'); return; }
+
+    brf.aberto.briefing = data.briefing;
+    const naLista = brf.lista.find(l => String(l.id) === String(brf.aberto.id));
+    if (naLista) naLista.briefing = data.briefing;
+    brfAbrirNaTela(brf.aberto);
+    mostrarToast('Briefing atualizado', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão', 'erro');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Gerar briefing atualizado'; }
+  }
+}
+
+// ─── Feedback pós-reunião ────────────────────────────────────────────────────
+const BRF_RESULTADOS = [
+  { id: 'fechou',         label: 'Fechou o contrato' },
+  { id: 'negociando',     label: 'Ficou em negociação' },
+  { id: 'nao_fechou',     label: 'Não fechou' },
+  { id: 'nao_compareceu', label: 'Não compareceu' },
+];
+
+let _brfFb = { id: null, nota: 0, resultado: null };
+
+// O resultado não tem coluna própria: sai do status do lead somado à presença.
+function brfResultadoDe(lead) {
+  if (!lead) return null;
+  if (lead.participou_reuniao === false) return 'nao_compareceu';
+  if (lead.status === 'ganhou')     return 'fechou';
+  if (lead.status === 'negociando') return 'negociando';
+  if (lead.status === 'perdeu')     return 'nao_fechou';
+  return null;
+}
+
+function brfFeedbackAbrir(id) {
+  brfEstilo();
+  const lead = brf.lista.find(l => String(l.id) === String(id)) || brf.aberto;
+  _brfFb = { id, nota: lead?.briefing_nota || 0, resultado: brfResultadoDe(lead) };
+
+  let overlay = document.getElementById('brf-fb-overlay');
+  if (overlay) overlay.remove();
+
+  overlay = document.createElement('div');
+  overlay.className = 'brf-overlay brf';
+  overlay.id = 'brf-fb-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) brfFeedbackFechar(); };
+  overlay.innerHTML = `
+    <div class="brf-modal">
+      <h2 style="font-size:18px;margin:0 0 4px">Como foi a reunião</h2>
+      <p class="brf-lead" style="margin-bottom:16px">
+        ${escapeHtml(lead?.nome_lead || 'Cliente')} · seu retorno mostra o que o briefing melhorou na prática.
+      </p>
+
+      <div class="brf-campo" style="margin-bottom:15px">
+        <label>O quanto o briefing te ajudou</label>
+        <div class="brf-estrelas" id="brf-fb-estrelas">
+          ${[1,2,3,4,5].map(n => `<button type="button" class="brf-estrela" onclick="brfFbNota(${n})">⭐</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="brf-campo" style="margin-bottom:15px">
+        <label>Resultado da reunião</label>
+        <div class="brf-chips" id="brf-fb-chips">
+          ${BRF_RESULTADOS.map(r => `<button type="button" class="brf-chip" data-r="${r.id}" onclick="brfFbResultado('${r.id}')">${r.label}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="brf-campo" style="margin-bottom:16px">
+        <label>O que aconteceu na conversa</label>
+        <textarea id="brf-fb-texto" style="min-height:76px"
+          placeholder="O que funcionou, o que o cliente perguntou que não estava no briefing, onde você travou.">${escapeHtml(lead?.briefing_feedback || '')}</textarea>
+      </div>
+
+      <div class="brf-acoes" style="margin-top:0">
+        <button class="brf-btn" id="brf-fb-salvar" onclick="brfFeedbackSalvar()">Salvar retorno</button>
+        <button class="brf-btn ghost" onclick="brfFeedbackFechar()">Cancelar</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  brfFbPintar();
+}
+
+function brfFbNota(n)        { _brfFb.nota = n;       brfFbPintar(); }
+function brfFbResultado(id)  { _brfFb.resultado = id; brfFbPintar(); }
+
+function brfFbPintar() {
+  document.querySelectorAll('#brf-fb-estrelas .brf-estrela')
+    .forEach((b, i) => b.classList.toggle('on', i < _brfFb.nota));
+  document.querySelectorAll('#brf-fb-chips .brf-chip')
+    .forEach(b => b.classList.toggle('on', b.dataset.r === _brfFb.resultado));
+}
+
+function brfFeedbackFechar() {
+  const o = document.getElementById('brf-fb-overlay');
+  if (o) o.remove();
+}
+
+async function brfFeedbackSalvar() {
+  if (!_brfFb.nota)      { mostrarToast('Dê uma nota de 1 a 5', 'erro'); return; }
+  if (!_brfFb.resultado) { mostrarToast('Marque como a reunião terminou', 'erro'); return; }
+
+  const btn  = document.getElementById('brf-fb-salvar');
+  const texto = document.getElementById('brf-fb-texto')?.value || '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+  try {
+    const res  = await api.post(`/briefing/${_brfFb.id}/feedback`, {
+      nota:       _brfFb.nota,
+      resultado:  _brfFb.resultado,
+      comentario: texto,
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res?.ok) { mostrarToast(data.erro || 'Erro ao salvar', 'erro'); return; }
+
+    const mapaStatus = {
+      fechou:         { status: 'ganhou',     participou_reuniao: true  },
+      negociando:     { status: 'negociando', participou_reuniao: true  },
+      nao_fechou:     { status: 'perdeu',     participou_reuniao: true  },
+      nao_compareceu: { participou_reuniao: false },
+    }[_brfFb.resultado] || {};
+
+    [brf.lista.find(l => String(l.id) === String(_brfFb.id)),
+     brf.aberto && String(brf.aberto.id) === String(_brfFb.id) ? brf.aberto : null]
+      .filter(Boolean)
+      .forEach(l => {
+        l.briefing_nota     = _brfFb.nota;
+        l.briefing_feedback = texto;
+        Object.assign(l, mapaStatus);
+      });
+
+    brfFeedbackFechar();
+    mostrarToast(data.aviso || 'Retorno registrado', data.aviso ? 'aviso' : 'sucesso');
+    brf.aba = 'historico';
+    mostrarBriefing();
+  } catch (err) {
+    mostrarToast('Erro de conexão', 'erro');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar retorno'; }
+  }
+}
+
+// Expõe o briefing para os onclick do HTML gerado
+Object.assign(window, {
+  brf,
+  mostrarBriefing, brfIrPara, brfGerar, brfAbrir, brfCopiar, brfPdf,
+  brfRegerarAbrir, brfRegerar, brfCarregarLista,
+  brfFeedbackAbrir, brfFeedbackFechar, brfFeedbackSalvar, brfFbNota, brfFbResultado, brfResultadoDe,
+  esconderInputChat,
+});
