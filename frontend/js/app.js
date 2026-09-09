@@ -40,7 +40,7 @@ const FERRAMENTA_PLANO_MIN = {
   'simular_reuniao':    'start',
   'simulador_objecoes': 'start',
   'gerador_proposta':   'start',
-  'criador_prompt':     'equipe',   // MAY IA PLUS+
+  'criador_prompt':     'start',    // plano único: não existe tier acima para desbloquear
   'simulador_vendas':   'start',    // consta na lista do plano vendido
 };
 

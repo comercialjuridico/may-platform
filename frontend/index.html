@@ -66,6 +66,9 @@
             <span style="color:#A78BFA;">✓</span> Chat com IA ilimitado
           </div>
           <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
+            <span style="color:#A78BFA;">✓</span> Briefing de reuniões
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
             <span style="color:#A78BFA;">✓</span> Simular reunião
           </div>
           <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
@@ -180,9 +183,6 @@
       <button onclick="abrirModalTrilha()" class="btn-ghost btn-full">
         <span class="nav-icon">📚</span> Minha Trilha
       </button>
-      <a href="/modulos" class="btn-ghost btn-full">
-        <span class="nav-icon">🧩</span> Módulos adicionais
-      </a>
     </div>
   </aside>
 
@@ -198,8 +198,6 @@
           <div class="chat-tool-label text-xs text-muted" id="chat-tool-label">May — Assistente de vendas</div>
         </div>
       </div>
-      <!-- Módulos ativos -->
-      <div id="header-modulos" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
 
       <div class="header-actions">
         <button class="btn-ghost btn-sm" onclick="abrirModalPlanos()" title="Planos">
@@ -651,6 +649,7 @@
         <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:20px;" id="sub-start">cobrado mensalmente · cancele quando quiser</div>
         <ul style="font-size:0.82rem; color:var(--text-secondary); list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px; text-align:left;">
           <li>✓ Chat com IA ilimitado</li>
+          <li>✓ Briefing de reuniões</li>
           <li>✓ Simular reunião</li>
           <li>✓ Simulador de objeções</li>
           <li>✓ Gerador de proposta PDF</li>
