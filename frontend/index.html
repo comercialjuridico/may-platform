@@ -75,9 +75,6 @@
             <span style="color:#A78BFA;">✓</span> Simulador de objeções
           </div>
           <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
-            <span style="color:#A78BFA;">✓</span> Gerador de proposta PDF
-          </div>
-          <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
             <span style="color:#A78BFA;">✓</span> Script de follow-up
           </div>
           <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:rgba(200,190,255,.8);">
@@ -179,7 +176,9 @@
     <!-- Footer da sidebar -->
     <div class="sidebar-footer">
 
-      <!-- Ferramentas -->
+      <button onclick="abrirModalDiagnostico()" class="btn-ghost btn-full">
+        <span class="nav-icon">🧭</span> Diagnóstico comercial
+      </button>
       <button onclick="abrirModalTrilha()" class="btn-ghost btn-full">
         <span class="nav-icon">📚</span> Minha Trilha
       </button>
@@ -200,15 +199,9 @@
       </div>
 
       <div class="header-actions">
-        <button class="btn-ghost btn-sm" onclick="abrirModalPlanos()" title="Planos">
-          ⭐ Planos
-        </button>
         <button class="theme-toggle" id="btn-theme" onclick="toggleTema()" title="Alternar tema">
           <span class="theme-toggle-icon" id="theme-icon">🌙</span>
           <span id="theme-label">Escuro</span>
-        </button>
-        <button class="btn-ghost btn-sm" onclick="abrirModalDiagnostico()" title="Editar diagnóstico">
-          ⚙️
         </button>
 
         <!-- Avatar do usuário + dropdown -->
@@ -227,7 +220,7 @@
             </div>
             <div class="user-dropdown-divider"></div>
             <button class="user-dropdown-item" onclick="fecharUserDropdown(); abrirModalPerfil()">
-              <span>👤</span> Editar perfil
+              <span>👤</span> Minha conta
             </button>
             <button class="user-dropdown-item user-dropdown-logout" onclick="logout()">
               <span>→</span> Sair
@@ -463,7 +456,7 @@
 <div class="modal-overlay" id="modal-perfil">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Perfil</span>
+      <span class="modal-title">Minha conta</span>
       <button class="modal-close" onclick="document.getElementById('modal-perfil').classList.remove('active')">✕</button>
     </div>
 
@@ -488,7 +481,7 @@
     <!-- Identidade do Escritório -->
     <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
       <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">
-        Identidade do Escritório — Proposta PDF
+        Identidade do escritório — PDFs
       </div>
 
       <!-- Logo -->
@@ -519,15 +512,53 @@
           <input id="perfil-cor-escritorio" type="color" value="#7C3AED"
             style="width:44px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:none;padding:2px" />
           <div style="font-size:.82rem;color:var(--text-muted)">
-            Usada no cabeçalho e nos títulos da proposta PDF
+            Usada no cabeçalho e nos títulos dos PDFs que você baixa
           </div>
         </div>
       </div>
     </div>
 
-    <div style="display:flex; gap:8px; margin-top:20px;">
-      <button class="btn btn-primary" style="flex:1" onclick="salvarPerfil()">Salvar</button>
-      <button class="btn btn-secondary" onclick="abrirModalDiagnostico()">Editar diagnóstico</button>
+    <div style="margin-top:20px;">
+      <button class="btn btn-primary btn-full" onclick="salvarPerfil()">Salvar</button>
+    </div>
+
+    <!-- Minha assinatura -->
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+      <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">
+        Minha assinatura
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div>
+          <div id="conta-plano-nome" style="font-size:.9rem;font-weight:700;color:var(--text-primary)">—</div>
+          <div id="conta-plano-info" style="font-size:.78rem;color:var(--text-muted);margin-top:3px">—</div>
+        </div>
+        <button class="btn btn-secondary" style="font-size:.8rem;padding:7px 14px" onclick="abrirModalPlanos()">Ver planos</button>
+      </div>
+      <button id="btn-cancelar-assinatura" class="btn btn-full"
+        style="background:transparent;border:1px solid rgba(239,68,68,.25);color:rgba(239,68,68,.7);font-size:.82rem;padding:9px"
+        onclick="abrirModalCancelamento()">
+        Cancelar assinatura
+      </button>
+    </div>
+
+    <!-- Alterar senha -->
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+      <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">
+        Alterar senha
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Senha atual</label>
+        <input id="senha-atual" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Nova senha</label>
+        <input id="senha-nova" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres" />
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Repita a nova senha</label>
+        <input id="senha-nova-2" type="password" autocomplete="new-password" placeholder="••••••••" />
+      </div>
+      <button id="btn-alterar-senha" class="btn btn-secondary btn-full" onclick="alterarSenha()">Alterar senha</button>
     </div>
 
     <!-- 2FA -->
@@ -563,9 +594,6 @@
     </div>
 
     <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
-      <button class="btn btn-full mb-8" style="background:transparent;border:1px solid rgba(239,68,68,.25);color:rgba(239,68,68,.7);font-size:.82rem;padding:9px;" onclick="abrirModalCancelamento()">
-        Cancelar assinatura
-      </button>
       <button class="btn btn-danger btn-full" onclick="logout()">Sair</button>
     </div>
   </div>
@@ -649,7 +677,6 @@
           <li>✓ Briefing de reuniões</li>
           <li>✓ Simular reunião</li>
           <li>✓ Simulador de objeções</li>
-          <li>✓ Gerador de proposta PDF</li>
           <li>✓ Script de follow-up</li>
           <li>✓ Diagnóstico de atendimento</li>
           <li>✓ Treino SPIN Selling</li>

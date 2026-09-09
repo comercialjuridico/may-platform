@@ -48,7 +48,6 @@ const FERRAMENTA_PLANO_MIN = {
   'spin':               'start',
   'simular_reuniao':    'start',
   'simulador_objecoes': 'start',
-  'gerador_proposta':   'start',
   'criador_prompt':     'start',    // plano único: não existe tier acima para desbloquear
   'simulador_vendas':   'start',    // consta na lista do plano vendido
 };
@@ -346,7 +345,6 @@ const FERRAMENTAS = [
   { id: 'briefing',           nome: 'Briefing de reuniões',        icon: '📋' },
   { id: 'simular_reuniao',    nome: 'Simular reunião',             icon: '🎭' },
   { id: 'simulador_objecoes', nome: 'Simulador de objeções',       icon: '🎯' },
-  { id: 'gerador_proposta',   nome: 'Gerador de proposta',         icon: '📄' },
   { id: 'follow_up',          nome: 'Script de follow-up',         icon: '🔁' },
   { id: 'negociacao',         nome: 'Argumentos de negociação',    icon: '⚖️' },
   { id: 'diagnostico',        nome: 'Diagnóstico de atendimento',  icon: '🔍' },
@@ -389,7 +387,7 @@ const FASES_TRILHA = [
     desc: 'Apresente honorários com confiança e responda objeções de preço',
     exercicios: [
       { id: 'a', label: 'Aprender: A estrutura de proposta que converte', tipo: 'chat', prompt: 'Como montar uma proposta de honorários que foque no valor e não no preço? Me dá a estrutura e os princípios para apresentar sem medo.' },
-      { id: 'b', label: 'Praticar: Gerar minha proposta', tipo: 'gerador_proposta', prompt: 'Preciso montar uma proposta para um novo caso. Me ajuda a estruturar mostrando valor antes de falar em preço.' },
+      { id: 'b', label: 'Praticar: Montar minha proposta', tipo: 'chat', prompt: 'Preciso montar uma proposta de honorários para um novo caso. Me faz as perguntas necessárias e me ajuda a estruturar, mostrando valor antes de falar em preço.' },
       { id: 'c', label: 'Simular: Responder "tá caro" do cliente', tipo: 'simular_reuniao', cenario: 'objecao_preco' },
     ],
   },
@@ -776,17 +774,6 @@ const TOOL_INFO = {
       'Simular cliente que compara com concorrente',
     ],
   },
-  gerador_proposta: {
-    desc: 'Informe o nome do lead, o serviço contratado e o valor aproximado — a May monta uma proposta comercial completa, pronta para enviar.',
-    dica: '💡 Quanto mais contexto você fornecer (nicho, situação do lead, urgência), mais personalizada fica a proposta.',
-    sugestoes: [
-      'Proposta para revisão de benefício INSS — honorários R$ 2.500',
-      'Proposta para causa trabalhista — honorários R$ 3.000',
-      'Proposta para cliente que pediu desconto',
-      'Proposta para contrato de consultoria mensal',
-      'Modelo de proposta para novo cliente do escritório',
-    ],
-  },
   follow_up: {
     desc: 'Para leads que sumiram ou não responderam. A May gera mensagens de acompanhamento naturais, sem parecer insistente ou robótico.',
     dica: '💡 Informe quantos dias passaram e qual foi o último contato para a May calibrar o tom certo.',
@@ -1039,16 +1026,7 @@ async function enviarMensagem() {
 
 // ─── Adicionar mensagem ao DOM ────────────────────────────────────────────────
 function msgActionButtons(msgId) {
-  const isProposal = estado.ferramentaAtiva === 'gerador_proposta';
-  const proposalBtn = isProposal ? `
-    <button class="msg-action-btn" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);color:#C4B5FD;font-weight:600" onclick="baixarPropostaPDF('${msgId}')">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-      📄 Proposta PDF
-    </button>
-  ` : '';
-
   return `<div class="msg-actions">
-    ${proposalBtn}
     <button class="msg-action-btn" onclick="copiarMensagem('${msgId}')">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
       Copiar
@@ -1712,7 +1690,78 @@ function abrirModalPerfil() {
   // Atualiza status 2FA
   atualizar2FAStatus();
 
+  // Minha assinatura
+  preencherMinhaAssinatura();
+
+  // Campos de senha sempre começam vazios
+  ['senha-atual', 'senha-nova', 'senha-nova-2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
   document.getElementById('modal-perfil').classList.add('active');
+}
+
+// ─── Minha assinatura (dentro de Minha conta) ────────────────────────────────
+function preencherMinhaAssinatura() {
+  const user   = estado.user;
+  const base   = planoBase(user);
+  const nomeEl = document.getElementById('conta-plano-nome');
+  const infoEl = document.getElementById('conta-plano-info');
+  const btnCancelar = document.getElementById('btn-cancelar-assinatura');
+  if (!nomeEl || !infoEl) return;
+
+  const assinante = base !== 'free';
+  const anual     = String(user?.plano || '').includes('anual');
+
+  nomeEl.textContent = assinante ? (PLANO_NOME[base] || 'May IA') : 'Período de teste';
+
+  if (assinante) {
+    const renova = user?.plano_fim
+      ? new Date(user.plano_fim).toLocaleDateString('pt-BR')
+      : null;
+    infoEl.textContent = `${anual ? 'Cobrança anual' : 'Cobrança mensal'}${renova ? ` · renova em ${renova}` : ''}`;
+  } else {
+    const dias = user?._trial_dias_restantes;
+    infoEl.textContent = dias
+      ? `Faltam ${dias} ${dias === 1 ? 'dia' : 'dias'} de teste. Assine para não perder o acesso.`
+      : 'Assine para continuar usando a May.';
+  }
+
+  // Sem assinatura ativa não há o que cancelar
+  if (btnCancelar) btnCancelar.style.display = assinante ? '' : 'none';
+}
+
+// ─── Alterar senha ───────────────────────────────────────────────────────────
+async function alterarSenha() {
+  const atual = document.getElementById('senha-atual')?.value || '';
+  const nova  = document.getElementById('senha-nova')?.value || '';
+  const nova2 = document.getElementById('senha-nova-2')?.value || '';
+  const btn   = document.getElementById('btn-alterar-senha');
+
+  if (!atual || !nova)      { mostrarToast('Preencha a senha atual e a nova', 'erro'); return; }
+  if (nova.length < 8)      { mostrarToast('A nova senha precisa de pelo menos 8 caracteres', 'erro'); return; }
+  if (nova !== nova2)       { mostrarToast('As duas senhas novas não são iguais', 'erro'); return; }
+  if (nova === atual)       { mostrarToast('A nova senha precisa ser diferente da atual', 'erro'); return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Alterando...'; }
+
+  try {
+    const res  = await api.put('/user/senha', { senha_atual: atual, nova_senha: nova });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res?.ok) { mostrarToast(data.erro || 'Não consegui alterar a senha', 'erro'); return; }
+
+    ['senha-atual', 'senha-nova', 'senha-nova-2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    mostrarToast('Senha alterada', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão ao alterar a senha', 'erro');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Alterar senha'; }
+  }
 }
 
 // ── 2FA ──────────────────────────────────────────────────────────────────────
@@ -2361,7 +2410,7 @@ function mostrarHomeDashboard() {
       <div class="home-chips">
         <button class="home-chip" onclick="abrirModalTrilha()">📚 Minha trilha</button>
         <button class="home-chip" onclick="selecionarFerramenta('simulador_objecoes')">🎯 Treinar objeções</button>
-        <button class="home-chip" onclick="selecionarFerramenta('gerador_proposta')">📄 Criar proposta</button>
+        <button class="home-chip" onclick="selecionarFerramenta('briefing')">📋 Preparar reunião</button>
         <button class="home-chip" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
       </div>
 
@@ -2770,6 +2819,7 @@ Object.assign(window, {
   selecionarFerramenta, uploadArquivo, toggleGravacao, removerAnexo,
   abrirModalDiagnostico, salvarDiagnostico,
   abrirModalPerfil, salvarPerfil, uploadFotoPerfil, uploadLogoEscritorio, baixarPropostaPDF,
+  alterarSenha, preencherMinhaAssinatura,
   iniciarCheckout, logout,
   toggleMenuMobile, mostrarToast, toggleUserDropdown, fecharUserDropdown,
   copiarMensagem, exportarDocx, exportarPdf, exportarImagem, salvarTemplate,
