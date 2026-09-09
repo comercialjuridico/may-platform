@@ -16,6 +16,15 @@ const estado = {
   documentosAnexados: [], // [{ upload_id, filename }] — documentos pendentes de envio
 };
 
+// Estado da tela de Briefing de reuniões (as funções ficam no fim do arquivo)
+const brf = {
+  aba:      'novo',   // 'novo' | 'historico'
+  lista:    [],
+  carregou: false,
+  aberto:   null,     // briefing aberto na tela
+  gerando:  false,
+};
+
 // ─── Controle de acesso por plano ─────────────────────────────────────────────
 const PLANO_NIVEL = { free: 0, start: 1, equipe: 2, pro: 3, prof: 4 };
 
@@ -2761,7 +2770,7 @@ Object.assign(window, {
   selecionarFerramenta, uploadArquivo, toggleGravacao, removerAnexo,
   abrirModalDiagnostico, salvarDiagnostico,
   abrirModalPerfil, salvarPerfil, uploadFotoPerfil, uploadLogoEscritorio, baixarPropostaPDF,
-  iniciarCheckout, abrirPortalStripe, logout,
+  iniciarCheckout, logout,
   toggleMenuMobile, mostrarToast, toggleUserDropdown, fecharUserDropdown,
   copiarMensagem, exportarDocx, exportarPdf, exportarImagem, salvarTemplate,
   abrirArquivosArea, copiarArquivo, excluirArquivo,
@@ -2793,14 +2802,6 @@ function carregarModulosHeader() {
 // A pessoa cadastra o cliente, a May devolve o relatório de preparação e depois
 // ela registra como a reunião foi. O histórico fica na segunda aba.
 // ═══════════════════════════════════════════════════════════════════════════════
-
-const brf = {
-  aba:      'novo',   // 'novo' | 'historico'
-  lista:    [],
-  carregou: false,
-  aberto:   null,     // briefing aberto na tela
-  gerando:  false,
-};
 
 function esconderInputChat() {
   const wrapper = document.getElementById('chat-input-wrapper');
