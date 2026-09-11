@@ -960,10 +960,10 @@ async function enviarMensagem() {
       <div class="msg-content">
         <div class="msg-name">May</div>
         <div class="msg-bubble">
-          <div class="typing-indicator">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
         </div>
       </div>
