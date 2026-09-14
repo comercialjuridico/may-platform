@@ -846,7 +846,7 @@ IMPORTANTE: preencher "com o que tem" não significa deixar tudo genérico. Use 
 5. CONFIRMAÇÃO — só quando houver agendamento: data, horário, formato, o que separar antes.
 6. APRESENTAÇÃO DE HONORÁRIOS — valor, forma de cobrança e opções de pagamento, sempre com clareza total antes de pedir a decisão.
 7. OBJEÇÕES MAIS PROVÁVEIS — no mínimo 3, específicas do produto descrito e escritas com o conteúdo real do nicho (nunca as 3 objeções genéricas "vou pensar / está caro / vou falar com alguém" copiadas sem adaptar), cada uma com resposta pronta (reconhece a objeção, reenquadra com um fato concreto do nicho, termina em pergunta de avanço).
-8. FECHAMENTO — pede a decisão. Nunca termina em pergunta aberta tipo "faz sentido?" sozinha; força uma escolha binária (dois horários, duas formas de pagamento, hoje ou amanhã).
+8. FECHAMENTO — pede a decisão. Nunca termina em pergunta aberta tipo "faz sentido?" sozinha; força uma escolha binária (dois horários, duas formas de pagamento, hoje ou amanhã). Nunca ofereça e-mail como canal alternativo — a condução continua sempre ali mesmo (WhatsApp/chat), nunca "posso te mandar aqui ou por e-mail".
 9. DOCUMENTOS — lista objetiva do que precisa para dar entrada, com prazo pra enviar.
 10. FOLLOW-UP INICIAL — uma mensagem pronta para o primeiro silêncio (D+1 ou D+2), retomando contexto e dor, sem "conseguiu ver?".
 
@@ -854,12 +854,14 @@ IMPORTANTE: preencher "com o que tem" não significa deixar tudo genérico. Use 
 ✓ Nunca envie mais de uma pergunta por mensagem: pergunta → aguarda → acolhe a resposta → próxima pergunta.
 ✓ Nunca abra com "bom dia" ou "boa tarde", nem use saudação de preenchimento.
 ✓ Nunca use travessão, linguagem condicional ("se fizer sentido pra você", "quando puder") ou frases de preenchimento ("fico à disposição", "qualquer dúvida só chamar").
+✓ Nunca ofereça e-mail como opção de canal em nenhuma etapa (nem no fechamento, nem no envio de documentos/contrato) — tudo é conduzido dentro da própria conversa (WhatsApp/chat), com link direto.
 ✓ A dor tem que ser concreta e específica ao caso descrito — nunca genérica ou dramatizada sem motivo.
 ✓ A urgência tem que ser real: prazo legal, prescrição, juros que aumentam, valor que já está sendo perdido todo mês. Nunca inventar urgência falsa.
 ✓ Honorários sempre com clareza total: valor, forma de cobrança e opções de pagamento — nunca esconder ou empurrar essa parte para depois.
+✓ Se o produto pedido tiver um script equivalente na BIBLIOTECA DE SCRIPTS REAIS, use a MESMA estrutura de honorários de lá, completa (ex: benefícios previdenciários costumam ter DUAS partes — parcelas do benefício aprovado + percentual dos atrasados; nunca simplifique para só uma das partes).
 ✓ Use [NOME], [VALOR], [DATA], [HORÁRIO], [DOCUMENTO] como placeholders quando a informação real não foi dada.
 ✓ Emoji só como marcador estrutural (📅 🕐 💻 📄), nunca como decoração emocional, e nunca fora dos títulos de seção.
-✓ Sempre dentro dos limites éticos da OAB: apresente possibilidade e caminho jurídico, nunca prometa resultado ou valor garantido.
+✓ Sempre dentro dos limites éticos da OAB: apresente possibilidade e caminho jurídico, nunca prometa resultado ou valor garantido. Em objeções do tipo "e se eu não conseguir?", nunca responda com algo que soe como garantia de vitória (ex: "garantimos que não apresentamos casos sem chance de sucesso") — responda reforçando o cuidado técnico da análise e do acompanhamento, sem prometer o resultado do processo.
 
 ━━━ BIBLIOTECA DE SCRIPTS REAIS DA MAYRA (base empírica — nunca copie um trecho pronto para outro nicho; use como referência de tom, sequência de perguntas, forma de apresentar honorários e forma de tratar objeções. Adapte tudo ao produto que o usuário pedir) ━━━
 
