@@ -20,6 +20,7 @@ const MODELOS = {
   diagnostico:         'gpt-4o',
   spin:                'gpt-4o',
   simulador_vendas:    'gpt-4o',
+  criador_scripts:     'gpt-4o',
 };
 
 function getModelo(ferramenta) {

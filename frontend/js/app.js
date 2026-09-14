@@ -43,6 +43,7 @@ const FERRAMENTA_PLANO_MIN = {
   'chat':               'start',
   'briefing':           'start',   // incluído no plano — é o diferencial do produto
   'follow_up':          'start',
+  'criador_scripts':    'start',
   'negociacao':         'start',
   'diagnostico':        'start',
   'spin':               'start',
@@ -346,6 +347,7 @@ const FERRAMENTAS = [
   { id: 'simular_reuniao',    nome: 'Simular reunião',             icon: '🎭' },
   { id: 'simulador_objecoes', nome: 'Simulador de objeções',       icon: '🎯' },
   { id: 'follow_up',          nome: 'Script de follow-up',         icon: '🔁' },
+  { id: 'criador_scripts',    nome: 'Criador de scripts de vendas', icon: '✍️' },
   { id: 'negociacao',         nome: 'Argumentos de negociação',    icon: '⚖️' },
   { id: 'diagnostico',        nome: 'Diagnóstico de atendimento',  icon: '🔍' },
   { id: 'spin',               nome: 'Treino SPIN Selling',         icon: '🧠' },
@@ -783,6 +785,17 @@ const TOOL_INFO = {
       'Reativar lead frio que não responde há 30 dias',
       'Follow-up após reunião de diagnóstico',
       'Mensagem de reativação para ex-cliente',
+    ],
+  },
+  criador_scripts: {
+    desc: 'Descreva o produto ou benefício, o ticket e como é o primeiro contato — a May monta o script completo, do primeiro "oi" ao fechamento, no seu método.',
+    dica: '💡 Quanto mais específico (produto, valor dos honorários, se fecha por texto ou agenda reunião), mais pronto para usar sai o script.',
+    sugestoes: [
+      'Script para benefício previdenciário (BPC, auxílio-doença ou acidente)',
+      'Script para revisão de financiamento veicular',
+      'Script para recuperação de Imposto de Renda',
+      'Script para plano de saúde (coparticipação, sensor, medicamento)',
+      'Script para reunião de diagnóstico que fecha na hora',
     ],
   },
   negociacao: {
