@@ -141,6 +141,15 @@ function escurecerCor(hex, fator = 0.4) {
   return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
 }
 
+// ─── Utilitário: remove emoji (PDFKit usa fontes padrão sem esses glifos —
+// sem isso, cada emoji vira um caractere corrompido no PDF final) ────────────
+function removerEmoji(txt) {
+  return txt
+    .replace(/[\u{1F1E6}-\u{1F1FF}\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u2190-\u21FF\u2B50\u2B55\uFE0F\u200D]/gu, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
 // ─── Utilitário: remove markdown inline, mantendo leitura fluida ─────────────
 function limparMarkdown(txt) {
   return txt
@@ -152,8 +161,13 @@ function limparMarkdown(txt) {
 // ─── POST /api/export/pdf ───────────────────────────────────────────────────
 router.post('/pdf', authMiddleware, async (req, res) => {
   try {
-    const { conteudo, titulo } = req.body;
+    let { conteudo, titulo } = req.body;
     if (!conteudo) return res.status(400).json({ erro: 'Conteúdo obrigatório.' });
+
+    // PDFKit não tem glifos de emoji nas fontes padrão (Helvetica) — sem isso,
+    // cada emoji do briefing vira um caractere corrompido no PDF.
+    conteudo = removerEmoji(conteudo);
+    if (titulo) titulo = removerEmoji(titulo);
 
     // Branding do escritório (do perfil do usuário, com fallbacks)
     const corPrincipal = (req.user.cor_escritorio || '#7C3AED').trim();
