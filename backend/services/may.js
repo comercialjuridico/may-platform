@@ -861,50 +861,923 @@ IMPORTANTE: preencher "com o que tem" não significa deixar tudo genérico. Use 
 ✓ Emoji só como marcador estrutural (📅 🕐 💻 📄), nunca como decoração emocional, e nunca fora dos títulos de seção.
 ✓ Sempre dentro dos limites éticos da OAB: apresente possibilidade e caminho jurídico, nunca prometa resultado ou valor garantido.
 
-━━━ EXEMPLO DE REFERÊNCIA (é só o ESQUELETO de ordem, formato e tom — nunca copie o texto entre colchetes literalmente para o script final; substitua cada trecho por conteúdo real e específico do produto pedido) ━━━
+━━━ BIBLIOTECA DE SCRIPTS REAIS DA MAYRA (base empírica — nunca copie um trecho pronto para outro nicho; use como referência de tom, sequência de perguntas, forma de apresentar honorários e forma de tratar objeções. Adapte tudo ao produto que o usuário pedir) ━━━
 
+Estes são scripts reais já usados por escritórios com o Método Comercial Jurídico. Eles mostram como a dor, a urgência, os honorários e as objeções ficam quando são REAIS e específicas do nicho — é esse nível de especificidade que o script gerado precisa ter, mesmo quando o nicho pedido for diferente destes exemplos.
+
+◆◆◆ SCRIPT REAL — BPC/LOAS — AUTISMO ◆◆◆
+SCRIPT ATENDIMENTO BPC AUTISTA
+TRIAGEM: PERGUNTAS DE 1 À 2
+1 – Olá! Tudo bem? Meu nome é Paloma, falo do Escritório Elayne Santos Advocacia, especialista em direitos dos Autistas e vou iniciar o seu atendimento. 🧩💙
+2 – Me conta duas coisas, por áudio ou mensagem de texto, por gentileza:
+Como você se chama? Seria o benefício para você, filho, filha, ou algum familiar?
+Se for o responsável legal: seguir o atendimento. Caso não seja: solicitar o contato do responsável ou pedir para enviar o número do escritório.
+INICIANDO O ATENDIMENTO HUMANIZADO COM OS REQUISITOS, ANÁLISE DO DIREITO AO BENEFÍCIO PERGUNTAS DE 4 À 12:
+4 – NOME qual é o nome e a idade do seu filho, há quanto tempo ele foi diagnosticado com autismo?
+NOME qual é a idade da sua filha e há quanto tempo ela foi diagnosticada com autismo?
+NEGATIVA = NÃO TEM LAUDO MÉDICO
+Certo, mas você tem alguma documentação médica? Exames, receitas, encaminhamentos...? [pedir foto]
+Nesse caso, é necessário um laudo médico para conseguirmos o benefício. Você tem previsão de consulta médica?
+Previsão dentro de 2 meses: acompanhar.
+Sem previsão: orientar a buscar um médico especialista ou agendar consulta no SUS 
+OBS: NÓS TEMOS PSIQUIATRA PARA MARCAR CONSULTA PRA TENTAR CONSEGUI UM LAUDO
+POSITIVO = TEM LAUDO
+Solicitar foto do laudo se tiver com ele em mãos, caso não tenha segue a análise normalmente. Depois o lead manda foto do laudo. 
+5 - Me conta uma coisa, o tratamento é pelo SUS, convênio ou plano de saúde? A senhora conseguiu o tratamento completo para o seu filho [NOME]? 
+7 – Nesse caso, a criança (SEMPRE SUBSTITUIR PELO NOME DA CRIANÇA) toma medicamento, faz uso de fraldas, algum alimento especial ou tem seletividade alimentar?
+RELATAR EM ÁUDIO OS DESAFIOS QUE O FILHO ENFRENTA NO DIA A DIA
+8 – Entendo perfeitamente! Vocês já tentaram dar entrada alguma vez no benefício e o INSS negou? Tem advogado?  
+Caso tenha negativa, acelera o atendimento. 
+Há quanto tempo o benefício foi negado pelo INSS e qual o motivo da negativa? 
+Nossa, nós temos um prazo de 30 dias para recorrer, como já se passou uma semana, nosso prazo está curto! Me conta mais, 
+Já perdeu o prazo do recurso: precisamos ingressar com uma ação na justiça federal, mas temos que agir rápido, pois corre risco do juiz negar pois já se passou o prazo de 30 dias para recurso!
+OBS: NÓS NÃO RECORREMOS ADMINISTRATIVAMENTE, SE HÁ A NEGATIVA, JÁ JUDICIALIZAMOS E O PRAZO PARA FAZÊ-LO NÃO PRESCREVE, MAS DE QUALQUER FORMA, TEM QUE SER GERADO UM SENSO DE URGêNCIA
+9 – Certo! Quantas pessoas moram na casa e qual é a renda do grupo familiar mensal? A senhora recebe bolsa família?
+se estiver recebendo o bolsa família, segue para a próxima pergunta
+caso não receba, pode perguntar se tem inscrição no cad único. 
+Caso não tenha, perguntar se consegue ir até o CRAS realizar a inscrição. 
+12 – Agora você poderia me contar um pouquinho mais sobre o comportamento e a rotina da criança? 
+APÓS ANALISAR O DIREITO ENCAMINHAR: (OBS: NÃO SEJA INVASIVO(A)
+13 – Muito obrigada pelas informações, realmente não consigo imaginar o quanto é difícil para sua família ter tantas dificuldades e sem ajuda alguma, mas pode ter certeza que eu e a minha equipe vamos trabalhar para conseguir esse benefício que vai proporcionar a vocês uma melhor qualidade de vida. Você acredita que um salário mínimo vai fazer diferença na vida de vocês?
+aguardar resposta
+14 – Agora eu posso encaminhar para você como nós vamos lutar pelo benefício? 
+aguardar resposta
+***honorários em texto:
+Nós cuidamos de tudo pra você ter tranquilidade no processo. Só depois que o benefício for aprovado e o dinheiro cair na sua conta é que você faz o pagamento pelos nossos serviços.
+O valor é de três parcelas do benefício e 30% dos atrasados que você receber.
+Esse valor já inclui tudo que for necessário:
+– Entrada do pedido no INSS
+ – Organização e envio dos documentos
+ – Agendamento e orientação completa para as perícias
+ – Recursos, se for preciso
+ – E até ação judicial, caso o INSS negue o pedido
+Você terá nosso acompanhamento do início ao fim, até o valor estar direitinho na sua conta. Ficou alguma dúvida ou posso te enviar agora os primeiros documentos para começarmos hoje ainda?
+Se sim, tira a dúvida, caso contrário encaminha a primeira documentação necessária.
+15 – Segue a primeira documentação para eu e a minha equipe lutarmos pelo benefício do seu FILHO: 
+●	RG e CPF da senhora e do seu filho;
+●	Comprovante de endereço;
+●	Estado civil da senhora;
+●	Profissão da senhora:
+A senhora consegue me enviar os documentos hoje até às 16h? 
+16 – NOME, segue a primeira documentação para eu e a minha equipe lutarmos pelo benefício do seu filho:
+Link: 
+A SELFIE É DO RESPONSÁVEL, NÃO É DA CRIANÇA.
+⚠️ Apenas ressalto que, o link do contrato que enviei para você tem validade no sistema e expira dentro de 3h, portanto, caso fique com alguma dúvida é só me chamar aqui.
+
+◆◆◆ SCRIPT REAL — GUIA DO MÉTODO + BPC/LOAS AUTISMO + AUXÍLIO-ACIDENTE + AUXÍLIO-DOENÇA (notação oficial do método) ◆◆◆
+SCRIPTS DE VENDAS
+Metodo Comercial Jurídico | Mayra Alves
+Marco 2026
+CHAGPT: https://chatgpt.com/g/g-JkyE62FUl-may-2-0
+Como ler estes scripts
+Metodo Comercial Jurídico | Mayra Alves
+Scripts estruturados sem espaço para o não | Marco 2026
+PRODUTO 1
+BPC / LOAS
+Autismo | PRODUTO 2
+AUXÍLIO
+Acidente | PRODUTO 3
+AUXÍLIO
+Doença
+Cada passo tem um objetivo de condução. O lead não decide para onde vai   a vendedora conduz. Não existe pergunta aberta sem caminho definido para o sim.
+FALA
+Mensagem ou áudio enviado para o lead | CONDICIONAL
+Ramificação: o que fazer se o lead responder X ou Y | GATILHO
+Urgência ou decisão. Sempre em TEXTO, nunca só em áudio
+FECHAMENTO
+Condução para assinatura. Não é pergunta   e convite com urgência | INSTRUÇÃO
+Orientação interna para a vendedora. Nao e enviada para o lead | NOTA
+Cuidado específico ou alternativa de rota naquele passo
+Princípio central: o lead entra num caminho sem saída para o não. Cada resposta   seja qual for   tem um próximo passo predefinido que mantém a condução ativa.
+PRODUTO 1   BPC / LOAS AUTISMO
+Público: responsável legal de criança ou adulto autista em situação de vulnerabilidade econômica. Ticket emocional alto. A mãe não compra serviço jurídico, ela compra esperança de vida melhor para o filho. O nome da criança e a âncora de todo o script.
+Honorarios: 50% dos 12 primeiros parcelas do benefício + 30% dos atrasados. Só cobrar após o dinheiro cair na conta.
+FASE | 1   TRIAGEM E ABERTURA
+1.  FALA   Texto
+Olá! Tudo bem? Meu nome é [NOME], falo do Escritório [NOME DO ESCRITÓRIO].
+Somos especialistas em direitos das pessoas autistas.
+
+Para eu dar início ao seu atendimento, me conta duas coisas rapidinho:
+Como você se chama? E o benefício seria para você, filho, filha ou outro familiar?
+2.  CONDICIONAL
+SE for o responsável legal: seguir para o passo 3.
+
+NÃO é o responsável legal:
+Entendo! Para eu conseguir ajudar direitinho, preciso falar com o responsável legal do [nome da criança].
+Você consegue me passar o contato dele(a) ou pedir para ele(a) me chamar aqui?
+3.  FALA   Audio
+[NOME], que bom falar com você! Me conta:
+Qual é o nome e a idade do seu filho/filha?
+Há quanto tempo ele/ela foi diagnosticado com autismo?
+FASE | 2   ANÁLISE DO DIREITO (QUALIFICAÇÃO)
+4.  CONDICIONAL
+SE tem laudo: solicitar foto se tiver em mãos. Caso contrário, siga.
+
+NÃO tem laudo:
+Certo. Você tem alguma documentação médica: exame, receita, encaminhamento?
+médico: pedir foto e seguir a análise normalmente.
+Não tem nada: Vamos resolver isso. Nós temos acesso a psiquiatra parceiro que pode ajudar a conseguir o laudo. Posso verificar uma agenda para o [nome da criança]?
+Nota: Se estiver prevista consulta em até 2 meses: acompanhar. Sem previsão: encaminhar para o psiquiatra parceiro do escritório antes de descartar.
+5.  FALA   Audio
+[NOME], o tratamento do [nome da criança] e pelo SUS, por convênio ou plano de saúde?
+Ele/ela consegue ter o tratamento completo que precisa?
+6.  FALA   Audio
+Entendo. E quanto ao dia a dia   [nome da criança] toma medicamento, usa fraldas, tem algum alimento especial ou seletividade alimentar?
+Me conta um pouquinho sobre os desafios dele/dela na rotina.
+Nota: Deixar a mãe falar. Não interromper. Esse momento gera conexão e dados para o processo.
+7.  CONDICIONAL
+SE já tentaram dar entrada no benefício e foi negado:
+Há quanto tempo foi negado e qual foi o motivo?
+dá para recorrer   mas o prazo está curto. Temos que agir rápido.
+é a ação judicial. E por isso é ainda mais urgente a gente começar logo.
+
+SE não tentou ainda:
+Então é a primeira vez. Ótimo,  a gente entra com o pedido bem organizado aumentando as chances de ser aprovado!
+Nota: Gerar urgência em ambos os casos. No INSS, o prazo de 30 dias é para recurso administrativo. A ação judicial não tem prazo de prescrição   mas o argumento de urgência deve ser mantido.
+8.  FALA
+Me conta: quantas pessoas moram na casa e qual é a renda mensal da família?
+A família recebe Bolsa Família ou está inscrita no CadÚnico?
+9.  CONDICIONAL
+SE recebe Bolsa Família: seguir.
+SE não tem CadÚnico: Vamos te ajudar a fazer esse cadastro também, isso faz parte do que a gente cuida para você.
+FASE | 3   ATIVAÇÃO DA DOR E VIRADA PARA O SIM
+Esse é o momento mais importante do script. A mãe já falou sobre o filho. Agora e hora de conectar a dor ao benefício com uma única pergunta que não tem resposta negativa.
+10.  FALA   Audio
+[NOME], muito obrigada por tudo que você me contou.
+Não consigo imaginar o quanto é desafiador cuidar do [nome da criança] com tudo isso, muitas vezes sem apoio.
+
+Mas eu quero que você saiba que eu e minha equipe vamos trabalhar para garantir esse direito para vocês.
+
+Me responde uma coisa só:
+Um salário mínimo todo mês faria diferença na vida de vocês?
+Nota: Aguardar a resposta. Essa pergunta não tem resposta negativa   qualquer variante de sim abre o próximo passo.
+11.  FALA
+Então posso te encaminhar agora como a gente vai lutar por esse benefício?
+Nota: Aguardar o sim   é quase sempre garantido após a pergunta anterior.
+FASE | 4   HONORÁRIOS E CONDUÇÃO PARA ASSINATURA
+Os honorários nunca são apresentados como preço   são apresentados como parte da garantia. Só cobrar depois que o dinheiro cair na conta é o maior diferencial deste produto.
+12.  FALA   Texto
+[NOME], o nosso trabalho funciona assim:
+
+A gente cuida de tudo para você ter tranquilidade no processo. Você não paga nada agora.
+Só depois que o benefício for aprovado e o dinheiro cair na conta da [nome da criança] é que você faz o pagamento.
+
+O valor é XX parcelas do benefício e 30% dos atrasados que você receber.
+Esse valor já inclui tudo:
+Entrada do pedido no INSS, organização dos documentos, orientação completa para as perícias, recursos se necessário, e ação judicial se o INSS negar.
+
+Você vai ter nosso acompanhamento do início ao fim   até o dinheiro estar na sua conta.
+
+Ficou alguma dúvida ou posso te encaminhar a primeira documentação para a gente começar hoje?
+13.  CONDICIONAL
+Se tiver dúvida: responder a dúvida e retornar imediatamente para o fechamento.
+NÃO tenha dúvida: ir direto para o passo 14.
+FASE | 5   DOCUMENTAÇÃO E ASSINATURA
+14.  FALA   Texto
+[NOME], segue a primeira documentação para eu e minha equipe lutarmos pelo benefício do [nome da criança]:
+
+RG e CPF seu e do seu filho/filha
+Comprovante de endereço
+Estado civil
+Profissão
+
+A senhora consegue me enviar até as 16h de hoje?
+Nota: Sempre firmar um prazo. Nunca aceitar em breve ou depois. Se não puder hoje: qual é o melhor horário para você mandar amanhã de manhã?
+15.  GATILHO   Texto
+[NOME], segue o link do contrato:
+[LINK]
+
+Para assinar é só clicar, conferir seus dados e assinar com o dedo na própria tela do celular.
+A selfie que vai pedir é a sua, não do [nome da criança].
+
+Importante: o link expira em 30 minutos. Se tiver qualquer dúvida, me chama aqui antes de fechar esse prazo
+Nota: Se o lead não assinar em 1h: reenviar o link com a mensagem: [Nome], o link do contrato expirou. Estou te enviando um atualizado. Você consegue abrir agora? Estou aqui se precisar de ajuda.
+PRODUTO 2   AUXÍLIO ACIDENTE
+Público: trabalhador que sofreu acidente com sequela permanente. Ticket racional   ele quer provar que tem direito. O argumento mais forte: o lucro é acumulavel com o salario e e vitalicio. Muitos voltaram a trabalhar sem saber que poderiam receber os dois ao mesmo tempo.
+Regra crítica: não dispensar o lead por sequela pequena   deixar o INSS avaliar. A função da vendedora é qualificar e conduzir, não fazer perícia.
+FASE | 1   ABERTURA E IDENTIFICAÇÃO
+1.  FALA   Texto
+Olá, [NOME]! Tudo bem?
+Meu nome é [NOME], falo do Escritório [NOME], especialista em auxílio-acidente.
+Vou iniciar o seu atendimento.
+
+Me conta: você sofreu um acidente que deixou alguma sequela ou limitação?
+FASE | 2   ANÁLISE DO DIREITO
+2.  FALA   Audio
+[NOME], pode me contar quando e como ocorreu o acidente?
+Quero entender os detalhes para analisar tudo que você pode ter direito.
+3.  FALA   Audio
+Que situação difícil, [NOME]. Vou fazer o máximo para te ajudar.
+
+Que sequelas você ficou? Essa sequela reduziu de alguma forma o seu desempenho no trabalho na época, mesmo que parcialmente?
+Nota: Não minimizar a sequela. Mesmo uma limitação pequena pode dar direito ao benefício. Deixar o lead descrever.
+4.  FALA
+Você tem documentos médicos do período do acidente? Atestado, laudo, exame, algo que comprovem o acidente e a sequela?
+Nota: Se não tiver: Tudo bem. A gente avalia o que é possível reunir. Me conta quais documentos você lembra de ter na época.
+5.  FALA
+Na época do acidente você trabalhava com carteira assinada? Chegou a ficar afastado por causa do acidente recebendo auxílio doença?
+6.  CONDICIONAL
+SE tinha carteira assinada: ir para o passo 7.
+
+NÃO tinha carteira assinada ou era MEI, autônomo:
+[NOME], analisei o seu caso com cuidado. Para o auxílio-acidente especificamente, um dos requisitos é ter contribuído para o INSS como empregado CLT na época.
+Mas dependendo da sua situação, pode existir outro caminho, por exemplo, se houve responsabilidade de terceiros ou se a sequela foi grave.
+Me conta mais um detalhe: a sequela causou algum impedimento sério na sua vida após o acidente?
+Nota: Nunca fechar a porta antes de verificar se não há outro produto aplicável (LOAS, ação trabalhista, indenização). Dispensar só se for absolutamente inviável.
+7.  FALA   Audio - SÓ FAZ ESSA PERGUNTA SE TIVER DÚVIDAS SOBRE O DIREITO, SE NÃO AVANCA!
+Qual era a sua função na empresa na época e como você executava o trabalho?
+Me conta um pouco mais de detalhes.
+FASE | 3   VIRADA PARA O SIM
+O benefício é apresentado como conquista já decidida   não como possibilidade. O script usa a voz ativa: a gente vai garantir, não a gente vai tentar.
+8.  FALA   Audio
+Excelente, [NOME]. Muito obrigada por confiar na gente com essas informações.
+
+Com base no que você me contou, o seu caso tem base para o auxílio-acidente.
+
+Só quero reforçar uma coisa importante antes de te explicar como funciona:
+O auxílio-acidente é um benefício mensal e vitalício que fica ativo até você se aposentar.
+E o que não todo mundo sabe: você pode receber o auxílio-acidente ao mesmo tempo que o salário. Não é preciso parar de trabalhar.
+
+Eu posso te encaminhar como a gente vai trabalhar para garantir esse benefício para você?
+Nota: Aguardar o sim. Se o lead perguntar sobre as chances: A gente não abre processo sem ter base no caso. Se eu estou aqui e dizendo que o seu caso tem sustentação, é porque tem. Não faria sentido gastar o tempo do escritório em algo sem perspectiva.
+FASE | 4   HONORÁRIOS E CONDUÇÃO PARA ASSINATURA
+9.  FALA   Audio
+Você só paga se ganhar! A gente cuida de tudo para você ter tranquilidade no processo.
+Você não paga nada agora.
+Só depois que o benefício for aprovado e o dinheiro cair na conta é que você faz o pagamento.
+
+O valor é XX parcelas do benefício e 30% dos atrasados que você receber.
+Esse valor já inclui tudo:
+Entrada do pedido no INSS, organização dos documentos, orientação completa para as perícias, recursos se necessário, e ação judicial se o INSS negar.
+
+Você vai ter nosso acompanhamento do início ao fim  até o dinheiro estar na sua conta.
+
+Ficou alguma dúvida ou posso te encaminhar a primeira documentação para a gente começar hoje?
+
+
+
+
+dúvida?
+Nota: Se houver dúvida: responder e retornar para o fechamento. Se não: ir direto para a documentação.
+FASE | 5   DOCUMENTAÇÃO E ASSINATURA
+10.  FALA   Texto
+[NOME], segue a documentação inicial para a gente começar a garantir o seu auxilio:
+
+RG e CPF
+Comprovante de endereço
+Estado civil
+Profissão
+
+Você consegue me enviar até as 16h de hoje?
+Nota: Se não puder hoje: firmar prazo para o dia seguinte de manhã. Nunca aceitar sem data.
+11.  FALA
+Assim que eu receber a documentação, a gente segue para a assinatura do contrato.
+12.  GATILHO   Texto
+[NOME], segue o contrato e a procuração:
+[LINK DO CONTRATO]
+
+Para assinar: clique no link, confira seus dados e assine com o dedo na própria tela.
+
+O link expira   se tiver qualquer dúvida é só me chamar antes de fechar.
+Nota: Se não assinar em 2 horas: [Nome], o link do contrato expira em breve. Consegue abrir agora? Estou aqui.
+PRODUTO 3   AUXÍLIO DOENÇA
+Publico: pessoa com problema de saúde que impede ou dificulta o trabalho. Perfil variado   pode ser física ou mental. A dor é dupla: financeira (sem renda) e emocional (medo de não conseguir, vergonha, incerteza). O script acolhe sem paralisar   e conduz para a solução.
+Período de graça INSS: 12 meses para quem parou de contribuir. Até 24 meses se contribuiu mais de 120 meses. 36 meses se estiver desempregado registrado. Verificar sempre antes de desqualificar.
+FASE | 1   ABERTURA E IDENTIFICAÇÃO
+1.  FALA   Texto
+Olá, bom dia! Tudo bem?
+Meu nome é [NOME], falo do Escritório [NOME], especialista em auxílio doença.
+Vou iniciar o seu atendimento.
+
+Me conta duas coisas rápido:
+Como você se chama? E o benefício seria para você ou para algum familiar?
+2.  INSTRUÇÃO
+Se o volume de atendimentos estiver alto, enviar a mensagem de espera:
+
+Devido ao alto número de chamados no escritório, o tempo de resposta pode ser um pouco maior hoje. Você merece toda a atenção da nossa equipe e será atendido(a) em breve.
+FASE | 2   ANÁLISE DO DIREITO
+3.  FALA   Audio
+[NOME], me conta: qual é o seu problema de saúde?
+Nota: Deixar o lead falar sem interromper. As informações dessa resposta vão alimentar todo o restante do atendimento.
+4.  FALA
+[NOME], você tem laudo, relatório médico ou atestado?
+Nota: Se sim: registrar e seguir. Se não: Tudo bem. Me conta o que você tem   exame, receita, qualquer documento. A gente trabalha com o que existe.
+5.  FALA
+[NOME], você já teve o auxílio doença negado alguma vez pelo INSS?
+Nota: Se sim: Quanto tempo faz? Qual foi o motivo? Usar urgência de prazo e retroativo. Se não: seguir.
+6.  FALA
+[NOME], você trabalha ou já trabalhou com carteira assinada?
+Quando foi a última vez que você contribuiu para o INSS?
+7.  CONDICIONAL
+SE contribuiu nos últimos 12 meses: seguir para o passo 8.
+SE parou de contribuir há mais de 12 meses:
+período de graça conforme o histórico:
+   Menos de 120 contribuições: graça de 12 meses.
+   Mais de 120 contribuições: graça de 24 meses.
+   Desempregado registrado: graça de 36 meses.
+período de graça: seguir normalmente.
+período de graça: verificar se há outro produto aplicável antes de dispensar.
+Nota: Nunca dispense com base em estimativa. Verificar o histórico de contribuições antes de qualquer decisão.
+FASE | 3   VIRADA PARA O SIM
+Aqui o script transforma informação em esperança. O lead já falou o suficiente. Agora a vendedora assume o protagonismo: eu e minha equipe vamos conseguir isso para você.
+8.  FALA   Audio
+[NOME], muito obrigada. Todas essas informações são valiosas, o INSS é criterioso e a gente precisa de tudo bem documentado.
+
+Pode ter certeza que eu e minha equipe vamos trabalhar para conseguir esse auxílio que vai trazer mais tranquilidade para você e para a sua família.
+
+Posso te encaminhar como a gente vai lutar pelo seu auxílio doença?
+Nota: Aguardar o sim. Essa pergunta não tem resposta negativa,  qualquer variante de sim abre o próximo passo.
+FASE | 4   HONORÁRIOS E CONDUÇÃO PARA ASSINATURA
+9.  FALA
+A gente cuida de tudo para você ter tranquilidade no processo.
+Você não paga nada agora.
+Só depois que o benefício for aprovado e o dinheiro cair na conta é que você faz o pagamento.
+
+O valor é XX parcelas do benefício e 30% dos atrasados que você receber.
+Esse valor já inclui tudo:
+Entrada do pedido no INSS, organização dos documentos, orientação completa para as perícias, recursos se necessário, e ação judicial se o INSS negar.
+
+Você vai ter nosso acompanhamento do início ao fim,  até o dinheiro estar na sua conta.
+
+Ficou alguma dúvida ou posso te encaminhar a primeira documentação para a gente começar hoje?
+
+
+
+
+dúvida ou posso encaminhar a primeira documentação para lutarmos pelo seu auxílio doença?
+Nota: Se houver dúvida: responder e retornar para o fechamento. Se não: ir direto para a documentação.
+FASE | 5   DOCUMENTAÇÃO E ASSINATURA
+10.  FALA   Texto
+[NOME], segue a documentação inicial para a gente começar a garantir o seu auxilio:
+
+RG e CPF
+Comprovante de endereço
+Estado civil
+Profissão
+
+Você consegue me enviar até as 16h de hoje?
+Nota: Se não puder hoje: firmar prazo para o dia seguinte de manhã. Nunca aceitar sem data.
+11.  FECHAMENTO   Texto
+[NOME], segue a primeira documentação para eu e minha equipe brigarmos pelo seu auxílio:
+[LINK]
+
+Para assinar: clique no link, confira seus dados e assine com o dedo na própria tela.
+
+O link do contrato expira   se tiver qualquer dúvida, me chame antes de fechar.
+Nota: Se não assinar em 2 horas: [Nome], o link expira em breve. Consegue abrir agora? Estou aqui para te ajudar.
+
+◆◆◆ SCRIPT REAL — IMPOSTO DE RENDA — RESTITUIÇÃO POR DESPESA ESCOLAR (DEPENDENTE COM LAUDO) ◆◆◆
+SCRIPT DE VENDAS – IR 
 1. ABERTURA
-"Olá! Eu sou a [NOME], do escritório [NOME]. Vi que você entrou em contato sobre [produto/situação]. Antes de te explicar melhor, como você se chama?"
-
+Olá! Que bom que você entrou em contato.
+Meu nome é Bruna e vou esclarecer todas as suas dúvidas sobre a recuperação de valores pagos a mais no Imposto de Renda por conta da escola particular.
+Antes de te explicar melhor, como você se chama? Seria seu filho ou filha?
 2. QUALIFICAÇÃO
-"[NOME], me conta uma coisa: [pergunta que confirma o requisito principal do caso]?"
-— aguardar —
-"E [segunda pergunta, só depois da primeira ser respondida]?"
+[NOME], seu filho tem diagnóstico com laudo médico e CID?
+Se sim:
+ Perfeito, isso já confirma um dos critérios principais.
+Ele estuda em escola particular?
+Se sim:
+ Ótimo, esse é outro ponto essencial.
+Se não:
+ Entendi. Nesse caso específico não entra por escola particular.
+ Mas me diz uma coisa: você recebe algum benefício ou a renda da família é mais baixa?
+Qual o valor da mensalidade da escola, aproximadamente?
+Você declara Imposto de Renda?
+Se não:
+ Esse direito vem justamente da declaração. Sem ela, não conseguimos aplicar agora.
+Seu filho está como dependente na sua declaração?
+Esses gastos com a escola você costuma lançar na declaração?
+Qual sua renda mensal aproximada?
+Há quantos anos você paga essa escola?
+3. SIMULAÇÃO (CONSCIÊNCIA)
+[NOME], fiz uma estimativa com base no que você me passou.
+Para esse nível de renda, a alíquota costuma ficar nessa faixa.
+Considerando a mensalidade da escola, isso gera uma recuperação anual relevante no Imposto de Renda.
+Agora vem o ponto que quase ninguém sabe:
+Como a Justiça permite recuperar os últimos 5 anos, esse valor acumulado se torna ainda maior.
+Ou seja, é um valor que hoje você está pagando a mais sem necessidade.
+Faz sentido até aqui?
+4. EXPLICAÇÃO DO PROCESSO
+Vou te explicar de forma simples.
+O escritório entra com uma ação pedindo para que essas despesas escolares sejam tratadas como despesas médicas.
+Quando sai a decisão inicial, você já pode aplicar isso no próximo Imposto de Renda.
+Depois, é possível recuperar os valores pagos a mais dos últimos anos.
+Você passa a pagar menos imposto e ainda recebe o que pagou a mais.
+Entendeu como funciona?
+5. URGÊNCIA
+[NOME], existem dois caminhos.
+Se você entrar agora, tem chance de aplicar isso já no próximo Imposto de Renda.
+Se deixar para depois, continua pagando com limite e perde mais um ano de recuperação. E tem outro ponto.
+Esse retroativo é limitado a 5 anos.
+Cada ano que passa, você perde uma parte desse valor.
+Na maioria das vezes o lead pergunta como faz para iniciar o processo mas caso não pergunte você fará a pergunta:
+Quer que eu te explique como funciona para iniciar?
+6. HONORÁRIOS
+Funciona assim.
+Existe um valor inicial para dar entrada no processo e um percentual apenas sobre o que você recuperar, que é R$ 1970,00 de entrada e 20% no final.
+Ou seja, o maior ganho vem justamente quando o resultado acontece. O pagamento pode ser feito no Pix ou no cartão em até 12x.
+Como você costuma se organizar melhor?
+Caso a cliente pergunte o valor parcelado no cartão
+Certo [NOME], o parcelamento pode ser feito em até 12 x de R$ 197,00, para que você possa ver como as parcelas podem se encaixar melhor no seu orçamento vou deixar abaixo o link para simulação
+Link para simulação das parcelas
+https://pay.infinitepay.io/jfuruchoadvocacia/VC1D-EjaHQDY8T-1970,00
+Aguardar uns 5 minutos e retornar:
+[NOME], conseguiu simular através do link? Tem algo mais que queira esclarecer?
+Nesse momento a cliente pode apresentar objeções ou falar que não tem nenhuma dúvida, então você pergunta
+Maravilha [NOME]! vamos então dar o próximo passo para garantir a devolução do seu dinheiro e a dedução integral do seu IR para os próximos anos?
+9. FECHAMENTO
+Perfeito, [NOME].
+Para iniciar, é só acessar o link, preencher seus dados e a nossa equipe jurídica já dará  sequência.
+Consegue fazer isso agora?
+https://app.zapsign.com.br/verificar/doc/51adf7f1-ae20-43c8-a54f-f03c1f2b766f
+Caso a cliente feche o contrato você então pede o documentos
+10. DOCUMENTOS 
+[NOME] Primeiramente quero agradecer pela confiança no nosso trabalho e parabenizar pela decisão de buscar seus direitos.
+Para dar inicio ao seu processo o quanto antes, precisamos de fotos ou PDF dos seguintes documentos:
+•⁠  ⁠Laudo médico com CID
+•⁠  ⁠Comprovantes de pagamento da escola (últimos 5 anos)
+Podem ser os recibos dos boletos, comprovantes do PIX ou declaração da escola informando os valores pago durante o ano.
+•⁠  ⁠Declarações de IR dos últimos 5 anos com o Recibo de Entrega
+•⁠  ⁠RG/CPF do responsável e do dependente (se o dependente não tiver RG pode ser a certidão de nascimento
+•⁠  ⁠Comprovante de residência atual em seu nome.
+Caso a cliente fique na dúvida, pare de responder ou tenha muitas objeções
+Ofereça o agendamento
+8. AGENDAMENTO
+Se preferir, posso te colocar em uma conversa rápida com a Dra. Juliana
+Ela analisa seu caso e te mostra o cálculo exato.
+Leva cerca de 15 minutos e é online.
+Melhor pela manhã ou à tarde?
+Se a cliente responder você me pergunta para eu te falar o horario
+Caso a cliente deixe de responder, agendar contato com o lead para D+2
+FOLLOW UP 1
+Olá [NOME] tudo bem? Aqui é a Bruna, do escritório da Dra. Juliana!
+Há uns dias atrás a Sra entrou em contato com o nosso escritório buscando informações sobre a possibilidade real de dedução de IR e restituição dos valores pagos com a escola regular do [SEU/SUA] [FILHO/FILHA]
+Restou alguma dúvida sobre o nosso trabalho? o que está faltando para darmos continuidade?
+Aguarda a resposta, se tiver alguma objeção ou não responder
+SE JA TINHA FALADO ANTES QUE PRECISAVA FALAR COM O ESPOSO
+Podemos agendar uma chamada de vídeo com a doutora, não vai tomar mais do que 15 minutos seu tempo para explicar para a senhora e seu esposo, caso vocês tenham alguma dúvida.
+OU SE NÃO FALOU NADA SOBRE ESPOSO
+Podemos agendar uma chamada de vídeo com a doutora, não vai tomar mais do que 15 minutos seu tempo para explicar para a senhora, caso tenha alguma dúvida.
+OBJEÇÕES
+Vou falar com meu esposo
+Claro [NOME], faz todo sentido. Uma decisão assim envolve a família inteira e vocês dois precisam estar alinhados. Eu respeito muito isso
+Antes de você ir conversar com ele, me deixa te perguntar uma coisa: você, pessoalmente, já viu que esse direito faz sentido para vocês? Porque se você ainda tiver dúvida, a conversa com ele fica mais difícil ainda  e aí eu prefiro resolver isso com você agora
+Ótimo, quando você acha que consegue conversar com ele, ainda essa semana?
+ela vai falar quando e você então já deixa marcado o retorno para um dia após o dia que ela disser que vai conversar
+Perfeito! então no dia xx/xx às xx horas eu retorno o contato para retomarmos nossa conversa tudo bem?
+E se no momento da conversa surgir qualquer dúvida pode me chamar ou pedir para seu esposo me chamar que estou à disposição para tirar todas as dúvidas 😊
+Se o marido for o obstáculo real — ofereça incluí-lo
+Se quiser, a gente pode fazer uma conversa rápida com vocês dois juntos por WhatsApp, vídeo, como for melhor. Assim ele ouve direto de mim, tira as dúvidas dele, e vocês decidem juntos com segurança. Muitos casais preferem assim
+Posso pagar os honorários quando receber a devolução?
+Faz todo sentido você pensar assim. Você gasta muito todo mês com a escola, com as terapias e tudo mais que [SEU/SUA FILHO/FILHA] precisa e a última coisa que você quer é mais uma conta antes de ver o resultado, eu entendo
+Mas deixa eu te mostrar o outro lado, você já pagou esse imposto a mais, o dinheiro já saiu do seu bolso, a Justiça reconhece que esse valor te pertence, estamos falando em recuperar um valor que já é seu, a questão não é se vale pagar honorários mas sim quanto tempo ainda você vai quer deixar esse dinheiro na mão da receita
+voltar na conversa para ver o valor estimado que a pessoa teria para receber e altera os valores
+Pensa comigo: uma família pagando R$ x.xxx,xx por mês de escola, tem direito a recuperar em torno de R$ x.xxx,xx por ano e podemos retroagir 5 anos. Estamos falando de R$ xx.xxx,xx ou mais, corrigidos pela Selic. O honorário sai de um valor que hoje não existe no seu bolso mas que você já deveria ter recebido
+O que eu posso fazer por você é parcelar o honorário para caber no seu orçamento agora. Porque o que não faz sentido é deixar de buscar um direito seu por causa de um valor que a gente consegue resolver juntas
+Você não está pagando por uma tentativa. Você está investindo em um direito que já existe, já foi reconhecido pela Justiça, e que tem precedente vinculante. Meu trabalho é garantir que esse dinheiro chegue até você com segurança, com técnica e com cuidado
+O laudo do meu filho é recente, descobri o diagnóstico recentemente
+Não tem problema nenhum o fato do diagnóstico ser recente, o entendimento é que o laudo vem apenas para fechar um diagnóstico que já existia, por isso todos os direitos do [SEU/SUA FILHO/FILHA] retroagem desde o nascimento
+Base de Cálculo Mensal (R$) | Alíquota (%)
+Até 2.259,20 | Isento
+De 2.259,21 até 2.826,65 | 7,5%
+De 2.826,66 até 3.751,05 | 15%
+De 3.751,06 até 4.664,68 | 22,5%
+Acima de 4.664,68 | 27,5%
 
+◆◆◆ SCRIPT REAL — REVISÃO DE FINANCIAMENTO VEICULAR ◆◆◆
+SCRIPT – REVISÃO DE FINANCIAMENTO - QUALIFICAÇÃO FEITA PELA IA (INICIAL)
+APÓS O ENVIO DOS DADOS
+Nome, tudo bem? Me chamo [NOME] e sou o(a) especialista que vai cuidar do cálculo da sua revisão de financiamento.
+
+Vou levar cerca de 5 minutos para fazer esse cálculo e já volto para te explicar o resultado.
+
+Enquanto isso, vou te enviar um caso parecido com o seu para você entender como funciona.
+
+➡️ Enviar um caso positivo do mesmo banco do lead.
+RETORNO DA ANÁLISE
+➡️ Enviar o print do cálculo.
+
+Pronto, [Nome]. Analisei as informações que você me enviou.
+
+Você está pagando mais do que deveria no seu financiamento.
+
+O nosso trabalho é verificar isso e buscar a melhor solução para reduzir esse impacto no seu bolso, sempre que houver essa possibilidade.
+
+Me diz uma coisa: essa redução faria diferença no seu orçamento hoje?
+CONDUÇÃO PARA O FECHAMENTO
+No seu caso, o próximo passo é avançarmos com a análise completa e iniciar a estratégia para buscar uma redução, negociação ou revisão dos valores.
+
+O objetivo é verificar onde podem existir cobranças acima do devido e definir a melhor forma de reduzir o impacto desse financiamento no seu orçamento.
+
+Vou te enviar um áudio explicando como funciona nosso serviço.
+
+Se houver dúvidas, esclareça todas. Caso contrário, prossiga para a apresentação dos honorários.
+PONTOS POSITIVOS E PONTOS DE ATENÇÃO
+[Nome], eu gosto de explicar tudo com clareza.
+
+O ponto positivo é que, quando existe possibilidade de revisão, podemos buscar uma condição melhor e evitar que você continue pagando valores acima do necessário.
+
+O ponto de atenção é que, quanto mais o tempo passa, mais parcelas são pagas nas mesmas condições. Por isso, não é um caso para deixar parado.
+
+Se a parcela já pesa no seu orçamento hoje, a tendência é que continue afetando sua vida financeira nos próximos meses. 
+APRESENTAÇÃO DOS HONORÁRIOS E FECHAMENTO
+Para o escritório iniciar o seu caso, os honorários iniciais são 10 x R$ [VALOR] que podem ser pagos via boleto, e ao final 10% do proveito econômico.
+
+Esse valor inclui a análise completa, os cálculos, a definição da estratégia e toda a condução do procedimento para buscar a melhor solução para o seu financiamento.
+
+Vou te enviar agora os documentos para assinatura e os dados para pagamento.
+
+Você prefere iniciar pelo PIX, pelo cartão ou boleto?
+teste Dani
+para darmos início ao seu processo e ativarmos a proteção do seu veículo, os honorários funcionam assim:
+📌 *Honorários Iniciais:* 10x de *R$ 480,00* (no boleto ou cartão) 
+📌 *Ao Final do Processo:* 10% do proveito econômico (somente sobre a economia).
+Esse valor cobre a análise completa, parecer técnico, monitoramento diário contra busca e apreensão e toda a negociação com o banco.
+Para eu solicitar os documentos e gerar o seu contrato agora, *você prefere seguir no Boleto, Cartão ou PIX à vista?*
+Reuniao Dani e Mayra - 12/08/2026
+SCRIPTS FOLLOW UP REVISIONAL - 
+[NOME], tudo bem?
+O setor jurídico está aguardando a assinatura da documentação para entrarmos com o seu processo de revisional… E tem outro detalhe, o cálculo que fizemos para você vence em 30 dias, tendo em vista que os juros se acumulam dia após dia.
+Como eu te falei, você pode ter uma economia de mais de R$xxx para quitar o veículo futuramente.
+Vou deixar o link novamente aqui. Assim que você assinar, me sinalize por favor. Posso contar com você hoje ainda para concluir a documentação? 
+[INSERIR LINK]
+Isabela tudo bem?
+Estamos aguardando a assinatura da documentação para entrarmos com o seu processo de revisional… E tem outro detalhe, a proposta que fizemos para você vence em 30 dias, tendo em vista que os juros se acumulam dia após dia.
+Como eu te falei, você pode ter uma economia significante para quitar o veículo futuramente, assim como o caso do cliente que estou te enviando.
+ Vou deixar o link novamente aqui. Assim que você assinar, me sinalize por favor. Posso contar com você hoje ainda para concluir a documentação?
+ Link contrato: 
+–
+Nome, tudo bem?
+Seu atendimento já está na etapa final e estamos aguardando somente a assinatura da documentação para dar andamento.
+Quero te reforçar um ponto importante: a condição apresentada na sua proposta tem validade de 30 dias, porque os valores envolvidos podem sofrer alteração com o passar do tempo.
+Como conversamos, existe uma estratégia para buscar uma condição mais vantajosa para a regularização do contrato, quanto mais tempo passa, mais difícil fica resolver. 
+Vou deixar os documentos aqui novamente, consegue me enviar hoje?
+enviar a mensagem acima separada dessa
+Lista de documentos:
+📄 RG ou CNH (foto dos dois lados)
+📄 Comprovante de residência atualizado (últimos 3 meses)
+📄 Contrato de financiamento do veículo
+📄 Boleto/Carnê
+📄 Documento do carro (CRLV)
+📄 Comprovante de renda
+—
+[nome], como vai? A senhora nos procurou para revisarmos o seu contrato de financiamento… 
+Tem um ponto importante: Você financiou *R$ 18 mil*, mas ainda tem aproximadamente **R$ 47.164,05** em parcelas.
+Com a revisão do contrato, identificamos uma *economia estimada de R$ 33.014,84*
+Por isso, é importante não deixar o seu processo parado. Falta somente os documentos para iniciarmos. 
+A proposta que eu te passei tem validade e passará por um reajuste em breve. Vou deixar os documentos aqui novamente, consegue me enviar hoje?
+enviar a mensagem acima separada dessa
+Lista de documentos:
+📄 RG ou CNH (foto dos dois lados)
+📄 Comprovante de residência atualizado (últimos 3 meses)
+📄 Contrato de financiamento do veículo
+📄 Boleto/Carnê
+📄 Documento do carro (CRLV)
+📄 Comprovante de renda
+–
+Nome, estou retomando seu caso porque a proposta que te passei foi no mês passado e eu não vou conseguir manter essa mesma condição por mais tempo.
+Como é a revisão do seu financiamento, quanto mais isso fica parado, mais parcelas continuam se acumulando.
+Então preciso concluir isso com você agora. Vou manter a condição que te passei até hoje.
+Concluindo hoje, já seguimos com a documentação e iniciamos o seu caso. Consegue me enviar os documentos hoje? 
+–
+Honorários 
+O escritório cuida de todo o seu caso: vamos revisar o contrato, fazer os cálculos, preparar o processo e acompanhar tudo até o final.
+Para iniciar o seu caso, fica em 10x de R$xxx no cartão de crédito ou boleto e 10% do valor economizado no final do processo.
+Lembrando: durante o processo, você não vai pagar as parcelas do veículo. O pagamento será somente da quitação no final do processo.
+E se acontecer uma busca e apreensão, precisamos de 30 dias para trabalhar na tentativa de derrubar essa busca.
+Vou te enviar os documentos para iniciarmos hoje. O pagamento será no PIX, cartão ou boleto?
+Dani / quando a IA nao responde logo
+Você prefere continuar o atendimento por aqui mesmo pelo WhatsApp ou prefere marcar uma videochamada com o especialista?
+Combinado! Já vou te passar pro Lucas, nosso especialista, ele continua com você por aqui mesmo.
+Tudo bem? Me chamo Lucas e sou o especialista que vai cuidar do cálculo da sua revisão de financiamento.
+Para fazer seus cálculos eu preciso das seguintes informações:
+📄 Valor da parcela
+📄 Valor total financiado
+📄 Número total de parcelas
+📄 Quantas já foram pagas
+
+◆◆◆ SCRIPT REAL — SENSOR FREESTYLE LIBRE — FORNECIMENTO PELO PLANO DE SAÚDE (versão 1) ◆◆◆
+SCRIPT DE VENDAS — SENSOR FREESTYLE LIBRE
+OBJETIVO DO SCRIPT
+Conduzir o lead desde o primeiro contato até a decisão de contratação, sem transformar a triagem em consulta jurídica.
+Fluxo:
+Abertura → Qualificação → Construção de consciência → Agendamento → Confirmação → Reunião → Apresentação da solução → Honorários → Objeções → Fechamento → Pós-venda → Follow-up
+1. ABERTURA
+“Olá, [NOME]! Eu sou a [NOME], do escritório [NOME] Advogados. 😊
+Vi que você entrou em contato pelo anúncio sobre o Sensor FreeStyle Libre.
+Hoje você tem plano de saúde ou faz seu tratamento pelo SUS?”
+— AGUARDAR RESPOSTA —
+REGRA DO ATENDIMENTO
+Nunca enviar várias perguntas na mesma mensagem.
+Pergunta → aguarda → acolhe → próxima pergunta.
+2. QUALIFICAÇÃO INICIAL
+SE TEM PLANO DE SAÚDE
+“Entendi. Você já utiliza o Libre ou ainda está buscando começar a usar?”
+— AGUARDAR —
+SE JÁ UTILIZA
+“E hoje, aproximadamente quanto você gasta por mês comprando os sensores?”
+— AGUARDAR —
+Após a resposta:
+“Entendi. Então hoje esse valor está saindo do seu bolso todos os meses, mesmo você tendo plano de saúde.”
+“Você possui receita ou relatório médico indicando o uso do Libre?”
+— AGUARDAR —
+SE NÃO POSSUI RECEITA OU RELATÓRIO
+“Sem problema. Você faz acompanhamento com endocrinologista atualmente?”
+— AGUARDAR —
+SE AINDA NÃO UTILIZA
+“Entendi. O uso do Libre já foi indicado pelo seu médico?”
+— AGUARDAR —
+Depois:
+“Você possui receita ou relatório médico com essa indicação?”
 3. CONSTRUÇÃO DE CONSCIÊNCIA
-"[NOME], pelo que você me contou, [resumo da dor concreta — valor perdido, direito não exercido, risco]. Enquanto isso não é resolvido, [consequência específica de continuar assim]."
-
-4. TRANSIÇÃO
-"O próximo passo é separar [tempo] para [especialista] analisar seu caso direitinho e te mostrar exatamente o que pode ser feito. Prefere pela manhã ou à tarde?"
-
-5. CONFIRMAÇÃO
-"Perfeito, [NOME]. Seu atendimento ficou agendado:
+SE JÁ COMPRA O SENSOR
+“[NOME], tem um ponto importante aqui.
+O Libre não é uma compra pontual. É um custo que continua mês após mês enquanto você precisar utilizar o sensor.”
+“Se hoje você gasta aproximadamente R$ [VALOR] por mês, estamos falando de cerca de R$ [VALOR ANUAL] por ano saindo do seu bolso.”
+Depois:
+“E a orientação é que você continue utilizando o sensor no seu tratamento?”
+— AGUARDAR —
+SE SIM
+“Então vale a pena analisar se existe uma possibilidade de você deixar de assumir esse custo sozinho e buscar o fornecimento do sensor pelo plano.”
+4. TRANSIÇÃO PARA O AGENDAMENTO
+“Pelas informações que você me passou, o próximo passo é separar aproximadamente 20 minutos para um especialista analisar melhor a sua situação.”
+“Durante essa conversa, ele vai entender seu tratamento, avaliar os documentos que você possui e te explicar se existe algum caminho possível no seu caso e quais seriam os próximos passos.”
+“Você prefere conversar pela manhã ou à tarde?”
+— AGUARDAR —
+5. AGENDAMENTO
+Após a escolha do período:
+“Tenho disponibilidade no [DIA] às [HORÁRIO 1] ou às [HORÁRIO 2].
+Qual horário fica melhor para você?”
+— AGUARDAR —
+6. SE A PESSOA DISSER “VOU VER”
+“Claro, [NOME].
+É em relação ao horário ou você ainda precisa avaliar se quer fazer essa análise?”
+— AGUARDAR —
+SE FOR HORÁRIO
+“Sem problema. Qual período normalmente é melhor para você: manhã ou tarde?”
+SE AINDA ESTIVER INSEGURA
+“Entendi.
+Essa conversa é justamente para você entender primeiro se existe algum caminho possível no seu caso.
+O especialista vai analisar sua situação e, ao final, te explicar o que pode ser feito, quais documentos serão necessários e quais seriam os próximos passos.”
+“Posso verificar um horário para você?”
+7. CONFIRMAÇÃO DO AGENDAMENTO
+“Perfeito, [NOME]. 😊
+Seu atendimento ficou agendado:
 📅 [DATA]
 🕐 [HORÁRIO]
-💻 [FORMATO]
-Separe [documentos/informações] antes da conversa."
+👤 Especialista [NOME]
+💻 Atendimento online
+Reserve aproximadamente 20 minutos para essa conversa.
+Antes da reunião, deixe separado tudo que tiver relacionado ao seu tratamento, como exames, receitas, relatórios médicos e, se tiver, comprovantes das compras do Libre.
+Assim conseguimos analisar sua situação com mais precisão.”
+8. CONFIRMAÇÃO NO DIA DA REUNIÃO
+“Oi, [NOME]! 😊
+Sua reunião com o especialista [NOME] é hoje às [HORÁRIO].
+Ele já recebeu as informações que você passou para nossa equipe e vai aprofundar a análise da sua situação.
+Segue o link da reunião:
+Até breve.”
 
-6. HONORÁRIOS
-"Para o escritório assumir seu caso, os honorários são [valor/forma de cobrança]. O pagamento pode ser feito em [opções]. Como prefere se organizar?"
+◆◆◆ SCRIPT REAL — SENSOR FREESTYLE LIBRE — FORNECIMENTO PELO PLANO DE SAÚDE (versão 2, com vídeo de closer) ◆◆◆
+SCRIPT SENSOR FREESTYLE LIBRE — MÉTODO COMERCIAL JURÍDICO
+1. ABERTURA
+Olá, [NOME]! 😊 Eu sou a Isadora, do escritório GSS Advogados.
+Vi que você entrou em contato pelo anúncio sobre o Sensor FreeStyle Libre.
+Hoje você tem plano de saúde ou faz seu tratamento pelo SUS?
+— AGUARDAR RESPOSTA —
+2. QUALIFICAÇÃO CURTA
+SE TEM PLANO:
+Entendi. Você já usa o Libre ou ainda está buscando começar a usar?
+— AGUARDAR RESPOSTA —
+SE JÁ USA:
+E hoje, mais ou menos, quanto você gasta por mês comprando os sensores?
+— AGUARDAR RESPOSTA —
+APÓS INFORMAR O VALOR:
+Entendi, [NOME]. Então hoje esse valor está saindo do seu bolso todos os meses, mesmo você tendo plano de saúde. Certo
+Você tem receita ou relatório médico indicando o uso do Libre?
+— AGUARDAR RESPOSTA —
+SE NÃO TIVER:
+Sem problema. Você faz acompanhamento com endocrinologista atualmente?
+— AGUARDAR RESPOSTA —
+3. CONSTRUÇÃO DE CONSCIÊNCIA
+SE JÁ COMPRA O SENSOR:
+[NOME], o ponto é justamente esse.
+O Libre não é uma compra que você faz uma única vez. É um gasto que continua mês após mês. Se hoje você gasta aproximadamente R$ [VALOR] por mês, estamos falando de cerca de R$ [VALOR ANUAL] por ano saindo do seu bolso.
+E você pretende continuar usando o Libre no seu tratamento?
+— AGUARDAR RESPOSTA —
+SE SIM:
+Então vale a pena entender se existe uma possibilidade jurídica de você deixar de assumir esse custo sozinho e o plano passar a custear o sensor para você.
+Antes de agendarmos uma videochamada, eu quero te explicar rapidamente como funciona essa análise e o que o advogado vai avaliar na reunião.
+Vou te enviar um vídeo curto do Dr. André explicando tudo. Depois disso, eu já verifico os horários disponíveis para você. 👇
+—
+[ENVIAR VÍDEO]
+5. VÍDEO — DR. [nome]
+Se você está assistindo a esse vídeo, provavelmente usa ou precisa usar o Sensor FreeStyle Libre e quer entender se existe uma possibilidade de buscar esse fornecimento pelo seu plano de saúde através da justiça.
+Eu sou o Dr. [nome] e quero te explicar rapidamente como funciona o nosso trabalho.
+Nosso trabalho não é simplesmente dizer se você “tem direito” ou não.
+Nós avaliamos seu tratamento, seus documentos médicos, a necessidade do sensor e a situação do seu plano de saúde para entender se existe um caminho possível no seu caso.
+Vamos agendar uma videochamada de 20 minutos com você e para conhecermos melhor a sua situação, explicar o que pode ser feito e quais são os próximos passos.
+E, se identificarmos o seu direito e você quiser seguir, vamos explicar como funciona a contratação do escritório para conduzir o seu caso.
+Por isso, essa não é apenas uma reunião para tirar dúvidas sobre o Libre.
+É uma análise para entender se existe uma solução possível para o seu caso e como podemos te ajudar! 
+Nos vemos na reunião.
+6. MICROCOMPROMISSO APÓS O VÍDEO
+[NOME], conseguiu assistir ao vídeo?
+— AGUARDAR —
+SE SIM:
+Perfeito.
+Então você já entendeu que o objetivo da reunião é analisar se existe um caminho para o seu caso e, se houver viabilidade, explicar como o escritório pode conduzir isso para você.
+Você prefere conversar com o advogado pela manhã ou à tarde?
+— AGUARDAR —
+APÓS ESCOLHA:
+Tenho disponibilidade às [HORÁRIO 1] ou [HORÁRIO 2] no [dia]
+Qual fica melhor para você?
+— AGUARDAR —
+8. CONFIRMAÇÃO
+Perfeito, [NOME]. 😊
+Seu atendimento ficou agendado:
+📅 [DATA]
+🕐 [HORÁRIO]
+👨‍⚖️ Dr(a). [NOME]
+💻 Atendimento online
+Reserve aproximadamente 20 minutos para essa conversa.
+Antes da reunião, deixe separado tudo que tiver relacionado ao seu tratamento: exames, receitas, relatórios médicos e, se tiver, comprovantes das compras do Libre.
+Assim o advogado consegue analisar sua situação com mais precisão.
+9. CONFIRMAÇÃO NO DIA DA REUNIÃO
+Oi, [NOME]! 😊
+Sua reunião com o Dr. [NOME] é hoje às [HORÁRIO].
+O advogado já recebeu as informações que você passou para nossa equipe e vai conversar com você sobre as possibilidades do seu caso.
+Até breve. 
+Link:
+— AGUARDAR —
+10. ABERTURA DA REUNIÃO — CLOSER
+[NOME], a equipe já me passou um resumo do seu atendimento.
+Entendi que você [já utiliza o Libre / precisa começar a utilizar], possui [PLANO], está gastando aproximadamente R$ [VALOR] por mês e quer entender se existe uma possibilidade de buscar esse fornecimento pelo plano.
+Está correto?
+— AGUARDAR —
+Perfeito.
+Então primeiro eu vou aprofundar alguns pontos do seu caso.
+Depois eu vou te explicar o caminho que enxergamos e, se identificarmos viabilidade, no final eu te mostro como funciona para o escritório assumir e conduzir essa demanda para você.
+11. REGRA DO MÉTODO PARA O ATENDENTE
+Nunca enviar várias perguntas na mesma mensagem.
+Sempre:
+PERGUNTA → AGUARDA → ACOLHE A RESPOSTA → PRÓXIMA PERGUNTA.
+A função da triagem não é fazer a consulta jurídica.
+A função é:
+Entender se existe um lead minimamente qualificado.
+Fazer o lead perceber o problema.
+Demonstrar que continuar pagando tem impacto.
+Apresentar a possibilidade de solução.
+Aumentar a consciência com o vídeo.
+Confirmar que ele realmente quer resolver.
+Só então colocar o lead na agenda.
+O lead não deve chegar à reunião pensando:
+“Vou perguntar se tenho direito.”
+Ele deve chegar pensando:
+“Quero entender se meu caso é viável e como esse escritório pode resolver isso para mim.”
 
-7. OBJEÇÕES
-"Vou pensar" → "Entendo, [NOME]. Só pra eu te ajudar melhor: a dúvida está no valor, na forma de pagamento ou no processo em si?"
-"Está caro" → "Faz sentido pensar no valor agora. Mas olha o outro lado: [comparação concreta entre o custo de não agir e o investimento]."
-"Vou falar com [pessoa]" → "Claro, faz todo sentido decidir isso junto. Antes de você conversar, me diz: você, pessoalmente, já viu que isso faz sentido pro seu caso?"
+◆◆◆ SCRIPT REAL — COPARTICIPAÇÃO DE PLANO DE SAÚDE ◆◆◆
+ABERTURA
+Olá, [Nome]. Tudo bem?
+Vi que você entrou em contato porque os valores de coparticipação do plano de saúde estão pesando no orçamento da sua família.
+Eu vou fazer algumas perguntas para entender o seu caso e analisar o seu direito de limitar a coparticipação. 
+Hoje, quem utiliza o plano e gera essas cobranças de coparticipação: você ou algum familiar?
+QUALIFICAÇÃO 1 — QUEM É O BENEFICIÁRIO
+Se responder filho(a):
+Entendi. E quais tratamentos/terapias ele(a) realiza atualmente pelo plano?
+Aguardar.
+QUALIFICAÇÃO 2 — FREQUÊNCIA
+[NOME], e com que frequência esses atendimentos acontecem durante a semana?
+Aguardar.
+QUALIFICAÇÃO 3 — VALOR
+Entendi. Hoje, aproximadamente, quanto vocês estão pagando por mês somente de coparticipação, além da mensalidade normal do plano?
+Aguardar.
+Se não souber:
+Sem problema. Mesmo que seja uma média: costuma ficar mais próximo de R$500, R$1.000, R$2.000 ou acima disso?
+QUALIFICAÇÃO 4 — IMPACTO FINANCEIRO
+Entendi, [Nome].
+Então, além da mensalidade do plano, vocês estão desembolsando aproximadamente R$ [valor] todos os meses só de coparticipação.
+Esse valor já está comprometendo outras despesas da família ou fazendo vocês pensarem em reduzir algum tratamento?
+Aguardar.
+ACOLHIMENTO + APROFUNDAMENTO
+Se disser que SIM:
+Entendi. É justamente isso que precisamos analisar com mais cuidado, porque deixa de ser apenas uma cobrança do plano e passa a afetar diretamente a continuidade do tratamento e o orçamento da família.
+Há quanto tempo vocês vêm pagando aproximadamente esse valor?
+Aguardar.
+DIMENSIONAMENTO DO PREJUÍZO
+Se, por exemplo, responder 8 meses e R$1.500/mês:
+Então estamos falando de aproximadamente:
+R$1.500 por mês × 8 meses = R$12.000
+que já saíram do orçamento da família somente com coparticipação, além da própria mensalidade do plano.
+E, mantendo essa média, seriam outros R$18.000 nos próximos 12 meses.
+É justamente por isso que vale a pena analisar juridicamente a situação agora, em vez de olhar somente para a cobrança deste mês.
+QUALIFICAÇÃO JURÍDICA BÁSICA
+E me diz, qual é o plano de saúde de vocês atualmente?
+Aguardar.
+O plano é empresarial, individual/familiar ou vocês não sabem informar?
+Aguardar.
+Vocês possuem algumas das últimas faturas ou demonstrativos mostrando essas cobranças?
+Aguardar.
+TRANSIÇÃO PARA AGENDAMENTO
+Perfeito. Pelas informações que você me passou, podemos separar 20 minutos para te explicar como funciona o processo em uma videochamada objetiva.
+Já te adianto que o objetivo da ação judicial é buscar a limitação dessas cobranças daqui para frente e, dependendo do caso, avaliar também a possibilidade de restituição dos valores pagos a mais.
+Ao final da conversa, vou te explicar o que pode ser feito no seu caso, quais documentos serão necessários e quais são os próximos passos para dar andamento.
+Tenho disponibilidade [DIA], às [X horas] ou [Y horas]. Qual horário fica melhor para você?
+DEPOIS QUE O LEAD ESCOLHER O HORÁRIO
+Prontinho, [Nome]. Seu horário ficou reservado:
+📅 Data: [DIA]
+⏰ Horário: [HORÁRIO]
+💻 Videochamada: [LINK]
+A conversa dura aproximadamente 20 minutos.
+Se possível, esteja em um local tranquilo e tenha por perto alguma fatura ou demonstrativo do plano que mostre as cobranças de coparticipação.
+Nos falamos no horário combinado.
+SE O LEAD DISSER “VOU VER E TE FALO”
+Claro.
+Só para eu entender e conseguir te ajudar melhor: você precisa verificar o horário ou ainda está em dúvida se quer fazer essa análise?
+Aguardar a resposta.
+Se for horário:
+Sem problema. Qual período costuma ser mais tranquilo para você: manhã ou tarde?
+Aguardar.
+Posso verificar duas opções dentro desse período e você escolhe a melhor.
+Se estiver em dúvida sobre fazer a análise:
+Entendi.
+O que está te deixando em dúvida neste momento?
+Aguardar e tratar a objeção específica.
+SE DISSER “VOU VER MINHA AGENDA”
+Perfeito. Para facilitar, eu consigo segurar provisoriamente um dos horários para você.
+Entre [X horas] e [Y horas], qual tem mais chance de funcionar?
+SE NÃO QUISER ESCOLHER O HORÁRIO NA HORA
+Tudo bem.
+Como estamos falando de uma cobrança que continua acontecendo mensalmente, prefiro não deixar sua análise perdida.
+Posso te chamar novamente [hoje no final do dia / amanhã pela manhã] para definirmos o horário?
+CONFIRMAÇÃO DA VIDEOCHAMADA — DIA ANTERIOR
+Olá, [Nome]. Tudo bem?
+Amanhã teremos um encontro para analisarmos a limitação da sua coparticipação!
+📅 [DIA]
+⏰ [HORÁRIO]
+Link: 
+Até breve!
+CONFIRMAÇÃO NO DIA
+Bom dia, [Nome].
+Nossa análise está marcada para hoje, às [HORÁRIO].
+Já deixei seu atendimento separado para entendermos o seu caso e te explicar os possíveis próximos passos.
+Mais próximo do horário, utilizaremos este link:
+💻 [LINK]
+Te espero às [HORÁRIO].
+LEMBRETE 30 MINUTOS ANTES
+[Nome], passando para lembrar que nossa videochamada começa em aproximadamente 30 minutos.
+Segue novamente o acesso:
+💻 [LINK]
+Já deixei as informações que você me passou separadas para conseguirmos fazer uma análise objetiva.
+Até daqui a pouco.
+10. SE NÃO ENTRAR NA VIDEOCHAMADA
+[Nome]. Estou na sala da nossa videochamada.
+Consegue entrar agora pelo link?
+💻 [LINK]
+11. SE DER NO-SHOW
+[Nome], como vai? 
+Vi que não conseguimos fazer nossa análise no horário combinado.
+Como você relatou que essas cobranças continuam pesando no orçamento da família, não queria deixar seu caso parado.
+Tenho um novo horário [DIA], às [X horas] ou [Y horas].
+Qual funciona melhor para você?
 
-8. FECHAMENTO
-"Então, [NOME], vamos dar o próximo passo? Posso te mandar agora os documentos para começarmos ainda hoje?"
+◆◆◆ SCRIPT REAL — AUXÍLIO-ACIDENTE (versão curta) ◆◆◆
+Script de atendimento ao cliente - Auxílio Acidente
+Oi, Fulano! Tudo bem? Sou a (nome da atendente), falo do escritório de advocacia.
+Recebemos suas informações, vi aqui que você preencheu certinho os dados sobre o auxílio acidente e, pelo que informou, você tem grande chance de conseguir o benefício.
+O senhor pode me contar o que aconteceu no acidente?
+O senhor(a) chegou a fazer algum tratamento ou tem laudo/atestado médico?
+O senhor(a) já recebeu o benefício do auxílio-doença? Estava trabalhando CLT quando aconteceu o acidente?
+Hoje, o senhor(a) sente alguma dificuldade em realizar atividades do dia a dia? Dor? amputação? Limitação de movimento?
+É lavrador ou exerce atividade rural- é pescador, agricultor, assentado? tem doc? já trabalhou em algum lugar? é MEI? Paga guia do INSS?
+EXISTE A POSSIBILIDADE PARA ALGUM OUTRO BENEFÍCIO? MEI E CONTRIBUINTE INDIVIDUAL NÃO TEM DIREITO A AUXILIO ACIDENTE.
+Entendo perfeitamente, imagino que não deve ser fácil lidar com isso no dia a dia. Mas pode ficar tranquilo, porque existem alguns direitos que a gente pode verificar no seu caso.
+VER A POSSIBILIDADE DE LIGAÇÃO, SE NÃO DER FINALIZAR POR MENSAGEM
+O que eu posso fazer agora é analisar direitinho a sua situação e ver se você tem direito a algum benefício. E o melhor: você só paga o nosso trabalho se realmente ganhar o processo, certo?
+Se for aprovado, você pode receber até 5 anos de parcelas atrasadas e um valor mensal até aposentadoria e ainda continuar trabalhando normalmente de carteira assinada, e o valor cobrado pelo nosso serviço é 30% do valor atrasado e 6 salários de benefício, enquanto o senhor poderá receber 10, 20, 30 anos de benefício dependendo de quando for aposentar, então pode ser uma renda extra aí no seu salário.
+Pra gente já adiantar a sua análise e não perder tempo, preciso da sua ajuda com algumas informações básicas para fazer a documentação que precisamos que o senhor assine para dá andamento ao seu caso, e se tiver direito já dá entrada. Posso contar com você? ●•^-
+NOME COMPLETO ESTADO CIVIL ENDEREÇO
+RG CPF
+Mandar contrato e procuração e declaração de residência
+Enviar já o vídeo e a explicação por áudio.
+Acolhimento:
+Após a assinatura: (verificar a documentação antes de dar esse retorno)
+Perfeito, acabei de ver aqui a sua assinatura e está tudo ok. Sabemos da importância desse benefício e vamos estar agilizando o seu caso quanto antes, tudo bem?
+Mas queria saber mais algumas informações, por que às vezes existe a possibilidade de solicitar mais de um benefício para a pessoa ou a família, certo?
+Conhece alguém que já sofreu algum acidente? Caiu de moto e quebrou punho, tornozelo, amputação de parte do dedo?
+Conhece alguma grávida? Ou pessoa que está doente ou não conseguiu se aposentar?
+EXPLICAR SOBRE A TRANSFERÊNCIA PARA O COMERCIAL 2
+Ótimo, Fulano! Deu tudo certo 
+Agora vou te encaminhar o contato do suporte ao cliente do escritório para você adicionar. O Carlos Eduardo, responsável pelo atendimento ao cliente vai te chamar, explicar como será analisado e feito o seu caso e por lá que vai solicitar documentos, enviar avisos e manter toda a comunicação do seu caso ate o final.
+Organizamos dessa forma para garantir mais agilidade e um atendimento mais rápido pra você, foi um prazer conversar com você, até mais.
+OBS: EVITAR PASSAR INFORMAÇÕES DEMAIS PARA QUE O CLIENTE SINTA SEGURANÇA DE DÁ ENTRADA SOZINHO, SEMPRE FALAR DA POSSIBILIDADE.E DA IMPORTÂNCIA DO ACOMPANHAMENTO PROFSSIONAL DO ADVOGADO PARA QUE SEJA FEITO DA FORMA CORRETA E NÃO PERCA O DIREITO.
+9-QUANDO O LEAD ERA DO OUTRO CONTATO. 
+Olá, fulana!
+fulana aqui, estamos com este número em manutenção no momento, por isso não conseguimos realizar atendimentos por ele.
+Para seguir com o atendimento, vou te chamar diretamente no WhatsApp   86 95230110.
 
-9. DOCUMENTOS
-"Segue o que preciso pra dar entrada no seu caso:
-📄 [documento 1]
-📄 [documento 2]
-📄 [documento 3]
-Consegue me enviar até [prazo]?"
-
-10. FOLLOW-UP INICIAL (D+1/D+2)
-"[NOME], retomando seu caso. [Dor específica] continua do mesmo jeito enquanto isso não é resolvido. O próximo passo é [ação]. Consigo avançar hoje ou prefere amanhã?"
-`,
+━━━ FIM DA BIBLIOTECA — lembrete final ━━━
+Os scripts acima variam em polimento (alguns são rascunhos internos, outros são versão final). Extraia sempre o padrão comum: perguntas curtas uma de cada vez, dor e urgência REAIS do nicho, honorários com clareza total, fechamento binário, e documentos objetivos. Nunca reproduza um script acima quase palavra por palavra para um pedido de nicho diferente — construa um script novo, no mesmo padrão de qualidade, com o conteúdo real do produto que foi pedido.`,
 
     // ═══════════════════════════════════════════════════════════════════════
     // NEGOCIAÇÃO
