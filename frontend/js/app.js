@@ -3512,8 +3512,12 @@ function recRenderForm() {
           <input id="rec-cliente-nome" placeholder="Como ele se apresenta" />
         </div>
         <div class="brf-campo">
-          <label>Empresa ou vínculo</label>
-          <input id="rec-cliente-empresa" placeholder="Opcional" />
+          <label>Telefone de contato</label>
+          <input id="rec-cliente-telefone" placeholder="(00) 00000-0000" />
+        </div>
+        <div class="brf-campo brf-full">
+          <label>Produto ou serviço</label>
+          <input id="rec-produto-servico" placeholder="Ex: revisão de aposentadoria" />
         </div>
       </div>
       <div class="brf-acoes">
@@ -3537,8 +3541,9 @@ async function recCriar(ev) {
 
   const corpo = {
     titulo,
-    cliente_nome:    recValor('rec-cliente-nome'),
-    cliente_empresa: recValor('rec-cliente-empresa'),
+    cliente_nome:     recValor('rec-cliente-nome'),
+    cliente_telefone: recValor('rec-cliente-telefone'),
+    produto_servico:  recValor('rec-produto-servico'),
   };
 
   const btn    = document.getElementById('rec-submit');
@@ -3583,14 +3588,20 @@ function recAbrirNaTela(reuniao) {
   }
 
   const textoConvite = `Olá${reuniao.cliente_nome ? ', ' + reuniao.cliente_nome : ''}! Segue o link da nossa reunião:\n${reuniao.room_url}\nSó clicar no horário combinado, não precisa instalar nada.`;
-  const waHref = `https://wa.me/?text=${encodeURIComponent(textoConvite)}`;
+  // Com telefone cadastrado, o link já abre a conversa certa. Assume DDI 55 quando
+  // vem só DDD + número (10 ou 11 dígitos) — cenário mais comum por aqui.
+  const digitos = reuniao.cliente_telefone ? reuniao.cliente_telefone.replace(/\D/g, '') : '';
+  const numeroWa = digitos.length === 10 || digitos.length === 11 ? `55${digitos}` : digitos;
+  const waHref = numeroWa
+    ? `https://wa.me/${numeroWa}?text=${encodeURIComponent(textoConvite)}`
+    : `https://wa.me/?text=${encodeURIComponent(textoConvite)}`;
 
   alvo.innerHTML = `
     <div class="brf-card">
       <div class="brf-topo">
         <div>
           <div class="brf-item-nome">${escapeHtml(reuniao.titulo)}</div>
-          <div class="brf-topo-meta">${reuniao.cliente_nome ? escapeHtml(reuniao.cliente_nome) : 'Sem cliente vinculado'}${reuniao.cliente_empresa ? ' · ' + escapeHtml(reuniao.cliente_empresa) : ''}</div>
+          <div class="brf-topo-meta">${reuniao.cliente_nome ? escapeHtml(reuniao.cliente_nome) : 'Sem cliente vinculado'}${reuniao.produto_servico ? ' · ' + escapeHtml(reuniao.produto_servico) : ''}${reuniao.cliente_telefone ? ' · ' + escapeHtml(reuniao.cliente_telefone) : ''}</div>
         </div>
       </div>
       <div class="brf-campo brf-full" style="margin-bottom:14px">
@@ -3766,7 +3777,7 @@ function recRenderHistorico() {
   alvo.innerHTML = rec.lista.map((r, i) => `
     <div class="brf-item" data-idx="${i}">
       <div style="flex:1">
-        <div class="brf-item-nome">${escapeHtml(r.titulo)}${r.cliente_empresa ? ` <span class="brf-item-emp">— ${escapeHtml(r.cliente_empresa)}</span>` : ''}</div>
+        <div class="brf-item-nome">${escapeHtml(r.titulo)}${r.produto_servico ? ` <span class="brf-item-emp">— ${escapeHtml(r.produto_servico)}</span>` : ''}</div>
         <div class="brf-item-meta">${new Date(r.created_at).toLocaleDateString('pt-BR')} · ${recStatusLabel(r.status)}</div>
       </div>
       ${r.nota_ia != null ? `<span class="brf-item-tag brf-tag-nota">${r.nota_ia}</span>` : `<span class="brf-item-tag brf-tag-vazio">${recStatusLabel(r.status)}</span>`}

@@ -75,7 +75,7 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(500).json({ erro: 'Módulo de reuniões ainda não configurado (falta DAILY_API_KEY no servidor).' });
     }
 
-    const { titulo, cliente_nome, cliente_empresa } = req.body;
+    const { titulo, cliente_nome, cliente_telefone, produto_servico } = req.body;
     if (!titulo) return res.status(400).json({ erro: 'Título da reunião é obrigatório.' });
 
     const nomeSala = `may-${uuidv4().slice(0, 8)}`;
@@ -84,15 +84,16 @@ router.post('/', authMiddleware, async (req, res) => {
     const { data, error } = await supabase
       .from('reunioes_ia')
       .insert({
-        empresa_id:      req.user.empresa_id,
-        criado_por:      req.user.id,
+        empresa_id:       req.user.empresa_id,
+        criado_por:       req.user.id,
         titulo,
-        cliente_nome:    cliente_nome || null,
-        cliente_empresa: cliente_empresa || null,
-        provider:        'daily',
-        room_name:       sala.name,
-        room_url:        sala.url,
-        status:          'agendada',
+        cliente_nome:     cliente_nome || null,
+        cliente_telefone: cliente_telefone || null,
+        produto_servico:  produto_servico || null,
+        provider:         'daily',
+        room_name:        sala.name,
+        room_url:         sala.url,
+        status:           'agendada',
       })
       .select()
       .single();
