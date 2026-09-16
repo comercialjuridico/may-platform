@@ -59,7 +59,14 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
 // ─── Body Parser ───────────────────────────────────────────────────────────
-app.use(express.json({ limit: '5mb' }));
+// `verify` guarda o corpo cru (req.rawBody) além do já parseado — é o que o
+// webhook do Daily (routes/webhookDaily.js) precisa pra conferir a assinatura
+// HMAC, já que ela é calculada sobre o texto exato que o Daily mandou, não
+// sobre uma reserialização do JSON.
+app.use(express.json({
+  limit: '5mb',
+  verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); },
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Rotas do frontend (ANTES do static para não ser interceptado) ─────────
@@ -134,6 +141,7 @@ app.use('/api/public',      require('./routes/public'));
 app.use('/api/stripe',      require('./routes/stripe'));
 app.use('/api/modulos',        require('./routes/modulos'));
 app.use('/api/reunioes',       require('./routes/reunioes'));
+app.use('/api/webhooks',       require('./routes/webhookDaily'));
 app.use('/api/ranking-vendas', require('./routes/ranking-vendas'));
 
 // ─── Health check ──────────────────────────────────────────────────────────
