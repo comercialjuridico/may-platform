@@ -43,6 +43,11 @@ const MODULOS = {
     valor_a:     '77.00',
     rota:        '/ranking-vendas',
   },
+  // "Reuniões com IA" NÃO entra aqui: ela foi integrada como item nativo da
+  // sidebar (ver FERRAMENTAS em frontend/js/app.js), igual ao Briefing de
+  // reuniões, e não passa pela loja de módulos — que segue desativada desde o
+  // lançamento (ver PAGINAS_DESATIVADAS em server.js). Preço/cobrança à parte
+  // fica pra decidir depois de ver custo x lucro; por ora está incluída no plano.
 };
 
 // ─── GET /api/modulos ─────────────────────────────────────────────────────────

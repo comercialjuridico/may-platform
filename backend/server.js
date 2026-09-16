@@ -133,6 +133,7 @@ app.use('/api/followups',   require('./routes/followups'));
 app.use('/api/public',      require('./routes/public'));
 app.use('/api/stripe',      require('./routes/stripe'));
 app.use('/api/modulos',        require('./routes/modulos'));
+app.use('/api/reunioes',       require('./routes/reunioes'));
 app.use('/api/ranking-vendas', require('./routes/ranking-vendas'));
 
 // ─── Health check ──────────────────────────────────────────────────────────

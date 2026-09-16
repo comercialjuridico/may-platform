@@ -1,5 +1,5 @@
 // ─── Service Worker — May PWA ─────────────────────────────────────────────────
-const CACHE_NAME = 'may-v4';
+const CACHE_NAME = 'may-v5';
 
 // Rotas HTML que NUNCA devem ser cacheadas (precisam sempre ir à rede)
 const NEVER_CACHE = ['/', '/app', '/index.html', '/auth.html', '/landing.html'];
@@ -55,5 +55,39 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
       return res;
     }).catch(() => caches.match(event.request))
+  );
+});
+
+// ─── Push recebido ────────────────────────────────────────────────────────────
+self.addEventListener('push', e => {
+  if (!e.data) return;
+  let payload;
+  try { payload = e.data.json(); } catch { payload = { title: 'May', body: e.data.text() }; }
+
+  const title   = payload.title || 'May';
+  const options = {
+    body:    payload.body  || '',
+    icon:    payload.icon  || '/assets/icon-192.png',
+    badge:   '/assets/icon-192.png',
+    tag:     payload.tag   || 'may-notif',
+    data:    { url: payload.url || '/app' },
+    actions: payload.actions || [{ action: 'abrir', title: 'Abrir May' }],
+    requireInteraction: false,
+    silent: false,
+  };
+
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ─── Clique na notificação ────────────────────────────────────────────────────
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url || '/app';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      const mayTab = list.find(c => c.url.includes(self.location.origin));
+      if (mayTab) { mayTab.focus(); mayTab.navigate(url); }
+      else clients.openWindow(url);
+    })
   );
 });

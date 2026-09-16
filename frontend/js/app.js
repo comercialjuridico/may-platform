@@ -25,6 +25,15 @@ const brf = {
   gerando:  false,
 };
 
+// Estado da tela de Reuniões com IA (as funções ficam no fim do arquivo)
+const rec = {
+  aba:      'nova',   // 'nova' | 'historico'
+  lista:    [],
+  carregou: false,
+  criando:  false,
+  aberto:   null,     // reunião aberta na tela (link gerado)
+};
+
 // ─── Controle de acesso por plano ─────────────────────────────────────────────
 const PLANO_NIVEL = { free: 0, start: 1, equipe: 2, pro: 3, prof: 4 };
 
@@ -42,6 +51,7 @@ function planoBase(user) {
 const FERRAMENTA_PLANO_MIN = {
   'chat':               'start',
   'briefing':           'start',   // incluído no plano — é o diferencial do produto
+  'reunioes_ia':        'start',   // incluído no plano por enquanto — preço à parte fica pra depois
   'follow_up':          'start',
   'criador_scripts':    'start',
   'negociacao':         'start',
@@ -344,6 +354,7 @@ async function pwSubmit(e) {
 const FERRAMENTAS = [
   { id: 'chat',               nome: 'Chat livre',                  icon: '💬' },
   { id: 'briefing',           nome: 'Briefing de reuniões',        icon: '📋' },
+  { id: 'reunioes_ia',        nome: 'Reuniões com IA',             icon: '🎥' },
   { id: 'simular_reuniao',    nome: 'Simular reunião',             icon: '🎭' },
   { id: 'simulador_objecoes', nome: 'Simulador de objeções',       icon: '🎯' },
   { id: 'follow_up',          nome: 'Script de follow-up',         icon: '🔁' },
@@ -680,13 +691,18 @@ function selecionarFerramenta(id) {
   const ferramenta = FERRAMENTAS.find(f => f.id === id);
   document.getElementById('chat-title').textContent = ferramenta?.nome || 'Chat';
   document.getElementById('chat-tool-label').textContent =
-    id === 'chat'     ? 'May — Assistente de vendas' :
-    id === 'briefing' ? 'Prepare a reunião antes de entrar nela' : 'Ferramenta ativa';
+    id === 'chat'        ? 'May — Assistente de vendas' :
+    id === 'briefing'    ? 'Prepare a reunião antes de entrar nela' :
+    id === 'reunioes_ia' ? 'Gere o link e envie para o cliente' : 'Ferramenta ativa';
 
   if (id === 'briefing') {
     // Tela própria, sem campo de chat embaixo
     esconderInputChat();
     mostrarBriefing();
+  } else if (id === 'reunioes_ia') {
+    // Tela própria, sem campo de chat embaixo
+    esconderInputChat();
+    mostrarReunioesIA();
   } else {
     mostrarInputChat();
     if (id === 'simular_reuniao') {
@@ -2273,8 +2289,9 @@ async function inicializarPushNotificacoes() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
   try {
-    // Registra o Service Worker
-    const reg = await navigator.serviceWorker.register('/sw.js');
+    // Registra o Service Worker (mesmo arquivo já registrado pelo index.html —
+    // dois registros com nomes diferentes no mesmo escopo '/' entravam em conflito)
+    const reg = await navigator.serviceWorker.register('/service-worker.js');
 
     // Só pede permissão depois de 30s (não interrompe o onboarding)
     const jaAtivo = localStorage.getItem('may_push_ativo');
@@ -2424,6 +2441,7 @@ function mostrarHomeDashboard() {
         <button class="home-chip" onclick="abrirModalTrilha()">📚 Minha trilha</button>
         <button class="home-chip" onclick="selecionarFerramenta('simulador_objecoes')">🎯 Treinar objeções</button>
         <button class="home-chip" onclick="selecionarFerramenta('briefing')">📋 Preparar reunião</button>
+        <button class="home-chip" onclick="selecionarFerramenta('reunioes_ia')">🎥 Gerar link de reunião</button>
         <button class="home-chip" onclick="selecionarFerramenta('chat')">💬 Chat livre</button>
       </div>
 
@@ -3433,4 +3451,338 @@ Object.assign(window, {
   brfRegerarAbrir, brfRegerar, brfCarregarLista,
   brfFeedbackAbrir, brfFeedbackFechar, brfFeedbackSalvar, brfFbNota, brfFbResultado, brfResultadoDe,
   esconderInputChat,
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Reuniões com IA
+// Gera uma sala própria da May (Daily.co), a pessoa manda o link pro cliente por
+// WhatsApp ou e-mail. Depois que a call termina, um job separado transcreve a
+// gravação e devolve nota, resumo e riscos aqui no histórico.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Tela ────────────────────────────────────────────────────────────────────
+function mostrarReunioesIA(aba) {
+  brfEstilo(); // reaproveita o estilo ".brf-*" já injetado pro Briefing
+  if (aba) rec.aba = aba;
+  rec.aberto = null;
+
+  const container = document.getElementById('messages-container');
+  container.innerHTML = `
+    <div class="brf">
+      <h2>🎥 Reuniões com IA</h2>
+      <p class="brf-lead">
+        Gere um link de videochamada da própria May e mande pro cliente. Depois da call,
+        a nota, o resumo e os riscos aparecem aqui no histórico automaticamente.
+      </p>
+      <div class="brf-tabs">
+        <button class="brf-tab ${rec.aba === 'nova' ? 'on' : ''}" onclick="recIrPara('nova')">Nova reunião</button>
+        <button class="brf-tab ${rec.aba === 'historico' ? 'on' : ''}" onclick="recIrPara('historico')">
+          Minhas reuniões${rec.lista.length ? `<span class="brf-badge">${rec.lista.length}</span>` : ''}
+        </button>
+      </div>
+      <div id="rec-conteudo"></div>
+    </div>`;
+
+  container.scrollTop = 0;
+  if (rec.aba === 'nova') recRenderForm();
+  else                    recRenderHistorico();
+}
+
+function recIrPara(aba) {
+  rec.aba = aba;
+  mostrarReunioesIA();
+  if (aba === 'historico' && !rec.carregou) recCarregarLista();
+}
+
+// ─── Formulário: nova reunião ────────────────────────────────────────────────
+function recRenderForm() {
+  const alvo = document.getElementById('rec-conteudo');
+  if (!alvo) return;
+
+  alvo.innerHTML = `
+    <form class="brf-card" onsubmit="recCriar(event)">
+      <div class="brf-grid">
+        <div class="brf-campo brf-full">
+          <label>Título da reunião</label>
+          <input id="rec-titulo" required placeholder="Ex: Diagnóstico comercial — Fernanda Duarte" />
+        </div>
+        <div class="brf-campo">
+          <label>Nome do cliente</label>
+          <input id="rec-cliente-nome" placeholder="Como ele se apresenta" />
+        </div>
+        <div class="brf-campo">
+          <label>Empresa ou vínculo</label>
+          <input id="rec-cliente-empresa" placeholder="Opcional" />
+        </div>
+      </div>
+      <div class="brf-acoes">
+        <button type="submit" class="brf-btn" id="rec-submit">Gerar link da reunião</button>
+        <span class="brf-dica" id="rec-status"></span>
+      </div>
+    </form>`;
+}
+
+function recValor(id) {
+  const el = document.getElementById(id);
+  return el && el.value.trim() ? el.value.trim() : null;
+}
+
+async function recCriar(ev) {
+  ev.preventDefault();
+  if (rec.criando) return;
+
+  const titulo = recValor('rec-titulo');
+  if (!titulo) { mostrarToast('Informe o título da reunião', 'erro'); return; }
+
+  const corpo = {
+    titulo,
+    cliente_nome:    recValor('rec-cliente-nome'),
+    cliente_empresa: recValor('rec-cliente-empresa'),
+  };
+
+  const btn    = document.getElementById('rec-submit');
+  const status = document.getElementById('rec-status');
+  rec.criando = true;
+  btn.disabled = true;
+  btn.textContent = 'Gerando sala...';
+  if (status) status.textContent = 'Leva alguns segundos.';
+
+  try {
+    const res  = await api.post('/reunioes', corpo);
+    const data = await res.json().catch(() => ({}));
+
+    if (!res?.ok) {
+      mostrarToast(data.erro || 'Não consegui gerar a reunião', 'erro');
+      return;
+    }
+
+    rec.lista.unshift(data.reuniao);
+    recAbrirNaTela(data.reuniao);
+    mostrarToast('Link gerado', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão ao gerar a reunião', 'erro');
+  } finally {
+    rec.criando = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Gerar link da reunião'; }
+    if (status) status.textContent = '';
+  }
+}
+
+// ─── Link gerado: copiar e enviar ────────────────────────────────────────────
+function recAbrirNaTela(reuniao) {
+  rec.aberto = reuniao;
+  const alvo = document.getElementById('rec-conteudo');
+  if (!alvo) return;
+
+  // Reunião já processada (gravação + transcrição + nota prontas) → mostra o
+  // resultado em vez da tela de compartilhar link.
+  if (reuniao.status === 'finalizada') {
+    recRenderResultado(reuniao);
+    return;
+  }
+
+  const textoConvite = `Olá${reuniao.cliente_nome ? ', ' + reuniao.cliente_nome : ''}! Segue o link da nossa reunião:\n${reuniao.room_url}\nSó clicar no horário combinado, não precisa instalar nada.`;
+  const waHref = `https://wa.me/?text=${encodeURIComponent(textoConvite)}`;
+
+  alvo.innerHTML = `
+    <div class="brf-card">
+      <div class="brf-topo">
+        <div>
+          <div class="brf-item-nome">${escapeHtml(reuniao.titulo)}</div>
+          <div class="brf-topo-meta">${reuniao.cliente_nome ? escapeHtml(reuniao.cliente_nome) : 'Sem cliente vinculado'}${reuniao.cliente_empresa ? ' · ' + escapeHtml(reuniao.cliente_empresa) : ''}</div>
+        </div>
+      </div>
+      <div class="brf-campo brf-full" style="margin-bottom:14px">
+        <label>Link da sala</label>
+        <div style="display:flex;gap:8px">
+          <input readonly value="${escapeHtml(reuniao.room_url)}" style="flex:1" onclick="this.select()" />
+          <button type="button" class="brf-btn ghost mini" onclick="recCopiarLink('${reuniao.room_url}')">Copiar</button>
+        </div>
+      </div>
+      <div class="brf-acoes">
+        <a class="brf-btn mini" style="text-decoration:none;background:#25D366;color:#fff" target="_blank" rel="noopener"
+           href="${waHref}">Enviar por WhatsApp</a>
+        <button type="button" class="brf-btn ghost mini" onclick="recAbrirConviteEmail('${reuniao.id}')">Enviar por e-mail</button>
+        <button type="button" class="brf-btn ghost mini" onclick="recIrPara('historico')">Voltar pro histórico</button>
+      </div>
+      <div id="rec-convite-email"></div>
+      <div style="height:1px;background:var(--b-border);margin:18px 0 14px"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:6px">A reunião já aconteceu?</div>
+        <p class="brf-dica" style="margin:0 0 10px">Processo a gravação, transcrevo e gero a nota assim que o Daily terminar de processar o vídeo (pode levar alguns minutos depois do fim da call).</p>
+        <button type="button" class="brf-btn mini" id="rec-processar-btn" onclick="recProcessar('${reuniao.id}')">Processar gravação</button>
+      </div>
+    </div>`;
+}
+
+// ─── Resultado: nota, resumo, riscos e gravação ─────────────────────────────
+function recRenderResultado(reuniao) {
+  const alvo = document.getElementById('rec-conteudo');
+  if (!alvo) return;
+
+  const riscos  = reuniao.riscos || [];
+  const passos  = reuniao.proximos_passos || [];
+
+  alvo.innerHTML = `
+    <div class="brf-card">
+      <div class="brf-topo">
+        <div>
+          <div class="brf-item-nome">${escapeHtml(reuniao.titulo)}</div>
+          <div class="brf-topo-meta">${reuniao.cliente_nome ? escapeHtml(reuniao.cliente_nome) : 'Sem cliente vinculado'}${reuniao.duracao_min ? ' · ' + reuniao.duracao_min + ' min' : ''}</div>
+        </div>
+        ${reuniao.nota_ia != null ? `<span class="brf-item-tag brf-tag-nota" style="margin-left:auto">${reuniao.nota_ia}/10</span>` : ''}
+      </div>
+      ${reuniao.resumo_ia ? `<p style="font-size:13.5px;line-height:1.6;margin:4px 0 14px">${escapeHtml(reuniao.resumo_ia)}</p>` : ''}
+      ${reuniao.sentimento ? `<p class="brf-dica" style="margin:0 0 14px">Sentimento do cliente: <b>${escapeHtml(reuniao.sentimento)}</b></p>` : ''}
+      ${riscos.length ? `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;margin-bottom:5px">Riscos pro fechamento</div><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6">${riscos.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul></div>` : ''}
+      ${passos.length ? `<div style="margin-bottom:6px"><div style="font-size:12px;font-weight:700;margin-bottom:5px">Próximos passos</div><ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.6">${passos.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul></div>` : ''}
+      <div class="brf-acoes">
+        <button type="button" class="brf-btn ghost mini" id="rec-gravacao-btn" onclick="recAssistirGravacao('${reuniao.id}')">Assistir gravação</button>
+        <button type="button" class="brf-btn ghost mini" onclick="recIrPara('historico')">Voltar pro histórico</button>
+      </div>
+    </div>`;
+}
+
+async function recProcessar(id) {
+  const btn = document.getElementById('rec-processar-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Processando...'; }
+
+  try {
+    const res  = await api.post(`/reunioes/${id}/processar`);
+    const data = await res.json().catch(() => ({}));
+
+    if (!res?.ok) {
+      mostrarToast(data.erro || 'Não consegui processar a gravação', res?.status === 409 ? 'aviso' : 'erro');
+      return;
+    }
+
+    const idx = rec.lista.findIndex(r => r.id === id);
+    if (idx >= 0) rec.lista[idx] = data.reuniao;
+    recAbrirNaTela(data.reuniao);
+    mostrarToast('Reunião processada', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão ao processar a reunião', 'erro');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Processar gravação'; }
+  }
+}
+
+async function recAssistirGravacao(id) {
+  const btn = document.getElementById('rec-gravacao-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Abrindo...'; }
+
+  try {
+    const res  = await api.get(`/reunioes/${id}/gravacao`);
+    const data = await res.json().catch(() => ({}));
+    if (!res?.ok) { mostrarToast(data.erro || 'Não consegui abrir a gravação', 'erro'); return; }
+    window.open(data.url, '_blank', 'noopener');
+  } catch (err) {
+    mostrarToast('Erro de conexão ao buscar a gravação', 'erro');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Assistir gravação'; }
+  }
+}
+
+function recCopiarLink(url) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => mostrarToast('Link copiado', 'sucesso'))
+      .catch(() => mostrarToast('Não consegui copiar o link', 'erro'));
+  } else {
+    mostrarToast('Não consegui copiar o link', 'erro');
+  }
+}
+
+function recAbrirConviteEmail(id) {
+  const alvo = document.getElementById('rec-convite-email');
+  if (!alvo) return;
+  alvo.innerHTML = `
+    <div class="brf-campo brf-full" style="margin-top:14px">
+      <label>E-mail do cliente</label>
+      <div style="display:flex;gap:8px">
+        <input id="rec-email-cliente" type="email" placeholder="cliente@email.com" style="flex:1" />
+        <button type="button" class="brf-btn mini" id="rec-email-btn" onclick="recEnviarConvite('${id}')">Enviar</button>
+      </div>
+    </div>`;
+}
+
+async function recEnviarConvite(id) {
+  const email = document.getElementById('rec-email-cliente')?.value.trim();
+  if (!email) { mostrarToast('Informe o e-mail do cliente', 'erro'); return; }
+
+  const btn = document.getElementById('rec-email-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+  try {
+    const res  = await api.post(`/reunioes/${id}/convite`, { email });
+    const data = await res.json().catch(() => ({}));
+    if (!res?.ok) { mostrarToast(data.erro || 'Não consegui enviar o convite', 'erro'); return; }
+    mostrarToast('Convite enviado por e-mail', 'sucesso');
+  } catch (err) {
+    mostrarToast('Erro de conexão ao enviar convite', 'erro');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; }
+  }
+}
+
+// ─── Histórico ───────────────────────────────────────────────────────────────
+async function recCarregarLista() {
+  const alvo = document.getElementById('rec-conteudo');
+  if (alvo && rec.aba === 'historico') {
+    alvo.innerHTML = '<div class="brf-vazio">Carregando suas reuniões...</div>';
+  }
+  try {
+    const res  = await api.get('/reunioes');
+    const data = await res.json().catch(() => ({}));
+    if (!res?.ok) {
+      if (alvo) alvo.innerHTML = `<div class="brf-vazio">${escapeHtml(data.erro || 'Erro ao carregar.')}</div>`;
+      return;
+    }
+    rec.lista    = data.reunioes || [];
+    rec.carregou = true;
+  } catch (err) {
+    if (alvo) alvo.innerHTML = '<div class="brf-vazio">Erro de conexão ao carregar suas reuniões.</div>';
+    return;
+  }
+  if (rec.aba === 'historico') mostrarReunioesIA();
+}
+
+function recStatusLabel(status) {
+  return { agendada: 'Aguardando', em_andamento: 'Em andamento', finalizada: 'Finalizada' }[status] || status;
+}
+
+function recRenderHistorico() {
+  const alvo = document.getElementById('rec-conteudo');
+  if (!alvo) return;
+
+  if (!rec.carregou) { alvo.innerHTML = '<div class="brf-vazio">Carregando suas reuniões...</div>'; return; }
+
+  if (!rec.lista.length) {
+    alvo.innerHTML = '<div class="brf-vazio">Nenhuma reunião gerada ainda.<br>Crie a primeira na aba "Nova reunião".</div>';
+    return;
+  }
+
+  alvo.innerHTML = rec.lista.map((r, i) => `
+    <div class="brf-item" data-idx="${i}">
+      <div style="flex:1">
+        <div class="brf-item-nome">${escapeHtml(r.titulo)}${r.cliente_empresa ? ` <span class="brf-item-emp">— ${escapeHtml(r.cliente_empresa)}</span>` : ''}</div>
+        <div class="brf-item-meta">${new Date(r.created_at).toLocaleDateString('pt-BR')} · ${recStatusLabel(r.status)}</div>
+      </div>
+      ${r.nota_ia != null ? `<span class="brf-item-tag brf-tag-nota">${r.nota_ia}</span>` : `<span class="brf-item-tag brf-tag-vazio">${recStatusLabel(r.status)}</span>`}
+    </div>`).join('');
+
+  // Clique abre o link gerado — usa addEventListener em vez de serializar o
+  // objeto inteiro num atributo onclick (evita ter que escapar aspas/JSON no HTML).
+  alvo.querySelectorAll('.brf-item').forEach(el => {
+    el.addEventListener('click', () => recAbrirNaTela(rec.lista[Number(el.dataset.idx)]));
+  });
+}
+
+// Expõe as Reuniões com IA para os onclick do HTML gerado
+Object.assign(window, {
+  rec,
+  mostrarReunioesIA, recIrPara, recCriar, recAbrirNaTela, recCopiarLink,
+  recAbrirConviteEmail, recEnviarConvite, recCarregarLista,
+  recProcessar, recAssistirGravacao,
 });
