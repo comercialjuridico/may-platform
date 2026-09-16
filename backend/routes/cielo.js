@@ -54,17 +54,23 @@ router.post('/pre-validar', async (req, res) => {
     const pagamento = resultado.body?.Payment;
     const statusOk  = [0, 1, 2].includes(pagamento?.Status);
     if (!pagamento || !statusOk) {
-      console.error('[cielo] recusa no pre-validar:', JSON.stringify({
+      const erroReq = Array.isArray(resultado.body) ? resultado.body[0] : null;
+      const logPayload = {
+        origem:        'pre-validar',
         httpStatus:    resultado.status,
         paymentStatus: pagamento?.Status,
         returnCode:    pagamento?.ReturnCode,
         returnMessage: pagamento?.ReturnMessage,
-        erroCielo:     Array.isArray(resultado.body) ? resultado.body : undefined,
-      }));
+        erroCielo:     erroReq || undefined,
+        bodyRaw:       JSON.stringify(resultado.body || null).slice(0, 1000),
+      };
+      console.error('[cielo] recusa no pre-validar:', JSON.stringify(logPayload));
+      await supabase.from('subscriptions_log').insert({
+        stripe_event: 'pre-validar.recusado',
+        payload:      logPayload,
+        processado:   false,
+      }).catch(() => {});
 
-      // Erro de requisição (credencial, campo inválido, recorrência não
-      // habilitada) vem como ARRAY, não como Payment.
-      const erroReq = Array.isArray(resultado.body) ? resultado.body[0] : null;
       if (erroReq) {
         return res.status(502).json({
           erro:   `A Cielo recusou a requisição: ${erroReq.Message || 'sem detalhe'}`,
@@ -78,13 +84,15 @@ router.post('/pre-validar', async (req, res) => {
         erro:   motivo,
         codigo: pagamento?.ReturnCode,
         origem: 'cartao',
-        // DIAGNÓSTICO TEMPORÁRIO — remover antes de abrir para clientes
-        _debug: {
-          httpStatus: resultado.status,
-          body:       JSON.stringify(resultado.body || null).slice(0, 600),
-        },
       });
     }
+
+    // Log de sucesso
+    await supabase.from('subscriptions_log').insert({
+      stripe_event: 'pre-validar.agendado',
+      payload:      { origem: 'pre-validar', orderId, plano, recurrentId: resultado.body?.Payment?.RecurrentPayment?.RecurrentPaymentId },
+      processado:   true,
+    }).catch(() => {});
 
     // Salva temporariamente no banco para vincular após registro
     await supabase.from('pre_checkouts').insert({
@@ -186,23 +194,26 @@ router.post('/checkout', authMiddleware, async (req, res) => {
       : [0, 1, 2].includes(pagamento?.Status);
 
     if (!pagamento || !statusOk) {
-      // Log com o retorno cru da Cielo (sem dado de cartão) — sem isso é impossível
-      // saber se foi recusa do emissor, credencial errada ou ambiente sandbox.
-      console.error('[cielo] recusa no checkout:', JSON.stringify({
+      const erroReq = Array.isArray(resultado.body) ? resultado.body[0] : null;
+      const logPayload = {
+        origem:        'checkout',
+        userId:        req.user.id,
+        email:         req.user.email,
+        plano,
         httpStatus:    resultado.status,
         paymentStatus: pagamento?.Status,
         returnCode:    pagamento?.ReturnCode,
         returnMessage: pagamento?.ReturnMessage,
-        erroCielo:     Array.isArray(resultado.body) ? resultado.body : undefined,
-      }));
-
-      // A Cielo responde de duas formas diferentes:
-      //  · recusa de cartão  → body.Payment com ReturnCode/ReturnMessage
-      //  · erro de requisição → body é um ARRAY [{ Code, Message }] (credencial
-      //    errada, campo inválido, recorrência não habilitada na conta…)
-      // Antes só o primeiro caso era lido, e o segundo virava "cartão não
-      // autorizado" — culpando o cartão do cliente por um problema de configuração.
-      const erroReq = Array.isArray(resultado.body) ? resultado.body[0] : null;
+        erroCielo:     erroReq || undefined,
+        bodyRaw:       JSON.stringify(resultado.body || null).slice(0, 1000),
+      };
+      console.error('[cielo] recusa no checkout:', JSON.stringify(logPayload));
+      await supabase.from('subscriptions_log').insert({
+        user_id:      req.user.id,
+        stripe_event: 'checkout.recusado',
+        payload:      logPayload,
+        processado:   false,
+      }).catch(() => {});
 
       if (erroReq) {
         return res.status(502).json({
@@ -218,13 +229,6 @@ router.post('/checkout', authMiddleware, async (req, res) => {
         status:  pagamento?.Status,
         codigo:  pagamento?.ReturnCode,
         origem:  'cartao',
-        // DIAGNÓSTICO TEMPORÁRIO — remover antes de abrir para clientes.
-        // Devolve o retorno cru da Cielo (sem nenhum dado de cartão, que não
-        // volta na resposta) para descobrir por que não vem código de recusa.
-        _debug: {
-          httpStatus: resultado.status,
-          body:       JSON.stringify(resultado.body || null).slice(0, 600),
-        },
       });
     }
 

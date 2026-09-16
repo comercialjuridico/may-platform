@@ -37,7 +37,7 @@ async function request(method, path, body) {
 // confirmar que há cartão cadastrado — sem isso, cada reunião custaria pouco
 // (± R$0,07/min gravado) mas travaria a criação da sala inteira.
 async function criarSala({ nomeSala, expiraEmHoras = 12, comGravacao = process.env.DAILY_BILLING_ATIVO === 'true' }) {
-  return request('POST', '/rooms', {
+  const sala = await request('POST', '/rooms', {
     name: nomeSala,
     privacy: 'public', // o link em si já funciona como convite
     properties: {
@@ -47,6 +47,27 @@ async function criarSala({ nomeSala, expiraEmHoras = 12, comGravacao = process.e
       eject_at_room_exp: true,
     },
   });
+
+  // Gravação automática: em vez de depender de alguém clicar em "gravar"
+  // dentro da call (o que não estava acontecendo — ver incidente de
+  // 2026-09-16, sala testada sem nenhuma gravação registrada), a sala volta
+  // com um token de reunião embutido no link (`?t=...`) já configurado com
+  // `start_cloud_recording: true`. Assim que a primeira pessoa entra usando
+  // esse link, o Daily começa a gravar sozinho, sem clique nenhum. É esse
+  // mesmo link (já com o token) que a May guarda e manda pro usuário e pro
+  // cliente — não precisa de nenhuma outra mudança no resto do fluxo.
+  if (comGravacao) {
+    const { token } = await request('POST', '/meeting-tokens', {
+      properties: {
+        room_name: sala.name,
+        is_owner: true,
+        start_cloud_recording: true,
+      },
+    });
+    sala.url = `${sala.url}?t=${token}`;
+  }
+
+  return sala;
 }
 
 async function buscarSala(nomeSala) {
