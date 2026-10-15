@@ -7,7 +7,7 @@ require('dotenv').config();
 // Sem isso, o processo morria dentro do SDK do Supabase com "supabaseUrl is
 // required" e o Railway ficava reiniciando em loop — sem dizer qual variável
 // faltava. Aqui a falta aparece nomeada, na primeira linha do log.
-const OBRIGATORIAS = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
+const OBRIGATORIAS = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
 const faltando = OBRIGATORIAS.filter(k => !process.env[k]);
 if (faltando.length) {
   console.error('═'.repeat(70));
@@ -27,6 +27,10 @@ const compression  = require('compression');
 const path         = require('path');
 
 const app = express();
+
+if (process.env.JWT_SECRET === process.env.JWT_REFRESH_SECRET) {
+  throw new Error('JWT_SECRET e JWT_REFRESH_SECRET devem ser diferentes.');
+}
 
 // ─── Compressão gzip ───────────────────────────────────────────────────────
 app.use(compression());
@@ -116,8 +120,11 @@ app.use('/assets', express.static(path.join(__dirname, '../frontend/assets'), {
 app.use('/css', express.static(path.join(__dirname, '../frontend/css'), {
   maxAge: '1d',
 }));
+app.get('/js/vendor/purify.min.js', (req, res) => {
+  res.sendFile(path.join(__dirname, '../node_modules/dompurify/dist/purify.min.js'));
+});
 app.use('/js', express.static(path.join(__dirname, '../frontend/js'), {
-  maxAge: '1d',
+  maxAge: 0,
 }));
 app.use(express.static(path.join(__dirname, '../frontend'), {
   maxAge: '1h',

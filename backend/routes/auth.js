@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, password, convite_token } = req.body;
 
-    if (!name || !email || !password) {
+    if (typeof name !== 'string' || !name.trim() || typeof email !== 'string' || !email.trim() || typeof password !== 'string') {
       return res.status(400).json({ erro: 'Nome, e-mail e senha são obrigatórios.' });
     }
     if (password.length < 8) {
@@ -44,7 +44,7 @@ router.post('/register', async (req, res) => {
     const { data: existente } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email.toLowerCase())
+      .eq('email', email.trim().toLowerCase())
       .single();
 
     if (existente) {
@@ -56,13 +56,16 @@ router.post('/register', async (req, res) => {
     if (convite_token) {
       const { data: convite } = await supabase
         .from('convites')
-        .select('id, empresa_id, email, aceito, permissoes')
+        .select('id, empresa_id, email, aceito, permissoes, expires_at')
         .eq('token', convite_token)
         .single();
 
-      if (convite && !convite.aceito) {
-        conviteData = convite;
+      if (!convite || convite.aceito ||
+          !Number.isFinite(Date.parse(convite.expires_at)) || Date.parse(convite.expires_at) <= Date.now() ||
+          convite.email?.trim().toLowerCase() !== email.trim().toLowerCase()) {
+        return res.status(400).json({ erro: 'Convite inválido, expirado ou destinado a outro e-mail.' });
       }
+      conviteData = convite;
     }
 
     const password_hash = await bcrypt.hash(password, 12);
@@ -70,7 +73,7 @@ router.post('/register', async (req, res) => {
 
     const novoUsuario = {
       name,
-      email: email.toLowerCase(),
+      email: email.trim().toLowerCase(),
       password_hash,
       verify_token,
       plano: 'free',
@@ -158,14 +161,14 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
       return res.status(400).json({ erro: 'E-mail e senha são obrigatórios.' });
     }
 
     const { data: user, error } = await supabase
       .from('users')
       .select('id, email, name, password_hash, plano, plano_status, plano_fim, diagnostico_completo, nicho, produto, publico_alvo, nivel, maior_dificuldade, totp_enabled, role, empresa_id, permissoes')
-      .eq('email', email.toLowerCase())
+      .eq('email', email.trim().toLowerCase())
       .single();
 
     if (error || !user) {
@@ -192,7 +195,7 @@ router.post('/login', async (req, res) => {
 
     await supabase.from('users').update({ refresh_token: refreshToken }).eq('id', user.id);
 
-    const { password_hash, totp_enabled, ...userPublic } = user;
+    const { password_hash, ...userPublic } = user;
 
     await registrarAuditoria({ userId: user.id, acao: 'login', req });
 
@@ -265,7 +268,7 @@ router.post('/forgot-password', async (req, res) => {
     const { data: user } = await supabase
       .from('users')
       .select('id, name')
-      .eq('email', email.toLowerCase())
+      .eq('email', email.trim().toLowerCase())
       .single();
 
     // Sempre retorna sucesso para não revelar se o e-mail existe
@@ -311,7 +314,7 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;
-    if (!token || !password) return res.status(400).json({ erro: 'Token e senha são obrigatórios.' });
+    if (typeof token !== 'string' || typeof password !== 'string') return res.status(400).json({ erro: 'Token e senha são obrigatórios.' });
     if (password.length < 8) return res.status(400).json({ erro: 'Senha deve ter no mínimo 8 caracteres.' });
 
     const { data: user } = await supabase
@@ -321,16 +324,20 @@ router.post('/reset-password', async (req, res) => {
       .single();
 
     if (!user) return res.status(400).json({ erro: 'Token inválido.' });
-    if (new Date(user.reset_token_exp) < new Date()) {
+    if (!Number.isFinite(Date.parse(user.reset_token_exp)) || Date.parse(user.reset_token_exp) <= Date.now()) {
       return res.status(400).json({ erro: 'Token expirado. Solicite um novo.' });
     }
 
     const password_hash = await bcrypt.hash(password, 12);
-    await supabase.from('users').update({
+    const { data: atualizado, error } = await supabase.from('users').update({
       password_hash,
+      refresh_token: null,
       reset_token: null,
       reset_token_exp: null,
-    }).eq('id', user.id);
+    }).eq('id', user.id).eq('reset_token', token)
+      .gt('reset_token_exp', new Date().toISOString()).select('id').maybeSingle();
+    if (error) throw error;
+    if (!atualizado) return res.status(400).json({ erro: 'Token inválido ou já utilizado.' });
 
     res.json({ mensagem: 'Senha redefinida com sucesso.' });
   } catch (err) {
@@ -345,7 +352,7 @@ router.get('/convite/:token', async (req, res) => {
   try {
     const { data: convite, error } = await supabase
       .from('convites')
-      .select('email, aceito, empresa_id, empresas(nome)')
+      .select('email, aceito, empresa_id, expires_at, empresas(nome)')
       .eq('token', req.params.token)
       .single();
 
@@ -354,6 +361,9 @@ router.get('/convite/:token', async (req, res) => {
     }
     if (convite.aceito) {
       return res.status(410).json({ erro: 'Este convite já foi utilizado.' });
+    }
+    if (!Number.isFinite(Date.parse(convite.expires_at)) || Date.parse(convite.expires_at) <= Date.now()) {
+      return res.status(410).json({ erro: 'Este convite expirou.' });
     }
 
     res.json({

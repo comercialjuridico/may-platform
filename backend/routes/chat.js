@@ -32,7 +32,7 @@ function getModelo(ferramenta) {
 router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
   const { mensagem, conversa_id, ferramenta = 'chat', area_ativa = null, upload_id = null, upload_ids = null } = req.body;
 
-  if (!mensagem || mensagem.trim() === '') {
+  if (typeof mensagem !== 'string' || mensagem.trim() === '' || mensagem.length > 50000) {
     return res.status(400).json({ erro: 'Mensagem não pode estar vazia.' });
   }
 
@@ -42,6 +42,23 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
       erro: 'Seu período de teste expirou. Adicione um cartão para continuar usando a May.',
       code: 'TRIAL_EXPIRADO',
     });
+  }
+
+  // Autoriza ANTES de abrir SSE, ler histórico ou chamar a IA. A chave de
+  // serviço ignora RLS: receber um UUID não é autorização para usá-lo.
+  if (conversa_id) {
+    if (typeof conversa_id !== 'string') {
+      return res.status(400).json({ erro: 'Conversa inválida.' });
+    }
+    try {
+      const { data: conversa, error } = await supabase.from('conversations')
+        .select('id').eq('id', conversa_id).eq('user_id', req.user.id).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      if (!conversa) return res.status(404).json({ erro: 'Conversa não encontrada.' });
+    } catch (err) {
+      console.error('Erro ao autorizar conversa:', err.message);
+      return res.status(503).json({ erro: 'Não foi possível verificar a conversa.' });
+    }
   }
 
   // Configura cabeçalhos para SSE
@@ -78,14 +95,17 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     }
 
     // Busca histórico da conversa (últimas 20 mensagens)
-    const { data: historico } = await supabase
+    const { data: historico, error: erroHistorico } = await supabase
       .from('messages')
       .select('role, content')
       .eq('conversation_id', conversaId)
-      .order('created_at', { ascending: true })
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
       .limit(20);
 
-    const mensagensAnteriores = (historico || []).map(m => ({
+    if (erroHistorico) throw erroHistorico;
+
+    const mensagensAnteriores = (historico || []).slice().reverse().map(m => ({
       role: m.role,
       content: m.content,
     }));
@@ -170,7 +190,8 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     });
 
     // Atualiza updated_at da conversa
-    await supabase.from('conversations').update({ updated_at: new Date() }).eq('id', conversaId);
+    await supabase.from('conversations').update({ updated_at: new Date() })
+      .eq('id', conversaId).eq('user_id', req.user.id);
 
     // Sinaliza fim do stream
     enviarEvento('fim', { conversa_id: conversaId });
@@ -223,6 +244,7 @@ router.get('/conversa/:id', authMiddleware, async (req, res) => {
       .from('messages')
       .select('id, role, content, created_at')
       .eq('conversation_id', req.params.id)
+      .eq('user_id', req.user.id)
       .order('created_at', { ascending: true });
 
     if (error) throw error;
