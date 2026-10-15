@@ -4,6 +4,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
+const { limiteMensagens } = require('../services/limites');
 
 // ─── GET /api/user/me ───────────────────────────────────────────────────────
 router.get('/me', authMiddleware, async (req, res) => {
@@ -210,18 +211,13 @@ router.get('/streak', authMiddleware, async (req, res) => {
 // ─── GET /api/user/uso ──────────────────────────────────────────────────────
 router.get('/uso', authMiddleware, async (req, res) => {
   try {
-    const limites = {
-      free:   parseInt(process.env.LIMITE_FREE)   || 20,
-      mensal: parseInt(process.env.LIMITE_MENSAL) || 500,
-      anual:  parseInt(process.env.LIMITE_ANUAL)  || 999999,
-    };
-    const limite = limites[req.user.plano] || limites.free;
+    const limite = limiteMensagens(req.user);
 
     res.json({
       plano: req.user.plano,
       mensagens_usadas: req.user.mensagens_mes || 0,
       limite,
-      restantes: Math.max(0, limite - (req.user.mensagens_mes || 0)),
+      restantes: limite === null ? null : Math.max(0, limite - (req.user.mensagens_mes || 0)),
     });
   } catch (err) {
     console.error('Erro ao buscar uso:', err.message);

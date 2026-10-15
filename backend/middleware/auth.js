@@ -1,6 +1,7 @@
 // ─── Middleware de autenticação JWT ────────────────────────────────────────────
 const jwt = require('jsonwebtoken');
 const { supabase } = require('../services/supabase');
+const { limiteMensagens } = require('../services/limites');
 
 /**
  * Verifica o access token JWT no header Authorization.
@@ -73,7 +74,7 @@ async function authMiddleware(req, res, next) {
       try {
         const criado    = new Date(user.created_at);
         const diasDesde = (Date.now() - criado.getTime()) / (1000 * 60 * 60 * 24);
-        if (diasDesde > 7) {
+        if (diasDesde >= 7) {
           user._trial_expirado = true;
         } else {
           user._trial_dias_restantes = Math.ceil(7 - diasDesde);
@@ -107,20 +108,13 @@ async function verificarLimite(req, res, next) {
     user.mes_referencia = mesAtual;
   }
 
-  // Admin nunca é bloqueado
-  if (user.role === 'admin') {
-    req.limiteInfo = { limite: 999999, usado: user.mensagens_mes };
+  const limite = limiteMensagens(user);
+
+  // Teste de 7 dias sem teto de mensagens; admin nunca é bloqueado.
+  if (limite === null || user.role === 'admin') {
+    req.limiteInfo = { limite, usado: user.mensagens_mes };
     return next();
   }
-
-  // Limites por plano
-  const limites = {
-    free:    parseInt(process.env.LIMITE_FREE)    || 20,
-    mensal:  parseInt(process.env.LIMITE_MENSAL)  || 500,
-    anual:   parseInt(process.env.LIMITE_ANUAL)   || 999999,
-  };
-
-  const limite = limites[user.plano] || limites.free;
 
   if (user.mensagens_mes >= limite) {
     return res.status(429).json({

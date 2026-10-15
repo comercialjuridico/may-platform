@@ -672,9 +672,10 @@ function atualizarContadorUso() {
   const el = document.getElementById('usage-counter');
   if (!el) return;
   const { mensagens_usadas, limite, restantes } = estado.uso;
-  el.textContent = `${mensagens_usadas}/${limite === 999999 ? '∞' : limite} mensagens`;
+  const ilimitado = limite === null || limite === 999999;
+  el.textContent = `${mensagens_usadas}/${ilimitado ? '∞' : limite} mensagens`;
   el.className = 'usage-counter' +
-    (restantes <= 5 ? ' danger' : restantes <= 20 ? ' warning' : '');
+    (!ilimitado && restantes <= 5 ? ' danger' : !ilimitado && restantes <= 20 ? ' warning' : '');
 }
 
 // ─── Selecionar ferramenta ───────────────────────────────────────────────────
@@ -1031,7 +1032,9 @@ async function enviarMensagem() {
         }
         // Atualiza uso
         estado.uso.mensagens_usadas++;
-        estado.uso.restantes = Math.max(0, estado.uso.restantes - 1);
+        if (estado.uso.restantes !== null) {
+          estado.uso.restantes = Math.max(0, estado.uso.restantes - 1);
+        }
         atualizarContadorUso();
         // Recarrega lista de conversas
         recarregarConversas();
