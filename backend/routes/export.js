@@ -8,6 +8,7 @@ const {
 const PDFDocument = require('pdfkit');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
+const { buscarLogoSeguro } = require('../services/profileImages');
 
 // ─── POST /api/export/docx ──────────────────────────────────────────────────
 // Exporta o conteúdo de uma conversa ou template para Word
@@ -196,11 +197,7 @@ router.post('/pdf', authMiddleware, async (req, res) => {
     let logoBuffer = null;
     if (logoUrl) {
       try {
-        const resp = await fetch(logoUrl);
-        if (resp.ok) {
-          const ab = await resp.arrayBuffer();
-          logoBuffer = Buffer.from(ab);
-        }
+        logoBuffer = await buscarLogoSeguro(logoUrl, req.user.id);
       } catch (_) { /* logo indisponível — continua sem ele */ }
     }
 

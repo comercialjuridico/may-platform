@@ -115,7 +115,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    // server.js preserva o texto original antes de fazer JSON.parse.
+    // express.raw após o parser global não recupera o corpo original.
+    event = stripe.webhooks.constructEvent(req.rawBody || req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature inválida:', err.message);
     return res.status(400).json({ erro: 'Webhook inválido.' });

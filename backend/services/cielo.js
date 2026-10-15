@@ -36,6 +36,7 @@ function request(host, method, path, body) {
       });
     });
     req.on('error', reject);
+    req.setTimeout(15000, () => req.destroy(new Error('Tempo esgotado na consulta à Cielo.')));
     if (data) req.write(data);
     req.end();
   });
@@ -126,7 +127,15 @@ async function criarRecorrencia({ plano, cartao, cliente, userId, comPeriodoGrat
 
 // Consulta transação pelo PaymentId
 async function consultarPagamento(paymentId) {
-  return request(QUERY_URL, 'GET', `/1/sales/${paymentId}`, null);
+  return request(QUERY_URL, 'GET', `/1/sales/${encodeURIComponent(paymentId)}`, null);
+}
+
+async function consultarRecorrencia(recurrentPaymentId) {
+  return request(QUERY_URL, 'GET', `/1/RecurrentPayment/${encodeURIComponent(recurrentPaymentId)}`, null);
+}
+
+function valorPlano(plano) {
+  return Object.hasOwn(PLANOS, plano) ? PLANOS[plano].valor : null;
 }
 
 // Desativa recorrência (cancela assinatura)
@@ -141,4 +150,4 @@ function cieloStatus() {
   };
 }
 
-module.exports = { criarRecorrencia, consultarPagamento, cancelarRecorrencia, detectarBandeira , cieloStatus };
+module.exports = { criarRecorrencia, consultarPagamento, consultarRecorrencia, cancelarRecorrencia, detectarBandeira, cieloStatus, valorPlano };

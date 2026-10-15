@@ -545,7 +545,10 @@ document.addEventListener('click', e => {
 function _setAvatarEl(el, user) {
   if (!el) return;
   if (user?.avatar_url) {
-    el.innerHTML = `<img src="${user.avatar_url}" alt="" />`;
+    const img = document.createElement('img');
+    img.src = user.avatar_url;
+    img.alt = '';
+    el.replaceChildren(img);
   } else {
     el.textContent = (user?.name || 'U').charAt(0).toUpperCase();
   }
@@ -628,7 +631,7 @@ function renderizarSeletorArea() {
             <span style="font-weight:${ativa?.id === a.id ? '600' : '400'}">${escapeHtml(a.nome)}</span>
             ${ativa?.id === a.id ? '<span style="margin-left:auto;font-size:10px;opacity:.7">●</span>' : ''}
           </div>
-          <button onclick="abrirArquivosArea('${a.id}','${escapeHtml(a.nome)}')"
+          <button onclick="abrirArquivosArea(${jsString(a.id)},${jsString(a.nome)})"
                   title="Arquivos salvos em ${escapeHtml(a.nome)}"
                   style="flex-shrink:0;background:transparent;border:none;cursor:pointer;padding:5px 6px;border-radius:6px;font-size:13px;color:var(--text-muted);transition:all .15s;"
                   onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.color='#A78BFA'"
@@ -885,7 +888,7 @@ function mostrarTelaVazia(ferramenta) {
       ${qs.length ? `
         <div class="quick-actions">
           ${qs.map(q => `
-            <button class="quick-action" onclick="enviarMensagemRapida('${escapeHtml(q)}')">
+            <button class="quick-action" onclick="enviarMensagemRapida(${jsString(q)})">
               ${escapeHtml(q)}
             </button>
           `).join('')}
@@ -1816,7 +1819,7 @@ async function toggle2FA() {
     document.getElementById('2fa-codigo-desativar').focus();
   } else {
     // Inicia setup — busca QR code
-    const res  = await apiFetch('/api/2fa/setup', { method: 'POST' });
+    const res  = await apiFetch('/2fa/setup', { method: 'POST' });
     const data = await res.json();
     if (!res.ok) { mostrarToast(data.erro || 'Erro ao iniciar 2FA', 'error'); return; }
     document.getElementById('2fa-qr-img').src = data.qrDataUrl;
@@ -1830,7 +1833,7 @@ async function toggle2FA() {
 async function confirmar2FAAtivacao() {
   const codigo = document.getElementById('2fa-codigo-ativar').value.trim();
   if (codigo.length !== 6) { mostrarToast('Informe os 6 dígitos', 'error'); return; }
-  const res  = await apiFetch('/api/2fa/ativar', { method: 'POST', body: JSON.stringify({ codigo }) });
+  const res  = await apiFetch('/2fa/ativar', { method: 'POST', body: JSON.stringify({ codigo }) });
   const data = await res.json();
   if (!res.ok) { mostrarToast(data.erro || 'Código inválido', 'error'); return; }
   estado.user.totp_enabled = true;
@@ -1842,7 +1845,7 @@ async function confirmar2FAAtivacao() {
 async function confirmar2FADesativacao() {
   const codigo = document.getElementById('2fa-codigo-desativar').value.trim();
   if (codigo.length !== 6) { mostrarToast('Informe os 6 dígitos', 'error'); return; }
-  const res  = await apiFetch('/api/2fa/desativar', { method: 'POST', body: JSON.stringify({ codigo }) });
+  const res  = await apiFetch('/2fa/desativar', { method: 'POST', body: JSON.stringify({ codigo }) });
   const data = await res.json();
   if (!res.ok) { mostrarToast(data.erro || 'Código inválido', 'error'); return; }
   estado.user.totp_enabled = false;
@@ -2210,8 +2213,8 @@ async function abrirArquivosArea(areaId, areaNome) {
           <div style="margin-top:8px;font-size:0.82rem;color:rgba(200,190,255,.6);line-height:1.5;max-height:60px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml((t.conteudo||'').slice(0,180))}${t.conteudo?.length>180?'…':''}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-          <button onclick="copiarArquivo('${t.id}',${JSON.stringify(t.conteudo).replace(/'/g,"\\'")})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#C4B5FD;border-radius:7px;padding:5px 12px;font-size:0.75rem;cursor:pointer;">Copiar</button>
-          <button onclick="excluirArquivo('${t.id}','${areaId}','${escapeHtml(areaNome)}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;border-radius:7px;padding:5px 12px;font-size:0.75rem;cursor:pointer;">Excluir</button>
+          <button onclick="copiarArquivo(${jsString(t.id)},${jsString(t.conteudo)})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#C4B5FD;border-radius:7px;padding:5px 12px;font-size:0.75rem;cursor:pointer;">Copiar</button>
+          <button onclick="excluirArquivo(${jsString(t.id)},${jsString(areaId)},${jsString(areaNome)})" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;border-radius:7px;padding:5px 12px;font-size:0.75rem;cursor:pointer;">Excluir</button>
         </div>
       </div>
     </div>
@@ -2812,7 +2815,13 @@ function escapeHtml(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// String JavaScript dentro de atributo HTML: escapar as duas camadas.
+function jsString(value) {
+  return escapeHtml(JSON.stringify(String(value)));
 }
 
 // ─── Cancelamento de assinatura com feedback ──────────────────────────────────

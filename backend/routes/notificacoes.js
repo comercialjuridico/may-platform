@@ -63,7 +63,7 @@ router.post('/unsubscribe', authMiddleware, async (req, res) => {
 // Disparado por cron job interno; protegido por CRON_SECRET
 router.post('/enviar-cron', async (req, res) => {
   const secret = req.headers['x-cron-secret'];
-  if (secret !== process.env.CRON_SECRET) return res.status(401).json({ erro: 'Não autorizado.' });
+  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) return res.status(401).json({ erro: 'Não autorizado.' });
 
   const { tipo } = req.body; // 'diario' | 'semanal'
 

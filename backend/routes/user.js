@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 const { limiteMensagens } = require('../services/limites');
+const { imagemPerfilPermitida } = require('../services/profileImages');
 
 // ─── GET /api/user/me ───────────────────────────────────────────────────────
 router.get('/me', authMiddleware, async (req, res) => {
@@ -138,6 +139,11 @@ router.put('/diagnostico', authMiddleware, async (req, res) => {
 router.put('/perfil', authMiddleware, async (req, res) => {
   try {
     const { name, avatar_url, logo_escritorio, cor_escritorio } = req.body;
+    for (const [value, tipo] of [[avatar_url, 'avatar'], [logo_escritorio, 'logo']]) {
+      if (value != null && value !== '' && !imagemPerfilPermitida(value, req.user.id, tipo)) {
+        return res.status(400).json({ erro: 'Utilize uma imagem enviada pelo seu perfil.' });
+      }
+    }
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (avatar_url !== undefined) updates.avatar_url = avatar_url;
@@ -182,7 +188,8 @@ router.put('/senha', authMiddleware, async (req, res) => {
     }
 
     const password_hash = await bcrypt.hash(nova_senha, 12);
-    await supabase.from('users').update({ password_hash }).eq('id', req.user.id);
+    const { error } = await supabase.from('users').update({ password_hash, refresh_token: null }).eq('id', req.user.id);
+    if (error) throw error;
 
     res.json({ mensagem: 'Senha alterada com sucesso.' });
   } catch (err) {

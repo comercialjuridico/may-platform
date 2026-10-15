@@ -1,9 +1,10 @@
 // ─── Rotas Cielo: checkout recorrente e webhook ─────────────────────────────
 const express = require('express');
 const router  = express.Router();
+const { reconciliarCielo, segredoConfere } = require('../services/cieloWebhook');
 const { supabase }          = require('../services/supabase');
 const { authMiddleware }    = require('../middleware/auth');
-const { criarRecorrencia, consultarPagamento, cancelarRecorrencia } = require('../services/cielo');
+const { criarRecorrencia, consultarPagamento, consultarRecorrencia, cancelarRecorrencia, valorPlano } = require('../services/cielo');
 
 // Planos válidos e suas durações em meses
 // Modelo por assento: R$97/mês base (1 usuário) + R$47/usuário adicional (gerenciado internamente)
@@ -42,7 +43,7 @@ router.post('/pre-validar', async (req, res) => {
       return res.status(400).json({ erro: 'Dados do cartão incompletos.' });
     }
 
-    const orderId = `PRE-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    const orderId = require('crypto').randomUUID();
     const resultado = await criarRecorrencia({
       plano,
       cartao,
@@ -130,7 +131,9 @@ router.post('/ativar', authMiddleware, async (req, res) => {
 
     if (!pre) return res.status(400).json({ erro: 'Sessão de pagamento expirada. Tente novamente.' });
 
-    const cfg   = PLANOS_CONFIG[plano] || PLANOS_CONFIG[pre.plano];
+    // O plano do cliente não pode alterar a duração já contratada.
+    const cfg = PLANOS_CONFIG[pre.plano];
+    if (!cfg) return res.status(400).json({ erro: 'Plano inválido.' });
     const agora = new Date();
     const inicioCobranca = new Date(agora);
     inicioCobranca.setDate(inicioCobranca.getDate() + 7);
@@ -315,76 +318,19 @@ router.post('/cancelar', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── POST /api/cielo/webhook ────────────────────────────────────────────────
-// Recebe notificações automáticas da Cielo (configurar URL no painel Cielo)
-// Formato esperado: POST com form-encoded body contendo PaymentId e ChangeType
-router.post('/webhook', express.urlencoded({ extended: true }), async (req, res) => {
+// Webhook: os dados recebidos nunca são autoridade para alterar a conta.
+router.post('/webhook', async (req, res) => {
+  const secret = process.env.CIELO_WEBHOOK_SECRET;
+  if (secret && !segredoConfere(req.headers['x-cielo-webhook-secret'], secret)) {
+    return res.status(401).json({ erro: 'Notificação não autorizada.' });
+  }
   try {
-    const { PaymentId, RecurrentPaymentId, ChangeType } = req.body;
-
-    // Registra notificação
-    await supabase.from('subscriptions_log').insert({
-      cielo_event: `webhook.changetype.${ChangeType}`,
-      payload:     req.body,
-    }).catch(() => {});
-
-    // ChangeType 2 = recorrência criada (já tratamos no checkout)
-    // ChangeType 7 = cobrança recorrente executada (renovação)
-    if (ChangeType === '7' || ChangeType === 2 || ChangeType === 7) {
-      if (!PaymentId) return res.status(200).send('ok');
-
-      // Consulta o pagamento para obter status e dados completos
-      const { body } = await consultarPagamento(PaymentId);
-      const pagamento = body?.Payment;
-      if (!pagamento) return res.status(200).send('ok');
-
-      // Busca usuário pelo RecurrentPaymentId
-      const rpId = RecurrentPaymentId || pagamento.RecurrentPayment?.RecurrentPaymentId;
-      if (!rpId) return res.status(200).send('ok');
-
-      const { data: user } = await supabase
-        .from('users')
-        .select('id, plano, plano_fim')
-        .eq('cielo_recurrent_payment_id', rpId)
-        .single();
-
-      if (!user) return res.status(200).send('ok');
-
-      if (pagamento.Status === 2) {
-        // Pagamento confirmado — renova o plano
-        const cfg      = PLANOS_CONFIG[user.plano] || { meses: 1 };
-        const novoFim  = new Date(user.plano_fim || new Date());
-        novoFim.setMonth(novoFim.getMonth() + cfg.meses);
-
-        await supabase.from('users').update({
-          plano_status: 'ativo',
-          trial_fim:    null,     // trial encerrou, agora é assinatura ativa
-          plano_fim:    novoFim.toISOString(),
-        }).eq('id', user.id);
-
-      } else if ([3, 13, 14].includes(pagamento.Status)) {
-        // Negado / não autorizado — marca como falha
-        await supabase.from('users').update({
-          plano_status: 'pagamento_falhou',
-        }).eq('id', user.id);
-      }
-    }
-
-    // ChangeType 3 = recorrência desativada
-    if (ChangeType === '3' || ChangeType === 3) {
-      if (RecurrentPaymentId) {
-        await supabase.from('users').update({
-          plano:                      'free',
-          plano_status:               'cancelado',
-          cielo_recurrent_payment_id: null,
-        }).eq('cielo_recurrent_payment_id', RecurrentPaymentId);
-      }
-    }
-
+    await reconciliarCielo(req.body || {}, { supabase, consultarPagamento, consultarRecorrencia, valorPlano });
     res.status(200).send('ok');
   } catch (err) {
-    console.error('Erro no webhook Cielo:', err.message);
-    res.status(200).send('ok'); // sempre 200 para Cielo não retentar
+    console.error('Falha na conciliação Cielo:', err.message);
+    // Indisponibilidade precisa permitir retentativa do provedor.
+    res.status(err.status || 503).json({ erro: 'Não foi possível confirmar a notificação.' });
   }
 });
 

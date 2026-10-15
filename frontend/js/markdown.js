@@ -1,8 +1,16 @@
 // ─── markdown.js — Renderizador de Markdown leve ─────────────────────────────
-// Sem dependência externa. Cobre os casos usados pela May.
+// Formatação limitada; a saída passa por DOMPurify antes de entrar no DOM.
+
+function escapeMarkdownHtml(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 
 function renderMarkdown(texto) {
   if (!texto) return '';
+
+  // Falha fechada caso o sanitizador não carregue (inclusive cache antigo).
+  if (!window.DOMPurify?.isSupported) return escapeMarkdownHtml(texto);
 
   let html = texto
     // Escapa HTML perigoso
@@ -61,7 +69,12 @@ function renderMarkdown(texto) {
     html = `<p>${html}</p>`;
   }
 
-  return html;
+  return window.DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'pre', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'hr', 'a'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    ALLOW_DATA_ATTR: false,
+    ALLOW_ARIA_ATTR: false,
+  });
 }
 
 window.renderMarkdown = renderMarkdown;
