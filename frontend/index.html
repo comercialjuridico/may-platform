@@ -109,18 +109,10 @@
       </div>
 
       <form id="pw-form" onsubmit="pwSubmit(event)" style="display:flex; flex-direction:column; gap:10px;">
-        <input class="co-field" type="text"  id="pw-nome"     placeholder="Nome completo"       required>
-        <input class="co-field" type="text"  id="pw-cpf"      placeholder="CPF ou CNPJ"         required maxlength="18">
-        <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:rgba(200,190,255,.45); margin-top:4px;">Cartão de crédito</div>
-        <input class="co-field" type="text"  id="pw-numero"   placeholder="Número do cartão"    required maxlength="19">
-        <input class="co-field" type="text"  id="pw-titular"  placeholder="Nome igual ao cartão" required>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <input class="co-field" type="text" id="pw-validade" placeholder="MM/AA" required maxlength="5">
-          <input class="co-field" type="text" id="pw-cvv"      placeholder="CVV"   required maxlength="4">
-        </div>
+        <p style="color:rgba(200,190,255,.8);font-size:.86rem;line-height:1.6">Você informará seu cartão na página segura do Stripe. Confira o valor e a data da primeira cobrança antes de confirmar.</p>
         <div id="pw-erro" style="color:#f87171; font-size:0.8rem; display:none;"></div>
-        <button type="submit" id="pw-submit" style="background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:14px; border-radius:10px; cursor:pointer; margin-top:4px;">🔒 Confirmar assinatura →</button>
-        <p style="text-align:center; font-size:0.73rem; color:rgba(200,190,255,.35); margin:0;">Sem cobrança hoje. Acesso imediato. Cancele quando quiser.</p>
+        <button type="submit" id="pw-submit" style="background:linear-gradient(135deg,#7C3AED,#6D28D9); color:#fff; border:none; font-size:0.9rem; font-weight:700; padding:14px; border-radius:10px; cursor:pointer; margin-top:4px;">Continuar para o Stripe →</button>
+        <p style="text-align:center; font-size:0.73rem; color:rgba(200,190,255,.35); margin:0;">O teste termina sete dias após seu cadastro. Contratar não reinicia esse prazo.</p>
       </form>
     </div>
 
@@ -534,6 +526,7 @@
         </div>
         <button class="btn btn-secondary" style="font-size:.8rem;padding:7px 14px" onclick="abrirModalPlanos()">Ver planos</button>
       </div>
+      <button id="btn-gerenciar-assinatura" class="btn btn-secondary btn-full" style="display:none;margin-bottom:8px" onclick="gerenciarAssinatura()">Gerenciar pagamento no Stripe</button>
       <button id="btn-cancelar-assinatura" class="btn btn-full"
         style="background:transparent;border:1px solid rgba(239,68,68,.25);color:rgba(239,68,68,.7);font-size:.82rem;padding:9px"
         onclick="abrirModalCancelamento()">
@@ -647,8 +640,8 @@
     <!-- Banner trial (aparece só para novo usuário) -->
     <div id="trial-banner-modal" style="display:none; background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(52,211,153,.08)); border:1px solid rgba(16,185,129,.3); border-radius:12px; padding:14px 18px; margin-bottom:16px; text-align:center;">
       <div style="font-size:1.3rem; margin-bottom:4px;">🎉</div>
-      <div style="font-size:14px; font-weight:700; color:#34D399; margin-bottom:2px;">7 dias grátis incluídos</div>
-      <div style="font-size:12px; color:rgba(200,255,220,.6); line-height:1.5;">Adicione seu cartão para começar. <strong style="color:#6EE7B7">Cancele antes do 8º dia e não paga nada.</strong></div>
+      <div style="font-size:14px; font-weight:700; color:#34D399; margin-bottom:2px;">Seu período de teste é preservado</div>
+      <div style="font-size:12px; color:rgba(200,255,220,.6); line-height:1.5;">O teste termina sete dias após o cadastro. Confira no Stripe quando será sua primeira cobrança.</div>
     </div>
 
     <!-- Toggle Trimestral / Anual -->
@@ -694,84 +687,6 @@
   </div>
 </div>
 
-<!-- ══════════════ MODAL: CARTÃO CIELO ══════════════ -->
-<div class="modal-overlay" id="modal-cartao">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-header">
-      <span class="modal-title" id="cartao-titulo">Assinar — Plano Mensal</span>
-      <button class="modal-close" onclick="document.getElementById('modal-cartao').classList.remove('active')">✕</button>
-    </div>
-
-    <!-- Aviso de trial (oculto por padrão, revelado pelo iniciarCheckout) -->
-    <div id="cartao-trial-aviso" style="display:none;align-items:flex-start;gap:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px 14px;margin:0 20px 0;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0">🔒</span>
-      <div>
-        <div style="font-size:.83rem;font-weight:700;color:#6EE7B7;margin-bottom:2px">7 dias por nossa conta — sem cobrança agora</div>
-        <div style="font-size:.78rem;color:rgba(110,231,183,.65);line-height:1.4">Seu cartão só será cobrado após os 7 dias. Cancele antes disso sem custo.</div>
-      </div>
-    </div>
-
-    <!-- Quem já usou o período grátis é cobrado na hora — precisa saber disso ANTES de digitar o cartão -->
-    <div id="cartao-cobranca-aviso" style="display:none;align-items:flex-start;gap:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 14px;margin:0 20px 0;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0">💳</span>
-      <div>
-        <div style="font-size:.83rem;font-weight:700;color:#FBBF24;margin-bottom:2px" id="cartao-cobranca-titulo">Cobrança de <span id="cartao-cobranca-valor">R$ 97</span> agora</div>
-        <div style="font-size:.78rem;color:rgba(251,191,36,.7);line-height:1.4">Você já usou o período de teste desta conta, então a assinatura começa a valer imediatamente.</div>
-      </div>
-    </div>
-
-    <form id="form-cartao" onsubmit="submeterCartao(event)" autocomplete="off">
-      <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
-
-        <div>
-          <label class="text-xs text-muted" style="display:block;margin-bottom:4px">Número do cartão</label>
-          <input id="cartao-numero" class="input" type="text" inputmode="numeric"
-            placeholder="0000 0000 0000 0000" maxlength="19" required
-            oninput="formatarNumeroCartao(this)">
-          <span id="cartao-bandeira" style="font-size:.75rem;color:var(--text-muted);margin-top:2px;display:block"></span>
-        </div>
-
-        <div>
-          <label class="text-xs text-muted" style="display:block;margin-bottom:4px">Nome no cartão</label>
-          <input id="cartao-titular" class="input" type="text" placeholder="NOME COMPLETO" required
-            oninput="this.value=this.value.toUpperCase()">
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div>
-            <label class="text-xs text-muted" style="display:block;margin-bottom:4px">Validade</label>
-            <input id="cartao-validade" class="input" type="text" placeholder="MM/AAAA" maxlength="7" required
-              oninput="formatarValidade(this)">
-          </div>
-          <div>
-            <label class="text-xs text-muted" style="display:block;margin-bottom:4px">CVV</label>
-            <input id="cartao-cvv" class="input" type="text" inputmode="numeric"
-              placeholder="123" maxlength="4" required>
-          </div>
-        </div>
-
-        <div>
-          <label class="text-xs text-muted" style="display:block;margin-bottom:4px">CPF do titular</label>
-          <input id="cartao-cpf" class="input" type="text" inputmode="numeric"
-            placeholder="000.000.000-00" maxlength="14" required
-            oninput="formatarCPF(this)">
-        </div>
-
-        <div id="cartao-erro" style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px;font-size:.82rem;color:#FCA5A5;"></div>
-
-        <button id="btn-pagar" type="submit" class="btn btn-primary btn-full" style="margin-top:4px">
-          Começar 7 dias por nossa conta
-        </button>
-      </div>
-    </form>
-
-    <p class="text-xs text-muted" style="text-align:center; margin-top:12px;">
-      🔒 Dados transmitidos com criptografia SSL para a Cielo
-    </p>
-  </div>
-</div>
-
-
 <!-- ══════════════ MODAL: ÁREAS DE TRABALHO ══════════════ -->
 <div class="modal-overlay" id="modal-areas">
   <div class="modal" style="max-width:480px">
@@ -811,7 +726,7 @@
 <script src="/js/api.js"></script>
 <script src="/js/vendor/purify.min.js?v=security-1"></script>
 <script src="/js/markdown.js?v=security-1"></script>
-<script src="/js/app.js?v=security-1"></script>
+<script src="/js/app.js?v=stripe-1"></script>
 <script>
   // ── Partículas ────────────────────────────────────────────────────────────────
   (function(){

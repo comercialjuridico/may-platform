@@ -1,6 +1,11 @@
 // ─── Rotas Cielo: checkout recorrente e webhook ─────────────────────────────
 const express = require('express');
 const router  = express.Router();
+
+// Novas compras usam Stripe; clientes Cielo mantêm webhook e cancelamento.
+router.use(['/pre-validar', '/ativar', '/checkout'], (req, res) => {
+  res.status(410).json({ erro: 'O pagamento foi atualizado. Recarregue o App May para assinar pelo Stripe.' });
+});
 const { reconciliarCielo, segredoConfere } = require('../services/cieloWebhook');
 const { supabase }          = require('../services/supabase');
 const { authMiddleware }    = require('../middleware/auth');
@@ -303,15 +308,16 @@ router.post('/cancelar', authMiddleware, async (req, res) => {
       return res.status(400).json({ erro: 'Nenhuma assinatura ativa encontrada.' });
     }
 
-    await cancelarRecorrencia(user.cielo_recurrent_payment_id);
+    const resultado = await cancelarRecorrencia(user.cielo_recurrent_payment_id);
+    if (!resultado || resultado.status < 200 || resultado.status >= 300) {
+      return res.status(502).json({ erro: 'A Cielo não confirmou o cancelamento. Tente novamente ou contate o suporte.' });
+    }
 
-    await supabase.from('users').update({
-      plano:                      'free',
-      plano_status:               'cancelado',
-      cielo_recurrent_payment_id: null,
-    }).eq('id', req.user.id);
-
-    res.json({ ok: true });
+    const salvamento = await supabase.from('users').update({
+      plano_status: 'cancelando',
+    }).eq('id', req.user.id).eq('cielo_recurrent_payment_id', user.cielo_recurrent_payment_id);
+    if (salvamento.error) throw salvamento.error;
+    res.json({ ok: true, mensagem: 'Renovação cancelada. Você mantém acesso até o fim do período atual.' });
   } catch (err) {
     console.error('Erro ao cancelar recorrência:', err.message);
     res.status(500).json({ erro: 'Erro ao cancelar assinatura.' });

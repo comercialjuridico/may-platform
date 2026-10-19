@@ -82,6 +82,8 @@ async function authMiddleware(req, res, next) {
       } catch (_) { /* ignora erro de parsing de data */ }
     }
 
+    // Assinaturas sem pagamento confirmado não voltam a ter acesso gratuito.
+    if (user.plano === 'free' && ['pagamento_falhou', 'cancelado', 'expirado'].includes(user.plano_status)) user._trial_expirado = true;
     req.user = user;
     next();
   } catch (err) {
