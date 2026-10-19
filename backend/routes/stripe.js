@@ -82,9 +82,19 @@ router.get('/precos', async (req, res) => {
       mensal: (mensal.unit_amount / 100).toFixed(2),
       anual:  (anual.unit_amount  / 100).toFixed(2),
     });
-  } catch {
-    // Fallback com preços hardcoded se Stripe falhar
-    res.json({ mensal: '97.00', anual: '797.00' });
+  } catch (err) {
+    // Não apresenta preços inventados quando a consulta ao provedor falha.
+    // Mensagens Stripe podem conter trechos de chave: não registrar err.message,
+    // payload, headers nem IDs recebidos. Retornar apenas categoria controlada.
+    const status = Number.isInteger(err?.statusCode) ? err.statusCode : null;
+    const codigo = status === 401 ? 'STRIPE_AUTENTICACAO'
+      : status === 403 ? 'STRIPE_SEM_PERMISSAO'
+      : status === 404 ? 'STRIPE_PRECO_NAO_ENCONTRADO'
+      : 'STRIPE_INDISPONIVEL';
+    console.error('Falha na consulta de preços Stripe:', { codigo, status });
+    res.status(503).json({
+      erro: 'Não foi possível consultar os planos de pagamento.', codigo,
+    });
   }
 });
 
