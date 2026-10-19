@@ -13,7 +13,7 @@ function router(retrieve, db) {
 }
 test('price query returns actual provider values instead of hardcoded annual fallback', async () => {
   const db = database({}); const calls = [];
-  await withApp(router(async id => { calls.push(id); return { unit_amount: id === 'price_month' ? 9700 : 93600 }; }, db), async request => {
+  await withApp(router(async id => { calls.push(id); return { id, active: true, currency: 'brl', unit_amount: id === 'price_month' ? 9700 : 93600, recurring: { interval: id === 'price_month' ? 'month' : 'year', interval_count: 1 } }; }, db), async request => {
     const res = await request('/precos'); assert.equal(res.status, 200);
     assert.deepEqual(res.data, { mensal: '97.00', anual: '936.00' });
   });

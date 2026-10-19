@@ -93,7 +93,6 @@ const PW_PRECOS = {
   anual:  { preco: 'R$ 936', sub: 'cobrado anualmente · equivale a R$ 78/mês',    checkout: 'start_anual'  },
 };
 let _pwPeriodo = 'mensal';
-let _pwPlano   = 'start'; // sempre start — único plano
 
 function verificarFluxoOnboarding(user) {
   // Calcula dias desde criação
@@ -195,7 +194,7 @@ let _bloqueioExpiradoTimer = null;
 // Assinatura vencida: trial de 7 dias estourado OU plano marcado como expirado
 function assinaturaExpirada(user) {
   if (!user) return false;
-  if (user.plano_status === 'expirado' || user._trial_expirado) return true;
+  if (user.plano_status === 'expirado' || user._trial_expirado || (user.plano === 'free' && ['pagamento_pendente', 'pagamento_falhou', 'cancelado'].includes(user.plano_status))) return true;
 
   const emTrial = (user.plano === 'free' || !user.plano) &&
                   !user.cielo_recurrent_payment_id && !user.stripe_subscription_id;
@@ -217,6 +216,12 @@ function mostrarBloqueioExpirado(delayMs) {
     const pa = document.getElementById('exp-preco-anual');
     if (pm) pm.textContent = `Renovar agora — ${PW_PRECOS.mensal.preco}/mês`;
     if (pa) pa.textContent = `Plano anual — ${PW_PRECOS.anual.preco} (economize!)`;
+    if (estado.user?.plano_status === 'pagamento_pendente') {
+      wall.querySelector('.expired-titulo').textContent = 'Pagamento em processamento';
+      wall.querySelector('.expired-desc').textContent = 'Seu pagamento aguarda confirmação. Consulte o status no portal do Stripe e atualize a página após a confirmação.';
+      if (pm) pm.textContent = 'Consultar pagamento';
+      if (pa) pa.style.display = 'none';
+    }
     wall.classList.add('ativo');
   }, delayMs == null ? 3000 : delayMs);
 }
@@ -254,22 +259,7 @@ function pwAvancarPagamento() {
   document.getElementById('pw-resumo-plano').textContent = 'MAY IA — Plano Completo';
   document.getElementById('pw-resumo-preco').textContent = `${dados.preco}/${_pwPeriodo === 'mensal' ? 'mês' : 'ano'}`;
 
-  // Máscaras
-  document.getElementById('pw-numero')?.addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
-  });
-  document.getElementById('pw-validade')?.addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4).replace(/^(\d{2})(\d)/,'$1/$2');
-  });
-  document.getElementById('pw-cvv')?.addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4);
-  });
-  document.getElementById('pw-cpf')?.addEventListener('input', e => {
-    const d = e.target.value.replace(/\D/g,'').slice(0,14);
-    e.target.value = d.length <= 11
-      ? d.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')
-      : d.replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{4})(\d{1,2})$/,'$1/$2');
-  });
+
 }
 
 function pwVoltarPlanos() {
@@ -281,73 +271,7 @@ function pwVoltarPlanos() {
 
 async function pwSubmit(e) {
   e.preventDefault();
-  const btn  = document.getElementById('pw-submit');
-  const erro = document.getElementById('pw-erro');
-  erro.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Validando cartão…';
-
-  try {
-    const validade = document.getElementById('pw-validade').value.trim();
-    const [mm, aa] = validade.split('/');
-    const planoKey = PW_PRECOS[_pwPeriodo].checkout;
-
-    // 1. Pré-validar cartão
-    const preRes = await fetch('/api/cielo/pre-validar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        plano: planoKey,
-        cpf:   document.getElementById('pw-cpf').value,
-        cartao: {
-          numero:   document.getElementById('pw-numero').value.replace(/\D/g,''),
-          titular:  document.getElementById('pw-titular').value.trim(),
-          validade: `${mm}/20${aa}`,
-          cvv:      document.getElementById('pw-cvv').value,
-        },
-      }),
-    });
-    const preData = await preRes.json();
-    if (!preRes.ok) {
-      console.error('Pré-validação recusada:', preData);
-      const cod = preData.codigo ? ` (código Cielo ${preData.codigo})` : '';
-      const dbg = preData._debug ? `\n\nHTTP ${preData._debug.httpStatus} · ${preData._debug.body}` : '';
-      throw new Error((preData.erro || 'Cartão não autorizado.') + cod + dbg);
-    }
-
-    // 2. Ativar plano (usuário já logado)
-    const token = getAccessToken();
-    const ativarRes = await fetch('/api/cielo/ativar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ orderId: preData.orderId }),
-    });
-    const ativarData = await ativarRes.json();
-    if (!ativarRes.ok) throw new Error(ativarData.erro || 'Erro ao ativar assinatura.');
-
-    // 3. Sucesso — atualiza localmente e recarrega dados do servidor
-    estado.user.plano = _pwPlano;
-    estado.user.plano_status = 'ativo';
-    estado.user.cielo_recurrent_payment_id = preData.orderId || 'ativo';
-    salvarUser(estado.user);
-    fecharPaymentWall();
-    const barTop = document.getElementById('trial-top-bar');
-    if (barTop) barTop.style.display = 'none';
-
-    mostrarToast(`✅ Assinatura confirmada! Bem-vindo(a) à May IA`);
-
-    // Recarrega dados do servidor para refletir empresa_id e permissões atualizadas
-    await carregarDadosIniciais();
-    renderizarSidebar();
-    mostrarHomeDashboard();
-
-  } catch (err) {
-    erro.textContent    = err.message;
-    erro.style.whiteSpace = 'pre-wrap';
-    erro.style.display  = 'block';
-    btn.disabled       = false;
-    btn.textContent    = '🔒 Confirmar assinatura →';
-  }
+  await iniciarCheckout(PW_PRECOS[_pwPeriodo].checkout);
 }
 
 // ─── Ferramentas disponíveis ─────────────────────────────────────────────────
@@ -462,7 +386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   carregarModulosHeader(); // carrega módulos ativos no topo
   verificarFluxoOnboarding(estado.user);
   verificarDiagnostico();
-  verificarQueryParams();
+  await verificarQueryParams();
   if (!estado.conversaAtiva) mostrarHomeDashboard();
   inicializarPushNotificacoes();
   carregarTrilhaDoServidor(); // sincroniza progresso da trilha com o banco
@@ -506,16 +430,29 @@ async function carregarDadosIniciais() {
 }
 
 // ─── Verificar params de URL ─────────────────────────────────────────────────
-function verificarQueryParams() {
+async function verificarQueryParams() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('pagamento') === 'sucesso') {
-    mostrarToast('Assinatura ativada com sucesso! 🎉', 'sucesso');
-    window.history.replaceState({}, '', '/');
-    carregarDadosIniciais().then(renderizarSidebar);
+    try {
+      const res = await api.post('/stripe/confirmar', { session_id: params.get('session_id') });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.erro || 'Não foi possível confirmar o pagamento.');
+      await carregarDadosIniciais();
+      renderizarSidebar();
+      if (data.confirmado) {
+        clearTimeout(_bloqueioExpiradoTimer);
+        fecharPaymentWall();
+        document.getElementById('expired-wall')?.classList.remove('ativo');
+        mostrarToast('Assinatura confirmada! 🎉', 'sucesso');
+      } else {
+        mostrarToast('Pagamento em processamento. Confira sua assinatura em Minha conta.', 'aviso');
+      }
+    } catch (err) { mostrarToast(err.message || 'Não foi possível confirmar o pagamento.', 'erro'); }
+    window.history.replaceState({}, '', '/app');
   }
   if (params.get('pagamento') === 'cancelado') {
-    mostrarToast('Pagamento cancelado.', 'aviso');
-    window.history.replaceState({}, '', '/');
+    mostrarToast('Pagamento cancelado. Nenhuma nova assinatura foi confirmada.', 'aviso');
+    window.history.replaceState({}, '', '/app');
   }
 }
 
@@ -1755,7 +1692,7 @@ function preencherMinhaAssinatura() {
     const renova = user?.plano_fim
       ? new Date(user.plano_fim).toLocaleDateString('pt-BR')
       : null;
-    infoEl.textContent = `${anual ? 'Cobrança anual' : 'Cobrança mensal'}${renova ? ` · renova em ${renova}` : ''}`;
+    infoEl.textContent = `${anual ? 'Cobrança anual' : 'Cobrança mensal'}${renova ? ` · ${user.plano_status === 'cancelando' ? 'acesso até' : 'renova em'} ${renova}` : ''}`;
   } else {
     const dias = user?._trial_dias_restantes;
     infoEl.textContent = dias
@@ -1763,6 +1700,8 @@ function preencherMinhaAssinatura() {
       : 'Assine para continuar usando a May.';
   }
 
+  const portal = document.getElementById('btn-gerenciar-assinatura');
+  if (portal) portal.style.display = user?.stripe_customer_id ? '' : 'none';
   // Sem assinatura ativa não há o que cancelar
   if (btnCancelar) btnCancelar.style.display = assinante ? '' : 'none';
 }
@@ -1942,154 +1881,43 @@ async function salvarPerfil() {
   renderizarSidebar();
 }
 
-// ─── Planos / Checkout Cielo ─────────────────────────────────────────────────
-let _planoSelecionado = 'start_trimestral';
-
-const PLANO_LABELS = {
-  start_mensal:  'Plano Mensal',
-  start_anual:   'Plano Anual',
-  solo_mensal:   'Plano Mensal',
-  solo_anual:    'Plano Anual',
-  equipe_mensal: 'Plano Mensal',
-  equipe_anual:  'Plano Anual',
-  mensal:        'Plano Mensal',
-  anual:         'Plano Anual',
-};
-
-function iniciarCheckout(plano) {
-  _planoSelecionado = plano;
-  const label = PLANO_LABELS[plano] || plano;
-  document.getElementById('cartao-titulo').textContent = `Assinar — ${label}`;
-  document.getElementById('cartao-erro').style.display = 'none';
-
-  // Quem já usou o período grátis é cobrado na hora (o backend manda AuthorizeNow:true).
-  // O aviso precisa dizer a verdade — prometer "sem cobrança agora" para quem vai
-  // pagar imediatamente é o tipo de surpresa que gera chargeback.
-  const jaUsouTrial = !!estado.user?.periodo_gratis_inicio;
-  const preco       = (plano || '').endsWith('anual') ? PW_PRECOS.anual.preco : PW_PRECOS.mensal.preco;
-
-  const trialAviso    = document.getElementById('cartao-trial-aviso');
-  const cobrancaAviso = document.getElementById('cartao-cobranca-aviso');
-  const btnPagar      = document.getElementById('btn-pagar');
-
-  if (trialAviso)    trialAviso.style.display    = jaUsouTrial ? 'none' : 'flex';
-  if (cobrancaAviso) cobrancaAviso.style.display = jaUsouTrial ? 'flex' : 'none';
-
-  const valorEl = document.getElementById('cartao-cobranca-valor');
-  if (valorEl) valorEl.textContent = preco;
-
-  if (btnPagar) {
-    btnPagar.textContent = jaUsouTrial
-      ? `Assinar agora — ${preco}`
-      : 'Começar 7 dias por nossa conta';
-  }
-
-  document.getElementById('modal-planos').classList.remove('active');
-  document.getElementById('modal-cartao').classList.add('active');
-}
-
-async function submeterCartao(e) {
-  e.preventDefault();
-  const btn  = document.getElementById('btn-pagar');
-  const erro = document.getElementById('cartao-erro');
-  erro.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Processando...';
-
+// ─── Checkout hospedado Stripe ────────────────────────────────────────────────
+let _checkoutEmAndamento = false;
+async function iniciarCheckout(plano) {
+  if (estado.user?.stripe_subscription_id) { await gerenciarAssinatura(); return; }
+  if (_checkoutEmAndamento) return;
+  _checkoutEmAndamento = true;
+  const btn = document.getElementById('pw-submit');
+  const erro = document.getElementById('pw-erro');
+  if (btn) { btn.disabled = true; btn.textContent = 'Abrindo pagamento…'; }
+  if (erro) erro.style.display = 'none';
   try {
-    const res = await api.post('/cielo/checkout', {
-      plano: _planoSelecionado,
-      cpf:   document.getElementById('cartao-cpf').value,
-      cartao: {
-        numero:   document.getElementById('cartao-numero').value.replace(/\D/g, ''),
-        titular:  document.getElementById('cartao-titular').value,
-        validade: document.getElementById('cartao-validade').value, // MM/AAAA
-        cvv:      document.getElementById('cartao-cvv').value,
-      },
-    });
-
+    const res = await api.post('/stripe/checkout', { plano });
     const data = await res.json();
-
     if (!res.ok) {
-      // Mostra a mensagem e o código que a Cielo devolveu. Sem o código não dá
-      // para distinguir recusa do emissor de problema de configuração da conta.
-      const base   = data.erro || 'Pagamento recusado. Verifique os dados e tente novamente.';
-      const codigo = data.codigo ? ` (código Cielo ${data.codigo})` : '';
-      // _debug é temporário, só enquanto investigamos a recusa sem código
-      const dbg = data._debug
-        ? `\n\nHTTP ${data._debug.httpStatus} · ${data._debug.body}`
-        : '';
-      erro.textContent = base + codigo + dbg;
-      erro.style.whiteSpace = 'pre-wrap';
-      erro.style.display = 'block';
-      console.error('Checkout recusado:', data);
-      return;
+      throw new Error(data.erro || 'Não foi possível abrir o pagamento.');
     }
-
-    // Sucesso — fecha modal, atualiza estado, exibe confirmação
-    document.getElementById('modal-cartao').classList.remove('active');
-    estado.user.plano = _planoSelecionado;
-    estado.user.plano_status = data.periodo_gratis ? 'periodo_gratis' : 'ativo';
-    renderizarSidebar();
-
-    const label = PLANO_LABELS[_planoSelecionado] || _planoSelecionado;
-    if (data.periodo_gratis) {
-      const dataCobranca = new Date(data.inicio_cobranca).toLocaleDateString('pt-BR');
-      mostrarToast(`🎉 7 dias por nossa conta ativados — ${label}. Cobrança inicia em ${dataCobranca}.`, 'sucesso');
-    } else {
-      mostrarToast(`🎉 Plano ${label} ativado com sucesso!`, 'sucesso');
-    }
-
-  } catch {
-    erro.textContent = 'Erro de conexão. Tente novamente.';
-    erro.style.display = 'block';
+    const url = new URL(data.url);
+    if (url.protocol !== 'https:' || url.hostname !== 'checkout.stripe.com') throw new Error('Endereço de pagamento inválido.');
+    window.location.assign(url.href);
+  } catch (err) {
+    const mensagem = err.message || 'Erro de conexão. Tente novamente.';
+    if (erro) { erro.textContent = mensagem; erro.style.display = 'block'; }
+    mostrarToast(mensagem, 'erro');
   } finally {
-    btn.disabled = false;
-    // Restaura o texto certo — pode ser cobrança imediata, não necessariamente trial
-    const jaUsou = !!estado.user?.periodo_gratis_inicio;
-    const p      = (_planoSelecionado || '').endsWith('anual') ? PW_PRECOS.anual.preco : PW_PRECOS.mensal.preco;
-    btn.textContent = jaUsou ? `Assinar agora — ${p}` : 'Começar 7 dias por nossa conta';
+    _checkoutEmAndamento = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Continuar para o Stripe →'; }
   }
 }
-
-async function cancelarAssinatura() {
-  if (!confirm('Tem certeza que deseja cancelar sua assinatura? Você perderá o acesso ao plano.')) return;
-  const res = await api.post('/cielo/cancelar', {});
-  if (!res?.ok) { mostrarToast('Erro ao cancelar assinatura', 'erro'); return; }
-  estado.user.plano = 'free';
-  estado.user.plano_status = 'cancelado';
-  renderizarSidebar();
-  mostrarToast('Assinatura cancelada.', 'aviso');
-}
-
-// Helpers para formatação do formulário de cartão
-function formatarNumeroCartao(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 16);
-  input.value = v.replace(/(.{4})/g, '$1 ').trim();
-  const { detectarBandeira } = window;
-  // Detecta bandeira client-side
-  const n = v;
-  let marca = '';
-  if (/^4/.test(n))                          marca = '💳 Visa';
-  else if (/^5[1-5]/.test(n))               marca = '💳 Mastercard';
-  else if (/^3[47]/.test(n))                marca = '💳 Amex';
-  else if (/^(?:506699|5067|4576)/.test(n)) marca = '💳 Elo';
-  else if (n.length >= 4)                   marca = '💳 Cartão';
-  document.getElementById('cartao-bandeira').textContent = marca;
-}
-
-function formatarValidade(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 6);
-  if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
-  input.value = v;
-}
-
-function formatarCPF(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 11);
-  v = v.replace(/(\d{3})(\d)/, '$1.$2');
-  v = v.replace(/(\d{3})(\d)/, '$1.$2');
-  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  input.value = v;
+async function gerenciarAssinatura() {
+  try {
+    const res = await api.post('/stripe/portal', {});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.erro || 'Não foi possível abrir sua assinatura.');
+    const url = new URL(data.url);
+    if (url.protocol !== 'https:' || url.hostname !== 'billing.stripe.com') throw new Error('Endereço do portal inválido.');
+    window.location.assign(url.href);
+  } catch (err) { mostrarToast(err.message, 'erro'); }
 }
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
@@ -2847,11 +2675,18 @@ async function confirmarCancelamento() {
   if (btn) { btn.textContent = 'Cancelando...'; btn.disabled = true; }
 
   try {
-    const res = await api.post('/stripe/cancel', { motivo, detalhes });
+    const rota = estado.user?.cielo_recurrent_payment_id ? '/cielo/cancelar' : '/stripe/cancel';
+    const res = await api.post(rota, { motivo, detalhes });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.erro || 'Não foi possível cancelar.');
+    await carregarDadosIniciais();
+    renderizarSidebar();
+    preencherMinhaAssinatura();
     fecharModalCancelamento();
-    mostrarToast('Assinatura cancelada. Você mantém o acesso até o fim do período atual.', 'sucesso');
+    mostrarToast(data.mensagem || 'Cancelamento confirmado pelo provedor.', 'sucesso');
   } catch (err) {
-    mostrarToast('Erro ao cancelar. Tente novamente ou entre em contato pelo suporte.', 'erro');
+    mostrarToast(err.message || 'Erro ao cancelar. Tente novamente ou entre em contato pelo suporte.', 'erro');
+  } finally {
     if (btn) { btn.textContent = 'Confirmar cancelamento'; btn.disabled = false; }
   }
 }
@@ -2863,7 +2698,7 @@ Object.assign(window, {
   abrirModalDiagnostico, salvarDiagnostico,
   abrirModalPerfil, salvarPerfil, uploadFotoPerfil, uploadLogoEscritorio, baixarPropostaPDF,
   alterarSenha, preencherMinhaAssinatura,
-  iniciarCheckout, logout,
+  iniciarCheckout, gerenciarAssinatura, logout,
   toggleMenuMobile, mostrarToast, toggleUserDropdown, fecharUserDropdown,
   copiarMensagem, exportarDocx, exportarPdf, exportarImagem, salvarTemplate,
   abrirArquivosArea, copiarArquivo, excluirArquivo,
