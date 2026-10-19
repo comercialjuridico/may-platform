@@ -9,8 +9,8 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 const billing = createBilling({ stripe, supabase });
 
 function fail(res, error) {
-  console.error('Falha Stripe:', error.code || error.type || 'interno');
-  const safe = Number.isInteger(error.status) && error.status >= 400 && error.status < 600;
+  console.error('Falha Stripe:', Number.isInteger(error.statusCode) ? error.statusCode : 'operacao');
+  const safe = error.billingError === true && Number.isInteger(error.status) && error.status >= 400 && error.status < 600;
   return res.status(safe ? error.status : 502).json({ erro: safe ? error.message : 'Não foi possível concluir a operação. Tente novamente ou contate o suporte.' });
 }
 router.post('/checkout', authMiddleware, async (req, res) => {
@@ -30,7 +30,14 @@ router.get('/precos', async (req, res) => {
     if (!stripe) return res.status(503).json({ erro: 'Pagamento indisponível.' });
     for (const plan of ['mensal', 'anual']) assertPrice(await stripe.prices.retrieve(priceFor(plan)), plan);
     res.json({ mensal: '97.00', anual: '936.00' });
-  } catch (e) { fail(res, e); }
+  } catch (err) {
+    const status = Number.isInteger(err?.statusCode) ? err.statusCode : null;
+    const codigo = status === 401 ? 'STRIPE_AUTENTICACAO'
+      : status === 403 ? 'STRIPE_SEM_PERMISSAO'
+      : status === 404 ? 'STRIPE_PRECO_NAO_ENCONTRADO' : 'STRIPE_INDISPONIVEL';
+    console.error('Falha na consulta de preços Stripe:', { codigo, status });
+    res.status(503).json({ erro: 'Não foi possível consultar os planos de pagamento.', codigo });
+  }
 });
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) return res.status(503).json({ erro: 'Pagamento indisponível.' });
@@ -40,15 +47,17 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   try {
     const obj = event.data.object;
     let subId, customerId;
-    if (['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'].includes(event.type)) {
+    if (['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted', 'customer.subscription.paused', 'customer.subscription.resumed'].includes(event.type)) {
       subId = obj.id; customerId = objectId(obj.customer);
-    } else if (['checkout.session.completed', 'invoice.paid', 'invoice.payment_succeeded', 'invoice.payment_failed'].includes(event.type)) {
+    } else if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'invoice.paid', 'invoice.payment_succeeded', 'invoice.payment_failed'].includes(event.type)) {
       subId = objectId(obj.subscription) || objectId(obj.parent?.subscription_details?.subscription);
       customerId = objectId(obj.customer);
     }
     // Cada tentativa consulta o estado atual no provedor. Repetição e entrega
     // fora de ordem não acrescentam dias nem confiam no status do evento antigo.
-    if (subId) await billing.syncSubscription(subId, customerId);
+    const checkoutEvent = event.type.startsWith('checkout.session.');
+    const checkoutPaid = ['paid', 'no_payment_required'].includes(obj.payment_status);
+    if (subId && (!checkoutEvent || checkoutPaid)) await billing.syncSubscription(subId, customerId);
     const { error } = await supabase.from('subscriptions_log').insert({
       stripe_event: event.type, processado: true,
       payload: { id: event.id, type: event.type, subscription_id: subId || null },

@@ -17,7 +17,7 @@ function fixture() {
     price_year: { id: 'price_year', active: true, currency: 'brl', unit_amount: 93600, recurring: { interval: 'year', interval_count: 1 } },
   };
   const now = Math.floor(Date.now()/1000);
-  const sub = { id: 'sub_1', customer: 'cus_1', metadata: { user_id: 'u1' }, status: 'active', created: now, current_period_start: now, current_period_end: now+30*86400, items: { data: [{ price: prices.price_month, quantity: 1 }] } };
+  const sub = { id: 'sub_1', customer: 'cus_1', metadata: { user_id: 'u1' }, status: 'active', latest_invoice: { status: 'paid' }, created: now, current_period_start: now, current_period_end: now+30*86400, items: { data: [{ price: prices.price_month, quantity: 1 }] } };
   const session = { id: 'cs_test_1', customer: 'cus_1', client_reference_id: 'u1', mode: 'subscription', status: 'complete', payment_status: 'paid', subscription: 'sub_1', metadata: { user_id: 'u1', plano: 'mensal' }, url: 'https://checkout.stripe.com/c/pay/cs_test_1' };
   const calls = []; const subscriptions = []; const sessions = [];
   const stripe = {
@@ -35,7 +35,7 @@ test('hosted checkout uses server price, fixed return origin and short expiry; a
   assert.equal(args.line_items[0].price, 'price_year'); assert.equal(args.subscription_data.metadata.plano, 'anual');
   assert.equal(args.success_url, 'https://may.example/app?pagamento=sucesso&session_id={CHECKOUT_SESSION_ID}');
   assert.equal(args.subscription_data.trial_period_days, undefined);
-  assert.equal(args.expires_at - Math.floor(Date.now()/1000), 1800);
+  assert.equal(args.expires_at - Math.floor(Date.now()/1000), 1860);
   assert.equal(JSON.stringify(args).includes('cvv'), false);
 });
 test('rejects incorrect price, currency or interval before creating checkout', async () => {
@@ -135,7 +135,7 @@ test('signed webhooks use current subscription state and store only minimal audi
   });
   await withApp(router, async request => {
     for (const type of ['customer.subscription.created', 'checkout.session.completed', 'invoice.payment_failed', 'invoice.payment_succeeded']) {
-      const object = type.startsWith('customer.') ? f.sub : { customer: 'cus_1', subscription: 'sub_1', email: 'sensitive@example.com' };
+      const object = type.startsWith('customer.') ? f.sub : { customer: 'cus_1', subscription: 'sub_1', payment_status: 'paid', email: 'sensitive@example.com' };
       const event = { id: 'evt_' + type, type, data: { object } };
       const sig = Stripe.webhooks.generateTestHeaderString({ payload: JSON.stringify(event), secret: process.env.STRIPE_WEBHOOK_SECRET });
       assert.equal((await request('/webhook', event, { 'stripe-signature': sig })).status, 200);
@@ -161,4 +161,38 @@ test('Cielo cancellation checks provider response and preserves paid period; old
     assert.equal(f.user.plano, 'mensal'); assert.equal(f.user.plano_status, 'cancelando');
     assert.equal(f.user.cielo_recurrent_payment_id, 'rp_1'); // no second provider until reconciliation
   });
+});
+test('active subscription with processing invoice cannot unlock access before asynchronous confirmation', async () => {
+  const f = fixture(); f.sub.latest_invoice.status = 'open';
+  assert.equal((await f.billing.syncSubscription('sub_1', 'cus_1')).confirmado, false);
+  assert.equal(f.user.plano, 'free'); assert.equal(f.user.plano_status, 'pagamento_pendente');
+  f.sub.latest_invoice.status = 'paid';
+  assert.equal((await f.billing.syncSubscription('sub_1', 'cus_1')).confirmado, true);
+  assert.equal(f.user.plano, 'mensal');
+});
+test('current API subscription periods are read from items and preserve trial dates', async () => {
+  const f = fixture(); Object.assign(f.sub.items.data[0], { current_period_start: f.sub.current_period_start, current_period_end: f.sub.current_period_end });
+  delete f.sub.current_period_start; delete f.sub.current_period_end;
+  assert.equal((await f.billing.syncSubscription('sub_1', 'cus_1')).confirmado, true);
+  const expectedEnd = f.sub.items.data[0].current_period_end;
+  assert.equal(f.user.plano_fim, new Date(expectedEnd*1000).toISOString());
+  f.sub.status = 'trialing'; f.sub.trial_end = Math.floor(Date.now()/1000)+86400; f.sub.latest_invoice.status = 'open';
+  assert.equal((await f.billing.syncSubscription('sub_1', 'cus_1')).confirmado, true);
+  assert.equal(f.user.plano_fim, new Date(f.sub.trial_end*1000).toISOString());
+});
+test('checkout delegates eligible payment methods to Stripe and uses integration tracking', async () => {
+  const f = fixture(); await f.billing.checkout(f.user, 'mensal'); const args = f.calls[0][1];
+  assert.equal(args.payment_method_types, undefined); assert.match(args.integration_identifier, /^may_hosted_[a-z]{8}$/);
+});
+test('checkout clears a proven canceled Stripe link before resubscription and never repeats trial', async () => {
+  const f = fixture(); f.user.stripe_subscription_id = 'sub_old'; f.user.created_at = new Date(Date.now()-DAY).toISOString();
+  f.subscriptions.push({ id: 'sub_old', status: 'canceled', metadata: { user_id: 'u1' } });
+  await f.billing.checkout(f.user, 'mensal'); assert.equal(f.user.stripe_subscription_id, null);
+  assert.equal(f.calls[0][1].subscription_data.trial_end, undefined);
+  assert.equal(f.calls[0][1].subscription_data.billing_cycle_anchor, undefined);
+});
+test('small clock skew preserves signup trial and invalid signup date cannot cause early charge', () => {
+  const now = Date.now(); const f = fixture(); f.user.created_at = new Date(now+10000).toISOString();
+  assert.equal(checkoutSubscriptionData(f.user, now).trial_end, Math.floor((now+10000+7*DAY)/1000));
+  f.user.created_at = 'invalid'; assert.throws(() => checkoutSubscriptionData(f.user, now), { code: 'DATA_CADASTRO_INVALIDA' });
 });

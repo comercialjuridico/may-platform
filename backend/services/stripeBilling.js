@@ -1,5 +1,5 @@
-// API version explicitamente compatível com stripe-node 16.x.
-const API_VERSION = '2024-06-20';
+// Versão estável confirmada em docs.stripe.com/api-versions (SDK23).
+const API_VERSION = '2026-09-30.endive';
 const DAY = 24 * 60 * 60 * 1000;
 const PLANS = {
   mensal: { amount: 9700, interval: 'month', priceVars: ['STRIPE_PRICE_MENSAL', 'STRIPE_PRICE_START_MENSAL'] },
@@ -7,7 +7,7 @@ const PLANS = {
 };
 
 function billingError(status, code, message) {
-  const e = new Error(message); e.status = status; e.code = code; return e;
+  const e = new Error(message); e.status = status; e.code = code; e.billingError = true; return e;
 }
 function planFor(value) {
   if (typeof value !== 'string') return null;
@@ -37,7 +37,7 @@ function assertPrice(price, plan, requireActive = true) {
 function trialEnd(user, now = Date.now()) {
   if (user.periodo_gratis_inicio || user.stripe_subscription_id || user.cielo_recurrent_payment_id || user.plano !== 'free') return null;
   const created = Date.parse(user.created_at);
-  if (!Number.isFinite(created) || created > now) return null;
+  if (!Number.isFinite(created) || created > now + 60000) throw billingError(409, 'DATA_CADASTRO_INVALIDA', 'Não foi possível conferir o período de teste. Entre em contato com o suporte.');
   const end = created + 7 * DAY;
   // Não cria uma segunda semana a partir do checkout.
   return end > now ? Math.floor(end / 1000) : null;
@@ -46,10 +46,10 @@ function checkoutSubscriptionData(user, now = Date.now()) {
   const end = trialEnd(user, now);
   const metadata = { user_id: user.id, app_trial_end: end ? String(end) : '' };
   if (!end) return { metadata };
-  if (end * 1000 <= now + 31 * 60000) throw billingError(409, 'TESTE_FINALIZANDO', 'Seu teste está nos minutos finais. Conclua a assinatura após o término para evitar uma cobrança antecipada.');
+  if (end * 1000 <= now + 32 * 60000) throw billingError(409, 'TESTE_FINALIZANDO', 'Seu teste está nos minutos finais. Conclua a assinatura após o término para evitar uma cobrança antecipada.');
   // Checkout exige ao menos 48h em trial_end. Para o final do teste, ancora
   // a primeira cobrança na data original sem cobrar período proporcional.
-  if (end * 1000 > now + 2 * DAY + 31 * 60000) return { metadata, trial_end: end };
+  if (end * 1000 > now + 2 * DAY + 32 * 60000) return { metadata, trial_end: end };
   return { metadata, billing_cycle_anchor: end, proration_behavior: 'none' };
 }
 
@@ -83,10 +83,21 @@ function createBilling({ stripe, supabase }) {
     if (subscriptions.has_more || subscriptions.data.some(s => !['canceled', 'incomplete_expired'].includes(s.status))) {
       throw billingError(409, 'ASSINATURA_EXISTENTE', 'Você já possui uma assinatura. Use Gerenciar assinatura para atualizar o pagamento.');
     }
+    // Libera novo checkout quando a assinatura antiga já terminou no Stripe,
+    // mesmo se o webhook de cancelamento ficou pendente no banco.
+    if (user.stripe_subscription_id) {
+      const old = subscriptions.data.find(s => s.id === user.stripe_subscription_id);
+      if (!old || old.metadata?.user_id !== user.id) throw billingError(409, 'ASSINATURA_DIVERGENTE', 'Sua assinatura anterior precisa ser conferida pelo suporte.');
+      const { data: cleared, error } = await supabase.from('users')
+        .update({ stripe_subscription_id: null, periodo_gratis_inicio: user.periodo_gratis_inicio || new Date().toISOString() })
+        .eq('id', user.id).eq('stripe_customer_id', customer).eq('stripe_subscription_id', user.stripe_subscription_id).select('id').maybeSingle();
+      if (error) throw error;
+      if (!cleared) throw billingError(503, 'CONCORRENCIA', 'Sua assinatura está sendo atualizada. Tente novamente.');
+    }
     const recent = await stripe.checkout.sessions.list({ customer, limit: 1 });
     const previous = recent.data[0];
     if (previous?.status === 'open') {
-      if (previous.metadata?.user_id !== user.id || previous.metadata?.plano !== plan) throw billingError(409, 'CHECKOUT_ABERTO', 'Já existe um pagamento aberto. Conclua-o ou aguarde até 30 minutos para escolher outro plano.');
+      if (previous.metadata?.user_id !== user.id || previous.metadata?.plano !== plan) throw billingError(409, 'CHECKOUT_ABERTO', 'Já existe um pagamento aberto. Conclua-o ou aguarde até 31 minutos para escolher outro plano.');
       const oldUrl = new URL(previous.url);
       if (oldUrl.protocol !== 'https:' || oldUrl.hostname !== 'checkout.stripe.com') throw billingError(502, 'CHECKOUT_INVALIDO', 'Endereço de pagamento inválido.');
       return { url: previous.url };
@@ -97,8 +108,8 @@ function createBilling({ stripe, supabase }) {
     const origin = new URL(process.env.APP_URL).origin;
     const session = await stripe.checkout.sessions.create({
       customer, client_reference_id: user.id, mode: 'subscription', locale: 'pt-BR',
-      expires_at: Math.floor(now / 1000) + 30 * 60,
-      payment_method_types: ['card'], line_items: [{ price: price.id, quantity: 1 }],
+      expires_at: Math.floor(now / 1000) + 31 * 60,
+      integration_identifier: 'may_hosted_zeitiicr', line_items: [{ price: price.id, quantity: 1 }],
       success_url: `${origin}/app?pagamento=sucesso&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/app?pagamento=cancelado`,
       metadata: { user_id: user.id, plano: plan }, subscription_data: subscriptionData,
@@ -120,7 +131,7 @@ function createBilling({ stripe, supabase }) {
     if (user.cielo_recurrent_payment_id) throw billingError(409, 'ASSINATURA_EXISTENTE', 'Existe uma assinatura Cielo que precisa ser conferida.');
     // Consulta o estado atual após ler o estado do banco: eventos antigos não
     // reativam assinatura cancelada, e CAS impede sobrescrever outra atualização.
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ['latest_invoice'] });
     if (objectId(subscription.customer) !== customerId || subscription.metadata?.user_id !== user.id) throw billingError(403, 'CLIENTE_DIVERGENTE', 'Assinatura não pertence à conta.');
     const item = subscription.items?.data?.[0];
     const plan = Object.keys(PLANS).find(p => priceFor(p) && item?.price?.id === priceFor(p));
@@ -130,13 +141,15 @@ function createBilling({ stripe, supabase }) {
     const start = subscription.current_period_start ?? item.current_period_start;
     const end = subscription.status === 'trialing' ? subscription.trial_end : (subscription.current_period_end ?? item.current_period_end);
     if (active && (!Number.isFinite(end) || !Number.isFinite(start))) throw billingError(502, 'PERIODO_INVALIDO', 'Período da assinatura inválido.');
-    const paidOrTrial = active && end * 1000 > Date.now();
     const appTrial = Number(subscription.metadata.app_trial_end);
     const inTrial = subscription.status === 'trialing' || (Number.isFinite(appTrial) && appTrial * 1000 > Date.now());
+    // Assinaturas assíncronas podem ficar active antes de a fatura ser paga.
+    const paidOrTrial = active && end * 1000 > Date.now() && (inTrial || subscription.latest_invoice?.status === 'paid');
+    const awaitingPayment = active && !paidOrTrial && end * 1000 > Date.now();
     const updates = {
       stripe_subscription_id: ['canceled', 'incomplete_expired'].includes(subscription.status) ? null : subscription.id,
       plano: paidOrTrial ? plan : 'free',
-      plano_status: paidOrTrial ? (subscription.cancel_at_period_end ? 'cancelando' : inTrial ? 'periodo_gratis' : 'ativo') : subscription.status === 'canceled' ? 'cancelado' : 'pagamento_falhou',
+      plano_status: paidOrTrial ? (subscription.cancel_at_period_end ? 'cancelando' : inTrial ? 'periodo_gratis' : 'ativo') : awaitingPayment ? 'pagamento_pendente' : subscription.status === 'canceled' ? 'cancelado' : 'pagamento_falhou',
       plano_fim: Number.isFinite(end) ? new Date(end * 1000).toISOString() : user.plano_fim,
     };
     if (Number.isFinite(start)) updates.plano_inicio = new Date(start * 1000).toISOString();
@@ -164,7 +177,7 @@ function createBilling({ stripe, supabase }) {
     if (!stripe || !user.stripe_customer_id) throw billingError(400, 'SEM_ASSINATURA_STRIPE', 'Não há assinatura Stripe nesta conta.');
     await customerFor(user);
     const origin = new URL(process.env.APP_URL).origin;
-    const session = await stripe.billingPortal.sessions.create({ customer: user.stripe_customer_id, return_url: `${origin}/app` });
+    const session = await stripe.billingPortal.sessions.create({ customer: user.stripe_customer_id, return_url: `${origin}/app`, ...(process.env.STRIPE_PORTAL_CONFIGURATION ? { configuration: process.env.STRIPE_PORTAL_CONFIGURATION } : {}) });
     const url = new URL(session.url);
     if (url.protocol !== 'https:' || url.hostname !== 'billing.stripe.com') throw billingError(502, 'PORTAL_INVALIDO', 'Não foi possível abrir o portal.');
     return session;

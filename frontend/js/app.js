@@ -194,7 +194,7 @@ let _bloqueioExpiradoTimer = null;
 // Assinatura vencida: trial de 7 dias estourado OU plano marcado como expirado
 function assinaturaExpirada(user) {
   if (!user) return false;
-  if (user.plano_status === 'expirado' || user._trial_expirado || (user.plano === 'free' && ['pagamento_falhou', 'cancelado'].includes(user.plano_status))) return true;
+  if (user.plano_status === 'expirado' || user._trial_expirado || (user.plano === 'free' && ['pagamento_pendente', 'pagamento_falhou', 'cancelado'].includes(user.plano_status))) return true;
 
   const emTrial = (user.plano === 'free' || !user.plano) &&
                   !user.cielo_recurrent_payment_id && !user.stripe_subscription_id;
@@ -216,6 +216,12 @@ function mostrarBloqueioExpirado(delayMs) {
     const pa = document.getElementById('exp-preco-anual');
     if (pm) pm.textContent = `Renovar agora — ${PW_PRECOS.mensal.preco}/mês`;
     if (pa) pa.textContent = `Plano anual — ${PW_PRECOS.anual.preco} (economize!)`;
+    if (estado.user?.plano_status === 'pagamento_pendente') {
+      wall.querySelector('.expired-titulo').textContent = 'Pagamento em processamento';
+      wall.querySelector('.expired-desc').textContent = 'Seu pagamento aguarda confirmação. Consulte o status no portal do Stripe e atualize a página após a confirmação.';
+      if (pm) pm.textContent = 'Consultar pagamento';
+      if (pa) pa.style.display = 'none';
+    }
     wall.classList.add('ativo');
   }, delayMs == null ? 3000 : delayMs);
 }
