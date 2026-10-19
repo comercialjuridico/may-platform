@@ -4,7 +4,7 @@ function testeGratuitoAtivo(user, agora = Date.now()) {
   if (['periodo_gratis', 'cancelando'].includes(user.plano_status) && user.stripe_subscription_id &&
       Date.parse(user.plano_fim) > agora && Date.parse(user.created_at) <= agora &&
       agora < Date.parse(user.created_at) + DURACAO_TESTE_MS) return true;
-  if (user.plano !== 'free' || user.plano_status === 'expirado' ||
+  if (user.plano !== 'free' || ['expirado', 'pagamento_pendente', 'pagamento_falhou', 'cancelado'].includes(user.plano_status) ||
       user._trial_expirado || user.cielo_recurrent_payment_id ||
       user.stripe_subscription_id || !user.created_at) return false;
 

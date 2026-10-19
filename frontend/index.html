@@ -12,7 +12,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/app.css" />
-</head>
+<style>
+.feedback-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px}
+.feedback-form{background:var(--bg-modal-surface,#17141f);color:var(--text-primary,#fff);padding:26px;border-radius:16px;width:100%;max-width:520px;max-height:90dvh;overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px #0005}
+.feedback-form h2,.feedback-form p{margin:0}.feedback-form label{display:flex;flex-direction:column;gap:6px}.feedback-form input,.feedback-form select{width:100%;padding:12px;border:1px solid var(--border,#655878);border-radius:8px;background:var(--bg-primary,#211c2c);color:inherit}.feedback-actions{display:flex;justify-content:flex-end;gap:12px}.importacao-resumo{padding:18px;border:1px solid var(--border,#675380);border-radius:12px;margin:12px;overflow-wrap:anywhere}.importacao-resumo ul{max-height:180px;overflow:auto}.feedback-form a{display:block}
+</style></head>
 <body>
 
 <!-- ═══ TRIAL BANNER ═══ -->
@@ -167,6 +171,7 @@
 
     <!-- Footer da sidebar -->
     <div class="sidebar-footer">
+      <button onclick="abrirAulas()" class="btn-ghost btn-full"><span class="nav-icon">▶</span> Aulas e gravações</button>
 
       <button onclick="abrirModalDiagnostico()" class="btn-ghost btn-full">
         <span class="nav-icon">🧭</span> Diagnóstico comercial
@@ -236,7 +241,7 @@
           ></textarea>
           <div class="input-actions">
             <button class="input-btn" onclick="uploadArquivo()" title="Enviar arquivo">📎</button>
-            <button class="input-btn" id="btn-audio" onclick="toggleGravacao()" title="Gravar áudio">🎙️</button>
+            <button class="input-btn" id="btn-audio" onclick="toggleGravacao()" title="Gravar áudio" aria-label="Gravar áudio" aria-pressed="false">🎙️</button>
             <button id="btn-send" onclick="enviarMensagem()" title="Enviar (Enter)">➤</button>
           </div>
         </div>
@@ -723,10 +728,10 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="/js/api.js"></script>
+<script src="/js/api.js?v=feedback-1"></script>
 <script src="/js/vendor/purify.min.js?v=security-1"></script>
 <script src="/js/markdown.js?v=security-1"></script>
-<script src="/js/app.js?v=stripe-1"></script>
+<script src="/js/app.js?v=feedback-1"></script>
 <script>
   // ── Partículas ────────────────────────────────────────────────────────────────
   (function(){

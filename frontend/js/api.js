@@ -108,13 +108,19 @@ const api = {
   patch:  (url, body)   => apiFetch(url, { method: 'PATCH', body: JSON.stringify(body) }),
 
   // Upload de arquivo (multipart)
-  upload: (url, formData) => {
+  upload: async (url, formData) => {
     const token = getAccessToken();
-    return fetch(`${API_BASE}${url}`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const enviar = () => fetch(`${API_BASE}${url}`, { method:'POST', headers, body:formData });
+    let res = await enviar();
+    if (res.status === 401) {
+      const erro = await res.clone().json().catch(() => ({}));
+      if (erro.code === 'TOKEN_EXPIRADO') {
+        try { headers.Authorization = `Bearer ${await refreshToken()}`; res = await enviar(); }
+        catch { return null; }
+      }
+    }
+    return res;
   },
 
   // Streaming SSE para o chat

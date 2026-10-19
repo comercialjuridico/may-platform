@@ -1,5 +1,5 @@
 // ─── Service Worker — May PWA ─────────────────────────────────────────────────
-const CACHE_NAME = 'may-security-1';
+const CACHE_NAME = 'may-feedback-1';
 
 // Rotas HTML que NUNCA devem ser cacheadas (precisam sempre ir à rede)
 const NEVER_CACHE = ['/', '/app', '/index.html', '/auth.html', '/landing.html'];
@@ -8,10 +8,10 @@ const CACHE_STATIC = [
   '/css/main.css',
   '/css/app.css',
   '/css/auth.css',
-  '/js/api.js',
+  '/js/api.js?v=feedback-1',
   '/js/vendor/purify.min.js?v=security-1',
   '/js/markdown.js?v=security-1',
-  '/js/app.js?v=security-1',
+  '/js/app.js?v=feedback-1',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
 ];
 

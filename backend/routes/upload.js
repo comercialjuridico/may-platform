@@ -2,13 +2,30 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
 const OpenAI = require('openai');
 const pdfParse = require('pdf-parse');
 const mammoth  = require('mammoth');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
+const { exigirMidias } = require('../services/recursos');
+const { tipoAudio, transcreverAudio } = require('../services/audioUpload');
+const { importarConversa } = require('../services/whatsappImport');
+const rateLimit = require('express-rate-limit');
+const limiteMidias = rateLimit({ windowMs:15 * 60 * 1000, max:12, keyGenerator:req => req.user.id,
+  message:{ erro:'Muitos envios de mídia. Aguarde alguns minutos para tentar novamente.' } });
+const processando = new Set();
+function umaMidiaPorVez(req, res, next) {
+  const id = req.user.id;
+  if (processando.has(id)) return res.status(429).json({ erro:'Já existe uma mídia sendo processada. Aguarde a conclusão.' });
+  if (processando.size >= 2) return res.status(429).json({ erro:'O processamento de mídias está ocupado. Tente novamente em instantes.' });
+  processando.add(id);
+  let liberado = false;
+  req.liberarMidia = () => { if (!liberado) { liberado = true; processando.delete(id); } };
+  res.on('finish', req.liberarMidia);
+  req.on('aborted', req.liberarMidia);
+  next();
+}
+
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -22,9 +39,9 @@ const upload = multer({
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/msword',
       'text/plain',
-      'audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-m4a',
+      'audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'audio/opus', 'audio/x-m4a', 'video/mp4', 'video/webm',
     ];
-    tiposPermitidos.includes(file.mimetype) ? cb(null, true) : cb(new Error('Tipo de arquivo não permitido.'));
+    (tiposPermitidos.includes(file.mimetype.split(';')[0]) || (req.path === '/audio' && file.mimetype === 'application/octet-stream' && tipoAudio(file.originalname))) ? cb(null, true) : cb(new Error('Tipo de arquivo não permitido.'));
   },
 });
 
@@ -210,39 +227,40 @@ router.post('/documento', authMiddleware, upload.single('arquivo'), async (req, 
 
 // ─── POST /api/upload/audio ─────────────────────────────────────────────────
 // Recebe áudio e transcreve via Whisper (OpenAI)
-router.post('/audio', authMiddleware, upload.single('audio'), async (req, res) => {
-  // Apenas planos pagos têm acesso à transcrição
-  if (req.user.plano === 'free') {
-    return res.status(403).json({
-      erro: 'A transcrição de áudio está disponível apenas nos planos pagos.',
-      code: 'PLANO_INSUFICIENTE',
-    });
-  }
-
-  if (!req.file) return res.status(400).json({ erro: 'Nenhum áudio enviado.' });
-
+router.post('/audio', authMiddleware, exigirMidias, limiteMidias, umaMidiaPorVez, upload.single('audio'), async (req, res) => {
+  if (!req.file || !tipoAudio(req.file.originalname)) return res.status(400).json({ erro:'Envie um áudio MP3, M4A, MP4, WAV, WebM, OGG ou OPUS de até 20 MB.' });
   try {
-    // Salva temporariamente para enviar ao Whisper
-    const tmpPath = path.join('/tmp', `audio_${Date.now()}.${req.file.mimetype.split('/')[1]}`);
-    fs.writeFileSync(tmpPath, req.file.buffer);
+    const transcricao = await transcreverAudio(openai, req.file.buffer, req.file.originalname);
+    if (!String(transcricao || '').trim()) return res.status(422).json({ erro:'Não identifiquei fala neste áudio. Confira a gravação e tente novamente.' });
+    res.json({ transcricao });
+  } catch {
+    res.status(422).json({ erro:'Não foi possível transcrever. Confira se o arquivo contém fala e tente um áudio menor ou em outro formato.' });
+  } finally { req.liberarMidia(); }
+});
 
-    const transcricao = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(tmpPath),
-      model: 'whisper-1',
-      language: 'pt',
-      response_format: 'text',
+const uploadZip = multer({ storage:multer.memoryStorage(), limits:{ fileSize:20 * 1024 * 1024 },
+  fileFilter:(req, file, cb) => /\.zip$/i.test(file.originalname) ? cb(null,true) : cb(new Error('Exporte a conversa do WhatsApp como ZIP com mídias.')) });
+router.post('/whatsapp', authMiddleware, exigirMidias, limiteMidias, umaMidiaPorVez, uploadZip.single('arquivo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ erro:'Selecione um ZIP exportado do WhatsApp.' });
+  try {
+    const resultado = await importarConversa(req.file.buffer, {
+      transcrever:(buffer,nome) => transcreverAudio(openai, buffer, nome),
+      analisarImagem:async (buffer,tipo) => {
+        const r = await openai.chat.completions.create({ model:'gpt-4o', max_tokens:1000,
+          messages:[{ role:'user', content:[{ type:'text', text:'Transcreva o texto e descreva objetivamente esta imagem anexada a uma conversa. Não invente informações.' },
+            { type:'image_url', image_url:{ url:`data:${tipo};base64,${buffer.toString('base64')}`, detail:'low' } }] }] }, { timeout:60000, maxRetries:0 });
+        return r.choices[0]?.message?.content || '';
+      },
     });
-
-    fs.unlinkSync(tmpPath); // Remove arquivo temporário
-
-    res.json({
-      transcricao: transcricao,
-      duracao_estimada: Math.round(req.file.size / 16000), // Estimativa em segundos
-    });
+    const { data, error } = await supabase.from('uploads').insert({ user_id:req.user.id,
+      filename:req.file.originalname, mimetype:'application/zip', tamanho:req.file.size,
+      texto_extraido:resultado.texto }).select('id, filename').single();
+    if (error) throw error;
+    res.json({ upload_id:data.id, filename:data.filename, manifesto:resultado.manifesto,
+      avisos:resultado.avisos, truncado:resultado.truncado });
   } catch (err) {
-    console.error('Erro na transcrição de áudio:', err.message);
-    res.status(500).json({ erro: 'Erro ao transcrever áudio.' });
-  }
+    res.status(err.status === 400 ? 400 : 503).json({ erro:err.status === 400 ? err.message : 'Não foi possível concluir a importação. Tente novamente.' });
+  } finally { req.liberarMidia(); }
 });
 
 // ─── POST /api/upload/imagem-chat ───────────────────────────────────────────
@@ -338,4 +356,9 @@ router.get('/:id/texto', authMiddleware, async (req, res) => {
   }
 });
 
+router.use((err, req, res, next) => {
+  if (!err) return next();
+  req.liberarMidia?.();
+  res.status(400).json({ erro:err.code === 'LIMIT_FILE_SIZE' ? 'Arquivo acima do limite permitido (20 MB para áudio ou ZIP).' : 'Formato de arquivo não permitido ou envio inválido.' });
+});
 module.exports = router;
