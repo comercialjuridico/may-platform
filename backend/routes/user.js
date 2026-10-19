@@ -1,10 +1,12 @@
 // ─── Rotas de perfil e diagnóstico do usuário ──────────────────────────────────
 const express = require('express');
+const { URL } = require('node:url');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 const { limiteMensagens } = require('../services/limites');
+const { recursosUsuario } = require('../services/recursos');
 const { imagemPerfilPermitida } = require('../services/profileImages');
 
 // ─── GET /api/user/me ───────────────────────────────────────────────────────
@@ -16,11 +18,21 @@ router.get('/me', authMiddleware, async (req, res) => {
       .eq('user_id', req.user.id)
       .single();
 
-    res.json({ user: req.user, streak: streak || null });
+    res.json({ user: { ...req.user, recursos:recursosUsuario(req.user) }, streak: streak || null });
   } catch (err) {
     console.error('Erro no /me:', err.message);
     res.status(500).json({ erro: 'Erro ao buscar perfil.' });
   }
+});
+
+// Link publicado pela administração; nenhuma URL ou gravação é inventada.
+router.get('/aulas', authMiddleware, (req, res) => {
+  let url = null;
+  try {
+    const parsed = new URL(process.env.AULAS_GRAVACAO_URL || '');
+    if (parsed.protocol === 'https:' && !parsed.username && !parsed.password) url = parsed.href;
+  } catch { /* gravação ainda não publicada */ }
+  res.json({ titulo:'Aula de uso do App May', url });
 });
 
 // ─── PUT /api/user/diagnostico ──────────────────────────────────────────────
@@ -219,12 +231,16 @@ router.get('/streak', authMiddleware, async (req, res) => {
 router.get('/uso', authMiddleware, async (req, res) => {
   try {
     const limite = limiteMensagens(req.user);
-
+    const recursos = recursosUsuario(req.user);
+    const mes = new Date().toISOString().slice(0,7);
+    const usadas = req.user.mes_referencia === mes ? (req.user.mensagens_mes || 0) : 0;
     res.json({
+      teste_ativo:recursos.teste_ativo, teste_fim:recursos.teste_fim,
+      plano_status:req.user.plano_status, plano_fim:req.user.plano_fim,
       plano: req.user.plano,
-      mensagens_usadas: req.user.mensagens_mes || 0,
+      mensagens_usadas: usadas,
       limite,
-      restantes: limite === null ? null : Math.max(0, limite - (req.user.mensagens_mes || 0)),
+      restantes: limite === null ? null : Math.max(0, limite - usadas),
     });
   } catch (err) {
     console.error('Erro ao buscar uso:', err.message);

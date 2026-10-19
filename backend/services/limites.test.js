@@ -64,6 +64,6 @@ test('contador exibe infinito sem aviso de limite próximo', () => {
     estado: { uso: { mensagens_usadas: 2000000, limite: null, restantes: null } },
     document: { getElementById: () => el },
   });
-  assert.equal(el.textContent, '2000000/∞ mensagens');
+  assert.equal(el.textContent, '2000000/∞ mensagens no mês');
   assert.equal(el.className, 'usage-counter');
 });

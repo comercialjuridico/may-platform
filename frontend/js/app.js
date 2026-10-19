@@ -12,7 +12,7 @@ const estado = {
   areas: [],              // lista de áreas do usuário
   enviando: false,
   conversas: [],
-  uso: { mensagens_usadas: 0, limite: 20, restantes: 20 },
+  uso: { carregando:true },
   documentosAnexados: [], // [{ upload_id, filename }] — documentos pendentes de envio
 };
 
@@ -344,7 +344,7 @@ const CENARIOS_SIMULACAO = {
   apresentacao_inicial: {
     nome: 'Apresentação inicial', icon: '🤝',
     desc: 'Você foi indicado para alguém. É a primeira ligação — o lead está cético.',
-    promptSistema: 'Você é um potencial cliente que foi indicado para esse advogado. Tem uma dúvida sobre disputa trabalhista com seu antigo empregador. Está cético em contratar advogado — acha caro e não sabe se vale. Seja natural, faça perguntas, demonstre resistência inicial razoável. Quando o advogado perguntar, responda com informações reais mas não se convença fácil.',
+    promptSistema: 'Você é um potencial cliente que foi indicado para esse advogado. Tem uma dúvida realista sobre o serviço e a área escolhidos para esta simulação. Está cético em contratar advogado — acha caro e não sabe se vale. Seja natural, faça perguntas, demonstre resistência inicial razoável. Quando o advogado perguntar, responda com informações reais mas não se convença fácil.',
   },
   pedir_indicacao: {
     nome: 'Pedir indicação', icon: '🌟',
@@ -354,12 +354,12 @@ const CENARIOS_SIMULACAO = {
   primeira_reuniao: {
     nome: 'Primeira reunião', icon: '🔍',
     desc: 'Lead frio que veio do Instagram. Tem problema real mas não está convicto.',
-    promptSistema: 'Você é um lead que veio do Instagram do escritório. Tem um problema real: seu patrão não pagou FGTS nos últimos 2 anos. Mas você ainda não está convicto de que precisa de advogado — acha que pode resolver sozinho, tem medo do custo. Faça perguntas, demonstre dúvidas. Deixe o advogado te qualificar e descobrir a dor.',
+    promptSistema: 'Você é um lead que veio do Instagram do escritório. Tem um problema realista relacionado ao serviço e à área escolhidos para esta simulação. Mas você ainda não está convicto de que precisa de advogado — acha que pode resolver sozinho, tem medo do custo. Faça perguntas, demonstre dúvidas. Deixe o advogado te qualificar e descobrir a dor.',
   },
   objecao_preco: {
     nome: 'Objeção de preço', icon: '💰',
     desc: 'O cliente recebeu a proposta de R$ 3.500 e voltou dizendo "tá caro".',
-    promptSistema: 'Você é um cliente que recebeu uma proposta de honorários de R$ 3.500 para uma causa trabalhista. Consultou outro escritório que cobrou R$ 2.000. Você gostou do advogado mas quer negociar ou entender por que custa mais. Mantenha a posição de que acha caro — não ceda fácil, exija bons argumentos.',
+    promptSistema: 'Você é um cliente que recebeu uma proposta de honorários de R$ 3.500 para o serviço escolhido para esta simulação. Consultou outro escritório que cobrou R$ 2.000. Você gostou do advogado mas quer negociar ou entender por que custa mais. Mantenha a posição de que acha caro — não ceda fácil, exija bons argumentos.',
   },
   fechamento_final: {
     nome: 'Fechamento com indeciso', icon: '⏰',
@@ -611,9 +611,13 @@ function renderizarListaConversas() {
 function atualizarContadorUso() {
   const el = document.getElementById('usage-counter');
   if (!el) return;
-  const { mensagens_usadas, limite, restantes } = estado.uso;
+  if (estado.uso.carregando) { el.textContent = 'Consultando seu plano…'; return; }
+  const { mensagens_usadas, limite, restantes, teste_ativo, teste_fim } = estado.uso;
   const ilimitado = limite === null || limite === 999999;
-  el.textContent = `${mensagens_usadas}/${ilimitado ? '∞' : limite} mensagens`;
+  el.textContent = teste_ativo
+    ? `Teste até ${new Date(teste_fim).toLocaleDateString('pt-BR')} · mensagens sem limite`
+    : `${mensagens_usadas}/${ilimitado ? '∞' : limite} mensagens no mês`;
+  el.title = teste_ativo ? 'O teste dura 7 dias a partir do cadastro. Áudio e simulações estão incluídos.' : 'Consumo do mês atual. Consulte sua assinatura em Minha conta.';
   el.className = 'usage-counter' +
     (!ilimitado && restantes <= 5 ? ' danger' : !ilimitado && restantes <= 20 ? ' warning' : '');
 }
@@ -1234,12 +1238,14 @@ async function uploadArquivo() {
   const input = document.createElement('input');
   input.type  = 'file';
   // Aceita documentos, imagens e áudio
-  input.accept = '.pdf,.docx,.doc,.txt,image/jpeg,image/png,image/webp,audio/webm,audio/mp4,audio/mpeg,audio/wav,audio/ogg,audio/x-m4a';
+  input.accept = '.pdf,.docx,.doc,.txt,.zip,.mp3,.m4a,.mp4,.wav,.webm,.ogg,.opus,.oga,image/jpeg,image/png,image/webp';
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
 
     const tipo = file.type;
+    if (file.size > 20 * 1024 * 1024) { mostrarToast('O arquivo deve ter até 20 MB.', 'erro'); return; }
+    if (/\.zip$/i.test(file.name)) { await importarWhatsApp(file); return; }
 
     // ── Imagem ────────────────────────────────────────────────────────────
     if (tipo.startsWith('image/')) {
@@ -1280,23 +1286,8 @@ async function uploadArquivo() {
     }
 
     // ── Áudio ─────────────────────────────────────────────────────────────
-    if (tipo.startsWith('audio/')) {
-      if (estado.user?.plano === 'free') {
-        mostrarToast('Transcrição de áudio disponível nos planos pagos.', 'aviso');
-        return;
-      }
-      mostrarToast('Transcrevendo áudio...', 'aviso');
-      const form = new FormData();
-      form.append('audio', file, file.name);
-
-      const res = await api.upload('/upload/audio', form);
-      if (!res?.ok) { mostrarToast('Erro ao transcrever áudio', 'erro'); return; }
-
-      const data = await res.json();
-      const msgInput = document.getElementById('message-input');
-      msgInput.value = `[Áudio transcrito: ${file.name}]\n\n${data.transcricao}`;
-      msgInput.dispatchEvent(new Event('input'));
-      mostrarToast('Áudio transcrito!', 'sucesso');
+    if (tipo.startsWith('audio/') || /\.(mp3|m4a|mp4|wav|webm|ogg|opus|oga)$/i.test(file.name)) {
+      await enviarAudioParaTranscricao(file, file.name);
       return;
     }
 
@@ -1385,58 +1376,96 @@ function removerAnexo(idx) {
   }
 }
 
-// ─── Gravação de áudio ───────────────────────────────────────────────────────
-let mediaRecorder = null;
-let audioChunks   = [];
-let gravando      = false;
-
-async function toggleGravacao() {
-  if (estado.user?.plano === 'free') {
-    mostrarToast('Gravação de áudio disponível nos planos pagos.', 'aviso');
-    return;
-  }
-
-  const btn = document.getElementById('btn-audio');
-  if (!gravando) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks   = [];
-
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = async () => {
-        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        const form = new FormData();
-        form.append('audio', blob, 'gravacao.webm');
-
-        mostrarToast('Transcrevendo...', 'aviso');
-        const res = await api.upload('/upload/audio', form);
-        if (!res?.ok) { mostrarToast('Erro ao transcrever áudio', 'erro'); return; }
-
-        const data = await res.json();
-        const msgInput = document.getElementById('message-input');
-        msgInput.value = data.transcricao;
-        msgInput.dispatchEvent(new Event('input'));
-        mostrarToast('Áudio transcrito!', 'sucesso');
-
-        stream.getTracks().forEach(t => t.stop());
-      };
-
-      mediaRecorder.start();
-      gravando = true;
-      btn.style.color = 'var(--error)';
-      btn.title = 'Parar gravação';
-      mostrarToast('Gravando... clique para parar.', 'aviso');
-    } catch {
-      mostrarToast('Não foi possível acessar o microfone.', 'erro');
-    }
-  } else {
-    mediaRecorder.stop();
-    gravando = false;
-    btn.style.color = '';
-    btn.title = 'Gravar áudio';
-  }
+// ─── Áudio e importação de conversas ────────────────────────────────────────
+function acessoMidias() {
+  if (estado.user?.recursos?.audio) return true;
+  mostrarToast('Áudio e mídias estão incluídos nos 7 dias de teste e em assinaturas ativas. Confira Minha conta.', 'aviso');
+  return false;
 }
+let audioEnviando = false;
+async function enviarAudioParaTranscricao(file, nome) {
+  if (!acessoMidias() || audioEnviando) return;
+  if (!file.size) { mostrarToast('O áudio está vazio. Grave novamente.', 'erro'); return; }
+  if (file.size > 20 * 1024 * 1024) { mostrarToast('O áudio deve ter até 20 MB.', 'erro'); return; }
+  audioEnviando = true;
+  mostrarToast('Transcrevendo áudio…', 'aviso');
+  try {
+    const form = new FormData(); form.append('audio', file, nome);
+    const res = await api.upload('/upload/audio', form);
+    const data = await res?.json();
+    if (!res?.ok) throw new Error(data?.erro || 'Falha de conexão ao transcrever. Tente novamente.');
+    const input = document.getElementById('message-input');
+    input.value = [input.value.trim(), data.transcricao].filter(Boolean).join('\n\n');
+    input.dispatchEvent(new Event('input')); input.focus();
+    mostrarToast('Áudio transcrito. Revise o texto antes de enviar.', 'sucesso');
+  } catch (err) { mostrarToast(err.message || 'Erro ao transcrever áudio.', 'erro'); }
+  finally { audioEnviando = false; }
+}
+async function importarWhatsApp(file) {
+  if (!acessoMidias()) return;
+  if (estado.documentosAnexados.length >= limiteAnexosMensagem()) { mostrarToast('Remova um anexo antes de importar a conversa.', 'aviso'); return; }
+  mostrarToast('Importando conversa e mídias. Aguarde o resumo do processamento…', 'aviso');
+  try {
+    const form = new FormData(); form.append('arquivo', file);
+    const res = await api.upload('/upload/whatsapp', form), data = await res?.json();
+    if (!res?.ok) throw new Error(data?.erro || 'Não foi possível importar. Tente novamente.');
+    estado.documentosAnexados.push({ upload_id:data.upload_id, filename:file.name });
+    renderAnexosBadges();
+    const container = document.getElementById('messages-container');
+    const bloco = document.createElement('div'); bloco.className = 'importacao-resumo';
+    const ok = data.manifesto.filter(m => m.status === 'processado').length;
+    bloco.innerHTML = `<strong>Conversa anexada: ${escapeHtml(file.name)}</strong><p>${ok} mídia(s) processada(s). Datas e remetentes mantidos conforme o TXT.</p>
+      <ul>${data.manifesto.map(m => `<li>${escapeHtml(m.nome)}: ${m.status === 'processado' ? 'processado' : escapeHtml(m.motivo)}</li>`).join('')}</ul>
+      ${data.avisos.map(a => `<p>${escapeHtml(a)}</p>`).join('')}
+      <p>Os áudios são transcritos e as imagens são analisadas. Em arquivos MP4, apenas o áudio é transcrito; o conteúdo visual do vídeo não é analisado. Outros formatos aparecem como não processados. Confira as pendências antes de pedir a análise.</p>`;
+    container.append(bloco); container.scrollTop = container.scrollHeight;
+    const input = document.getElementById('message-input');
+    if (!input.value.trim()) input.value = 'Analise esta conversa: identifique o que travou o atendimento, sugira a próxima mensagem e o próximo passo. Considere somente as mídias efetivamente processadas.';
+    input.dispatchEvent(new Event('input')); input.focus();
+    mostrarToast(data.truncado || ok < data.manifesto.length ? 'Importação concluída com pendências. Confira o resumo.' : 'Conversa importada. Revise e envie sua pergunta.', 'aviso');
+  } catch (err) { mostrarToast(err.message || 'Erro ao importar conversa.', 'erro'); }
+}
+let mediaRecorder = null, gravando = false, audioStream = null, gravacaoTimer = null, iniciandoGravacao = false, aguardandoAudio = false;
+function liberarMicrofone() {
+  audioStream?.getTracks().forEach(t => t.stop()); audioStream = null;
+  clearTimeout(gravacaoTimer); gravacaoTimer = null; gravando = false;
+  const btn = document.getElementById('btn-audio');
+  if (btn) { btn.style.color = ''; btn.title = 'Gravar áudio'; btn.setAttribute('aria-pressed', 'false'); }
+}
+function pararGravacao() {
+  if (mediaRecorder?.state === 'recording') { aguardandoAudio = true; mediaRecorder.stop(); }
+  liberarMicrofone();
+}
+async function toggleGravacao() {
+  if (gravando) { pararGravacao(); return; }
+  if (iniciandoGravacao || aguardandoAudio || audioEnviando || !acessoMidias()) return;
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') { mostrarToast('Este navegador não permite gravar. Atualize-o ou anexe um áudio pelo clipe.', 'erro'); return; }
+  iniciandoGravacao = true;
+  try {
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    const tipo = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported(t));
+    const recorder = new MediaRecorder(audioStream, tipo ? { mimeType:tipo } : undefined);
+    mediaRecorder = recorder;
+    const chunks = []; let size = 0, falhou = false;
+    recorder.ondataavailable = e => { if (e.data.size) { chunks.push(e.data); size += e.data.size; if (size > 20 * 1024 * 1024) { falhou = true; pararGravacao(); mostrarToast('Gravação excedeu 20 MB. Grave trechos menores.', 'erro'); } } };
+    recorder.onerror = () => { falhou = true; pararGravacao(); mostrarToast('Falha na gravação. Anexe o áudio ou tente novamente.', 'erro'); };
+    recorder.onstop = async () => {
+      liberarMicrofone(); aguardandoAudio = false;
+      if (falhou) return;
+      const mime = recorder.mimeType || chunks[0]?.type || 'audio/webm';
+      const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
+      await enviarAudioParaTranscricao(new Blob(chunks, { type:mime }), `gravacao.${ext}`);
+    };
+    recorder.start(1000); gravando = true;
+    const btn = document.getElementById('btn-audio'); btn.style.color = 'var(--error)'; btn.title = 'Parar gravação'; btn.setAttribute('aria-pressed', 'true');
+    gravacaoTimer = setTimeout(() => { pararGravacao(); mostrarToast('Gravação encerrada após 5 minutos. Você pode gravar outro trecho.', 'aviso'); }, 5 * 60 * 1000);
+    mostrarToast('Gravando… clique novamente para parar. Limite: 5 minutos.', 'aviso');
+  } catch (err) {
+    liberarMicrofone();
+    mostrarToast(err.name === 'NotAllowedError' ? 'Permita o microfone nas configurações do navegador ou anexe um áudio pelo clipe.' : err.name === 'NotFoundError' ? 'Nenhum microfone encontrado. Conecte um ou anexe o áudio.' : 'Não foi possível iniciar a gravação. Tente anexar um áudio.', 'erro');
+  } finally { iniciandoGravacao = false; }
+}
+window.addEventListener('pagehide', pararGravacao);
 
 // ─── Modal de diagnóstico — Maturidade Comercial ─────────────────────────────
 const NIVEIS_MATURIDADE = [
@@ -2628,13 +2657,47 @@ function mostrarCenariosSimulacao() {
 function iniciarSimulacao(cenarioId) {
   const cenario = CENARIOS_SIMULACAO[cenarioId];
   if (!cenario) return;
-  selecionarFerramenta('simular_reuniao');
-  mostrarInputChat();
-  // Injeta o cenário como primeiro prompt do sistema via mensagem especial
-  setTimeout(() => {
-    const prompt = `[MODO SIMULAÇÃO — ${cenario.nome}]\n\nInstruções para a May: ${cenario.promptSistema}\n\nAgora o advogado vai começar a conversa. Você responde como o cliente. Comece aguardando — quando o advogado falar, você reage naturalmente como esse cliente.`;
+  document.getElementById('simulacao-config')?.remove();
+  const modal = document.createElement('div'); modal.id = 'simulacao-config'; modal.className = 'feedback-modal'; modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true');
+  modal.innerHTML = `<form class="feedback-form">
+    <h2>${escapeHtml(cenario.nome)}</h2><p>Escolha o contexto. A May fará o papel do cliente.</p>
+    <label>Área de atuação<input name="area" required maxlength="120" value="${escapeHtml(estado.areaAtiva?.nome || estado.user?.nicho || '')}" placeholder="Ex.: Direito da Saúde"></label>
+    <label>Serviço ou caso<input name="servico" required maxlength="240" value="${escapeHtml(estado.user?.produto || '')}" placeholder="Ex.: redução de reajuste do plano de saúde"></label>
+    <label>Dificuldade<select name="dificuldade"><option value="inicial">Inicial — cliente mais receptivo</option><option value="intermediaria" selected>Intermediária — dúvidas e objeções</option><option value="avancada">Avançada — maior resistência</option></select></label>
+    <p>Use um caso fictício. Para receber a avaliação, escreva “encerrar simulação”.</p>
+    <div class="feedback-actions"><button type="button" class="btn-ghost">Cancelar</button><button class="btn-primary" type="submit">Começar simulação</button></div>
+  </form>`;
+  modal.querySelector('button[type="button"]').onclick = () => modal.remove();
+  modal.querySelector('form').onsubmit = e => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const area = form.elements.area.value.trim(), servico = form.elements.servico.value.trim();
+    if (!area || !servico) return;
+    const dificuldade = form.elements.dificuldade.value;
+    modal.remove(); selecionarFerramenta('simular_reuniao'); mostrarInputChat();
+    const prompt = `[MODO SIMULAÇÃO — ${cenario.nome}]\nÁrea escolhida: ${area}\nServiço/caso: ${servico}\nDificuldade: ${dificuldade}\n\nInstruções para a May: ${cenario.promptSistema}\nO cliente deve ter um caso fictício exclusivamente nessa área e nesse serviço. Não troque o nicho.\nAgora o advogado vai começar a conversa. Responda apenas como o cliente. Aguarde o atendimento e, ao encerrar a simulação, dê feedback conforme o Método Mayra.`;
     enviarMensagemRapida(prompt);
-  }, 100);
+  };
+  document.body.append(modal); modal.querySelector('input').focus();
+}
+async function abrirAulas() {
+  document.getElementById('aulas-modal')?.remove();
+  const modal = document.createElement('div'); modal.id = 'aulas-modal'; modal.className = 'feedback-modal'; modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true');
+  const panel = document.createElement('div'); panel.className = 'feedback-form';
+  const h = document.createElement('h2'); h.textContent = 'Aulas e gravações'; panel.append(h);
+  const texto = document.createElement('p'); texto.textContent = 'Consultando gravações…'; panel.append(texto);
+  const manual = document.createElement('a'); manual.href = '/manual.html'; manual.target = '_blank'; manual.rel = 'noopener noreferrer'; manual.textContent = 'Abrir manual de uso'; panel.append(manual);
+  const fechar = document.createElement('button'); fechar.className = 'btn-ghost'; fechar.textContent = 'Fechar'; fechar.onclick = () => modal.remove(); panel.append(fechar);
+  modal.append(panel); document.body.append(modal);
+  try {
+    const res = await api.get('/user/aulas'); const data = await res?.json();
+    if (!res?.ok) throw Error();
+    const url = data.url ? new URL(data.url) : null;
+    if (url?.protocol === 'https:') {
+      texto.textContent = data.titulo;
+      const link = document.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.className = 'btn-primary'; link.textContent = 'Assistir gravação'; texto.after(link);
+    } else texto.textContent = 'A gravação da aula ainda não foi disponibilizada. Enquanto isso, consulte o manual de uso.';
+  } catch { texto.textContent = 'Não foi possível consultar as gravações. Tente novamente.'; }
 }
 
 // ─── Utilitários ─────────────────────────────────────────────────────────────
