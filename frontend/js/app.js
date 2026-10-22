@@ -2680,26 +2680,6 @@ function iniciarSimulacao(cenarioId) {
   };
   document.body.append(modal); modal.querySelector('input').focus();
 }
-async function abrirAulas() {
-  document.getElementById('aulas-modal')?.remove();
-  const modal = document.createElement('div'); modal.id = 'aulas-modal'; modal.className = 'feedback-modal'; modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true');
-  const panel = document.createElement('div'); panel.className = 'feedback-form';
-  const h = document.createElement('h2'); h.textContent = 'Aulas e gravações'; panel.append(h);
-  const texto = document.createElement('p'); texto.textContent = 'Consultando gravações…'; panel.append(texto);
-  const manual = document.createElement('a'); manual.href = '/manual.html'; manual.target = '_blank'; manual.rel = 'noopener noreferrer'; manual.textContent = 'Abrir manual de uso'; panel.append(manual);
-  const fechar = document.createElement('button'); fechar.className = 'btn-ghost'; fechar.textContent = 'Fechar'; fechar.onclick = () => modal.remove(); panel.append(fechar);
-  modal.append(panel); document.body.append(modal);
-  try {
-    const res = await api.get('/user/aulas'); const data = await res?.json();
-    if (!res?.ok) throw Error();
-    const url = data.url ? new URL(data.url) : null;
-    if (url?.protocol === 'https:') {
-      texto.textContent = data.titulo;
-      const link = document.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.className = 'btn-primary'; link.textContent = 'Assistir gravação'; texto.after(link);
-    } else texto.textContent = 'A gravação da aula ainda não foi disponibilizada. Enquanto isso, consulte o manual de uso.';
-  } catch { texto.textContent = 'Não foi possível consultar as gravações. Tente novamente.'; }
-}
-
 // ─── Utilitários ─────────────────────────────────────────────────────────────
 function escapeHtml(str) {
   return String(str)

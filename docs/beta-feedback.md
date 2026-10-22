@@ -7,7 +7,6 @@
 - ZIP do WhatsApp: até 20 MB, 200 entradas, 20 MB por entrada e 60 MB descompactados; sem extração de caminhos no disco, sem links, criptografia ou arquivos de mesmo nome. Exatamente um TXT por conversa. Até 12 mídias processadas sequencialmente, com verificação de prazo de 3 minutos entre chamadas; uma chamada iniciada pode terminar depois desse prazo. Áudios são transcritos; imagens JPEG/PNG/WebP são analisadas. MP4 fornece apenas áudio. Formatos sem suporte, falhas e limites aparecem no resumo. Arquivos e trechos sem referência no TXT não recebem data/remetente inventados. O conteúdo textual salvo é limitado a 50 mil caracteres com aviso explícito de truncamento.
 - O importador salva somente texto processado na tabela `uploads`, associado ao usuário autenticado. O chat mantém seu filtro de propriedade ao recuperar esse texto. O ZIP e as mídias originais não são gravados no storage público.
 - O contador indica a data de término do teste e mensagens sem limite enquanto o teste está ativo. Fora do teste mostra uso do mês; contadores de mês anterior aparecem zerados.
-- “Aulas e gravações” consulta link HTTPS configurado em `AULAS_GRAVACAO_URL`. Sem link, informa que a gravação não foi disponibilizada e oferece o manual. Não há vídeo fictício nem URL inventada.
 
 ## Validação
 
