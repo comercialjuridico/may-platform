@@ -36,15 +36,11 @@ test('invalid archives return JSON errors without writing uploads or calling pro
  const f=routeFixture({id:'zip-user',plano:'mensal'});
  await multipart(f.router,async request=>{const r=await request('/whatsapp','conversation.zip',Buffer.from('invalid zip'),'application/zip');assert.equal(r.status,400);assert.equal(typeof r.data.erro,'string');});assert.equal(f.db.tables.uploads.length,0);assert.equal(f.calls.length,0);
 });
-test('usage is zero for previous month and trial capabilities are exposed; lesson link is empty until configured',async()=>{
+test('usage is zero for previous month and trial capabilities are exposed',async()=>{
  const user={id:'user',plano:'free',created_at:new Date().toISOString(),mensagens_mes:999,mes_referencia:'2020-01'};const db=database({streak:[]});
  const router=loadRoute('backend/routes/user.js',{'../services/supabase':{supabase:db},'../middleware/auth':{authMiddleware(req,res,next){req.user=user;next();}}});
- const old=process.env.AULAS_GRAVACAO_URL;
- try {delete process.env.AULAS_GRAVACAO_URL;await withApp(router,async request=>{
+ await withApp(router,async request=>{
   const usage=await request('/uso');assert.equal(usage.data.mensagens_usadas,0);assert.equal(usage.data.limite,null);assert.equal(usage.data.teste_ativo,true);
   const me=await request('/me');assert.equal(me.data.user.recursos.audio,true);
-  assert.equal((await request('/aulas')).data.url,null);
-  process.env.AULAS_GRAVACAO_URL='https://example.com/aula';assert.equal((await request('/aulas')).data.url,'https://example.com/aula');
-  process.env.AULAS_GRAVACAO_URL='javascript:alert(1)';assert.equal((await request('/aulas')).data.url,null);
- });}finally{if(old===undefined)delete process.env.AULAS_GRAVACAO_URL;else process.env.AULAS_GRAVACAO_URL=old;}
+ });
 });

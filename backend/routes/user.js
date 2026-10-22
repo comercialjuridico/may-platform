@@ -1,6 +1,5 @@
 // ─── Rotas de perfil e diagnóstico do usuário ──────────────────────────────────
 const express = require('express');
-const { URL } = require('node:url');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { supabase } = require('../services/supabase');
@@ -23,16 +22,6 @@ router.get('/me', authMiddleware, async (req, res) => {
     console.error('Erro no /me:', err.message);
     res.status(500).json({ erro: 'Erro ao buscar perfil.' });
   }
-});
-
-// Link publicado pela administração; nenhuma URL ou gravação é inventada.
-router.get('/aulas', authMiddleware, (req, res) => {
-  let url = null;
-  try {
-    const parsed = new URL(process.env.AULAS_GRAVACAO_URL || '');
-    if (parsed.protocol === 'https:' && !parsed.username && !parsed.password) url = parsed.href;
-  } catch { /* gravação ainda não publicada */ }
-  res.json({ titulo:'Aula de uso do App May', url });
 });
 
 // ─── PUT /api/user/diagnostico ──────────────────────────────────────────────
