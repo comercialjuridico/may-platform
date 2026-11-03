@@ -1,0 +1,42 @@
+name: MAY P0 security tests
+
+on:
+  push:
+    branches:
+      - security/p0-tenant-sessions-2026-11-03
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'tests/**'
+      - 'package*.json'
+      - '.github/workflows/security-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Check changed source syntax
+        run: |
+          node --check backend/routes/auth.js
+          node --check backend/routes/twofa.js
+          node --check backend/routes/followups.js
+          node --check backend/routes/leads.js
+          node --check backend/routes/briefing.js
+          node --check backend/routes/reunioes.js
+          node --check backend/services/sessionTokens.js
+          node --check tests/session-security.test.cjs
+          node --check tests/tenant-mutations-security.test.cjs
+      - name: Full regression suite
+        run: npm test
