@@ -9,6 +9,25 @@ const router  = express.Router();
 const OpenAI  = require('openai');
 const { supabase }       = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
+const { exigirAcessoAtivo } = require('../services/recursos');
+const { limiteBriefing } = require('../services/limiteIA');
+
+// Tudo isto vai para o prompt do gpt-4o: sem teto, um único pedido podia
+// carregar centenas de milhares de caracteres.
+const LIMITES_CAMPOS = {
+  nome_lead: 200, empresa_lead: 200, whatsapp: 40, produto: 300, valor_honorarios: 100,
+  origem_canal: 200, data_reuniao: 60, local_reuniao: 300, contexto: 8000, objecao_inicial: 2000,
+  contexto_extra: 4000,
+};
+function campoAcimaDoLimite(body) {
+  return Object.entries(LIMITES_CAMPOS).find(([campo, max]) =>
+    body[campo] != null && String(body[campo]).length > max);
+}
+function validarTamanhos(req, res, next) {
+  const excedido = campoAcimaDoLimite(req.body || {});
+  if (excedido) return res.status(400).json({ erro: `O campo ${excedido[0]} passou de ${excedido[1]} caracteres. Resuma e tente de novo.` });
+  next();
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -94,7 +113,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
 // ─── POST /api/briefing ───────────────────────────────────────────────────────
 // Cadastra o cliente e gera o relatório de preparação
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, exigirAcessoAtivo, validarTamanhos, limiteBriefing, async (req, res) => {
   try {
     if (semEmpresa(req, res)) return;
 
@@ -153,7 +172,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // ─── POST /api/briefing/:id/regerar ───────────────────────────────────────────
-router.post('/:id/regerar', authMiddleware, async (req, res) => {
+router.post('/:id/regerar', authMiddleware, exigirAcessoAtivo, validarTamanhos, limiteBriefing, async (req, res) => {
   try {
     if (semEmpresa(req, res)) return;
 

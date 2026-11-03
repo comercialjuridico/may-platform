@@ -3477,7 +3477,10 @@ function recAbrirNaTela(reuniao) {
     return;
   }
 
-  const textoConvite = `Olá${reuniao.cliente_nome ? ', ' + reuniao.cliente_nome : ''}! Segue o link da nossa reunião:\n${reuniao.room_url}\nSó clicar no horário combinado, não precisa instalar nada.`;
+  // O cliente recebe a sala sem o token de anfitrião; o link com token
+  // (room_url) fica só no botão "Entrar na sala", para quem criou a reunião.
+  const linkCliente = reuniao.room_url_convidado || reuniao.room_url;
+  const textoConvite = `Olá${reuniao.cliente_nome ? ', ' + reuniao.cliente_nome : ''}! Segue o link da nossa reunião:\n${linkCliente}\nSó clicar no horário combinado, não precisa instalar nada.`;
   // Com telefone cadastrado, o link já abre a conversa certa. Assume DDI 55 quando
   // vem só DDD + número (10 ou 11 dígitos) — cenário mais comum por aqui.
   const digitos = reuniao.cliente_telefone ? reuniao.cliente_telefone.replace(/\D/g, '') : '';
@@ -3495,15 +3498,17 @@ function recAbrirNaTela(reuniao) {
         </div>
       </div>
       <div class="brf-campo brf-full" style="margin-bottom:14px">
-        <label>Link da sala</label>
+        <label>Link para o cliente</label>
         <div style="display:flex;gap:8px">
-          <input readonly value="${escapeHtml(reuniao.room_url)}" style="flex:1" onclick="this.select()" />
-          <button type="button" class="brf-btn ghost mini" onclick="recCopiarLink('${reuniao.room_url}')">Copiar</button>
+          <input readonly value="${escapeHtml(linkCliente)}" style="flex:1" onclick="this.select()" />
+          <button type="button" class="brf-btn ghost mini" onclick="recCopiarLink(${jsString(linkCliente)})">Copiar</button>
         </div>
       </div>
       <div class="brf-acoes">
+        <a class="brf-btn mini" style="text-decoration:none" target="_blank" rel="noopener"
+           href="${escapeHtml(reuniao.room_url)}">Entrar na sala</a>
         <a class="brf-btn mini" style="text-decoration:none;background:#25D366;color:#fff" target="_blank" rel="noopener"
-           href="${waHref}">Enviar por WhatsApp</a>
+           href="${escapeHtml(waHref)}">Enviar por WhatsApp</a>
         <button type="button" class="brf-btn ghost mini" onclick="recAbrirConviteEmail('${reuniao.id}')">Enviar por e-mail</button>
         <button type="button" class="brf-btn ghost mini" onclick="recIrPara('historico')">Voltar pro histórico</button>
       </div>

@@ -20,6 +20,11 @@ const { analisarReuniao } = require('../services/analiseReuniao');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function escaparHtml(v) {
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // Confere a assinatura HMAC do Daily. A fórmula é: base64(hmac_sha256(secret,
 // timestamp + "." + corpo_cru)) — precisa ser o corpo EXATO que o Daily
 // mandou (req.rawBody, capturado em server.js), não uma reserialização do
@@ -109,8 +114,8 @@ router.post('/daily', async (req, res) => {
         from:    `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
         to:      criador.email,
         subject: `Nota da reunião pronta: ${atualizada.titulo}`,
-        html: `<p>Oi${criador.name ? ', ' + criador.name : ''}!</p>
-               <p>A gravação de "<strong>${atualizada.titulo}</strong>" já foi processada automaticamente.</p>
+        html: `<p>Oi${criador.name ? ', ' + escaparHtml(criador.name) : ''}!</p>
+               <p>A gravação de "<strong>${escaparHtml(atualizada.titulo)}</strong>" já foi processada automaticamente.</p>
                <p>Nota, resumo, riscos e próximos passos já estão prontos dentro da May, em <strong>Reuniões com IA</strong>.</p>`,
       });
       if (r?.error) console.error('[webhook daily] falha ao enviar e-mail de aviso:', JSON.stringify(r.error));

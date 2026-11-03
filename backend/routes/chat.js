@@ -5,6 +5,18 @@ const OpenAI = require('openai');
 const { supabase } = require('../services/supabase');
 const { authMiddleware, verificarLimite } = require('../middleware/auth');
 const { buildSystemPrompt } = require('../services/may');
+const { limiteChat } = require('../services/limiteIA');
+
+const MAX_ANEXOS = 5;
+
+// area_ativa entra no system prompt: aceita só nome e ícone curtos.
+function areaSegura(area) {
+  if (!area || typeof area !== 'object' || typeof area.nome !== 'string' || !area.nome.trim()) return null;
+  return {
+    nome: area.nome.trim().slice(0, 80),
+    icone: typeof area.icone === 'string' ? area.icone.slice(0, 8) : undefined,
+  };
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -29,11 +41,21 @@ function getModelo(ferramenta) {
 
 // ─── POST /api/chat/stream ──────────────────────────────────────────────────
 // Envia uma mensagem e recebe resposta via Server-Sent Events (streaming)
-router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
-  const { mensagem, conversa_id, ferramenta = 'chat', area_ativa = null, upload_id = null, upload_ids = null } = req.body;
+router.post('/stream', authMiddleware, verificarLimite, limiteChat, async (req, res) => {
+  const { mensagem, conversa_id, upload_id = null, upload_ids = null } = req.body;
+  const ferramenta = typeof req.body.ferramenta === 'string' && /^[a-z_]{1,40}$/.test(req.body.ferramenta)
+    ? req.body.ferramenta : 'chat';
+  const area_ativa = areaSegura(req.body.area_ativa);
 
   if (typeof mensagem !== 'string' || mensagem.trim() === '' || mensagem.length > 50000) {
     return res.status(400).json({ erro: 'Mensagem não pode estar vazia.' });
+  }
+
+  const ids = Array.isArray(upload_ids) && upload_ids.length
+    ? upload_ids
+    : upload_id ? [upload_id] : [];
+  if (ids.length > MAX_ANEXOS || ids.some(id => typeof id !== 'string' || id.length > 64)) {
+    return res.status(400).json({ erro: `Anexe no máximo ${MAX_ANEXOS} documentos por mensagem.` });
   }
 
   // Trial expirado (7 dias sem cartão)
@@ -111,10 +133,6 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     }));
 
     // Busca contexto dos documentos anexados (suporta um ou múltiplos)
-    const ids = Array.isArray(upload_ids) && upload_ids.length
-      ? upload_ids
-      : upload_id ? [upload_id] : [];
-
     let contextoDocumento = '';
     if (ids.length > 0) {
       try {
@@ -158,6 +176,10 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     let respostaCompleta = '';
     let tokensUsados = 0;
 
+    // Se a pessoa fechar a aba, para de gerar (e de pagar) a resposta.
+    const abortar = new AbortController();
+    res.on('close', () => { if (!res.writableEnded) abortar.abort(); });
+
     const stream = await openai.chat.completions.create({
       model: modelo,
       max_tokens: 2048,
@@ -167,7 +189,7 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
       ],
       stream: true,
       stream_options: { include_usage: true },
-    });
+    }, { signal: abortar.signal });
 
     for await (const chunk of stream) {
       const texto = chunk.choices[0]?.delta?.content || '';
@@ -198,6 +220,7 @@ router.post('/stream', authMiddleware, verificarLimite, async (req, res) => {
     res.end();
 
   } catch (err) {
+    if (err?.name === 'AbortError' || err?.constructor?.name === 'APIUserAbortError') return res.end();
     console.error('Erro no chat/stream:', err.message);
     enviarEvento('erro', { mensagem: 'Erro ao processar sua mensagem.' });
     res.end();

@@ -13,4 +13,13 @@ function exigirMidias(req, res, next) {
     erro: 'Áudio e importação com mídias estão disponíveis durante os 7 dias de teste e em assinaturas ativas.', code: 'ACESSO_MIDIAS' });
   next();
 }
-module.exports = { recursosUsuario, exigirMidias };
+// Mesma regra de acesso do chat (teste ativo, assinatura válida ou admin),
+// aplicada às outras rotas que chamam IA. Sem isso, quem tinha o teste
+// vencido continuava gerando briefing, analisando imagem e processando
+// reunião de graça, embora o chat estivesse bloqueado.
+function exigirAcessoAtivo(req, res, next) {
+  if (!recursosUsuario(req.user).audio) return res.status(402).json({
+    erro: 'Seu período de teste terminou. Assine para continuar usando a May.', code: 'TRIAL_EXPIRADO' });
+  next();
+}
+module.exports = { recursosUsuario, exigirMidias, exigirAcessoAtivo };

@@ -10,6 +10,7 @@ function loadRoute(relative, mocks) {
   const module = { exports: {} };
   vm.runInNewContext(fs.readFileSync(filename, 'utf8'), {
     module, exports: module.exports, console, process, Buffer, Date,
+    URL, AbortController, AbortSignal, setTimeout, clearTimeout,
     require: name => Object.hasOwn(mocks, name) ? mocks[name] : realRequire(name),
   }, { filename });
   return module.exports;
