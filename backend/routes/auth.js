@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const { supabase } = require('../services/supabase');
 const { Resend } = require('resend');
 const { registrarAuditoria } = require('../middleware/auditLog');
+const { hashRefreshToken, refreshTokenConfere } = require('../services/sessionTokens');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -22,7 +23,7 @@ function gerarAccessToken(user) {
 // Gera refresh token (longa duração)
 function gerarRefreshToken(user) {
   return jwt.sign(
-    { id: user.id },
+    { id: user.id, jti: uuidv4() },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
   );
@@ -142,7 +143,7 @@ router.post('/register', async (req, res) => {
     const accessToken  = gerarAccessToken(user);
     const refreshToken = gerarRefreshToken(user);
 
-    await supabase.from('users').update({ refresh_token: refreshToken }).eq('id', user.id);
+    await supabase.from('users').update({ refresh_token: hashRefreshToken(refreshToken) }).eq('id', user.id);
 
     res.status(201).json({
       mensagem: 'Conta criada. Verifique seu e-mail.',
@@ -193,7 +194,7 @@ router.post('/login', async (req, res) => {
     const accessToken  = gerarAccessToken(user);
     const refreshToken = gerarRefreshToken(user);
 
-    await supabase.from('users').update({ refresh_token: refreshToken }).eq('id', user.id);
+    await supabase.from('users').update({ refresh_token: hashRefreshToken(refreshToken) }).eq('id', user.id);
 
     const { password_hash, ...userPublic } = user;
 
@@ -210,7 +211,7 @@ router.post('/login', async (req, res) => {
 router.post('/refresh', async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).json({ erro: 'Refresh token não fornecido.' });
+    if (typeof refreshToken !== 'string' || !refreshToken || refreshToken.length > 4096) return res.status(400).json({ erro: 'Refresh token inválido.' });
 
     let payload;
     try {
@@ -225,14 +226,22 @@ router.post('/refresh', async (req, res) => {
       .eq('id', payload.id)
       .single();
 
-    if (error || !user || user.refresh_token !== refreshToken) {
+    if (error || !user || !refreshTokenConfere(user.refresh_token, refreshToken)) {
       return res.status(401).json({ erro: 'Refresh token inválido.' });
     }
 
     const novoAccessToken  = gerarAccessToken(user);
     const novoRefreshToken = gerarRefreshToken(user);
 
-    await supabase.from('users').update({ refresh_token: novoRefreshToken }).eq('id', user.id);
+    // Compare-and-swap: the same refresh token cannot be redeemed concurrently.
+    // A legacy plaintext session is accepted once and immediately upgraded to a hash.
+    const { data: rotated, error: rotationError } = await supabase.from('users')
+      .update({ refresh_token: hashRefreshToken(novoRefreshToken) })
+      .eq('id', user.id)
+      .eq('refresh_token', user.refresh_token)
+      .select('id').maybeSingle();
+    if (rotationError) throw rotationError;
+    if (!rotated) return res.status(401).json({ erro: 'Sessão já renovada ou revogada.' });
 
     res.json({ accessToken: novoAccessToken, refreshToken: novoRefreshToken });
   } catch (err) {
