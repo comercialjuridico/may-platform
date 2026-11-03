@@ -4,6 +4,8 @@ const router    = express.Router();
 const speakeasy = require('speakeasy');
 const QRCode    = require('qrcode');
 const jwt = require('jsonwebtoken');
+const { randomUUID } = require('node:crypto');
+const { hashRefreshToken } = require('../services/sessionTokens');
 const rateLimit = require('express-rate-limit');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
@@ -187,12 +189,12 @@ router.post('/validar', autenticarSegundaEtapa, limitarPorConta, async (req, res
       { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
     );
     const refreshToken = jwt.sign(
-      { id: user.id },
+      { id: user.id, jti: randomUUID() },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
     );
 
-    const { error } = await supabase.from('users').update({ refresh_token: refreshToken }).eq('id', user.id);
+    const { error } = await supabase.from('users').update({ refresh_token: hashRefreshToken(refreshToken) }).eq('id', user.id);
     if (error) throw error;
     await registrarAuditoria({ userId: user.id, acao: '2fa_login_ok', req });
 
