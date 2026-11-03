@@ -194,7 +194,7 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
     // Verifica se lead é da empresa do usuário
     const { data: lead } = await supabase
       .from('leads')
-      .select('id, empresa_id, sdr_id, closer_id')
+      .select('id, empresa_id, sdr_id, closer_id, nome_lead, status')
       .eq('id', req.params.id)
       .single();
 
@@ -209,30 +209,27 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
     if (local_reuniao) updates.local_reuniao = local_reuniao;
 
     // Se ganhou/perdeu, registra data
-    if (['ganhou', 'perdeu'].includes(status)) {
-      updates.fechado_em = new Date().toISOString();
-
-      // Se ganhou, registra como venda
-      if (status === 'ganhou' && valor_fechado) {
-        await supabase.from('vendas').insert({
-          user_id:     req.user.id,
-          empresa_id:  req.user.empresa_id,
-          valor:       valor_fechado,
-          descricao:   `Lead: ${lead.nome_lead || 'fechamento via funil'}`,
-          data_venda:  new Date().toISOString(),
-        }).catch(() => {});
-      }
-    }
+    if (['ganhou', 'perdeu'].includes(status)) updates.fechado_em = new Date().toISOString();
 
     const { data: updated, error } = await supabase
       .from('leads')
       .update(updates)
       .eq('id', req.params.id)
+      .eq('empresa_id', req.user.empresa_id)
       .select()
       .single();
 
     if (error) throw error;
 
+    // Only record the sale after a confirmed update; never for cross-tenant IDs.
+    if (status === 'ganhou' && valor_fechado && lead.status !== 'ganhou') {
+      const { error: saleError } = await supabase.from('vendas').insert({
+        user_id: req.user.id, empresa_id: req.user.empresa_id,
+        valor: valor_fechado, descricao: `Lead: ${updated.nome_lead || 'fechamento via funil'}`,
+        data_venda: new Date().toISOString(),
+      });
+      if (saleError) console.error('Falha ao registrar venda do lead:', saleError.message);
+    }
     res.json({ ok: true, lead: updated });
   } catch (err) {
     console.error('Erro ao atualizar lead:', err.message);
@@ -330,11 +327,15 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     // Só o SDR que criou ou gestor pode deletar
-    if (lead.sdr_id !== req.user.id && req.user.papel !== 'gestor') {
+    if (lead.sdr_id !== req.user.id && !['gestor', 'admin'].includes(req.user.role)) {
       return res.status(403).json({ erro: 'Sem permissão.' });
     }
 
-    await supabase.from('leads').delete().eq('id', req.params.id);
+    const { data: deleted, error } = await supabase.from('leads').delete()
+      .eq('id', req.params.id).eq('empresa_id', req.user.empresa_id)
+      .select('id').maybeSingle();
+    if (error) throw error;
+    if (!deleted) return res.status(404).json({ erro: 'Lead não encontrado.' });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao remover lead.' });
@@ -412,7 +413,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     }
 
     const { data: updated, error } = await supabase
-      .from('leads').update(updates).eq('id', req.params.id).select().single();
+      .from('leads').update(updates).eq('id', req.params.id).eq('empresa_id', req.user.empresa_id).select().single();
 
     if (error) throw error;
 
