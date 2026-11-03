@@ -40,6 +40,7 @@ function database(tables) {
         order(key, options) { this.ordering = { key, options }; return this; },
         limit(n) { this.count = n; return this; },
         update(value) { this.op = 'update'; this.value = value; return this; },
+        delete() { this.op = 'delete'; return this; },
         insert(value) { this.op = 'insert'; this.value = value; return this; },
         single() { this.one = true; this.required = true; return this; },
         maybeSingle() { this.one = true; return this; },
@@ -54,6 +55,10 @@ function database(tables) {
               const row = { id: 'created-' + source.length, ...this.value };
               source.push(row); rows = [row];
             } else if (this.op === 'update') rows.forEach(r => Object.assign(r, this.value));
+            else if (this.op === 'delete') {
+              const victims = new Set(rows);
+              tables[table] = source.filter(r => !victims.has(r));
+            }
             if (this.ordering) {
               const { key, options } = this.ordering;
               rows = rows.slice().sort((a, b) => (a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0) * (options.ascending ? 1 : -1));
@@ -82,9 +87,9 @@ async function withApp(router, run, before) {
     const s = app.listen(0, '127.0.0.1', () => resolve(s));
   });
   try {
-    await run(async (url, body, headers = {}) => {
+    await run(async (url, body, headers = {}, method = (body === undefined ? 'GET' : 'POST')) => {
       const res = await fetch(`http://127.0.0.1:${server.address().port}${url}`, {
-        method: body === undefined ? 'GET' : 'POST',
+        method,
         headers: { 'Content-Type': 'application/json', ...headers },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
