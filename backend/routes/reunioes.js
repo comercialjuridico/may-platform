@@ -194,6 +194,7 @@ router.post('/:id/processar', authMiddleware, async (req, res) => {
         finalizada_em:       new Date().toISOString(),
       })
       .eq('id', req.params.id)
+      .eq('empresa_id', req.user.empresa_id)
       .select()
       .single();
 
@@ -246,7 +247,9 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     if (!reuniao) return res.status(404).json({ erro: 'Reunião não encontrada.' });
 
     await daily.apagarSala(reuniao.room_name).catch(() => {});
-    await supabase.from('reunioes_ia').delete().eq('id', req.params.id);
+    const { error: erroRemocao } = await supabase.from('reunioes_ia')
+      .delete().eq('id', req.params.id).eq('empresa_id', req.user.empresa_id);
+    if (erroRemocao) throw erroRemocao;
 
     res.json({ ok: true });
   } catch (err) {
