@@ -106,13 +106,17 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     if (data_hora  !== undefined) updates.data_hora = new Date(data_hora).toISOString();
     if (tipo       !== undefined) updates.tipo = tipo;
 
-    const { error } = await supabase
+    if (!Object.keys(updates).length) return res.status(400).json({ erro: 'Nenhuma alteração informada.' });
+    const { data: updated, error } = await supabase
       .from('followups')
       .update(updates)
       .eq('id', req.params.id)
-      .eq('empresa_id', req.user.empresa_id);
+      .eq('empresa_id', req.user.empresa_id)
+      .eq('usuario_id', req.user.id)
+      .select('id').maybeSingle();
 
     if (error) throw error;
+    if (!updated) return res.status(404).json({ erro: 'Follow-up não encontrado.' });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao atualizar follow-up.' });
@@ -122,9 +126,13 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 // ─── DELETE /api/followups/:id ────────────────────────────────────────────────
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    await supabase.from('followups').delete()
+    const { data: deleted, error } = await supabase.from('followups').delete()
       .eq('id', req.params.id)
-      .eq('empresa_id', req.user.empresa_id);
+      .eq('empresa_id', req.user.empresa_id)
+      .eq('usuario_id', req.user.id)
+      .select('id').maybeSingle();
+    if (error) throw error;
+    if (!deleted) return res.status(404).json({ erro: 'Follow-up não encontrado.' });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao remover follow-up.' });
