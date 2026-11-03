@@ -26,7 +26,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Install locked dependencies
-        run: npm ci --ignore-scripts
+        run: npm ci
       - name: Check changed source syntax
         run: |
           node --check backend/routes/auth.js
@@ -38,5 +38,8 @@ jobs:
           node --check backend/services/sessionTokens.js
           node --check tests/session-security.test.cjs
           node --check tests/tenant-mutations-security.test.cjs
+      - name: Production dependency smoke test
+        run: |
+          node -e "require('express'); require('stripe'); require('openai'); require('dompurify'); console.log('Core packages loaded')"
       - name: Full regression suite
         run: npm test
