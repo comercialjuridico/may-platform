@@ -268,12 +268,11 @@ router.post('/:id/feedback', authMiddleware, async (req, res) => {
     }
 
     // Primeiro o que sempre existe no banco
-    const { error: erroBase } = const { data: resultadoAtualizado, error: erroBase } = await supabase.from('leads')
+    const { data: resultadoAtualizado, error: erroBase } = await supabase.from('leads')
       .update(updates).eq('id', req.params.id).eq('empresa_id', req.user.empresa_id)
       .select('id').maybeSingle();
     if (erroBase) throw erroBase;
     if (!resultadoAtualizado) return res.status(404).json({ erro: 'Briefing não encontrado.' });
-    if (erroBase) throw erroBase;
 
     // Depois as colunas de feedback, que dependem da migração
     const { error: erroFeedback } = await supabase
