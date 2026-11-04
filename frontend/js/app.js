@@ -52,6 +52,7 @@ const FERRAMENTA_PLANO_MIN = {
   'chat':               'start',
   'briefing':           'start',   // incluído no plano — é o diferencial do produto
   'reunioes_ia':        'start',   // incluído no plano por enquanto — preço à parte fica pra depois
+  'memoria':            'start',   // memória do escritório (retenção, camada 1)
   'follow_up':          'start',
   'criador_scripts':    'start',
   'negociacao':         'start',
@@ -279,6 +280,7 @@ const FERRAMENTAS = [
   { id: 'chat',               nome: 'Chat livre',                  icon: '💬' },
   { id: 'briefing',           nome: 'Briefing de reuniões',        icon: '📋' },
   { id: 'reunioes_ia',        nome: 'Reuniões com IA',             icon: '🎥' },
+  { id: 'memoria',            nome: 'Memória do escritório',       icon: '🗂️' },
   { id: 'simular_reuniao',    nome: 'Simular reunião',             icon: '🎭' },
   { id: 'simulador_objecoes', nome: 'Simulador de objeções',       icon: '🎯' },
   { id: 'follow_up',          nome: 'Script de follow-up',         icon: '🔁' },
@@ -388,6 +390,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   verificarDiagnostico();
   await verificarQueryParams();
   if (!estado.conversaAtiva) mostrarHomeDashboard();
+  if (estado.abrirDepois === 'retornos') { selecionarFerramenta('briefing'); brfIrPara('retornos'); }
+  else if (estado.abrirDepois) selecionarFerramenta(estado.abrirDepois);
   inicializarPushNotificacoes();
   carregarTrilhaDoServidor(); // sincroniza progresso da trilha com o banco
 });
@@ -448,6 +452,12 @@ async function verificarQueryParams() {
         mostrarToast('Pagamento em processamento. Confira sua assinatura em Minha conta.', 'aviso');
       }
     } catch (err) { mostrarToast(err.message || 'Não foi possível confirmar o pagamento.', 'erro'); }
+    window.history.replaceState({}, '', '/app');
+  }
+  // Links do lembrete e do resumo semanal: /app?abrir=retornos | <ferramenta>
+  const abrir = params.get('abrir');
+  if (abrir && (abrir === 'retornos' || FERRAMENTAS.some(f => f.id === abrir))) {
+    estado.abrirDepois = abrir;
     window.history.replaceState({}, '', '/app');
   }
   if (params.get('pagamento') === 'cancelado') {
@@ -638,7 +648,8 @@ function selecionarFerramenta(id) {
   document.getElementById('chat-tool-label').textContent =
     id === 'chat'        ? 'May — Assistente de vendas' :
     id === 'briefing'    ? 'Prepare a reunião antes de entrar nela' :
-    id === 'reunioes_ia' ? 'Gere o link e envie para o cliente' : 'Ferramenta ativa';
+    id === 'reunioes_ia' ? 'Gere o link e envie para o cliente' :
+    id === 'memoria'     ? 'O que a May sabe sobre o seu escritório' : 'Ferramenta ativa';
 
   if (id === 'briefing') {
     // Tela própria, sem campo de chat embaixo
@@ -648,6 +659,9 @@ function selecionarFerramenta(id) {
     // Tela própria, sem campo de chat embaixo
     esconderInputChat();
     mostrarReunioesIA();
+  } else if (id === 'memoria') {
+    esconderInputChat();
+    mostrarMemoria(); // js/retencao.js
   } else {
     mostrarInputChat();
     if (id === 'simular_reuniao') {
@@ -2291,6 +2305,8 @@ function mostrarHomeDashboard() {
       <h1 class="home-title">May <span>IA</span></h1>
       <p class="home-sub">Sua advocacia, multiplicada por IA.</p>
 
+      <div id="home-retencao"></div>
+
       <div class="home-blocos">
         ${HOME_BLOCOS.map((b, i) => `
           <button class="home-bloco" onclick="homeAbrirBloco(${i})">
@@ -2311,6 +2327,7 @@ function mostrarHomeDashboard() {
       <div class="home-hint"><kbd>Enter</kbd> enviar · <kbd>Shift</kbd>+<kbd>Enter</kbd> nova linha</div>
     </div>
   `;
+  if (typeof retHome === 'function') retHome(); // js/retencao.js: retornos de hoje e memória
 
 }
 
@@ -2875,13 +2892,17 @@ function mostrarBriefing(aba) {
         <button class="brf-tab ${brf.aba === 'historico' ? 'on' : ''}" onclick="brfIrPara('historico')">
           Meus briefings${brf.lista.length ? `<span class="brf-badge">${brf.lista.length}</span>` : ''}
         </button>
+        <button class="brf-tab ${brf.aba === 'retornos' ? 'on' : ''}" onclick="brfIrPara('retornos')">
+          Retornos${(typeof retPendentesHoje === 'function' && retPendentesHoje()) ? `<span class="brf-badge">${retPendentesHoje()}</span>` : ''}
+        </button>
       </div>
       <div id="brf-conteudo"></div>
     </div>`;
 
   container.scrollTop = 0;
-  if (brf.aba === 'novo') brfRenderForm();
-  else                    brfRenderHistorico();
+  if (brf.aba === 'novo')          brfRenderForm();
+  else if (brf.aba === 'retornos') brfRenderRetornos(); // js/retencao.js
+  else                             brfRenderHistorico();
 }
 
 function brfIrPara(aba) {
@@ -3119,6 +3140,8 @@ function brfAbrirNaTela(lead) {
         <button class="brf-btn ghost mini" onclick="brfIrPara('historico')">Voltar</button>
       </div>
 
+      ${typeof retBlocoProximoPasso === 'function' ? retBlocoProximoPasso(lead) : ''}
+
       <div class="brf-rel" id="brf-relatorio">${renderMarkdown(lead.briefing || 'Briefing não gerado.')}</div>
 
       <div class="brf-acoes">
@@ -3258,6 +3281,18 @@ function brfFeedbackAbrir(id) {
         </div>
       </div>
 
+      <div class="brf-campo" style="margin-bottom:15px">
+        <label>Próximo passo combinado</label>
+        <input id="brf-fb-passo" maxlength="500" value="${escapeHtml(lead?.proximo_passo || '')}"
+          placeholder="Ex: enviar a proposta e ligar para confirmar a assinatura" />
+      </div>
+
+      <div class="brf-campo" style="margin-bottom:15px">
+        <label>Data do retorno</label>
+        <input id="brf-fb-retorno" type="datetime-local" value="${typeof retParaInput === 'function' ? retParaInput(lead?.data_retorno) : ''}" />
+        <p class="brf-dica">A May te avisa no dia, pelo celular e por e-mail.</p>
+      </div>
+
       <div class="brf-campo" style="margin-bottom:16px">
         <label>O que aconteceu na conversa</label>
         <textarea id="brf-fb-texto" style="min-height:76px"
@@ -3298,10 +3333,14 @@ async function brfFeedbackSalvar() {
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
 
   try {
+    const passo   = document.getElementById('brf-fb-passo')?.value.trim() || '';
+    const retorno = document.getElementById('brf-fb-retorno')?.value || '';
     const res  = await api.post(`/briefing/${_brfFb.id}/feedback`, {
-      nota:       _brfFb.nota,
-      resultado:  _brfFb.resultado,
-      comentario: texto,
+      nota:          _brfFb.nota,
+      resultado:     _brfFb.resultado,
+      comentario:    texto,
+      proximo_passo: passo,
+      data_retorno:  retorno ? new Date(retorno).toISOString() : null,
     });
     const data = await res.json().catch(() => ({}));
 
@@ -3320,11 +3359,15 @@ async function brfFeedbackSalvar() {
       .forEach(l => {
         l.briefing_nota     = _brfFb.nota;
         l.briefing_feedback = texto;
+        l.proximo_passo     = passo || null;
+        l.data_retorno      = retorno ? new Date(retorno).toISOString() : null;
+        l.retorno_concluido = false;
         Object.assign(l, mapaStatus);
       });
 
     brfFeedbackFechar();
-    mostrarToast(data.aviso || 'Retorno registrado', data.aviso ? 'aviso' : 'sucesso');
+    if (typeof retAtualizar === 'function') retAtualizar();
+    mostrarToast(data.aviso || (retorno ? 'Retorno registrado. A May te lembra no dia.' : 'Retorno registrado'), data.aviso ? 'aviso' : 'sucesso');
     brf.aba = 'historico';
     mostrarBriefing();
   } catch (err) {

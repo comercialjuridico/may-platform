@@ -164,6 +164,7 @@ app.use('/api/notificacoes', require('./routes/notificacoes'));
 app.use('/api/trilha',      require('./routes/trilha'));
 app.use('/api/leads',       require('./routes/leads'));
 app.use('/api/briefing',    require('./routes/briefing'));
+app.use('/api/memoria',     require('./routes/memoria'));
 app.use('/api/followups',   require('./routes/followups'));
 app.use('/api/public',      require('./routes/public'));
 app.use('/api/stripe',      require('./routes/stripe'));
@@ -205,6 +206,7 @@ app.listen(PORT, () => {
   console.log(`✓ May rodando na porta ${PORT}`);
   console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
   iniciarCronPush();
+  require('./jobs/retencao').iniciarJobsRetencao();
 });
 
 // ─── Cron de notificações push ───────────────────────────────────────────────

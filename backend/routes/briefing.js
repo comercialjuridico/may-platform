@@ -11,13 +11,14 @@ const { supabase }       = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
 const { exigirAcessoAtivo } = require('../services/recursos');
 const { limiteBriefing } = require('../services/limiteIA');
+const { carregarMemoria, textoMemoria } = require('../services/memoria');
 
 // Tudo isto vai para o prompt do gpt-4o: sem teto, um único pedido podia
 // carregar centenas de milhares de caracteres.
 const LIMITES_CAMPOS = {
   nome_lead: 200, empresa_lead: 200, whatsapp: 40, produto: 300, valor_honorarios: 100,
   origem_canal: 200, data_reuniao: 60, local_reuniao: 300, contexto: 8000, objecao_inicial: 2000,
-  contexto_extra: 4000,
+  contexto_extra: 4000, proximo_passo: 500,
 };
 function campoAcimaDoLimite(body) {
   return Object.entries(LIMITES_CAMPOS).find(([campo, max]) =>
@@ -40,6 +41,27 @@ const CAMPOS_BASE = `
   fechado_em, created_at
 `;
 const CAMPOS_FEEDBACK = `, briefing_nota, briefing_feedback, briefing_feedback_em`;
+const CAMPOS_RETORNO  = `, proximo_passo, data_retorno, retorno_concluido`;
+
+let _temColunasRetorno = null; // null = ainda não testado
+
+// Tenta com as colunas novas e vai tirando o que o banco ainda não tem.
+async function buscarComFallback(montar) {
+  const tentativas = [];
+  if (_temColunasRetorno !== false && _temColunasFeedback !== false) tentativas.push([true, true]);
+  if (_temColunasFeedback !== false) tentativas.push([true, false]);
+  tentativas.push([false, false]);
+  let ultimo;
+  for (const [fb, ret] of tentativas) {
+    ultimo = await montar(CAMPOS_BASE + (fb ? CAMPOS_FEEDBACK : '') + (ret ? CAMPOS_RETORNO : ''));
+    if (!ultimo.error) {
+      if (ret) _temColunasRetorno = true; else if (fb) _temColunasRetorno = false;
+      if (fb) _temColunasFeedback = _temColunasFeedback ?? true; else _temColunasFeedback = false;
+      return ultimo;
+    }
+  }
+  return ultimo;
+}
 
 let _temColunasFeedback = null; // null = ainda não testado
 
@@ -58,30 +80,53 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     if (semEmpresa(req, res)) return;
 
-    const buscar = (comFeedback) => supabase
+    const { data, error } = await buscarComFallback(campos => supabase
       .from('leads')
-      .select(CAMPOS_BASE + (comFeedback ? CAMPOS_FEEDBACK : ''))
+      .select(campos)
       .eq('empresa_id', req.user.empresa_id)
       .not('briefing', 'is', null)
       .order('created_at', { ascending: false })
-      .limit(200);
-
-    let { data, error } = await buscar(_temColunasFeedback !== false);
-
-    if (error && _temColunasFeedback !== false) {
-      // Provável ausência das colunas de feedback — repete sem elas
-      _temColunasFeedback = false;
-      ({ data, error } = await buscar(false));
-    } else if (!error) {
-      _temColunasFeedback = _temColunasFeedback ?? true;
-    }
+      .limit(200));
 
     if (error) throw error;
 
-    res.json({ briefings: data || [], feedback_disponivel: _temColunasFeedback !== false });
+    res.json({
+      briefings: data || [],
+      feedback_disponivel: _temColunasFeedback !== false,
+      retorno_disponivel: _temColunasRetorno === true,
+    });
   } catch (err) {
     console.error('Erro ao listar briefings:', err.message);
     res.status(500).json({ erro: 'Erro ao carregar seus briefings.' });
+  }
+});
+
+// ─── GET /api/briefing/retornos ───────────────────────────────────────────────
+// Retornos combinados com clientes e ainda não feitos, do mais antigo ao mais novo.
+router.get('/retornos', authMiddleware, async (req, res) => {
+  try {
+    if (semEmpresa(req, res)) return;
+    const dias = Math.min(Math.max(Number.parseInt(req.query.dias, 10) || 7, 1), 60);
+    const ate = new Date(Date.now() + dias * 86400000).toISOString();
+    const { data, error } = await supabase
+      .from('leads')
+      .select('id, nome_lead, empresa_lead, whatsapp, produto, proximo_passo, data_retorno, status')
+      .eq('empresa_id', req.user.empresa_id)
+      .eq('closer_id', req.user.id)
+      .eq('retorno_concluido', false)
+      .not('data_retorno', 'is', null)
+      .lte('data_retorno', ate)
+      .order('data_retorno', { ascending: true })
+      .limit(100);
+    if (error) {
+      _temColunasRetorno = false;
+      return res.json({ retornos: [], retorno_disponivel: false });
+    }
+    _temColunasRetorno = true;
+    res.json({ retornos: data || [], retorno_disponivel: true });
+  } catch (err) {
+    console.error('Erro ao listar retornos:', err.message);
+    res.status(500).json({ erro: 'Erro ao carregar seus retornos.' });
   }
 });
 
@@ -90,18 +135,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
   try {
     if (semEmpresa(req, res)) return;
 
-    const buscar = (comFeedback) => supabase
+    const { data, error } = await buscarComFallback(campos => supabase
       .from('leads')
-      .select(CAMPOS_BASE + (comFeedback ? CAMPOS_FEEDBACK : ''))
+      .select(campos)
       .eq('id', req.params.id)
       .eq('empresa_id', req.user.empresa_id)
-      .single();
-
-    let { data, error } = await buscar(_temColunasFeedback !== false);
-    if (error && _temColunasFeedback !== false) {
-      _temColunasFeedback = false;
-      ({ data, error } = await buscar(false));
-    }
+      .single());
 
     if (error || !data) return res.status(404).json({ erro: 'Briefing não encontrado.' });
     res.json(data);
@@ -137,6 +176,7 @@ router.post('/', authMiddleware, exigirAcessoAtivo, validarTamanhos, limiteBrief
       contexto: contexto || 'Sem contexto adicional informado.',
       objecao_inicial,
       user: req.user,
+      memoria: await carregarMemoria(supabase, req.user.empresa_id),
     });
 
     const { data: lead, error } = await supabase
@@ -198,6 +238,7 @@ router.post('/:id/regerar', authMiddleware, exigirAcessoAtivo, validarTamanhos, 
       contexto:         lead.contexto + (contexto_extra ? `\n\nInformação nova: ${contexto_extra}` : ''),
       objecao_inicial:  lead.objecao_inicial,
       user:             req.user,
+      memoria:          await carregarMemoria(supabase, req.user.empresa_id),
     });
 
     await supabase.from('leads').update({ briefing }).eq('id', req.params.id);
@@ -225,6 +266,10 @@ router.patch('/:id', authMiddleware, async (req, res) => {
       if (req.body[c] !== undefined) updates[c] = req.body[c] === '' ? null : req.body[c];
     });
 
+    const retorno = camposRetorno(req.body);
+    if (retorno.erro) return res.status(400).json({ erro: retorno.erro });
+    Object.assign(updates, retorno.campos);
+
     if (!Object.keys(updates).length) return res.status(400).json({ erro: 'Nada para atualizar.' });
 
     const { data, error } = await supabase
@@ -235,6 +280,9 @@ router.patch('/:id', authMiddleware, async (req, res) => {
       .select()
       .single();
 
+    if (error && Object.keys(retorno.campos).length && /column|schema cache/i.test(error.message || '')) {
+      return res.status(503).json({ erro: 'Próximo passo e data de retorno precisam da atualização do banco.', code: 'FALTA_MIGRACAO' });
+    }
     if (error) throw error;
     res.json({ ok: true, lead: data });
   } catch (err) {
@@ -242,6 +290,32 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ erro: 'Erro ao salvar as alterações.' });
   }
 });
+
+// Próximo passo e data de retorno: validados aqui para PATCH e feedback.
+function camposRetorno(body = {}) {
+  const campos = {};
+  if (body.proximo_passo !== undefined) {
+    campos.proximo_passo = typeof body.proximo_passo === 'string' && body.proximo_passo.trim()
+      ? body.proximo_passo.trim().slice(0, 500) : null;
+  }
+  if (body.data_retorno !== undefined) {
+    if (body.data_retorno === null || body.data_retorno === '') campos.data_retorno = null;
+    else {
+      const t = Date.parse(body.data_retorno);
+      if (!Number.isFinite(t)) return { erro: 'Data de retorno inválida.' };
+      if (t > Date.now() + 366 * 86400000) return { erro: 'Escolha uma data de retorno em até um ano.' };
+      campos.data_retorno = new Date(t).toISOString();
+    }
+    // Nova data reabre o retorno e permite um novo lembrete.
+    campos.retorno_concluido = false;
+    campos.retorno_lembrado_em = null;
+  }
+  if (body.retorno_concluido !== undefined) {
+    if (typeof body.retorno_concluido !== 'boolean') return { erro: 'retorno_concluido deve ser verdadeiro ou falso.' };
+    campos.retorno_concluido = body.retorno_concluido;
+  }
+  return { campos };
+}
 
 // ─── POST /api/briefing/:id/feedback ──────────────────────────────────────────
 // Como a reunião foi e o quanto o briefing ajudou
@@ -307,6 +381,18 @@ router.post('/:id/feedback', authMiddleware, async (req, res) => {
     }
 
     _temColunasFeedback = true;
+
+    // Próximo passo e data de retorno, se vieram (dependem da migração de retenção)
+    const retorno = camposRetorno(req.body);
+    if (retorno.erro) return res.status(400).json({ erro: retorno.erro });
+    if (Object.keys(retorno.campos).length) {
+      const { error: erroRetorno } = await supabase.from('leads').update(retorno.campos).eq('id', req.params.id);
+      if (erroRetorno) {
+        _temColunasRetorno = false;
+        return res.json({ ok: true, parcial: true, aviso: 'Retorno salvo. O próximo passo e a data precisam da atualização do banco.' });
+      }
+      _temColunasRetorno = true;
+    }
     res.json({ ok: true });
   } catch (err) {
     console.error('Erro ao salvar feedback:', err.message);
@@ -347,6 +433,7 @@ function formatarData(iso) {
 async function gerarBriefing(dados) {
   const { user } = dados;
   const quando   = formatarData(dados.data_reuniao);
+  const memoria  = textoMemoria(dados.memoria);
 
   const perfil = [
     user?.name          ? `- Quem vai conduzir a reunião: ${user.name}`               : null,
@@ -362,7 +449,7 @@ Você vai preparar o relatório de briefing de uma reunião de vendas que ainda 
 
 ESCRITÓRIO
 ${perfil}
-
+${memoria ? '\n' + memoria + '\n' : ''}
 CLIENTE DESTA REUNIÃO
 - Nome: ${dados.nome_lead}
 - Empresa ou vínculo: ${dados.empresa_lead || 'não informado'}
