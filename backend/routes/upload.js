@@ -7,7 +7,8 @@ const pdfParse = require('pdf-parse');
 const mammoth  = require('mammoth');
 const { supabase } = require('../services/supabase');
 const { authMiddleware } = require('../middleware/auth');
-const { exigirMidias } = require('../services/recursos');
+const { exigirMidias, exigirAcessoAtivo } = require('../services/recursos');
+const { limiteImagem } = require('../services/limiteIA');
 const { tipoAudio, transcreverAudio } = require('../services/audioUpload');
 const { importarConversa } = require('../services/whatsappImport');
 const rateLimit = require('express-rate-limit');
@@ -265,7 +266,7 @@ router.post('/whatsapp', authMiddleware, exigirMidias, limiteMidias, umaMidiaPor
 
 // ─── POST /api/upload/imagem-chat ───────────────────────────────────────────
 // Recebe imagem e analisa via GPT-4o Vision
-router.post('/imagem-chat', authMiddleware, uploadImagemChat.single('imagem'), async (req, res) => {
+router.post('/imagem-chat', authMiddleware, exigirAcessoAtivo, limiteImagem, uploadImagemChat.single('imagem'), async (req, res) => {
   if (!req.file) return res.status(400).json({ erro: 'Nenhuma imagem enviada.' });
 
   try {
@@ -295,7 +296,7 @@ router.post('/imagem-chat', authMiddleware, uploadImagemChat.single('imagem'), a
         content: [
           {
             type: 'text',
-            text: req.body.instrucao ||
+            text: (typeof req.body.instrucao === 'string' && req.body.instrucao.slice(0, 1000)) ||
               'Descreva detalhadamente o conteúdo desta imagem. Se for um documento, contrato, proposta ou texto, transcreva o conteúdo principal.'
           },
           { type: 'image_url', image_url: { url: dataUrl, detail: 'high' } }

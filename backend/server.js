@@ -28,6 +28,12 @@ const path         = require('path');
 
 const app = express();
 
+// O Railway entrega as requisições por um proxy. Sem isto, req.ip é o IP do
+// proxy e todos os limites "por IP" (login, cadastro, chat da landing) viram
+// um balde único compartilhado por todos os visitantes. 1 = confiar só no
+// salto imediato, que é o do Railway.
+app.set('trust proxy', Number.isInteger(Number(process.env.TRUST_PROXY_HOPS)) ? Number(process.env.TRUST_PROXY_HOPS) : 1);
+
 if (process.env.JWT_SECRET === process.env.JWT_REFRESH_SECRET) {
   throw new Error('JWT_SECRET e JWT_REFRESH_SECRET devem ser diferentes.');
 }
@@ -61,6 +67,21 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+// Esqueci a senha manda e-mail; sem limite, servia para disparar e-mails em
+// massa pelo domínio da May e para testar tokens de redefinição.
+app.use('/api/auth/forgot-password', authLimiter);
+app.use('/api/auth/reset-password', authLimiter);
+
+// ─── APIs de módulos fora do produto ───────────────────────────────────────
+// As telas já redirecionam para /app (PAGINAS_DESATIVADAS, abaixo), mas as
+// APIs continuavam no ar. /api/modulos/ativar ainda recebia número de cartão e
+// CVV no servidor. Para reativar um módulo, tire o caminho da lista.
+const APIS_DESATIVADAS = [
+  '/api/leads', '/api/followups', '/api/ranking-vendas', '/api/modulos/ativar',
+];
+app.use(APIS_DESATIVADAS, (req, res) => {
+  res.status(410).json({ erro: 'Este recurso não faz parte do App May no momento.', code: 'RECURSO_DESATIVADO' });
+});
 
 // ─── Body Parser ───────────────────────────────────────────────────────────
 // `verify` guarda o corpo cru (req.rawBody) além do já parseado — é o que o

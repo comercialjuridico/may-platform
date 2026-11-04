@@ -31,9 +31,10 @@ SOBRE A PLATAFORMA:
 - Scripts comerciais prontos para cada etapa da venda jurídica
 - Simuladores de atendimento com IA
 - Playbooks de follow-up, quebra de objeções e argumentação de honorários
-- Ranking de vendas, agendamento de reunião e notificações de follow-up
-- Painel do gestor com visão da equipe
-- Trilha de capacitação comercial para novos colaboradores
+- Briefing de preparação antes de cada reunião com cliente
+- Análise de conversas e atendimentos enviados pelo usuário
+- Trilha de capacitação comercial
+- NÃO ofereça nem confirme ranking, agenda, CRM, funil ou painel de gestor: esses recursos não fazem parte da plataforma hoje.
 - 7 dias de acesso completo, sem cobrança. Planos a partir de R$97/mês. Cancele quando quiser.`;
 
 // ─── POST /api/public/chat ──────────────────────────────────────────────────
