@@ -6,6 +6,12 @@ const { supabase } = require('../services/supabase');
 const { authMiddleware, verificarLimite } = require('../middleware/auth');
 const { buildSystemPrompt } = require('../services/may');
 const { limiteChat } = require('../services/limiteIA');
+const { carregarMemoria, extrairSugestoes, juntarSugestoes } = require('../services/memoria');
+
+// Ferramentas em que a conversa fala do escritório real. Simulações e criador
+// de prompt ficam de fora: o "cliente" ali é inventado.
+const APRENDE_COM = new Set(['chat', 'follow_up', 'criador_scripts', 'negociacao', 'diagnostico', 'simulador_objecoes', 'spin']);
+const APRENDER_A_CADA = 6; // mensagens do usuário na conversa
 
 const MAX_ANEXOS = 5;
 
@@ -169,7 +175,8 @@ router.post('/stream', authMiddleware, verificarLimite, limiteChat, async (req, 
     await supabase.rpc('incrementar_mensagens_mes', { uid: req.user.id });
 
     // System prompt personalizado
-    const systemPrompt = buildSystemPrompt(req.user, ferramenta, area_ativa);
+    const memoria = await carregarMemoria(supabase, req.user.empresa_id);
+    const systemPrompt = buildSystemPrompt(req.user, ferramenta, area_ativa, memoria);
     const modelo = getModelo(ferramenta);
 
     // Inicia streaming com OpenAI
@@ -219,6 +226,14 @@ router.post('/stream', authMiddleware, verificarLimite, limiteChat, async (req, 
     enviarEvento('fim', { conversa_id: conversaId });
     res.end();
 
+    // Depois de responder: a cada N mensagens, a May procura no trecho recente
+    // fatos do escritório que valem ir para a memória (aguardam aprovação).
+    const totalUsuario = mensagensAnteriores.filter(m => m.role === 'user').length;
+    if (req.user.empresa_id && APRENDE_COM.has(ferramenta) && totalUsuario % APRENDER_A_CADA === 0) {
+      aprenderComConversa(req.user.empresa_id, [...mensagensAnteriores.slice(0, -1), { role: 'user', content: mensagem }, { role: 'assistant', content: respostaCompleta }], memoria)
+        .catch(e => console.error('Aprendizado da memória falhou:', e.message));
+    }
+
   } catch (err) {
     if (err?.name === 'AbortError' || err?.constructor?.name === 'APIUserAbortError') return res.end();
     console.error('Erro no chat/stream:', err.message);
@@ -226,6 +241,15 @@ router.post('/stream', authMiddleware, verificarLimite, limiteChat, async (req, 
     res.end();
   }
 });
+
+async function aprenderComConversa(empresaId, mensagens, memoria) {
+  const novas = await extrairSugestoes(openai, mensagens, memoria);
+  if (!novas.length) return;
+  const sugestoes = juntarSugestoes(memoria?.sugestoes, novas);
+  const { error } = await supabase.from('memoria_escritorio')
+    .upsert({ empresa_id: empresaId, sugestoes }, { onConflict: 'empresa_id' });
+  if (error) throw error;
+}
 
 // ─── GET /api/chat/conversas ────────────────────────────────────────────────
 // Lista conversas do usuário

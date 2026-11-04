@@ -30,11 +30,25 @@ function database(tables) {
         eq(key, value) { this.conditions.push(r => r[key] === value); return this; },
         gt(key, value) { this.conditions.push(r => r[key] > value); return this; },
         gte(key, value) { this.conditions.push(r => r[key] >= value); return this; },
-        is(key, value) { return this.eq(key, value); },
+        is(key, value) { this.conditions.push(r => (r[key] ?? null) === value); return this; },
+        lte(key, value) { this.conditions.push(r => r[key] <= value); return this; },
+        neq(key, value) { this.conditions.push(r => r[key] !== value); return this; },
+        not(key, op, value) {
+          if (op === 'is' && value === null) this.conditions.push(r => r[key] != null);
+          else throw Error('Filtro not de teste não implementado: ' + op);
+          return this;
+        },
+        range(from, to) { this.rangeFrom = from; this.count = to - from + 1; return this; },
+        match(obj) { Object.entries(obj).forEach(([k, v]) => this.eq(k, v)); return this; },
+        upsert(value, opts = {}) { this.op = 'upsert'; this.value = value; this.onConflict = opts.onConflict || 'id'; return this; },
+        delete() { this.op = 'delete'; return this; },
         in(key, values) { this.conditions.push(r => values.includes(r[key])); return this; },
         or(expr) {
           if (expr === 'totp_enabled.is.null,totp_enabled.eq.false') {
             this.conditions.push(r => r.totp_enabled == null || r.totp_enabled === false);
+          } else if (/^(\w+)\.is\.null,\1\.neq\.(.+)$/.test(expr)) {
+            const [, k, v] = expr.match(/^(\w+)\.is\.null,\1\.neq\.(.+)$/);
+            this.conditions.push(r => r[k] == null || r[k] !== v);
           } else throw Error('Filtro de teste não implementado: ' + expr);
           return this;
         },
@@ -54,11 +68,20 @@ function database(tables) {
             if (this.op === 'insert') {
               const row = { id: 'created-' + source.length, ...this.value };
               source.push(row); rows = [row];
+            } else if (this.op === 'upsert') {
+              const k = this.onConflict;
+              let row = source.find(r => r[k] === this.value[k]);
+              if (row) Object.assign(row, this.value);
+              else { row = { ...this.value }; source.push(row); }
+              rows = [row];
+            } else if (this.op === 'delete') {
+              rows.forEach(r => source.splice(source.indexOf(r), 1));
             } else if (this.op === 'update') rows.forEach(r => Object.assign(r, this.value));
             if (this.ordering) {
               const { key, options } = this.ordering;
               rows = rows.slice().sort((a, b) => (a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0) * (options.ascending ? 1 : -1));
             }
+            if (this.rangeFrom) rows = rows.slice(this.rangeFrom);
             if (this.count !== null) rows = rows.slice(0, this.count);
             const project = row => {
               if (!this.columns || this.columns === '*') return { ...row };
